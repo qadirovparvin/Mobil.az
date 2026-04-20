@@ -1,0 +1,22 @@
+node_modules/
+dist/
+build/
+.DS_Store
+Thumbs.db
+*.log
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Project-specific secrets and generated content
+Backend/.env
+Backend/node_modules/
+Back end/node_modules/
+Front end/node_modules/
+Backend/uploads/
+
+# Editor files
+.vscode/
+.idea/

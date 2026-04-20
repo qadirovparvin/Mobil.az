@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LeadTech Mobile — Mağaza Profili | Mobil.az</title>
+  <meta name="description" content="LeadTech Mobile mağazasının profili — 127 aktiv elan, 4.9 reytinq, Apple və Samsung məhsulları, Bakı">
+  <link rel="stylesheet" href="CSS/general.css">
+  <link rel="stylesheet" href="CSS/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    /* ── Store Profile Page Styles ───────────────────────────── */
+
+    /* Cover */
+    .store-cover {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+      position: relative;
+    }
+    .store-cover-wrap {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      background: #1c1c1e;
+    }
+    .store-cover-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .store-cover-gradient {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 140px;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+    }
+
+    /* Profile row below cover */
+    .store-profile-bar {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+    }
+    .store-identity {
+      display: flex;
+      align-items: flex-end;
+      gap: 22px;
+      margin-top: -52px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .store-logo-large {
+      width: 100px;
+      height: 100px;
+      border-radius: 22px;
+      border: 4px solid var(--bg-secondary);
+      object-fit: cover;
+      flex-shrink: 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      background: var(--bg-secondary);
+    }
+    .store-identity-info {
+      flex: 1;
+      padding-bottom: 6px;
+    }
+    .store-identity-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 4px;
+      letter-spacing: -0.3px;
+    }
+    .store-identity-name .badge-verified {
+      color: #0066cc;
+      font-size: 18px;
+    }
+    .store-pkg-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .store-pkg-badge.pro {
+      background: rgba(0,102,204,0.12);
+      color: #0066cc;
+    }
+    .store-pkg-badge.premium {
+      background: linear-gradient(135deg, rgba(255,193,7,0.15), rgba(230,120,0,0.12));
+      color: #c65200;
+    }
+    .store-sub-line {
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .store-sub-line span { display: flex; align-items: center; gap: 5px; }
+    .store-sub-line i { color: var(--airy-primary); font-size: 13px; }
+    .store-identity-actions {
+      display: flex;
+      gap: 10px;
+      padding-bottom: 6px;
+      flex-shrink: 0;
+    }
+    .btn-follow {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--airy-primary);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn-follow:hover { background: var(--airy-hover); transform: translateY(-1px); }
+    .btn-wa-profile {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: #25d366;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 11px 22px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .btn-wa-profile:hover { background: #128c7e; transform: translateY(-1px); }
+
+    /* Stats strip */
+    .store-stats-strip {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .stat-pill {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      border-right: 1px solid var(--border-color);
+    }
+    .stat-pill:last-child { border-right: none; }
+    .stat-pill .val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--airy-primary);
+      display: block;
+      letter-spacing: -0.5px;
+    }
+    .stat-pill .lbl {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* Tab nav */
+    .store-tabs {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .tab-btn {
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 0;
+      margin-bottom: -1px;
+    }
+    .tab-btn.active { color: var(--airy-primary); border-bottom-color: var(--airy-primary); }
+    .tab-btn:hover:not(.active) { color: var(--text-primary); background: var(--bg-primary); }
+
+    /* Main content + sidebar */
+    .store-body {
+      max-width: 1280px;
+      margin: 28px auto 60px;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* Tab panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Section heading */
+    .section-heading {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .section-heading i { color: var(--airy-primary); }
+
+    /* About card */
+    .about-card {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 26px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      margin-bottom: 24px;
+    }
+    .about-card p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin: 0;
+    }
+    .about-highlights {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .highlight-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .highlight-item i { color: var(--airy-primary); width: 18px; text-align: center; }
+
+    /* Review summary */
+    .reviews-summary {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 26px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      margin-bottom: 20px;
+    }
+    .review-big-num {
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--airy-primary);
+      line-height: 1;
+      letter-spacing: -2px;
+    }
+    .review-stars { color: #ffc107; font-size: 18px; margin: 4px 0 6px; letter-spacing: 2px; }
+    .review-count { font-size: 13px; color: var(--text-secondary); }
+    .review-bars { flex: 1; }
+    .rbar { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+    .rbar-label { color: var(--text-secondary); width: 28px; text-align: right; }
+    .rbar-track { flex: 1; height: 6px; background: var(--border-color); border-radius: 4px; overflow: hidden; }
+    .rbar-fill { height: 100%; border-radius: 4px; background: #ffc107; }
+    .rbar-count { color: var(--text-secondary); width: 24px; }
+
+    /* Review cards */
+    .review-card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      padding: 20px 22px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 14px;
+      box-shadow: var(--card-shadow);
+    }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .reviewer-avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      font-size: 16px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .reviewer-name { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+    .reviewer-date { font-size: 12px; color: var(--text-secondary); }
+    .review-stars-sm { color: #ffc107; font-size: 13px; }
+    .review-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* Ads grid */
+    .store-ads-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .store-ads-grid .ad-card {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .store-ads-grid .ad-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-shadow-hover);
+      border-color: var(--airy-secondary);
+    }
+    .store-ads-grid .ad-image {
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-primary);
+    }
+    .store-ads-grid .ad-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .store-ads-grid .ad-card:hover .ad-image img { transform: scale(1.05); }
+    .store-ads-grid .ad-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--airy-primary);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+    .store-ads-grid .ad-info { padding: 14px; }
+    .store-ads-grid .ad-price {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--airy-primary);
+    }
+    .store-ads-grid .ad-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 4px 0 8px;
+      line-height: 1.35;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .store-ads-grid .ad-location {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .store-ads-grid .ad-location i { color: var(--airy-primary); margin-right: 3px; }
+
+    /* RIGHT SIDEBAR */
+    .store-sidebar { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 88px; }
+
+    .sidebar-contact-card {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+    .sidebar-contact-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-contact-card h4 i { color: var(--airy-primary); }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+    .contact-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .contact-row i { color: var(--airy-primary); width: 18px; text-align: center; font-size: 15px; }
+    .contact-row a { color: var(--airy-primary); font-weight: 500; text-decoration: none; }
+    .contact-row a:hover { text-decoration: underline; }
+
+    .sidebar-cta-call {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      background: linear-gradient(135deg, var(--airy-primary), #7d7aff);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 16px rgba(94,92,230,0.32);
+      margin-top: 16px;
+    }
+    .sidebar-cta-call:hover { transform: translateY(-2px); box-shadow: 0 7px 24px rgba(94,92,230,0.42); }
+    .sidebar-cta-wa {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      width: 100%;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(37,211,102,0.28);
+      margin-top: 10px;
+    }
+    .sidebar-cta-wa:hover { transform: translateY(-2px); }
+
+    /* Map placeholder */
+    .map-card {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+    .map-card-header {
+      padding: 16px 20px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .map-card-header i { color: var(--airy-primary); }
+    .map-placeholder {
+      width: 100%;
+      height: 160px;
+      background: linear-gradient(135deg, rgba(94,92,230,0.06), rgba(94,92,230,0.02));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .map-placeholder:hover { background: rgba(94,92,230,0.08); }
+    .map-placeholder i { font-size: 28px; color: var(--airy-primary); }
+
+    /* Working hours */
+    .hours-card {
+      background: var(--bg-secondary);
+      border-radius: 20px;
+      padding: 22px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+    .hours-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hours-card h4 i { color: var(--airy-primary); }
+    .hours-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row .day { font-weight: 600; color: var(--text-primary); }
+    .hours-row .open { color: #34c759; font-weight: 600; }
+    .hours-row .closed { color: #dc3545; font-weight: 600; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .store-body { grid-template-columns: 1fr; }
+      .store-sidebar { position: static; }
+      .store-ads-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .store-cover-wrap { height: 180px; }
+      .store-identity { flex-direction: column; align-items: flex-start; gap: 12px; margin-top: -30px; }
+      .store-logo-large { width: 72px; height: 72px; }
+      .store-identity-name { font-size: 20px; }
+      .store-identity-actions { flex-wrap: wrap; }
+      .store-ads-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .about-highlights { grid-template-columns: 1fr; }
+      .store-stats-strip { flex-wrap: wrap; }
+      .stat-pill { flex: 1 1 50%; border-right: none; border-bottom: 1px solid var(--border-color); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════ HEADER ══════════════════ -->
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">
+        <span class="mobil-logo">Mobil<span>.az</span></span>
+      </a>
+      <div class="header-right">
+        <nav class="menu">
+          <ul>
+            <div class="contact-dropdown">
+              <li data-translate="Contact">
+                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+              </li>
+              <div class="contact-menu">
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+              </div>
+            </div>
+            <li class="About" data-translate="About">
+              <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+            </li>
+            <li class="Stores" data-translate="Stores">
+              <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+            </li>
+            <li class="Favorite" data-translate="Favorite">
+              <a href="favorite.html"><i class="fas fa-heart"></i> Seçimlər</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="button-container">
+          <a href="login.html" class="login-btn" data-translate="login-btn"><i class="fas fa-sign-in-alt"></i> Giriş</a>
+          <a href="signup.html" class="register-btn" data-translate="register-btn"><i class="fas fa-user-plus"></i> Qeydiyyat</a>
+        </div>
+        <div class="theme-lang-container">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+          <button class="language-selector">
+            <i class="fas fa-globe"></i>
+            <span id="current-lang" data-translate="language-selector">AZ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════ COVER ══════════════════ -->
+  <div class="store-cover-wrap">
+    <img src="https://images.unsplash.com/photo-1541560052-5e137f229371?q=80&w=1400&auto=format&fit=crop" alt="LeadTech Mobile mağaza kapağı">
+    <div class="store-cover-gradient"></div>
+  </div>
+
+  <!-- ══════════════════ IDENTITY BAR ══════════════════ -->
+  <div class="store-profile-bar">
+    <div class="store-identity">
+      <img src="https://i.pinimg.com/736x/e7/85/29/e78529fcd6194bae5fd828b46a5a501b.jpg" alt="LeadTech Logo" class="store-logo-large">
+      <div class="store-identity-info">
+        <div class="store-identity-name">
+          LeadTech Mobile
+          <i class="fas fa-check-circle badge-verified" title="Rəsmi Mağaza"></i>
+          <span class="store-pkg-badge pro"><i class="fas fa-star"></i> Pro Mağaza</span>
+        </div>
+        <div class="store-sub-line">
+          <span><i class="fas fa-map-marker-alt"></i> Bakı ş., 28 May m/s yaxınlığı</span>
+          <span><i class="fas fa-clock"></i> 09:00 – 21:00</span>
+          <span><i class="fas fa-calendar-alt"></i> 2023-cü ildən bəri</span>
+        </div>
+      </div>
+      <div class="store-identity-actions">
+        <button class="btn-follow" id="followBtn"><i class="fas fa-plus"></i> İzlə</button>
+        <a href="https://wa.me/994501234567" target="_blank" style="text-decoration:none">
+          <button class="btn-wa-profile"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ STATS STRIP ══════════════════ -->
+  <div class="store-stats-strip">
+    <div class="stat-pill"><span class="val">4.9</span><div class="lbl">★ Reytinq</div></div>
+    <div class="stat-pill"><span class="val">127</span><div class="lbl">Aktiv Elan</div></div>
+    <div class="stat-pill"><span class="val">2.4K</span><div class="lbl">Satış</div></div>
+    <div class="stat-pill"><span class="val">98%</span><div class="lbl">Müsbət Rəy</div></div>
+    <div class="stat-pill"><span class="val">3.1K</span><div class="lbl">İzləyici</div></div>
+  </div>
+
+  <!-- ══════════════════ TABS ══════════════════ -->
+  <div class="store-tabs">
+    <button class="tab-btn active" data-tab="ads"><i class="fas fa-th-large"></i> Elanlar</button>
+    <button class="tab-btn" data-tab="about"><i class="fas fa-info-circle"></i> Haqqında</button>
+    <button class="tab-btn" data-tab="reviews"><i class="fas fa-star"></i> Rəylər <span style="background:rgba(94,92,230,0.12);color:var(--airy-primary);padding:1px 7px;border-radius:10px;font-size:11px;margin-left:3px">120</span></button>
+  </div>
+
+  <!-- ══════════════════ BODY ══════════════════ -->
+  <div class="store-body">
+
+    <!-- LEFT: Tab Panels -->
+    <div>
+
+      <!-- ── ADS tab ── -->
+      <div class="tab-panel active" id="tab-ads">
+        <h3 class="section-heading"><i class="fas fa-th-large"></i> Aktiv Elanlar (127)</h3>
+        <div class="store-ads-grid">
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1611406560410-09b9eb210c4f?q=80&w=400" alt="iPhone 15 Pro Max"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">2 450 AZN</div><div class="ad-title">Apple iPhone 15 Pro Max 256GB Titan Qara</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>Bugün</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=400" alt="Samsung S24 Ultra"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">2 200 AZN</div><div class="ad-title">Samsung Galaxy S24 Ultra 512GB</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>Bugün</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=400" alt="iPhone 15 Pro"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">2 100 AZN</div><div class="ad-title">Apple iPhone 15 Pro 128GB Titan Ağ</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>Dünən</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=400" alt="iPhone 14 Pro Max"><span class="ad-badge" style="background:#e67e22">İşlənmiş</span></div>
+            <div class="ad-info"><div class="ad-price">1 900 AZN</div><div class="ad-title">Apple iPhone 14 Pro Max 256GB Qızılı</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>Dünən</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=400" alt="Xiaomi 14 Ultra"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">1 750 AZN</div><div class="ad-title">Xiaomi 14 Ultra 16/512GB Ağ</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>2 gün əvvəl</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400" alt="Sony WH-1000XM5"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">480 AZN</div><div class="ad-title">Sony WH-1000XM5 Simsiz Qulaqlıq</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>Bugün</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=400" alt="Samsung Tab S9"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">1 650 AZN</div><div class="ad-title">Samsung Galaxy Tab S9 Ultra 12/256GB</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>3 gün əvvəl</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=400" alt="Samsung A54"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">550 AZN</div><div class="ad-title">Samsung Galaxy A54 8/128GB Bənövşəyi</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>4 gün əvvəl</span></div></div>
+          </a>
+
+          <a href="elan-detail.html" class="ad-card">
+            <div class="ad-image"><img src="https://images.unsplash.com/photo-1606741965509-717b8f89a257?q=80&w=400" alt="AirPods Pro"><span class="ad-badge">Yeni</span></div>
+            <div class="ad-info"><div class="ad-price">320 AZN</div><div class="ad-title">Apple AirPods Pro (2-ci nəsil)</div><div class="ad-location"><span><i class="fas fa-map-marker-alt"></i>Bakı</span><span>5 gün əvvəl</span></div></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ── ABOUT tab ── -->
+      <div class="tab-panel" id="tab-about">
+        <div class="about-card">
+          <h3 class="section-heading"><i class="fas fa-store"></i> Mağaza haqqında</h3>
+          <p>LeadTech Mobile 2023-cü ildən fəaliyyət göstərən, Bakının mərkəzində yerləşən etibarlı bir texnologiya mağazasıdır. Biz Apple, Samsung, Xiaomi və digər aparıcı markaların orijinal məhsullarını rəqabətqabiliyyətli qiymətlərlə təklif edirik.
+
+Müştəri məmnuniyyəti bizim prioritetimizdir. Hər satışda rəsmi zəmanət, kreditlə alış imkanı və peşəkar məsləhəti daxil edirik. Mağazamızda həmçinin telefon təmiri, ekran dəyişməsi və digər texniki xidmətlər mövcuddur.</p>
+          <div class="about-highlights">
+            <div class="highlight-item"><i class="fas fa-shield-alt"></i> Rəsmi Zəmanət</div>
+            <div class="highlight-item"><i class="fas fa-sync-alt"></i> Barter Mümkündür</div>
+            <div class="highlight-item"><i class="fas fa-credit-card"></i> Kreditlə Alış</div>
+            <div class="highlight-item"><i class="fas fa-truck"></i> Ölkədaxili Çatdırılma</div>
+            <div class="highlight-item"><i class="fas fa-tools"></i> Təmir Xidməti</div>
+            <div class="highlight-item"><i class="fas fa-tag"></i> Toplu Endirim</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS tab ── -->
+      <div class="tab-panel" id="tab-reviews">
+
+        <!-- Rating summary -->
+        <div class="reviews-summary">
+          <div>
+            <div class="review-big-num">4.9</div>
+            <div class="review-stars">★★★★★</div>
+            <div class="review-count">120 rəy əsasında</div>
+          </div>
+          <div class="review-bars">
+            <div class="rbar"><span class="rbar-label">5★</span><div class="rbar-track"><div class="rbar-fill" style="width:90%"></div></div><span class="rbar-count">108</span></div>
+            <div class="rbar"><span class="rbar-label">4★</span><div class="rbar-track"><div class="rbar-fill" style="width:7%"></div></div><span class="rbar-count">8</span></div>
+            <div class="rbar"><span class="rbar-label">3★</span><div class="rbar-track"><div class="rbar-fill" style="width:2%"></div></div><span class="rbar-count">3</span></div>
+            <div class="rbar"><span class="rbar-label">2★</span><div class="rbar-track"><div class="rbar-fill" style="width:1%"></div></div><span class="rbar-count">1</span></div>
+            <div class="rbar"><span class="rbar-label">1★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
+          </div>
+        </div>
+
+        <!-- Review cards -->
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background:linear-gradient(135deg,#5e5ce6,#7d7aff)">E</div>
+            <div>
+              <div class="reviewer-name">Elçin M.</div>
+              <div class="reviewer-date">8 Aprel 2025</div>
+            </div>
+            <div class="review-stars-sm" style="margin-left:auto">★★★★★</div>
+          </div>
+          <p class="review-text">iPhone 15 Pro Max aldım, çatdırılma 2 saat ərzində oldu. Qutuda sıxışmış, heç bir problem yox. Satıcı çox peşəkardır, hər şeyi izah etdi. Qiymet digər mağazalara nisbeten qat-qat münasibdir!</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background:linear-gradient(135deg,#34c759,#28a745)">N</div>
+            <div>
+              <div class="reviewer-name">Nigar R.</div>
+              <div class="reviewer-date">2 Aprel 2025</div>
+            </div>
+            <div class="review-stars-sm" style="margin-left:auto">★★★★★</div>
+          </div>
+          <p class="review-text">Samsung S24 Ultra üçün buraya müraciət etdim. Kredit şartı çox rahat idi — ilkin ödəniş 30%, qalanını 12 aya böldülər. Mağazada xidmət səviyyəsi beş ulduzu tam haqq edir!</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background:linear-gradient(135deg,#ff9f0a,#e67e22)">R</div>
+            <div>
+              <div class="reviewer-name">Rauf K.</div>
+              <div class="reviewer-date">25 Mart 2025</div>
+            </div>
+            <div class="review-stars-sm" style="margin-left:auto">★★★★<span style="color:var(--border-color)">★</span></div>
+          </div>
+          <p class="review-text">Telefonu aldım, zəmanət kartı da verildilər. Sadəcə çatdırılma bir az gecikdi — 4 saata gəldi. Amma ümumiyyətlə mağazadan razıyam, yenidən alıcam.</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background:linear-gradient(135deg,#ff2d55,#c62828)">A</div>
+            <div>
+              <div class="reviewer-name">Aysel H.</div>
+              <div class="reviewer-date">18 Mart 2025</div>
+            </div>
+            <div class="review-stars-sm" style="margin-left:auto">★★★★★</div>
+          </div>
+          <p class="review-text">Airpods Pro 2 aldım, orijinallığını yoxladım — tam düzdür. Qiymət o qadər münasibdir ki ilk başda şübhə etdim 😄 Dostlarıma tövsiyə etdim artıq 3 nəfər alıb bu mağazadan!</p>
+        </div>
+
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- RIGHT: Sidebar -->
+    <div class="store-sidebar">
+
+      <!-- Contact info -->
+      <div class="sidebar-contact-card">
+        <h4><i class="fas fa-address-card"></i> Əlaqə Məlumatları</h4>
+        <div class="contact-row"><i class="fas fa-phone-alt"></i><a href="tel:+994501234567">+994 50 123 45 67</a></div>
+        <div class="contact-row"><i class="fas fa-phone-alt"></i><a href="tel:+994121234567">+994 12 123 45 67</a></div>
+        <div class="contact-row"><i class="fab fa-instagram"></i><a href="https://instagram.com" target="_blank">@leadtech.mobile</a></div>
+        <div class="contact-row"><i class="fas fa-envelope"></i><a href="mailto:info@leadtech.az">info@leadtech.az</a></div>
+        <div class="contact-row"><i class="fas fa-map-marker-alt"></i>Bakı ş., 28 May m/s yaxınlığı</div>
+        <button class="sidebar-cta-call" id="callBtn">
+          <i class="fas fa-phone-alt"></i> Zəng et
+        </button>
+        <a href="https://wa.me/994501234567" target="_blank" style="text-decoration:none">
+          <button class="sidebar-cta-wa"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+        </a>
+      </div>
+
+      <!-- Map -->
+      <div class="map-card">
+        <div class="map-card-header"><i class="fas fa-map-marked-alt"></i> Ünvan</div>
+        <div class="map-placeholder" onclick="window.open('https://maps.google.com/?q=Baku+28+May+Metro','_blank')">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Xəritədə göstər</span>
+          <span style="font-size:12px;opacity:0.7">Bakı ş., 28 May m/s yaxınlığı</span>
+        </div>
+      </div>
+
+      <!-- Working hours -->
+      <div class="hours-card">
+        <h4><i class="fas fa-clock"></i> İş saatları</h4>
+        <div class="hours-row"><span class="day">Bazar ertəsi</span><span class="open">09:00 – 21:00</span></div>
+        <div class="hours-row"><span class="day">Çərşənbə axşamı</span><span class="open">09:00 – 21:00</span></div>
+        <div class="hours-row"><span class="day">Çərşənbə</span><span class="open">09:00 – 21:00</span></div>
+        <div class="hours-row"><span class="day">Cümə axşamı</span><span class="open">09:00 – 21:00</span></div>
+        <div class="hours-row"><span class="day">Cümə</span><span class="open">09:00 – 21:00</span></div>
+        <div class="hours-row"><span class="day">Şənbə</span><span class="open">10:00 – 20:00</span></div>
+        <div class="hours-row"><span class="day">Bazar</span><span class="closed">Bağlı</span></div>
+      </div>
+
+    </div><!-- /sidebar -->
+
+  </div><!-- /store-body -->
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+        <ul>
+          <li><a href="faq.html"><span data-translate="faq">Tez-tez verilən suallar</span></a></li>
+          <li><a href="rules.html"><span data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
+          <li><a href="privacy.html"><span data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h3 class="contact" data-translate="contact">Əlaqə</h3>
+        <ul>
+          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+        </ul>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+    </div>
+  </footer>
+
+  <!-- ══════════════════ SCRIPTS ══════════════════ -->
+  <script>
+    // ── Tab switching ─────────────────────────────
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // ── Follow button toggle ──────────────────────
+    const followBtn = document.getElementById('followBtn');
+    let following = false;
+    followBtn.addEventListener('click', () => {
+      following = !following;
+      followBtn.innerHTML = following
+        ? '<i class="fas fa-check"></i> İzlənilir'
+        : '<i class="fas fa-plus"></i> İzlə';
+      followBtn.style.background = following ? '#34c759' : '';
+    });
+
+    // ── Call button ───────────────────────────────
+    let callRevealed = false;
+    document.getElementById('callBtn').addEventListener('click', () => {
+      if (!callRevealed) {
+        document.getElementById('callBtn').innerHTML = '<i class="fas fa-phone-alt"></i> +994 50 123 45 67';
+        document.getElementById('callBtn').style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+        callRevealed = true;
+      } else {
+        window.location.href = 'tel:+994501234567';
+      }
+    });
+  </script>
+
+  <script src="JS/auth.js"></script>
+  <script src="JS/script.js"></script>
+
+</body>
+</html>

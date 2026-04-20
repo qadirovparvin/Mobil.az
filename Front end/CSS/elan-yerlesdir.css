@@ -1,0 +1,670 @@
+/* =========================================================
+   HERO SECTION
+   ========================================================= */
+.ad-page-hero {
+  background: linear-gradient(135deg, #3d1e6d 0%, #6a35b5 60%, #9b59d8 100%);
+  padding: 56px 24px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ad-page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.ad-page-hero-inner {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ---- BADGE / TAG ---- */
+.ad-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  border-radius: 100px;
+  padding: 7px 20px 7px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+  animation: badgePulse 2.4s ease-in-out infinite;
+}
+
+.ad-hero-badge i {
+  font-size: 14px;
+  color: #ffe568;
+  filter: drop-shadow(0 0 6px #ffe568cc);
+  animation: boltFlash 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes badgePulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+  }
+
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.0);
+  }
+}
+
+@keyframes boltFlash {
+  from {
+    opacity: 0.7;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.ad-hero-title {
+  font-size: 34px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  line-height: 1.15;
+}
+
+.ad-hero-subtitle {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+  margin-bottom: 28px;
+}
+
+.ad-hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  padding: 6px 16px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.hero-stat i {
+  color: #ffe568;
+  font-size: 13px;
+}
+
+/* =========================================================
+   FORM WRAPPER
+   ========================================================= */
+.ad-form-wrapper {
+  max-width: 1060px;
+  margin: 36px auto 60px;
+  padding: 0 20px;
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+/* =========================================================
+   PROGRESS STEPS
+   ========================================================= */
+.form-steps {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  gap: 0;
+}
+
+.form-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.step-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #999);
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.form-step.active .step-circle {
+  background: linear-gradient(135deg, #3d1e6d, #7c3dc5);
+  border-color: #7c3dc5;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(61, 30, 109, 0.4);
+}
+
+.form-step span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  opacity: 0.55;
+}
+
+.form-step.active span {
+  opacity: 1;
+  color: #6a35b5;
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin-bottom: 22px;
+}
+
+/* =========================================================
+   FORM CARD MAIN
+   ========================================================= */
+.ad-form-card {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+.form-section {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 26px 26px 22px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 16px rgba(61, 30, 109, 0.06);
+  border: 1px solid rgba(61, 30, 109, 0.07);
+}
+
+.form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.form-section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: linear-gradient(135deg, #6a35b5, #9b59d8);
+  border-radius: 10px;
+  padding: 0 10px;
+  box-shadow: 0 3px 10px rgba(106, 53, 181, 0.35);
+  flex-shrink: 0;
+}
+
+.form-section-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* =========================================================
+   FORM ROW — 2 columns
+   ========================================================= */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   FORM GROUPS
+   ========================================================= */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-row .form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.required {
+  color: #e8445a;
+  margin-left: 2px;
+}
+
+/* =========================================================
+   INPUTS & SELECTS — custom wrapper
+   ========================================================= */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px !important;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6a35b5;
+  font-size: 13px;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 13px;
+  color: #6a35b5;
+  font-size: 16px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.input-wrapper input {
+  padding-left: 36px !important;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--bg-primary);
+  font-size: 14.5px;
+  color: var(--text-primary);
+  transition: border-color 0.22s, box-shadow 0.22s;
+  width: 100%;
+  box-sizing: border-box;
+  resize: none;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #6a35b5;
+  box-shadow: 0 0 0 3px rgba(106, 53, 181, 0.14);
+  outline: none;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Character counter */
+.char-counter {
+  font-size: 11.5px;
+  color: #999;
+  text-align: right;
+  margin-top: -4px;
+}
+
+/* =========================================================
+   FEATURE CHIPS (checkbox toggles)
+   ========================================================= */
+.feature-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip-toggle {
+  cursor: pointer;
+}
+
+.chip-toggle input {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 100px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-primary);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.22s ease;
+  user-select: none;
+}
+
+.chip i {
+  font-size: 13px;
+  color: #aaa;
+  transition: color 0.2s;
+}
+
+.chip-toggle input:checked+.chip {
+  background: linear-gradient(135deg, #3d1e6d, #7c3dc5);
+  border-color: #7c3dc5;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(61, 30, 109, 0.3);
+}
+
+.chip-toggle input:checked+.chip i {
+  color: #ffe568;
+}
+
+.chip:hover {
+  border-color: #6a35b5;
+  color: #6a35b5;
+}
+
+.chip-toggle input:checked+.chip:hover {
+  color: #fff;
+}
+
+/* =========================================================
+   FILE UPLOAD AREA
+   ========================================================= */
+.file-upload-area {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 28px 20px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.22s, background 0.22s;
+  background: var(--bg-primary);
+}
+
+.file-upload-area:hover,
+.file-upload-area.dragover {
+  border-color: #6a35b5;
+  background: rgba(106, 53, 181, 0.04);
+}
+
+.file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.file-upload-content i {
+  font-size: 36px;
+  color: #6a35b5;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.file-upload-content p {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.file-upload-content p span {
+  color: #6a35b5;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.file-upload-content small {
+  color: #999;
+  font-size: 12px;
+}
+
+.image-preview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.image-preview-grid .preview-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid rgba(106, 53, 181, 0.2);
+}
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+.ad-form-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #3d1e6d 0%, #7c3dc5 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 8px;
+  transition: all 0.25s ease;
+  width: 100%;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 6px 20px rgba(61, 30, 109, 0.35);
+}
+
+.ad-form-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(61, 30, 109, 0.45);
+}
+
+.ad-form-btn:active {
+  transform: translateY(0);
+}
+
+.form-submit-note {
+  text-align: center;
+  font-size: 12px;
+  color: #999;
+  margin-top: 10px;
+}
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+.ad-form-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 90px;
+}
+
+/* Rules card */
+.ad-form-rules {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 22px 20px;
+  border: 1px solid rgba(61, 30, 109, 0.08);
+  box-shadow: 0 2px 16px rgba(61, 30, 109, 0.06);
+}
+
+.rules-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.rules-header i {
+  font-size: 18px;
+  color: #6a35b5;
+}
+
+.ad-form-rules h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ad-form-rules ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ad-form-rules li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.45;
+}
+
+.ad-form-rules li i {
+  color: #6a35b5;
+  font-size: 11px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+/* Tip card */
+.ad-tip-card {
+  background: linear-gradient(135deg, #3d1e6d, #7c3dc5);
+  border-radius: 16px;
+  padding: 22px 20px;
+  color: #fff;
+}
+
+.tip-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.ad-tip-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.ad-tip-card p {
+  font-size: 13.5px;
+  opacity: 0.88;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
+  .ad-form-wrapper {
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 12px;
+  }
+
+  .ad-form-sidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-hero-title {
+    font-size: 26px;
+  }
+
+  .ad-hero-stats {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 440px) {
+  .form-steps {
+    gap: 0;
+  }
+
+  .step-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+
+  .feature-chips {
+    gap: 8px;
+  }
+
+  .chip {
+    font-size: 12.5px;
+    padding: 7px 12px;
+  }
+}

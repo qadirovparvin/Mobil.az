@@ -1,0 +1,174 @@
+/* Bütün sayta aid ümumi stillər - Mobil.az | Apple Design & Dark Mode Variables */
+:root {
+    /* Apple Light Mode Palette */
+    --bg-primary: #f5f5f7;
+    --bg-secondary: #ffffff;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --accent-color: #0066cc;
+    /* Apple Blue */
+    --accent-hover: #0077ed;
+    --border-color: #d2d2d7;
+    --header-bg: rgba(255, 255, 255, 0.72);
+    --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --input-bg: #f5f5f7;
+    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Mobil.az Purple (Updated to be softer) */
+    --airy-primary: #5e5ce6;
+    --airy-hover: #4846c9;
+    --airy-secondary: #bfbce3;
+}
+
+[data-theme="dark"] {
+    /* Apple Dark Mode Palette */
+    --bg-primary: #000000;
+    --bg-secondary: #1c1c1e;
+    --text-primary: #f5f5f7;
+    --text-secondary: #86868b;
+    --accent-color: #0a84ff;
+    /* Apple Dark Blue */
+    --accent-hover: #409cff;
+    --border-color: #38383a;
+    --header-bg: rgba(28, 28, 30, 0.72);
+    --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --input-bg: #2c2c2e;
+
+    /* Dark Mobil.az Purple */
+    --airy-primary: #7d7aff;
+    --airy-hover: #6763eb;
+    --airy-secondary: #3b3a7a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    height: 100%;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    -webkit-font-smoothing: antialiased;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.3s ease;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* ── Mobil.az Text Logo ────────────────────────────────────────────── */
+.mobil-logo {
+    font-family: var(--font-family);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--airy-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    transition: opacity 0.2s ease;
+    user-select: none;
+}
+
+.mobil-logo span {
+    color: var(--accent-color);
+    font-weight: 700;
+}
+
+.mobil-logo:hover {
+    opacity: 0.82;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+input,
+select,
+textarea {
+    outline: none;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    padding: 12px 14px;
+    border-radius: 12px;
+    width: 100%;
+    font-family: inherit;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+}
+
+.container {
+    width: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Responsive dizayn üçün əsas media sorğuları */
+@media (max-width: 992px) {
+    body {
+        font-size: 15px;
+    }
+
+    button {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+
+    .container {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+    }
+}

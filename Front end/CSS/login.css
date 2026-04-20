@@ -1,0 +1,332 @@
+/* Login / Signup container stilləri */
+.login-container,
+.signup-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 1rem;
+    background-color: #f7f9fa;
+    /* Soft background */
+}
+
+/* Base Form structure */
+.login-form,
+.signup-form {
+    background-color: var(--bg-secondary, #fff);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    /* Apple-like soft shadow */
+    width: 100%;
+    max-width: 440px;
+    padding: 3rem 2.5rem;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+}
+
+body.dark-mode .login-form,
+body.dark-mode .signup-form {
+    background-color: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.login-form h2,
+.signup-form h2 {
+    color: var(--text-primary, #333);
+    margin-bottom: 2rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Social login düymələri */
+.social-login,
+.social-signup {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.social-btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: var(--text-primary, #333);
+}
+
+.social-btn:hover {
+    background-color: #f5f7f9;
+}
+
+body.dark-mode .social-btn {
+    border-color: #333;
+    color: #eee;
+}
+
+body.dark-mode .social-btn:hover {
+    background-color: #2a2a2a;
+}
+
+.social-btn i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.facebook i {
+    color: #1877F2;
+}
+
+.google i {
+    color: #DB4437;
+}
+
+/* Ayırıcı */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+body.dark-mode .divider::before,
+body.dark-mode .divider::after {
+    border-bottom-color: #333;
+}
+
+.divider span {
+    padding: 0 12px;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* Form elementləri */
+.input-row {
+    display: flex;
+    gap: 15px;
+}
+
+.input-row .input-group {
+    flex: 1;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1.2rem;
+}
+
+.input-group i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 1rem;
+}
+
+.input-group .toggle-password {
+    left: auto;
+    right: 16px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.input-group .toggle-password:hover {
+    color: var(--primary-color, blueviolet);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px 14px 45px;
+    background-color: #f5f7f9;
+    color: var(--text-primary, #333);
+    border: 1px solid transparent;
+    /* No border initially, handled by bg */
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .input-group input {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+}
+
+.input-group input:focus {
+    background-color: transparent;
+    border-color: var(--primary-color, blueviolet);
+    box-shadow: 0 0 0 3px rgba(138, 43, 226, 0.15);
+    /* Soft focus ring */
+    outline: none;
+}
+
+body.dark-mode .input-group input:focus {
+    border-color: var(--primary-color, #9c4dcc);
+    box-shadow: 0 0 0 3px rgba(156, 77, 204, 0.2);
+}
+
+/* Form seçimləri */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input {
+    margin-right: 8px;
+    accent-color: var(--primary-color, blueviolet);
+    width: 16px;
+    height: 16px;
+}
+
+.forgot-password {
+    color: var(--primary-color, blueviolet);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Terms checkbox */
+.terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.terms-checkbox input {
+    margin-right: 10px;
+    margin-top: 4px;
+    accent-color: var(--primary-color, blueviolet);
+    width: 16px;
+    height: 16px;
+}
+
+.terms-checkbox label {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.5;
+}
+
+body.dark-mode .terms-checkbox label {
+    color: #aaa;
+}
+
+.terms-checkbox a {
+    color: var(--primary-color, blueviolet);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.terms-checkbox a:hover {
+    text-decoration: underline;
+}
+
+/* Action düymələri */
+.login-submit-btn,
+.signup-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color, blueviolet);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    margin-top: 0.5rem;
+}
+
+.login-submit-btn:hover,
+.signup-btn:hover {
+    background-color: #7a28cc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(138, 43, 226, 0.25);
+}
+
+.login-submit-btn:active,
+.signup-btn:active {
+    transform: translateY(0);
+}
+
+/* Linklər */
+.register-link,
+.login-link {
+    margin-top: 1.8rem;
+    color: #666;
+    font-size: 0.95rem;
+}
+
+body.dark-mode .register-link,
+body.dark-mode .login-link {
+    color: #aaa;
+}
+
+.register-link a,
+.login-link a {
+    color: var(--primary-color, blueviolet);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.register-link a:hover,
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Footer stilləri (Global unless omitted) */
+/* Re-using existing styles from main css where possible */
+
+/* Responsiv dizayn */
+@media (max-width: 768px) {
+
+    .login-form,
+    .signup-form {
+        padding: 2.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .social-login,
+    .social-signup,
+    .input-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .terms-checkbox input {
+        margin-top: 2px;
+    }
+}

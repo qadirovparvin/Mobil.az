@@ -1,0 +1,170 @@
+/* About page styles */
+.about-container {
+    max-width: 1000px;
+    margin: 26px auto;
+    padding: 26px;
+    background-color: var(--bg-secondary);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.about-header {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #3d1e6d;
+}
+
+.about-header h1 {
+    color: var(--text-primary);
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 20px;
+    color: #ff9900;
+    font-weight: 500;
+}
+
+.about-intro {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    text-align: justify;
+}
+
+.about-section {
+    margin-bottom: 40px;
+}
+
+.about-section h2 {
+    color: var(--text-primary);
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.benefits-list li,
+.advantages-list li,
+.future-plans li {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.benefits-list i,
+.advantages-list i,
+.future-plans i {
+    color: #ff9900;
+    margin-right: 10px;
+    font-size: 18px;
+    min-width: 20px;
+}
+
+.user-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.user-type {
+    flex: 1;
+    min-width: 300px;
+    background-color: var(--bg-primary);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-type h3 {
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-size: 20px;
+}
+
+.user-type ul li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.user-type ul li i {
+    color: #ff9900;
+    margin-right: 10px;
+    min-width: 20px;
+}
+
+.about-conclusion {
+    font-size: 18px;
+    line-height: 1.6;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    border-radius: 8px;
+    text-align: justify;
+}
+
+.tagline {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-top: 20px;
+}
+
+.tagline i {
+    color: #ff9900;
+    margin: 0 10px;
+}
+
+@media (max-width: 768px) {
+    .about-header h1 {
+        font-size: 28px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+    }
+
+    .user-types {
+        flex-direction: column;
+    }
+
+    .user-type {
+        min-width: 100%;
+    }
+
+    .about-intro,
+    .about-conclusion {
+        font-size: 16px;
+    }
+
+    .tagline {
+        font-size: 20px;
+    }
+}
+
+.product-categories-list {
+    margin-top: 15px;
+}
+
+.product-categories-list li {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.product-categories-list i {
+    color: #ff9900;
+    margin-right: 10px;
+    font-size: 18px;
+    min-width: 20px;
+}
+
+.product-categories-list strong {
+    color: var(--text-primary);
+    margin-right: 5px;
+}

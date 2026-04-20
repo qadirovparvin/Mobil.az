@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobil.az - Məxfilik Siyasəti</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .privacy-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .privacy-hero {
+            text-align: center;
+            padding: 50px 20px 30px;
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .privacy-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .privacy-hero p {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            max-width: 650px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .privacy-last-updated {
+            font-size: 0.85rem;
+            opacity: 0.75;
+            margin-top: 10px;
+        }
+
+        .privacy-section {
+            background-color: var(--bg-secondary);
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .privacy-section h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a73e8;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 14px;
+        }
+
+        .privacy-section h2 i {
+            font-size: 1.2rem;
+            color: #1a73e8;
+        }
+
+        .privacy-section p {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.75;
+            margin-bottom: 14px;
+        }
+
+        .privacy-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .privacy-list {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .privacy-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            line-height: 1.65;
+        }
+
+        .privacy-list li i {
+            color: #1a73e8;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            min-width: 16px;
+        }
+
+        .highlight-box {
+            background-color: rgba(26, 115, 232, 0.07);
+            border: 1px solid rgba(26, 115, 232, 0.25);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .highlight-box i {
+            color: #1a73e8;
+            font-size: 1.1rem;
+            margin-top: 3px;
+            min-width: 18px;
+        }
+
+        .highlight-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.65;
+        }
+
+        .contact-card {
+            background: linear-gradient(135deg, var(--input-bg) 0%, var(--bg-secondary) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-top: 10px;
+            transition: box-shadow 0.2s;
+        }
+
+        .contact-card:hover {
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .contact-card i {
+            font-size: 1.8rem;
+            color: #1a73e8;
+        }
+
+        .contact-card div h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .contact-card div a {
+            color: #1a73e8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .contact-card div a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        <li class="About" data-translate="About">
+                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="privacy-container">
+
+            <div class="privacy-hero">
+                <h1><i class="fas fa-lock"></i> <span data-translate="privacy-page-h1">Məxfilik Siyasəti</span></h1>
+                <p data-translate="privacy-page-sub">Mobil.az istifadəçilərimizin məxfiliyini qorumağı prinsip kimi
+                    qəbul edir. Bu siyasət məlumatlarınızın necə toplanıb, istifadə edildiyi barədə şəffaf məlumat
+                    verir.</p>
+                <p class="privacy-last-updated" data-translate="privacy-updated">Son yenilənmə: Mart 2025</p>
+            </div>
+
+            <!-- WHAT DATA WE COLLECT -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-database"></i> <span data-translate="privacy-h2-collect">Hansı Məlumatları
+                        Toplayırıq?</span></h2>
+                <p data-translate="privacy-p-collect">Mobil.az-da qeydiyyatdan keçdiyiniz zaman aşağıdakı məlumatları
+                    toplamaq lazım gəlir:</p>
+                <ul class="privacy-list">
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-collect-1">Ad, soyad — hesabınızı
+                            fərdiləşdirmək və identifikasiya etmək üçün.</span></li>
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-collect-2">Telefon nömrəsi — elanla
+                            bağlı əlaqə üçün və hesab doğrulaması üçün.</span></li>
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-collect-3">E-mail ünvanı —
+                            bildirişlər, şifrə sıfırlanması və sistemdən məlumatlar göndərmək üçün.</span></li>
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-collect-4">Yerləşdirdiyiniz elan
+                            məlumatları (şəkillər, təsvir, qiymət, məhsul xüsusiyyətləri).</span></li>
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-collect-5">Texniki məlumatlar: IP
+                            ünvanı, brauzer növü, platforma fəaliyyət jurnalları (log).</span></li>
+                </ul>
+            </div>
+
+            <!-- HOW WE USE DATA -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-cogs"></i> <span data-translate="privacy-h2-use">Məlumatları Necə İstifadə
+                        Edirik?</span></h2>
+                <p data-translate="privacy-p-use">Topladığımız məlumatlar aşağıdakı məqsədlər üçün istifadə olunur:</p>
+                <ul class="privacy-list">
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-1">Hesabınızı yaratmaq, idarə
+                            etmək və qorumaq.</span></li>
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-2">Elanlarınızı platformada
+                            yerləşdirmək və göstərmək.</span></li>
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-3">Alıcı ilə satıcı arasında
+                            ünsiyyəti asanlaşdırmaq.</span></li>
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-4">Şübhəli fəaliyyətləri aşkar
+                            etmək və platformanın təhlükəsizliyini təmin etmək.</span></li>
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-5">Elan, hesab vəziyyəti haqqında
+                            bildirişlər göndərmək.</span></li>
+                    <li><i class="fas fa-check"></i> <span data-translate="privacy-use-6">Xidmətimizi inkişaf etdirmək
+                            üçün statistik təhlil aparmaq (şəxsi məlumatlar anonim şəkildə).</span></li>
+                </ul>
+            </div>
+
+            <!-- DATA SHARING -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-share-alt"></i> <span data-translate="privacy-h2-share">Məlumatları
+                        Paylaşırıqmı?</span></h2>
+                <p data-translate="privacy-p-share1">Mobil.az şəxsi məlumatlarınızı üçüncü şəxslərə satmır. Məlumatlar
+                    yalnız aşağıdakı hallardan birinin yarandığı zaman paylaşıla bilər:</p>
+                <ul class="privacy-list">
+                    <li><i class="fas fa-exclamation-circle"></i> <span
+                            data-translate="privacy-share-1">Qanunvericiliyin tələb etdiyi hallarda (məhkəmə qərarı,
+                            hüquq mühafizə orqanlarının sorğusu).</span></li>
+                    <li><i class="fas fa-exclamation-circle"></i> <span data-translate="privacy-share-2">Xidmət
+                            təminatçıları ilə (hosting, e-mail göndərmə) — yalnız xidmət çərçivəsində.</span></li>
+                    <li><i class="fas fa-exclamation-circle"></i> <span data-translate="privacy-share-3">Fırıldaqçılıq
+                            hallarında platformanı qorumaq məqsədilə iş ortaqlarımızla.</span></li>
+                </ul>
+                <div class="highlight-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p data-translate="privacy-note-share">Elanınızda göstərdiyiniz telefon nömrəsi elanı görən bütün
+                        istifadəçilər tərəfindən görülə bilər. Telefon nömrənizi elanda göstərmək istəyib-istəmədiyinizi
+                        siz seçirsiniz.</p>
+                </div>
+            </div>
+
+            <!-- COOKIES -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-cookie-bite"></i> <span data-translate="privacy-h2-cookies">Çərəzlər
+                        (Cookies)</span></h2>
+                <p data-translate="privacy-p-cookies1">Mobil.az veb saytımızın düzgün işləməsi üçün çərəzlərdən istifadə
+                    edir. Çərəzlər sizin brauzerinizdə saxlanan kiçik məlumat fayllarıdır.</p>
+                <p data-translate="privacy-p-cookies2">İstifadə etdiyimiz çərəzlər:</p>
+                <ul class="privacy-list">
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-cookie-1"><strong>Sessiya
+                                çərəzləri:</strong> Siz saytı bağladıqdan sonra silinir. Giriş statusunu saxlamaq üçün
+                            istifadə olunur.</span></li>
+                    <li><i class="fas fa-circle"></i> <span data-translate="privacy-cookie-2"><strong>Daimi
+                                çərəzlər:</strong> Dil seçimi, qaranlıq rejim kimi tercihləriniizi yadda saxlamaq üçün
+                            istifadə olunur.</span></li>
+                </ul>
+                <p data-translate="privacy-p-cookies3">Brauzerin parametrlərini dəyişdirərək çərəzləri qəbul etməkdən
+                    imtina edə bilərsiniz, amma bu halda bəzi funksiyalar düzgün işləməyə bilər.</p>
+            </div>
+
+            <!-- USER RIGHTS -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-user-check"></i> <span data-translate="privacy-h2-rights">İstifadəçi
+                        Hüquqları</span></h2>
+                <p data-translate="privacy-p-rights">Siz öz məlumatlarınıza dair aşağıdakı hüquqlara maliksiniz:</p>
+                <ul class="privacy-list">
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="privacy-right-1">Hesabınızdakı şəxsi
+                            məlumatlarınıza baxmaq və onları yeniləmək hüququ.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="privacy-right-2">Hesabınızı tamamilə
+                            silmək hüququ — bu halda bütün məlumatlarınız sistemdən silinir.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="privacy-right-3">Marketinq
+                            bildirişlərindən imtina etmək hüququ.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="privacy-right-4">Məlumatlarınızın
+                            işlənməsinə itiraz etmək hüququ (qanuni əsaslar daxilində).</span></li>
+                </ul>
+                <div class="highlight-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p data-translate="privacy-rights-note">Bu hüquqlarınızı həyata keçirmək üçün aşağıdakı e-mail
+                        ünvanı vasitəsilə bizimlə əlaqə saxlaya bilərsiniz.</p>
+                </div>
+            </div>
+
+            <!-- SECURITY -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-lock"></i> <span data-translate="privacy-h2-security">Məlumat Təhlükəsizliyi</span>
+                </h2>
+                <p data-translate="privacy-p-security1">Məlumatlarınızın təhlükəsizliyi bizim əsas prioritetimizdir.
+                    Mobil.az istifadəçilərin məlumatlarını qorumaq üçün lazımi təhlükəsizlik tədbirləri görür. Şifrələr
+                    təhlükəsiz
+                    kriptoqrafik üsullarla saxlanılır.</p>
+                <p data-translate="privacy-p-security2">Bununla belə, heç bir internet platforması tam 100%
+                    təhlükəsizlik zəmanəti verə bilməz. Şifrənizi heç kimlə paylaşmayın və güclü, unikal şifrə istifadə
+                    edin.</p>
+            </div>
+
+            <!-- CHANGES TO POLICY -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-sync-alt"></i> <span data-translate="privacy-h2-changes">Siyasətdə
+                        Dəyişikliklər</span></h2>
+                <p data-translate="privacy-p-changes">Bu məxfilik siyasəti zaman-zaman yenilənə bilər. Əhəmiyyətli
+                    dəyişikliklər olduqda e-mail vasitəsilə məlumatlandırılacaqsınız. Maksimum şəffaflıq üçün bu
+                    səhifəni müntəzəm yoxlamağınızı tövsiyə edirik.</p>
+            </div>
+
+            <!-- CONTACT -->
+            <div class="privacy-section">
+                <h2><i class="fas fa-envelope-open-text"></i> <span data-translate="privacy-h2-contact">Bizimlə
+                        Əlaqə</span></h2>
+                <p data-translate="privacy-p-contact">Məxfilik siyastimizlə bağlı hər hansı sualınız varsa, bizimlə
+                    əlaqə saxlayın:</p>
+                <div class="contact-card">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <h3 data-translate="privacy-contact-email-h">E-mail</h3>
+                        <a href="mailto:info@mobilaz.az">info@mobilaz.az</a>
+                    </div>
+                </div>
+                <div class="contact-card" style="margin-top: 12px;">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h3 data-translate="privacy-contact-phone-h">Telefon</h3>
+                        <a href="tel:+994703638808">+994 70 363 88 08</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
+                    </li>
+                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
+                                Təhlükəsizlik</span></a></li>
+                    <li><a href="rules.html#posting-rules"><span class="posting-rules"
+                                data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
+                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
+                                siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js"></script>
+</body>
+
+</html>

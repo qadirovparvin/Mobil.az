@@ -1,0 +1,161 @@
+﻿<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş - Mobil.az</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        <li class="About" data-translate="About">
+                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="login-container">
+        <div class="login-form">
+            <h2 data-translate="login-title">Hesaba Giriş</h2>
+            <div class="social-login">
+                <button class="social-btn facebook"><i class="fab fa-facebook-f"></i> <span
+                        data-translate="login-facebook">Facebook ilə</span></button>
+                <button class="social-btn google"><i class="fab fa-google"></i> <span
+                        data-translate="login-google">Google ilə</span></button>
+            </div>
+            <div class="divider">
+                <span data-translate="login-or">və ya</span>
+            </div>
+            <form>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" data-translate-placeholder="login-username-placeholder"
+                        placeholder="İstifadəçi adı və ya email" required>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" data-translate-placeholder="login-password-placeholder"
+                        placeholder="Şifrə" required>
+                    <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
+                </div>
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember">
+                        <label for="remember" data-translate="login-remember">Məni xatırla</label>
+                    </div>
+                    <a href="#" class="forgot-password" data-translate="login-forgot">Şifrəni unutmusunuz?</a>
+                </div>
+                <button type="submit" class="login-submit-btn" data-translate="login-submit">Daxil Ol</button>
+            </form>
+            <div class="register-link">
+                <p><span data-translate="login-no-account">Hesabınız yoxdur?</span> <a href="signup.html"
+                        data-translate="login-signup-link">Qeydiyyatdan keçin</a></p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
+                    </li>
+                    <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
+                                Təhlükəsizlik</span></a></li>
+                    <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
+                                qaydaları</span></a></li>
+                    <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
+                                siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+
+    <script>
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            if (!passwordInput) return;
+            const icon = passwordInput.nextElementSibling;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+            } else {
+                passwordInput.type = 'password';
+                if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+            }
+        }
+    </script>
+    <script src="JS/auth.js"></script>
+    <script src="JS/login.js"></script>
+    <script src="JS/script.js"></script>
+</body>
+
+</html>

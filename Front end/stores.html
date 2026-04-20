@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mağazalar - Mobil.az</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/stores.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        body { background-color: var(--bg-primary); }
+        
+        /* Desktop Store Container */
+        .stores-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            min-height: calc(100vh - 350px);
+            padding: 0 20px;
+        }
+
+        .stores-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 20px 30px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .stores-header-text {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stores-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .stores-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* Search Box */
+        .stores-filters {
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .search-stores {
+            display: flex;
+            align-items: center;
+            background: var(--bg-secondary);
+            padding: 8px;
+            border-radius: 12px;
+            flex: 1;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .search-stores input {
+            border: none;
+            background: transparent;
+            padding: 10px 15px;
+            flex: 1;
+            font-size: 15px;
+            outline: none;
+            color: var(--text-primary);
+        }
+
+        .search-stores button {
+            background: #6a1fa0;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .search-stores button:hover {
+            background: #551582;
+        }
+
+        .add-store-btn {
+            background: #6a1fa0;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(106, 31, 160, 0.2);
+        }
+        
+        .add-store-btn a {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .add-store-btn:hover {
+            background: #551582;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(106, 31, 160, 0.3);
+        }
+
+        /* Full-width PC Store Lists */
+        .stores-list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .list-store-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            transition: box-shadow 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: row;
+            height: auto;
+            min-height: 220px;
+        }
+
+        .list-store-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            border-color: var(--airy-primary);
+        }
+
+        .list-store-image {
+            width: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .store-logo-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            border: 3px solid var(--bg-secondary);
+            background: var(--bg-secondary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            object-fit: cover;
+        }
+
+        .list-store-content {
+            padding: 24px 30px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .store-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .store-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .store-title .verified-badge {
+            color: #1DA1F2;
+            font-size: 18px;
+        }
+
+        .store-rating-large {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--input-bg);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 15px;
+        }
+
+        .store-rating-large i.fa-star {
+            color: #ffc107;
+        }
+
+        .store-description {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            max-width: 700px;
+        }
+
+        .store-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .detail-item i {
+            color: var(--airy-primary);
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .store-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: auto;
+        }
+
+        .store-actions button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-view-store {
+            background: var(--airy-primary);
+            color: #fff;
+        }
+
+        .btn-view-store:hover {
+            background: var(--airy-hover);
+        }
+
+        .btn-contact-store {
+            background: #25D366; /* WhatsApp color */
+            color: #fff;
+        }
+
+        .btn-contact-store:hover {
+            background: #128C7E;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 850px) {
+            .stores-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            .stores-filters {
+                flex-direction: column;
+            }
+            .add-store-btn {
+                width: 100%;
+            }
+            .add-store-btn a {
+                justify-content: center;
+            }
+            .list-store-card {
+                flex-direction: column;
+            }
+            .list-store-image {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .store-logo-overlay {
+                bottom: -35px;
+                left: 20px;
+            }
+            .list-store-content {
+                padding-top: 45px;
+            }
+            .store-header-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        </li>
+                        <li class="About" data-translate="About">
+                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <!-- ... existing language / theme toggles ... -->
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="stores-container">
+        <div class="stores-header">
+            <div class="stores-header-text">
+                <h1 data-translate="stores-h1">Sevdiyiniz mağazaları kəşf edin</h1>
+                <p data-translate="stores-p">Bütün mobil telefon və texnologiya mağazaları bir yerdə</p>
+            </div>
+        </div>
+
+        <div class="stores-filters">
+            <div class="search-stores">
+                <input type="text" data-translate-placeholder="stores-search-placeholder"
+                    placeholder="Mağaza adı, məhsul və ya ünvan axtar...">
+                <button type="submit" data-translate="stores-search-btn"><i class="fas fa-search"></i> Axtar</button>
+                <button class="add-store-btn"><a href="create-shop.html" data-translate="stores-add-btn"><i class="fas fa-store-alt"></i> Mağaza Aç</a></button>
+            </div>
+        </div>
+
+        <div class="stores-list-view">
+            <!-- Store 1: LeadTech -->
+            <div class="list-store-card">
+                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1541560052-5e137f229371?q=80&w=600');">
+                    <img src="https://i.pinimg.com/736x/e7/85/29/e78529fcd6194bae5fd828b46a5a501b.jpg" alt="LeadTech" class="store-logo-overlay">
+                </div>
+                <div class="list-store-content">
+                    <div class="store-header-row">
+                        <h3 class="store-title">LeadTech Mobile <i class="fas fa-check-circle verified-badge" title="Rəsmi Mağaza"></i></h3>
+                        <div class="store-rating-large">
+                            <i class="fas fa-star"></i> 4.8 <span>(120 <span data-translate="stores-review">rəy</span>)</span>
+                        </div>
+                    </div>
+                    <p class="store-description">
+                        Yeni və işlənmiş Apple, Samsung smartfonlarının keyfiyyətli satışı. Zəmanətli və kreditlə alış imkanı. Sizin üçün ən uyğun elektronika həlləri.
+                    </p>
+                    <div class="store-details-grid">
+                        <div class="detail-item">
+                            <i class="fas fa-box-open"></i> <span>24 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., 28 May m/s yaxınlığı</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone-alt"></i> <span>+994 50 123 45 67</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i> <span>09:00 - 21:00</span>
+                        </div>
+                    </div>
+                    <div class="store-actions">
+                        <a href="magaza-profil.html?id=1" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
+                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store 2: Global -->
+            <div class="list-store-card">
+                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600');">
+                    <img src="https://i.pinimg.com/736x/0b/96/89/0b9689a90971180085bf2c881b0303c1.jpg" alt="Global" class="store-logo-overlay">
+                </div>
+                <div class="list-store-content">
+                    <div class="store-header-row">
+                        <h3 class="store-title">Global Elektronika <i class="fas fa-check-circle verified-badge" title="Təsdiqlənmiş"></i></h3>
+                        <div class="store-rating-large">
+                            <i class="fas fa-star"></i> 4.9 <span>(85 <span data-translate="stores-review">rəy</span>)</span>
+                        </div>
+                    </div>
+                    <p class="store-description">
+                        Bütün növ planşetlər, telefonlar və orijinal aksesuarlar. Sürətli çatdırılma və rəsmi zəmanət. Böyük endirimlər və hər növ təmir xidmətləri.
+                    </p>
+                    <div class="store-details-grid">
+                        <div class="detail-item">
+                            <i class="fas fa-box-open"></i> <span>12 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i> <span>Sumqayıt, Sülh küçəsi</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone-alt"></i> <span>+994 70 888 11 22</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-truck"></i> <span data-translate="stores-nationwide-delivery">Ölkədaxili Çatdırılma</span>
+                        </div>
+                    </div>
+                    <div class="store-actions">
+                        <a href="magaza-profil.html?id=2" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
+                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store 3: Easy Shopping -->
+            <div class="list-store-card">
+                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1605170439002-90845e8c0137?q=80&w=600');">
+                    <img src="https://i.pinimg.com/736x/8c/78/e5/8c78e58e61b52cba1fef650e185300e5.jpg" alt="Easy Shopping" class="store-logo-overlay">
+                </div>
+                <div class="list-store-content">
+                    <div class="store-header-row">
+                        <h3 class="store-title">Easy Shopping </h3>
+                        <div class="store-rating-large">
+                            <i class="fas fa-star"></i> 4.7 <span>(210 <span data-translate="stores-review">rəy</span>)</span>
+                        </div>
+                    </div>
+                    <p class="store-description">
+                        Xiaomi və digər münasib büdcəli telefonların satışı. Barter imkanı var, eyni zamanda işlənmiş və yeni kompüter detalları alqı-satqısı.
+                    </p>
+                    <div class="store-details-grid">
+                        <div class="detail-item">
+                            <i class="fas fa-box-open"></i> <span>18 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., Gənclik m/s</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone-alt"></i> <span>+994 55 999 44 55</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-sync-alt"></i> <span data-translate="stores-barter">Barter mümkündür</span>
+                        </div>
+                    </div>
+                    <div class="store-actions">
+                        <a href="magaza-profil.html?id=3" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
+                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Store 4: AzPhone -->
+             <div class="list-store-card">
+                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=600');">
+                    <img src="https://i.pinimg.com/736x/14/1e/e5/141ee57665dbaca61c11d44c2357e35d.jpg" alt="AzPhone" class="store-logo-overlay">
+                </div>
+                <div class="list-store-content">
+                    <div class="store-header-row">
+                        <h3 class="store-title">AzPhone Premium <i class="fas fa-check-circle verified-badge" title="Rəsmi Mağaza"></i></h3>
+                        <div class="store-rating-large">
+                            <i class="fas fa-star"></i> 5.0 <span>(450 <span data-translate="stores-review">rəy</span>)</span>
+                        </div>
+                    </div>
+                    <p class="store-description">
+                        Azərbaycanın ən güvənli Apple reseller mağazası. Yalnız rəsmi mallar, qeydiyyatdan keçmiş və beynəlxalq zəmanət ilə satılan məhsullar.
+                    </p>
+                    <div class="store-details-grid">
+                        <div class="detail-item">
+                            <i class="fas fa-box-open"></i> <span>56 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., Port Baku Mall</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-phone-alt"></i> <span>+994 12 555 10 10</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-shield-alt"></i> <span>1 <span data-translate="stores-warranty">İl Rəsmi Zəmanət</span></span>
+                        </div>
+                    </div>
+                    <div class="store-actions">
+                        <a href="magaza-profil.html?id=4" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
+                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="#"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
+                    <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
+                                Təhlükəsizlik</span></a></li>
+                    <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
+                                qaydaları</span></a></li>
+                    <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
+                                siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js"></script>
+</body>
+
+</html>
+

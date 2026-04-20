@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobil.az - Tez-tez verilən suallar</title>
+
+    <!-- Ümumi CSS linkləri  -->
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/faq.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Font Awesome linki -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <!-- Header hissəsi -->
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/yourphonenumber" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="qadirovparvin@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        </li>
+                        <li class="About" data-translate="About">
+                            <a href="About.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="Stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="Favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- FAQ Section -->
+    <main class="faq-container">
+        <div class="faq-header">
+            <h1 data-translate="faq-title">Tez-tez Verilən Suallar</h1>
+        </div>
+
+        <div class="faq-content">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q1">Mobil.az-da elan yerləşdirmək ödənişlidir?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a1">Xeyr, platformamızda standart elan yerləşdirmək tamamilə ödənişsizdir. Əgər elanınızın daha geniş auditoriyaya və daha qısa zamanda çatmasını istəyirsinizsə, VIP və ya Premium xidmətlərimizdən yararlana bilərsiniz.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q2">Necə qeydiyyatdan keçə bilərəm?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a2">Qeydiyyat prosesi çox sadədir. Saytın yuxarı sağ küncündəki "Qeydiyyat" bölməsinə daxil olub, mobil nömrənizi qeyd edərək asanlıqla öz profilinizi yarada bilərsiniz.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q3">Yeni elan necə əlavə edilir?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a3">Şəxsi kabinetinizə daxil olduqdan sonra "Yeni Elan" düyməsinə klikləyin. Cihazınızın göstəricilərini dəqiq qeyd edin, cəlbedici şəkillər əlavə edin və elanınızı təsdiqləyin. Çox qısa zamanda elanınız aktivləşəcək.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q4">Bir elana maksimum neçə şəkil əlavə etmək olar?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a4">Hər bir elan üçün maksimum 6 ədəd yüksək keyfiyyətli şəkil yükləyə bilərsiniz. Şəkillərin aydın olması və cihazınızı fərqli rakurslardan göstərməsi, satış ehtimalını əhəmiyyətli dərəcədə artırır.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q5">Elanım nə vaxt saytda aktiv olacaq?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a5">Elanlar yerləşdirildikdən sonra standartlara və qaydalara cavab verməsi üçün qısa yoxlama prosesindən keçir. Qaydalara zidd bir hal olmazsa, bir neçə dəqiqə ərzində saytda yayımlanır.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q6">Bəyəndiyim cihazın satıcısı ilə necə əlaqə yarada bilərəm?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a6">Hər bir elanın aşağı hissəsində satıcının əlaqə nömrəsi qeyd olunub. Oradakı "Zəng et" və ya "Mesaj göndər" funksiyası ilə birbaşa əlaqə qura bilərsiniz.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q7">Öz elanımda dəyişiklik edə bilərəmmi?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a7">Bəli, şəxsi kabinetinizə daxil olaraq "Mənim elanlarım" bölməsində istədiyiniz elanın üzərində dəyişiklik edə bilərsiniz. Dəyişikliklərdən sonra elan yenidən qısa yoxlamadan keçəcək.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q8">Elanlar saytda neçə gün aktiv qalır?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a8">Platformamızda yerləşdirilən hər bir elan 30 gün müddətində aktiv qalır. Müddət bitdikdən sonra elan avtomatik olaraq arxivə keçirilir və istəyinizə uyğun olaraq yenidən bərpa edilə bilər.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q9">Şübhəli və ya qaydaları pozan elanla rastlaşsam nə etməliyəm?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a9">İstifadəçilərimizin təhlükəsizliyi bizim üçün başlıca prioritetdir. Hər hansı şübhəli elan görsəniz, elanın altındakı "Şikayət et" düyməsini klikləyərək bizi məlumatlandıra bilərsiniz.</p>
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    <span data-translate="faq-q10">VIP elanın hansı üstünlükləri var?</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                    <p data-translate="faq-a10">VIP elanlar axtarış nəticələrində həmişə ən üst sıralarda yer alır, xüsusi rənglə vurğulanmış formada görünüşlə fərqlənir və əsas səhifədə nümayiş olunur. Bu isə cihazınızın dəfələrlə daha tez satılmasına kömək edir.</p>
+                </div>
+            </div>
+    </main>
+
+
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
+                    </li>
+                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
+                                Təhlükəsizlik</span></a></li>
+                    <li><a href="rules.html#posting-rules"><span class="posting-rules"
+                                data-translate="posting-rules">Elan yerləşdirmə
+                                qaydaları</span></a></li>
+                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
+                                siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994501234567"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+
+    <script>
+        // FAQ Accordion JavaScript
+        document.addEventListener('DOMContentLoaded', function () {
+            const faqQuestions = document.querySelectorAll('.faq-question');
+
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function () {
+                    const faqItem = this.parentElement;
+                    const answer = faqItem.querySelector('.faq-answer');
+                    const icon = this.querySelector('i');
+
+                    // Close all other FAQ items
+                    faqQuestions.forEach(otherQuestion => {
+                        const otherItem = otherQuestion.parentElement;
+                        const otherAnswer = otherItem.querySelector('.faq-answer');
+                        const otherIcon = otherQuestion.querySelector('i');
+
+                        if (otherItem !== faqItem) {
+                            otherItem.classList.remove('active');
+                            otherAnswer.style.maxHeight = '0';
+                            otherIcon.style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // Toggle current FAQ item
+                    faqItem.classList.toggle('active');
+
+                    if (faqItem.classList.contains('active')) {
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        answer.style.maxHeight = '0';
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js?v=2"></script>
+</body>
+
+</html>

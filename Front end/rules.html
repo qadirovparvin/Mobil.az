@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobil.az - Qaydalar və Təhlükəsizlik</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .rules-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .rules-hero {
+            text-align: center;
+            padding: 50px 20px 30px;
+            background: linear-gradient(135deg, var(--airy-primary) 0%, var(--airy-secondary, #6c3fc4) 100%);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .rules-hero h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .rules-hero p {
+            font-size: 1.05rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .rules-section {
+            background-color: var(--bg-secondary);
+            border-radius: 18px;
+            padding: 30px;
+            margin-bottom: 28px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .rules-section h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--airy-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 14px;
+        }
+
+        .rules-section h2 i {
+            font-size: 1.3rem;
+            color: var(--airy-primary);
+        }
+
+        .rules-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .rules-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            transition: background-color 0.2s;
+            line-height: 1.6;
+            font-size: 0.97rem;
+            color: var(--text-primary);
+        }
+
+        .rules-list li:hover {
+            background-color: var(--input-bg);
+        }
+
+        .rules-list li .rule-icon {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            background-color: var(--airy-primary);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2px;
+        }
+
+        .rules-list li .rule-icon.warning {
+            background-color: #f59e0b;
+        }
+
+        .safety-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 10px;
+        }
+
+        .safety-card {
+            background-color: var(--input-bg);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .safety-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .safety-card i {
+            font-size: 1.8rem;
+            color: var(--airy-primary);
+            margin-bottom: 12px;
+        }
+
+        .safety-card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .safety-card p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .warning-box {
+            background-color: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 14px;
+            padding: 18px 20px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            margin-top: 16px;
+        }
+
+        .warning-box i {
+            color: #ef4444;
+            font-size: 1.2rem;
+            margin-top: 2px;
+            min-width: 20px;
+        }
+
+        .warning-box p {
+            color: var(--text-primary);
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .section-tab {
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            transition: all 0.2s;
+        }
+
+        .section-tab:hover,
+        .section-tab.active {
+            background-color: var(--airy-primary);
+            color: white;
+            border-color: var(--airy-primary);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        <li class="About" data-translate="About">
+                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="rules-container">
+
+            <div class="rules-hero">
+                <h1 data-translate="rules-page-h1"><i class="fas fa-shield-alt"></i> Qaydalar və Təhlükəsizlik</h1>
+                <p data-translate="rules-page-sub">Platformamızdan təhlükəsiz və rahat istifadə etmək üçün bu qaydaları
+                    oxuyun.</p>
+            </div>
+
+            <div class="section-tabs">
+                <a href="#general-rules" class="section-tab active" data-translate="rules-tab-general">Ümumi
+                    Qaydalar</a>
+                <a href="#posting-rules" class="section-tab" data-translate="rules-tab-posting">Elan Yerləşdirmə</a>
+                <a href="#safety-rules" class="section-tab" data-translate="rules-tab-safety">Təhlükəsizlik</a>
+                <a href="#prohibited" class="section-tab" data-translate="rules-tab-prohibited">Qadağalar</a>
+            </div>
+
+            <!-- GENERAL RULES -->
+            <div id="general-rules" class="rules-section">
+                <h2><i class="fas fa-list-check"></i> <span data-translate="rules-h2-general">Ümumi İstifadə
+                        Qaydaları</span></h2>
+                <ul class="rules-list">
+                    <li>
+                        <span class="rule-icon">1</span>
+                        <span data-translate="rules-g1">Platforma yalnız mobil telefon, planşet, qulaqlıq və telefon
+                            aksesuarlarının alqı-satqısı üçün nəzərdə tutulmuşdur.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">2</span>
+                        <span data-translate="rules-g2">Qeydiyyatdan keçmək üçün real şəxsi məlumatlarınızı (ad, soyad,
+                            telefon nömrəsi) daxil etməlisiniz.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">3</span>
+                        <span data-translate="rules-g3">Hər istifadəçinin yalnız bir hesabı ola bilər. Çoxsaylı hesablar
+                            bloklanacaq.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">4</span>
+                        <span data-translate="rules-g4">Platformada yerləşdirilən bütün elanlar moderasiyadan keçir.
+                            Müvafiq olmayan elanlar silinir.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">5</span>
+                        <span data-translate="rules-g5">Elanın müddəti 30 gündür. Müddəti bitmiş elanlar avtomatik
+                            arxivlənir.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">6</span>
+                        <span data-translate="rules-g6">Eyni elanı bir neçə dəfə yerləşdirmək qadağandır. Belə elanlar
+                            sistematik olaraq silinəcəkdir.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- AD POSTING RULES -->
+            <div id="posting-rules" class="rules-section">
+                <h2><i class="fas fa-bullhorn"></i> <span data-translate="rules-h2-posting">Elan Yerləşdirmə
+                        Qaydaları</span></h2>
+                <ul class="rules-list">
+                    <li>
+                        <span class="rule-icon">1</span>
+                        <span data-translate="rules-p1">Elanı düzgün kateqoriyada yerləşdirin: Telefonlar, Planşetlər,
+                            Qulaqlıqlar və ya Aksesuarlar.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">2</span>
+                        <span data-translate="rules-p2">Başlıqda qiymət yazmayın — bunun üçün qiymət sahəsi
+                            ayrılmışdır. Bu tip elanlara düzəliş edilməlidir.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">3</span>
+                        <span data-translate="rules-p3">Məhsulun real vəziyyətini qeyd edin: Yeni, İşlənmiş (əla) və s.
+                            Yanıltıcı məlumat vermək qadağandır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">4</span>
+                        <span data-translate="rules-p4">Ən az 1, maksimum 10 keyfiyyətli şəkil əlavə edin. Hər şəkilin
+                            ölçüsü 5MB-dan artıq olmamalıdır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">5</span>
+                        <span data-translate="rules-p5">Şəkillərdə, başlıqda və ya təsvirdə telefon nömrəsi, e-mail
+                            ünvanı və ya sayt adresi göstərməyin.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">6</span>
+                        <span data-translate="rules-p6">Məhsulun texniki xüsusiyyətlərini (yaddaş, rəng, NFC, suya davamlılıq və s.) dürüst qeyd edin.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">7</span>
+                        <span data-translate="rules-p7">Zəmanəti olan məhsullar üçün zəmanət müddəti mütləq qeyd
+                            edilməlidir.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">8</span>
+                        <span data-translate="rules-p8">Qiymət AZN (Azərbaycan Manatı) ilə göstərilməlidir. Başqa
+                            valyutada göstərmək qadağandır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">9</span>
+                        <span data-translate="rules-p9">Hər kateqoriya üçün müəyyən sayda aktiv elan limiti mövcuddur.
+                            Premium paketlər bu limiti artırır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon">10</span>
+                        <span data-translate="rules-p10">Elanınızla əlaqədar bütün bildirişlər qeydiyyatda istifadə
+                            etdiyiniz e-mail ünvanına göndəriləcəkdir.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- SAFETY -->
+            <div id="safety-rules" class="rules-section">
+                <h2><i class="fas fa-user-shield"></i> <span data-translate="rules-h2-safety">Təhlükəsizlik
+                        Tövsiyələri</span></h2>
+                <div class="safety-cards">
+                    <div class="safety-card">
+                        <i class="fas fa-handshake"></i>
+                        <h3 data-translate="safety-c1-h">Şəxsən görüşün</h3>
+                        <p data-translate="safety-c1-p">Mümkün qədər alıcı/satıcı ilə ictimai yerdə, gündüz vaxtı
+                            görüşün. Gecənin qaranlığında ya da tənha yerlərdə görüşməyin.</p>
+                    </div>
+                    <div class="safety-card">
+                        <i class="fas fa-eye"></i>
+                        <h3 data-translate="safety-c2-h">Məhsulu yoxlayın</h3>
+                        <p data-translate="safety-c2-p">Almadan əvvəl telefonun IMEI nömərini, batareya sağlamlığını,
+                            ekranını və bütün funksiyalarını yoxlayın.</p>
+                    </div>
+                    <div class="safety-card">
+                        <i class="fas fa-credit-card"></i>
+                        <h3 data-translate="safety-c3-h">Ödəniş</h3>
+                        <p data-translate="safety-c3-p">Ödənişi yalnız məhsulu aldıqdan sonra, şəxsən nağd şəkildə edin.
+                            Avans ödəniş etməkdən çəkinin.</p>
+                    </div>
+                    <div class="safety-card">
+                        <i class="fas fa-phone-volume"></i>
+                        <h3 data-translate="safety-c4-h">Şübhəli elanları bildirin</h3>
+                        <p data-translate="safety-c4-p">Hər hansı şübhəli, yanıltıcı elanı "Şikayət et" düyməsi ilə
+                            dərhal moderatorlara bildirin.</p>
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p data-translate="safety-warning">Diqqət: Mobil.az heç vaxt SMS, e-mail və ya zənglə sizin
+                        şifrənizi, bank kartı məlumatlarınızı tələb etmir. Belə sorğuları dərhal rədd edin.</p>
+                </div>
+            </div>
+
+            <!-- PROHIBITED  -->
+            <div id="prohibited" class="rules-section">
+                <h2><i class="fas fa-ban"></i> <span data-translate="rules-h2-prohibited">Qadağan Edilən
+                        Fəaliyyətlər</span></h2>
+                <ul class="rules-list">
+                    <li>
+                        <span class="rule-icon warning"><i class="fas fa-times"></i></span>
+                        <span data-translate="rules-pr1">Oğurlanmış, saxta və ya qanuni sənədsiz məhsulları satmaq
+                            qadağandır. Bu cür elanlar silinir, hesab bloklanır, hüquq orqanlarına xəbər verilir.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon warning"><i class="fas fa-times"></i></span>
+                        <span data-translate="rules-pr2">Başqasının şəkilləri, adı, marka logosu olmadan elan
+                            yerləşdirmək (fikri mülkiyyətin pozulması) qadağandır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon warning"><i class="fas fa-times"></i></span>
+                        <span data-translate="rules-pr3">Aldadıcı qiymət, saxta texniki xüsusiyyət və yanıltıcı
+                            fotoşəkil istifadəsi qadağandır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon warning"><i class="fas fa-times"></i></span>
+                        <span data-translate="rules-pr4">Digər istifadəçilərə qarşı təhqiredici, ayrı-seçkilik edən və
+                            ya aqressiv ünsiyyət qadağandır.</span>
+                    </li>
+                    <li>
+                        <span class="rule-icon warning"><i class="fas fa-times"></i></span>
+                        <span data-translate="rules-pr5">Spam elanlar, sistematik olaraq eyni elanı yerləşdirmək
+                            qadağandır.</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
+                    </li>
+                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
+                                Təhlükəsizlik</span></a></li>
+                    <li><a href="rules.html#posting-rules"><span class="posting-rules"
+                                data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
+                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
+                                siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js"></script>
+</body>
+
+</html>

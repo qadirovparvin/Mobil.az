@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate-title="cabinet-title">Şəxsi Kabinet - Mobil.az</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="CSS/cabinet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="mobil-logo">Mobil<span>.az</span></span>
+            </a>
+            <div class="header-right">
+                <nav class="menu">
+                    <ul>
+                        <div class="contact-dropdown">
+                            <li data-translate="Contact">
+                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+                            </li>
+                            <div class="contact-menu">
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
+                                    Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
+                                    Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
+                                    WhatsApp</a>
+                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                            </div>
+                        </div>
+                        <li class="About" data-translate="About">
+                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+                        </li>
+                        <li class="Stores" data-translate="Stores">
+                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+                        </li>
+                        <li class="Favorite" data-translate="Favorite">
+                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="button-container">
+                    <a href="login.html" class="login-btn" data-translate="login-btn">
+                        <i class="fas fa-sign-in-alt"></i> Giriş
+                    </a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn">
+                        <i class="fas fa-user-plus"></i> Qeydiyyat
+                    </a>
+                </div>
+                <div class="theme-lang-container">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="language-selector">
+                        <i class="fas fa-globe"></i>
+                        <span id="current-lang" data-translate="language-selector">AZ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="cabinet-main">
+        <div class="cabinet-wrapper">
+            <!-- Sidebar Navigation -->
+            <aside class="cabinet-sidebar cab-glass">
+                <div class="user-snippet">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>Pərvin Qədirov</h3>
+                    <p>pervin@example.com</p>
+                    <span class="user-role-badge">Standart Hesab</span>
+                </div>
+
+                <ul class="cabinet-menu">
+                    <li>
+                        <a href="#" class="tab-link active" data-target="tab-profile">
+                            <span class="menu-left"><i class="fas fa-chart-pie"></i> İdarə Paneli</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="tab-link" data-target="tab-ads">
+                            <span class="menu-left"><i class="fas fa-list-alt"></i> Mənim elanlarım</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="tab-link" data-target="tab-messages">
+                            <span class="menu-left"><i class="fas fa-envelope"></i> Mesajlar</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="tab-link" data-target="tab-settings">
+                            <span class="menu-left"><i class="fas fa-cog"></i> Tənzimləmələr</span>
+                        </a>
+                    </li>
+                    <li style="margin-top: 30px;">
+                        <a href="index.html" class="logout-link">
+                            <span class="menu-left"><i class="fas fa-sign-out-alt"></i> Çıxış</span>
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main Content Area -->
+            <section class="cabinet-content">
+                <!-- Tab: Profile / Dashboard -->
+                <div id="tab-profile" class="cabinet-tab active">
+                    <div class="cabinet-header cab-glass">
+                        <div>
+                            <h1>İdarə Paneli</h1>
+                            <p>Xoş gəldiniz Pərvin. Bugünkü statistikanızla tanış olun.</p>
+                        </div>
+                        <a href="elan-yerlesdir.html" class="btn-primary">
+                            Yeni Elan
+                        </a>
+                    </div>
+    
+                    <!-- Dashboard Top Grid -->
+                    <div class="dashboard-top-grid">
+                        <div class="wallet-card cab-glass">
+                            <h3>Balansınız</h3>
+                            <div class="wallet-amount">0.00 <small>AZN</small></div>
+                            <div class="wallet-actions">
+                                <button class="btn-wallet">Artır</button>
+                                <button class="btn-wallet">Paket al</button>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-card cab-glass">
+                                <div class="stat-card-top">
+                                    <div class="stat-icon"><i class="fas fa-eye"></i></div>
+                                    <div class="stat-value">0</div>
+                                </div>
+                                <span>Ümumi baxış (Bu ay)</span>
+                                <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
+                            </div>
+                            <div class="stat-card cab-glass">
+                                <div class="stat-card-top">
+                                    <div class="stat-icon"><i class="fab fa-whatsapp"></i></div>
+                                    <div class="stat-value">0</div>
+                                </div>
+                                <span>WhatsApp keçidləri</span>
+                                <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Bottom Grid -->
+                    <div class="dashboard-bottom-grid">
+                        <!-- Referral Card -->
+                        <div class="referral-card cab-glass">
+                            <div class="referral-content">
+                                <div class="referral-icon">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                                <h2 data-translate="mon-referral-title">Dostunu gətir, 5 AZN qazan!</h2>
+                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN hədiyyə olunacaq.</p>
+                                
+                                <div class="referral-stats">
+                                    <div class="ref-stat">
+                                        <span class="ref-stat-label" data-translate="mon-referral-credit">Referal balansı</span>
+                                        <span class="ref-stat-value">15.00 <small>AZN</small></span>
+                                    </div>
+                                    <div class="ref-stat">
+                                        <span class="ref-stat-label">Dəvətlər</span>
+                                        <span class="ref-stat-value">3</span>
+                                    </div>
+                                </div>
+
+                                <div class="copy-link-box">
+                                    <input type="text" value="https://mobil.az/ref/pervin77" readonly id="referralLink">
+                                    <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i> <span data-translate="mon-copy-link">Kopyala</span></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline / Activity Feed -->
+                        <div class="dash-panel cab-glass">
+                            <div class="panel-header">
+                                <h2>Son Aktivlik</h2>
+                            </div>
+                            <div class="timeline">
+                                <div class="timeline-item success">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <h4>Referal Bonusu</h4>
+                                        <p>Dostunuz "Həsən Ə." qeydiyyatdan keçdiyi üçün 5 AZN qazandınız.</p>
+                                        <span class="timeline-time">2 saat əvvəl</span>
+                                    </div>
+                                </div>
+                                <div class="timeline-item">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-content">
+                                        <h4>Sistem Girişi</h4>
+                                        <p>Hesabınıza yeni giriş aşkarlandı (Bakı, 192.168.1.1)</p>
+                                        <span class="timeline-time">Dünən 14:20</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: My Ads -->
+                <div id="tab-ads" class="cabinet-tab" style="display: none;">
+                    <div class="cabinet-header cab-glass">
+                        <div>
+                            <h1>Mənim elanlarım</h1>
+                            <p>Bütün aktiv və passiv elanlarınızı idarə edin.</p>
+                        </div>
+                        <a href="elan-yerlesdir.html" class="btn-primary">
+                            Yeni Elan
+                        </a>
+                    </div>
+
+                    <div class="tab-content-box cab-glass">
+                        <div class="ad-filters">
+                            <button class="filter-pill active" data-filter="all">Bütün elanlar (0)</button>
+                            <button class="filter-pill" data-filter="active">Aktiv (0)</button>
+                            <button class="filter-pill" data-filter="pending">Yoxlanılır (0)</button>
+                            <button class="filter-pill" data-filter="expired">Müddəti bitmiş (0)</button>
+                        </div>
+
+                        <div class="my-ads-list">
+                            <!-- Ad Item 1 -->
+                            <div class="my-ad-item cab-glass" data-status="active" data-id="101">
+                                <span class="ad-status-badge">Aktiv</span>
+                                <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=400" class="my-ad-img" alt="iPhone 15">
+                                <div class="my-ad-details">
+                                    <h4>iPhone 15 Pro Max 256GB</h4>
+                                    <div class="ad-meta">
+                                        <span><i class="fas fa-eye"></i> 142</span>
+                                        <span><i class="fas fa-heart"></i> 18</span>
+                                        <span><i class="fas fa-calendar-alt"></i> 12 Apr 2026</span>
+                                    </div>
+                                    <p class="ad-price">2450 AZN</p>
+                                </div>
+                                <div class="my-ad-controls">
+                                    <button class="btn-boost" onclick="openPromotionModal(101)">
+                                        <i class="fas fa-rocket"></i> <span data-translate="mon-promote-ad">Tanıt</span>
+                                    </button>
+                                    <div class="my-ad-actions">
+                                        <button class="btn-action edit-action"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-action delete-action"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ad Item 2 -->
+                            <div class="my-ad-item cab-glass" data-status="active" data-id="102">
+                                <span class="ad-status-badge">Aktiv</span>
+                                <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=400" class="my-ad-img" alt="S24 Ultra">
+                                <div class="my-ad-details">
+                                    <h4>Samsung S24 Ultra 512GB</h4>
+                                    <div class="ad-meta">
+                                        <span><i class="fas fa-eye"></i> 89</span>
+                                        <span><i class="fas fa-heart"></i> 5</span>
+                                        <span><i class="fas fa-calendar-alt"></i> 13 Apr 2026</span>
+                                    </div>
+                                    <p class="ad-price">2200 AZN</p>
+                                </div>
+                                <div class="my-ad-controls">
+                                    <button class="btn-boost" onclick="openPromotionModal(102)">
+                                        <i class="fas fa-rocket"></i> <span data-translate="mon-promote-ad">Tanıt</span>
+                                    </button>
+                                    <div class="my-ad-actions">
+                                        <button class="btn-action edit-action"><i class="fas fa-edit"></i></button>
+                                        <button class="btn-action delete-action"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Messages (Two-Column Chat) -->
+                <div id="tab-messages" class="cabinet-tab" style="display: none;">
+                    <div class="cabinet-header cab-glass" style="margin-bottom: 20px;">
+                        <div>
+                            <h1>Mesajlar</h1>
+                            <p>Alıcı və satıcılarla əlaqə</p>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-container cab-glass">
+                        <!-- Sidebar Contacts -->
+                        <div class="chat-sidebar">
+                            <div class="chat-search">
+                                <div class="chat-search-wrap">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Mesaj axtar...">
+                                </div>
+                            </div>
+                            <div class="chat-list">
+                                <div class="empty-state" style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);">
+                                    Mesaj qutunuz boşdur.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Chat Thread -->
+                        <div class="chat-main">
+                            <div class="chat-header">
+                                <div class="chat-header-info">
+                                    <h3>İstifadəçi seçilməyib</h3>
+                                    <p><i class="fas fa-info-circle"></i> Söhbətə başlamaq üçün soldan mesaj seçin</p>
+                                </div>
+                                <button class="btn-action" style="opacity: 0.5;"><i class="fas fa-ellipsis-v"></i></button>
+                            </div>
+                            <div class="chat-messages">
+                                <!-- empty state messages area -->
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+                                    <i class="fas fa-comments" style="font-size: 64px; margin-bottom: 20px;"></i>
+                                </div>
+                            </div>
+                            <div class="chat-input">
+                                <input type="text" placeholder="Mesajınızı yazın...">
+                                <button class="btn-send"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Settings (Segmented) -->
+                <div id="tab-settings" class="cabinet-tab" style="display: none;">
+                    <div class="cabinet-header cab-glass" style="margin-bottom: 20px;">
+                        <div>
+                            <h1>Tənzimləmələr</h1>
+                            <p>Hesab məlumatlarınızı idarə edin</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-grid">
+                        <!-- Navigation -->
+                        <div class="settings-nav cab-glass" style="padding: 15px;">
+                            <button class="active" onclick="showSettingsPanel('panel-personal', this)"><i class="fas fa-user-edit"></i> Şəxsi Məlumatlar</button>
+                            <button onclick="showSettingsPanel('panel-notifications', this)"><i class="fas fa-bell"></i> Bildirişlər</button>
+                            <button onclick="showSettingsPanel('panel-security', this)"><i class="fas fa-lock"></i> Təhlükəsizlik</button>
+                            <button onclick="showSettingsPanel('panel-privacy', this)"><i class="fas fa-user-shield"></i> Məxfilik</button>
+                            <button onclick="showSettingsPanel('panel-social', this)"><i class="fas fa-link"></i> Sosial Hesablar</button>
+                            <button onclick="showSettingsPanel('panel-billing', this)"><i class="fas fa-credit-card"></i> Paket & Ödənişlər</button>
+                        </div>
+
+                        <!-- Detail Panels -->
+                        <div class="tab-content-box cab-glass" style="padding: 30px;">
+                            <!-- Personal Settings -->
+                            <div id="panel-personal" class="settings-panel active">
+                                <h3>Şəxsi Məlumatlar</h3>
+                                <div class="user-avatar" style="width: 80px; height: 80px; margin-bottom: 20px; font-size: 30px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <form>
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Ad</label>
+                                            <input type="text" class="form-control" value="Pərvin">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Soyad</label>
+                                            <input type="text" class="form-control" value="Qədirov">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" class="form-control" value="pervin@example.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Telefon</label>
+                                            <input type="tel" class="form-control" value="+994 70 123 45 67">
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-primary">Yadda saxla</button>
+                                </form>
+                            </div>
+
+                            <!-- Notifications Settings -->
+                            <div id="panel-notifications" class="settings-panel">
+                                <h3>Bildirişlər</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Platformadan hansı məlumatları necə almaq istədiyinizi seçin.</p>
+                                
+                                <div class="settings-section">
+                                    <h4 style="margin-bottom: 20px; font-size: 16px; color: var(--text-main);">Email Bildirişləri</h4>
+                                    <div class="toggle-group">
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Yeni Mesajlar</label>
+                                                <span>Kimsə sizə alıcı və ya satıcı kimi mesaj yazdıqda dərhal email alın</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Elan Statusu</label>
+                                                <span>Elanınız təsdiqləndikdə, rədd edildikdə və ya müddəti bitdikdə</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Xəbərlər və Kampaniyalar</label>
+                                                <span>Mobil.az-dan yeniliklər, endirimlər və xüsusi təkliflər barədə xəbərlər</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox"><span class="slider round"></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Settings -->
+                            <div id="panel-security" class="settings-panel">
+                                <h3>Təhlükəsizlik</h3>
+                                <form>
+                                    <div class="form-group" style="max-width: 400px;">
+                                        <label>Cari Şifrə</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <div class="form-group" style="max-width: 400px;">
+                                        <label>Yeni Şifrə</label>
+                                        <input type="password" class="form-control">
+                                    </div>
+                                    <div class="checkbox-group" style="margin-top: 20px;">
+                                        <input type="checkbox" id="two_fa">
+                                        <label for="two_fa">İki mərhələli təsdiqləməni (2FA) aktiv et</label>
+                                    </div>
+                                    <button type="button" class="btn-primary" style="margin-top: 15px;">Yenilə</button>
+                                </form>
+
+                                <hr style="border: 0; height: 1px; background: var(--cab-glass-border); margin: 40px 0;">
+                                
+                                <h4 style="color: var(--danger); margin-bottom: 20px;">Hesabın İdarəedilməsi</h4>
+                                <div class="account-danger-zone">
+                                    <div class="danger-item">
+                                        <div class="danger-info">
+                                            <h5>Hesabı Dondur</h5>
+                                            <p>Hesabınız və bütün aktiv elanlarınız müvəqqəti olaraq gizlədiləcək.</p>
+                                        </div>
+                                        <button class="btn-outline-warning">Dondur</button>
+                                    </div>
+                                    <div class="danger-item">
+                                        <div class="danger-info">
+                                            <h5 style="color: var(--danger);">Hesabı Sil</h5>
+                                            <p>Bütün məlumatlarınız və elanlarınız həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.</p>
+                                        </div>
+                                        <button class="btn-outline-danger">Hesabı Sil</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Privacy Settings -->
+                            <div id="panel-privacy" class="settings-panel">
+                                <h3>Məxfilik</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Məlumatlarınızın platformada necə görünəcəyini idarə edin.</p>
+                                
+                                <div class="settings-section">
+                                    <div class="toggle-group">
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Nömrəni Göstər</label>
+                                                <span>Bütün elanlarınızda əlaqə nömrəniz alıcılara göstərilsin</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Mesajlara İcazə Ver</label>
+                                                <span>Digər istifadəçilər daxili sistem vasitəsilə sizə mesaj yaza bilsin</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                        </div>
+                                        <div class="toggle-item">
+                                            <div class="toggle-info">
+                                                <label>Onlayn Statusu</label>
+                                                <span>Profilinizdə nə vaxt onlayn olduğunuz görünsün</span>
+                                            </div>
+                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Social Accounts -->
+                            <div id="panel-social" class="settings-panel">
+                                <h3>Sosial Hesablar</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Daha sürətli və təhlükəsiz giriş üçün sosial media hesablarınızı bağlayın.</p>
+                                
+                                <div class="social-links-grid">
+                                    <div class="social-connect-card">
+                                        <div class="social-icon google"><i class="fab fa-google"></i></div>
+                                        <div class="social-info">
+                                            <h4>Google</h4>
+                                            <span>Bağlanmayıb</span>
+                                        </div>
+                                        <button class="btn-connect">Bağla</button>
+                                    </div>
+                                    <div class="social-connect-card connected">
+                                        <div class="social-icon facebook"><i class="fab fa-facebook-f"></i></div>
+                                        <div class="social-info">
+                                            <h4>Facebook</h4>
+                                            <span>Pərvin Qədirov</span>
+                                        </div>
+                                        <button class="btn-disconnect" aria-label="Ayır"><i class="fas fa-times"></i></button>
+                                    </div>
+                                    <div class="social-connect-card">
+                                        <div class="social-icon apple"><i class="fab fa-apple"></i></div>
+                                        <div class="social-info">
+                                            <h4>Apple</h4>
+                                            <span>Bağlanmayıb</span>
+                                        </div>
+                                        <button class="btn-connect">Bağla</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Billing Settings -->
+                            <div id="panel-billing" class="settings-panel">
+                                <h3>Paket və Ödənişlər</h3>
+                                <div class="wallet-card cab-glass" style="margin-bottom: 25px; box-shadow: none;">
+                                    <h3>Cari Paket</h3>
+                                    <div class="wallet-amount" style="margin-bottom: 5px;">Standart Hesab</div>
+                                    <p style="font-size: 13px; opacity: 0.8; margin-top: 0;">Heç bir fəal paket yoxdur.</p>
+                                </div>
+                                <h4 style="margin-bottom: 15px; color: var(--text-main);">Ödəniş Tarixçəsi</h4>
+                                <ul style="list-style:none; padding:0; margin:0;">
+                                    <li style="display:flex; justify-content:center; padding:20px; font-size:14px; color:var(--text-muted);">
+                                        Heç bir əməliyyat tapılmadı.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-column">
+                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+                <ul>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
+                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
+                    <li><a href="rules.html#posting-rules"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
+                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3 class="contact" data-translate="contact">Əlaqə</h3>
+                <ul>
+                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+                </ul>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+        </div>
+    </footer>
+
+    <!-- Promotion Modal -->
+    <div id="promotionModal" class="modal-overlay">
+        <div class="modal-card cab-glass">
+            <div class="modal-header">
+                <h2 data-translate="mon-promote-ad">Elanı Tanıt</h2>
+                <button class="btn-close-modal" onclick="closePromotionModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="promo-packages">
+                <!-- Bump Up -->
+                <div class="promo-pkg-card" onclick="selectPackage('bump')">
+                    <input type="radio" name="promoPack" id="pkg-bump" value="bump">
+                    <label for="pkg-bump" class="pkg-label">
+                        <div class="pkg-icon bump"><i class="fas fa-arrow-up"></i></div>
+                        <div class="pkg-info">
+                            <h4 data-translate="mon-bump">İrəli çək</h4>
+                            <p>Elanı birbaşa ən üst sıraya daşıyın</p>
+                        </div>
+                        <div class="pkg-price">1.00 <small>AZN</small></div>
+                    </label>
+                </div>
+
+                <!-- VIP -->
+                <div class="promo-pkg-card" onclick="selectPackage('vip')">
+                    <input type="radio" name="promoPack" id="pkg-vip" value="vip">
+                    <label for="pkg-vip" class="pkg-label">
+                        <div class="pkg-icon vip"><i class="fas fa-crown"></i></div>
+                        <div class="pkg-info">
+                            <h4 data-translate="mon-vip">VİP</h4>
+                            <p>VIP bölməsində xüsusi rənglə vurğulayın</p>
+                        </div>
+                        <div class="pkg-price-tiers">
+                            <span class="tier" data-price="2" data-duration="1">1 gün: 2 AZN</span>
+                            <span class="tier" data-price="4" data-duration="3">3 gün: 4 AZN</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- PRO -->
+                <div class="promo-pkg-card" onclick="selectPackage('pro')">
+                    <input type="radio" name="promoPack" id="pkg-pro" value="pro">
+                    <label for="pkg-pro" class="pkg-label">
+                        <div class="pkg-icon pro"><i class="fas fa-bolt"></i></div>
+                        <div class="pkg-info">
+                            <h4 data-translate="mon-pro">PRO</h4>
+                            <p>Maksimum görünmə + Avtomatik irəli çəkmə</p>
+                        </div>
+                        <div class="pkg-price-tiers">
+                            <span class="tier" data-price="4" data-duration="1">1 gün: 4 AZN</span>
+                            <span class="tier" data-price="8" data-duration="3">3 gün: 8 AZN</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="tier-selector" id="tierSelector" style="display:none;">
+                <label data-translate="mon-duration">Müddət:</label>
+                <div class="tier-options">
+                    <button class="btn-tier active" data-days="1" onclick="setDuration(1)">1 Gün</button>
+                    <button class="btn-tier" data-days="3" onclick="setDuration(3)">3 Gün</button>
+                </div>
+            </div>
+
+            <div class="promo-summary">
+                <div class="referral-credit-toggle">
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="useReferralCredit" onchange="updateTotal()">
+                        <span data-translate="mon-use-credit">Referal kreditindən istifadə et (max 50%)</span>
+                    </label>
+                    <span class="avail-credit">Balans: 15.00 AZN</span>
+                </div>
+                <hr>
+                <div class="summary-row">
+                    <span data-translate="mon-total">Cəmi:</span>
+                    <span class="total-price" id="finalPrice">0.00 AZN</span>
+                </div>
+                <button class="btn-primary w-100" id="btnPayPromo" onclick="confirmPromotion()">
+                    <i class="fas fa-check-circle"></i> <span data-translate="mon-pay-btn">Ödəniş et</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js?v=2"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
+            const contents = document.querySelectorAll('.cabinet-tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    contents.forEach(content => {
+                        content.style.display = 'none';
+                        content.classList.remove('active');
+                    });
+                    
+                    const targetId = this.getAttribute('data-target');
+                    const targetContent = document.getElementById(targetId);
+                    if (targetContent) {
+                        targetContent.style.display = 'block';
+                        targetContent.classList.add('active');
+                    }
+                });
+            });
+        });
+
+        // Function to handle sub-navigation inside Settings Tab
+        window.showSettingsPanel = function(panelId, btn) {
+            // Remove active from all nav buttons
+            const navButtons = btn.parentElement.querySelectorAll('button');
+            navButtons.forEach(b => b.classList.remove('active'));
+            // Add active to clicked button
+            btn.classList.add('active');
+
+            // Hide all panels
+            const panels = document.querySelectorAll('.settings-panel');
+            panels.forEach(p => {
+                p.style.display = 'none';
+                p.classList.remove('active');
+            });
+            // Show target panel
+            const target = document.getElementById(panelId);
+            if(target) {
+                target.style.display = 'block';
+                // Trigger reflow for animation
+                void target.offsetWidth;
+                target.classList.add('active');
+            }
+        };
+    </script>
+    <script src="JS/cabinet.js"></script>
+    <script src="JS/favorites.js"></script>
+</body>
+</html>

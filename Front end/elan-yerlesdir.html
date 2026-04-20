@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yeni Elan - Mobil.az</title>
+  <link rel="stylesheet" href="CSS/general.css">
+  <link rel="stylesheet" href="CSS/style.css">
+  <link rel="stylesheet" href="CSS/elan-yerlesdir.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+
+<body>
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">
+        <span class="mobil-logo">Mobil<span>.az</span></span>
+      </a>
+      <div class="header-right">
+        <nav class="menu">
+          <ul>
+            <div class="contact-dropdown">
+              <li data-translate="Contact">
+                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
+              </li>
+              <div class="contact-menu">
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+              </div>
+            </div>
+            <li class="About" data-translate="About">
+              <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
+            </li>
+            <li class="Stores" data-translate="Stores">
+              <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
+            </li>
+            <li class="Favorite" data-translate="Favorite">
+              <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="button-container">
+          <a href="login.html" class="login-btn" data-translate="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Giriş
+          </a>
+          <a href="signup.html" class="register-btn" data-translate="register-btn">
+            <i class="fas fa-user-plus"></i> Qeydiyyat
+          </a>
+        </div>
+        <div class="theme-lang-container">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="language-selector">
+            <i class="fas fa-globe"></i>
+            <span id="current-lang" data-translate="language-selector">AZ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="ad-page-hero">
+      <div class="ad-page-hero-inner">
+        <div class="ad-hero-badge">
+          <i class="fas fa-bolt"></i>
+          <span data-translate="elan-badge">Aktiv</span>
+        </div>
+        <h1 class="ad-hero-title" data-translate="elan-h2">Yeni Elan Yerləşdir</h1>
+        <p class="ad-hero-subtitle" data-translate="elan-subtitle">Telefon, planşet, qulaqlıq və aksesuarlarınızı
+          sürətlə doğru
+          alıcıya çatdırın</p>
+        <div class="ad-hero-stats">
+          <div class="hero-stat">
+            <i class="fas fa-shield-alt"></i>
+            <span data-translate="elan-stat-safe">Güvənli platforma</span>
+          </div>
+          <div class="hero-stat">
+            <i class="fas fa-check-circle"></i>
+            <span data-translate="elan-stat-free">Pulsuz elan</span>
+          </div>
+          <div class="hero-stat">
+            <i class="fas fa-clock"></i>
+            <span data-translate="elan-stat-days">30 gün aktiv</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ad-form-wrapper">
+      <div class="ad-form-card">
+
+        <!-- Progress steps -->
+        <div class="form-steps">
+          <div class="form-step active" data-step="1">
+            <div class="step-circle"><i class="fas fa-tag"></i></div>
+            <span data-translate="elan-step1">Məlumatlar</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="form-step" data-step="2">
+            <div class="step-circle"><i class="fas fa-camera"></i></div>
+            <span data-translate="elan-step2">Şəkillər</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="form-step" data-step="3">
+            <div class="step-circle"><i class="fas fa-paper-plane"></i></div>
+            <span data-translate="elan-step3">Yayımla</span>
+          </div>
+        </div>
+
+        <form id="adForm" enctype="multipart/form-data" novalidate>
+
+          <!-- Section: Əsas məlumat -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-num">01</span>
+              <h3 data-translate="elan-section1">Əsas Məlumat</h3>
+            </div>
+
+            <!-- Kateqoriya -->
+            <div class="form-group">
+              <label for="category" data-translate="elan-category">Kateqoriya <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select id="category" name="category" data-translate-placeholder="elan-select" required>
+                  <option disabled selected value="">Seçin</option>
+                  <option value="Telefon" data-translate-option="opt-telefon">Telefon</option>
+                  <option value="Planşet" data-translate-option="opt-planshet">Planşet</option>
+                  <option value="Aksesuar" data-translate-option="opt-aksesuar">Aksesuar</option>
+                  <option value="Qulaqlıq" data-translate-option="opt-headphone">Qulaqlıq</option>
+                </select>
+                <i class="fas fa-chevron-down select-arrow"></i>
+              </div>
+            </div>
+
+            <!-- Marka -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="brand" data-translate="elan-brand">Marka <span class="required">*</span></label>
+                <div class="select-wrapper">
+                  <select id="brand" name="brand" required>
+                    <option disabled selected value="">Əvvəlcə kateqoriya seçin</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+
+              <!-- Model (dynamic by brand) -->
+              <div class="form-group">
+                <label for="model" data-translate="elan-model">Model <span class="required">*</span></label>
+                <div class="select-wrapper" id="model-select-wrapper">
+                  <select id="model" name="model" required>
+                    <option disabled selected value="">Əvvəlcə kateqoriya seçin</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Region -->
+            <div class="form-group">
+              <label for="city" data-translate="elan-region">Region <span class="required">*</span></label>
+              <div class="select-wrapper">
+                <select id="city" name="city" data-translate-placeholder="elan-select" required>
+                  <option disabled selected value="">Seçin</option>
+                  <option value="Bakı">Bakı</option>
+                  <option value="Gəncə">Gəncə</option>
+                  <option value="Sumqayıt">Sumqayıt</option>
+                  <option value="Mingqəçevir">Mingəçevir</option>
+                  <option value="Naxqıvan">Naxçıvan</option>
+                  <option value="Şəki">Şəki</option>
+                  <option value="Şırvan">Şırvan</option>
+                  <option value="Lankəran">Lənkəran</option>
+                  <option value="Abşəron">Abşəron</option>
+                  <option value="Ağcabədi">Ağcabədi</option>
+                  <option value="Ağdam">Ağdam</option>
+                  <option value="Ağdaş">Ağdaş</option>
+                  <option value="Ağstafa">Ağstafa</option>
+                  <option value="Ağsu">Ağsu</option>
+                  <option value="Astara">Astara</option>
+                  <option value="Balakən">Balakən</option>
+                  <option value="Beyləqan">Beyləqan</option>
+                  <option value="Bərdə">Bərdə</option>
+                  <option value="Biləsuvar">Biləsuvar</option>
+                  <option value="Cəbrayıl">Cəbrayıl</option>
+                  <option value="Cəlilabad">Cəlilabad</option>
+                  <option value="Daşkəsən">Daşkəsən</option>
+                  <option value="Füzuli">Füzuli</option>
+                  <option value="Gədəbəy">Gədəbəy</option>
+                  <option value="Goranboy">Goranboy</option>
+                  <option value="Göyçay">Göyçay</option>
+                  <option value="Göygöl">Göygöl</option>
+                  <option value="Hacıqabul">Hacıqabul</option>
+                  <option value="İmişli">İmişli</option>
+                  <option value="İsmayıllı">İsmayıllı</option>
+                  <option value="Kəlbəcər">Kəlbəcər</option>
+                  <option value="Kürdəmir">Kürdəmir</option>
+                  <option value="Laçın">Laçın</option>
+                  <option value="Lerik">Lerik</option>
+                  <option value="Masallı">Masallı</option>
+                  <option value="Naftalan">Naftalan</option>
+                  <option value="Neftqala">Neftqala</option>
+                  <option value="Oğuz">Oğuz</option>
+                  <option value="Qəbələ">Qəbələ</option>
+                  <option value="Qax">Qax</option>
+                  <option value="Qazax">Qazax</option>
+                  <option value="Quba">Quba</option>
+                  <option value="Qubadlı">Qubadlı</option>
+                  <option value="Qusar">Qusar</option>
+                  <option value="Saatlı">Saatlı</option>
+                  <option value="Sabirabad">Sabirabad</option>
+                  <option value="Salyan">Salyan</option>
+                  <option value="Şabran">Şabran</option>
+                  <option value="Şamaxı">Şamaxı</option>
+                  <option value="Şuşa">Şuşa</option>
+                  <option value="Siyəzən">Siyəzən</option>
+                  <option value="Tərtər">Tərtər</option>
+                  <option value="Tovuz">Tovuz</option>
+                  <option value="Ucar">Ucar</option>
+                  <option value="Yardımlı">Yardımlı</option>
+                  <option value="Yevlax">Yevlax</option>
+                  <option value="Zəngilan">Zəngilan</option>
+                  <option value="Zaqatala">Zaqatala</option>
+                  <option value="Zərdab">Zərdab</option>
+                </select>
+                <i class="fas fa-chevron-down select-arrow"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Texniki xüsusiyyətlər -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-num">02</span>
+              <h3 data-translate="elan-section2">Texniki Xüsusiyyətlər</h3>
+            </div>
+
+            <!-- Qiymət + Vəziyyəti -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="price" data-translate="elan-price">Qiymət (AZN) <span class="required">*</span></label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">₼</span>
+                  <input type="number" id="price" name="price" min="1" placeholder="0" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="condition" data-translate="elan-condition">Vəziyyəti</label>
+                <div class="select-wrapper">
+                  <select id="condition" name="condition" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option data-translate-option="opt-yeni">Yeni</option>
+                    <option data-translate-option="opt-islenmiş">İşlənmiş</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Yaddaş + RAM -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="memory" data-translate="elan-memory">Yaddaş (GB)</label>
+                <div class="select-wrapper">
+                  <select id="memory" name="memory" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option data-translate-option="opt-64-az">64 GB-dən az</option>
+                    <option data-translate-option="opt-64">64 GB</option>
+                    <option data-translate-option="opt-128">128 GB</option>
+                    <option data-translate-option="opt-256">256 GB</option>
+                    <option data-translate-option="opt-512">512 GB</option>
+                    <option data-translate-option="opt-512-cox">512 GB-dən daha çox</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="ram" data-translate="elan-ram">RAM (GB)</label>
+                <div class="select-wrapper">
+                  <select id="ram" name="ram" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option value="2">2 GB</option>
+                    <option value="3">3 GB</option>
+                    <option value="4">4 GB</option>
+                    <option value="6">6 GB</option>
+                    <option value="8">8 GB</option>
+                    <option value="12">12 GB</option>
+                    <option value="16+">16 GB+</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ekran ölçüsü + Batareya -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="screen_size" data-translate="elan-screen">Ekran ölçüsü</label>
+                <div class="select-wrapper">
+                  <select id="screen_size" name="screen_size" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option value="<5.5">&lt;5.5"</option>
+                    <option value="5.5-6.1">5.5" – 6.1"</option>
+                    <option value="6.1-6.7">6.1" – 6.7"</option>
+                    <option value=">6.7">&gt;6.7"</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="battery" data-translate="elan-battery">Batareya (mAh)</label>
+                <div class="select-wrapper">
+                  <select id="battery" name="battery" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option value="<3000">&lt;3000</option>
+                    <option value="3000-4500">3000 – 4500</option>
+                    <option value=">4500">&gt;4500</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rəng -->
+            <div class="form-row">
+              <div class="form-group">
+                <label for="color" data-translate="elan-color">Rəng</label>
+                <div class="select-wrapper">
+                  <select id="color" name="color" data-translate-placeholder="elan-select">
+                    <option disabled selected value="">Seçin</option>
+                    <option data-translate-option="opt-qara">Qara</option>
+                    <option data-translate-option="opt-ag">Ağ</option>
+                    <option data-translate-option="opt-qizili">Qızılı</option>
+                    <option data-translate-option="opt-gumushu">Gümüşü</option>
+                    <option data-translate-option="opt-boz">Boz</option>
+                    <option data-translate-option="opt-mavi">Mavi</option>
+                    <option data-translate-option="opt-diger">Digər</option>
+                  </select>
+                  <i class="fas fa-chevron-down select-arrow"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Toggle chips for boolean features -->
+            <div class="form-group">
+              <label data-translate="elan-features-label">Xüsusiyyətlər</label>
+              <div class="feature-chips">
+                <label class="chip-toggle">
+                  <input type="checkbox" name="nfc" id="nfc" value="1">
+                  <span class="chip"><i class="fas fa-wifi"></i> <span data-translate="elan-chip-nfc">NFC</span></span>
+                </label>
+                <label class="chip-toggle">
+                  <input type="checkbox" name="fingerprint" id="fingerprint" value="1">
+                  <span class="chip"><i class="fas fa-fingerprint"></i> <span
+                      data-translate="elan-chip-fingerprint">Barmaq izi</span></span>
+                </label>
+                <label class="chip-toggle">
+                  <input type="checkbox" name="waterproof" id="waterproof" value="1">
+                  <span class="chip"><i class="fas fa-tint"></i> <span data-translate="elan-chip-waterproof">Suya
+                      davamlı</span></span>
+                </label>
+                <label class="chip-toggle">
+                  <input type="checkbox" name="expandable" id="expandable" value="1">
+                  <span class="chip"><i class="fas fa-sd-card"></i> <span data-translate="elan-chip-expandable">Əlavə
+                      yaddaş</span></span>
+                </label>
+                <label class="chip-toggle">
+                  <input type="checkbox" name="delivery" id="delivery" value="1">
+                  <span class="chip"><i class="fas fa-truck"></i> <span
+                      data-translate="elan-chip-delivery">Çatdırılma</span></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Təsvir və Şəkillər -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-num">03</span>
+              <h3 data-translate="elan-section3">Təsvir və Şəkillər</h3>
+            </div>
+
+            <!-- Təsvir -->
+            <div class="form-group">
+              <label for="description" data-translate="elan-desc">Təsvir (Ətraflı məlumat)</label>
+              <textarea id="description" name="description" rows="4" data-translate-placeholder="elan-desc-placeholder"
+                placeholder="Telefonun ümumi vəziyyəti, nəyə görə satılır, zəmanətin mövcudluğu və s."></textarea>
+              <div class="char-counter"><span id="descCount">0</span> / 1000 simvol</div>
+            </div>
+
+            <!-- Şəkil yüklə -->
+            <div class="form-group">
+              <label data-translate="elan-images">Şəkil yüklə <span class="required">*</span></label>
+              <div class="file-upload-area" id="fileUploadArea">
+                <input type="file" id="images" accept="image/*" name="images" multiple required class="file-input">
+                <div class="file-upload-content">
+                  <i class="fas fa-cloud-upload-alt"></i>
+                  <p><span data-translate="elan-upload-text">Şəkilləri buraya sürükleyin və ya</span> <span
+                      data-translate="elan-upload-span"
+                      style="color:#6a35b5;font-weight:600;text-decoration:underline">seçin</span></p>
+                  <small data-translate="elan-images-small">Ən az 1, maksimum 10 şəkil. Hər biri max 5MB.</small>
+                </div>
+                <div class="image-preview-grid" id="imagePreviewGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Əlaqə -->
+          <div class="form-section">
+            <div class="form-section-header">
+              <span class="form-section-num">04</span>
+              <h3 data-translate="elan-section4">Əlaqə Məlumatları</h3>
+            </div>
+
+            <div class="form-group">
+              <label for="phone" data-translate="elan-phone">Əlaqə nömrəsi <span class="required">*</span></label>
+              <div class="input-wrapper">
+                <span class="input-prefix"><i class="fas fa-phone"></i></span>
+                <input type="tel" id="phone" name="phone" data-translate-placeholder="elan-phone-placeholder"
+                  placeholder="+994 XX XXX XX XX" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="ad-form-btn" data-translate="elan-submit">
+            <i class="fas fa-paper-plane"></i>
+            <span>Elan yerləşdir</span>
+          </button>
+          <div class="form-submit-note" data-translate="elan-submit-note">Elanınız dərc edilməzdən əvvəl moderasiyadan
+            keçəcək.</div>
+        </form>
+      </div>
+
+      <div class="ad-form-sidebar">
+        <!-- Qaydalar -->
+        <div class="ad-form-rules">
+          <div class="rules-header">
+            <i class="fas fa-shield-alt"></i>
+            <h3 data-translate="elan-rules-h3">Qaydalar</h3>
+          </div>
+          <ul>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule1">Elanın müddəti 30 gündür.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule2">Eyni elanı bir neçə dəfə təqdim
+                etməyin.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule3">Məhsulunuzu mümkün qədər ətraflı təsvir
+                edin.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule4">Başlıq yerində qiymət yazmayın.</span>
+            </li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule5">Elan məlumatları e-mail ünvanınıza
+                göndərilir.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule6">Şəkillərdə əlaqə məlumatları
+                göstərməyin.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule7">Real məhsul təsviri və şəkli istifadə
+                edin.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule8">Şəkillər keyfiyyətli olmalıdır.</span>
+            </li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule9">Hər kateqoriyada limit mövcuddur.</span>
+            </li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule10">Zəmanət olduqda təsvir bölməsində qeyd
+                edin.</span></li>
+            <li><i class="fas fa-check"></i> <span data-translate="elan-rule11">Etik qaydalara riayət edin.</span></li>
+          </ul>
+        </div>
+
+        <!-- Tip card -->
+        <div class="ad-tip-card">
+          <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
+          <h4 data-translate="elan-tip-title">Məsləhət</h4>
+          <p data-translate="elan-tip-text">Yüksək keyfiyyətli şəkillər elanınızın 3x daha tez satışına kömək edir. Ən
+            azı 4–6 fotoşəkil əlavə edin.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+        <ul>
+          <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
+          <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a>
+          </li>
+          <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
+                qaydaları</span></a></li>
+          <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-column">
+        <h3 class="contact" data-translate="contact">Əlaqə</h3>
+        <ul>
+          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+        </ul>
+        <div class="social-icons">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
+    </div>
+  </footer>
+
+  <script src="JS/elan-yerlesdir.js"></script>
+  <script src="JS/auth.js"></script>
+  <script src="JS/script.js"></script>
+</body>
+
+</html>
