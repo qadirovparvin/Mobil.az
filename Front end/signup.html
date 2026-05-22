@@ -1,17 +1,26 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qeydiyyat - Mobil.az</title>
+    <title data-translate-title="auth-signup-page-title">Qeydiyyat - Mobil.az</title>
+    <meta name="description" content="Mobil.az-da qeydiyyatdan keçin. Telefon nömrəsi və ya email ilə hesab yaradın.">
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        if (localStorage.getItem('mobilaz_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
 </head>
 
-<body>
+<body class="auth-page">
+    <!-- ── HEADER ───────────────────────────────────────────── -->
     <header>
         <div class="container">
             <a href="index.html" class="logo">
@@ -25,123 +34,328 @@
                                 <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
                             </li>
                             <div class="contact-menu">
-                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
-                                    Instagram</a>
-                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
-                                    Facebook</a>
-                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
-                                    WhatsApp</a>
+                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
                                 <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
                             </div>
                         </div>
-                        <li class="About" data-translate="About">
-                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-                        </li>
-                        <li class="Stores" data-translate="Stores">
-                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-                        </li>
-                        <li class="Favorite" data-translate="Favorite">
-                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-                        </li>
+                        <li class="About" data-translate="About"><a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a></li>
+                        <li class="Stores" data-translate="Stores"><a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a></li>
+                        <li class="Favorite" data-translate="Favorite"><a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a></li>
                     </ul>
                 </nav>
                 <div class="button-container">
-                    <a href="login.html" class="login-btn" data-translate="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş
-                    </a>
-                    <a href="signup.html" class="register-btn" data-translate="register-btn">
-                        <i class="fas fa-user-plus"></i> Qeydiyyat
-                    </a>
+                    <a href="login.html" class="login-btn" data-translate="login-btn"><i class="fas fa-sign-in-alt"></i> Giriş</a>
+                    <a href="signup.html" class="register-btn" data-translate="register-btn"><i class="fas fa-user-plus"></i> Qeydiyyat</a>
                 </div>
                 <div class="theme-lang-container">
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span id="current-lang" data-translate="language-selector">AZ</span>
-                    </button>
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode"><i class="fas fa-moon"></i></button>
+                    <button class="language-selector"><i class="fas fa-globe"></i><span id="current-lang" data-translate="language-selector">AZ</span></button>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="signup-container">
-        <div class="signup-form">
-            <h2 data-translate="signup-title">Qeydiyyatdan Keç</h2>
-            <div class="social-signup">
-                <button class="social-btn facebook"><i class="fab fa-facebook-f"></i> <span
-                        data-translate="login-facebook">Facebook ilə</span></button>
-                <button class="social-btn google"><i class="fab fa-google"></i> <span
-                        data-translate="login-google">Google ilə</span></button>
+    <!-- ── MAIN AUTH SHELL ──────────────────────────────────── -->
+    <div class="auth-shell">
+
+        <!-- Left branded panel -->
+        <aside class="auth-brand">
+            <div class="auth-brand-blobs">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+                <div class="blob blob-3"></div>
             </div>
-            <div class="divider">
-                <span data-translate="login-or">və ya</span>
+            <div class="auth-brand-logo">Mobil<span>.az</span></div>
+            <h1 class="auth-brand-title" data-translate="auth-signup-welcome">Qeydiyyatdan Keçin!</h1>
+            <p class="auth-brand-sub" data-translate="auth-signup-brand-sub">Pulsuz hesab yaradın, elanlarınızı dərhal dərc edin.</p>
+            <div class="auth-brand-features">
+                <div class="auth-brand-feat"><i class="fas fa-tags"></i><span data-translate="auth-signup-feat-1">Pulsuz elan yerləşdirin</span></div>
+                <div class="auth-brand-feat"><i class="fas fa-comments"></i><span data-translate="auth-signup-feat-2">Satıcılarla birbaşa əlaqə</span></div>
+                <div class="auth-brand-feat"><i class="fas fa-heart"></i><span data-translate="auth-signup-feat-3">Seçilmişlərə əlavə edin</span></div>
+                <div class="auth-brand-feat"><i class="fas fa-bell"></i><span data-translate="auth-signup-feat-4">Yeni elanlarda bildiriş alın</span></div>
             </div>
-            <form>
-                <div class="input-row">
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" data-translate-placeholder="signup-firstname-placeholder" placeholder="Ad"
-                            required>
+        </aside>
+
+        <!-- Right form panel -->
+        <main class="auth-form-panel">
+            <div class="auth-form-box">
+
+                <!-- Page tab switcher -->
+                <div class="auth-tabs" role="tablist">
+                    <button class="auth-tab-btn" role="tab" onclick="window.location.href='login.html'" data-translate="auth-tab-login">Giriş</button>
+                    <button class="auth-tab-btn active" role="tab" data-translate="auth-tab-signup">Qeydiyyat</button>
+                </div>
+
+                <h2 class="auth-heading" data-translate="auth-heading-signup">Hesab Yarat</h2>
+                <p class="auth-subheading" data-translate="auth-subheading-signup">Doğrulama üsulunuzu seçin</p>
+
+                <!-- ── Verification method selector ── -->
+                <p class="verify-method-label" data-translate="auth-signup-method-label">Qeydiyyat üsulu</p>
+                <div class="verify-method-tabs" id="signupMethodTabs">
+                    <button class="verify-method-btn active" id="smethodPhone" onclick="switchSignupMethod('phone')">
+                        <i class="fas fa-mobile-alt"></i> <span data-translate="auth-signup-method-sms">SMS ilə</span>
+                    </button>
+                    <button class="verify-method-btn" id="smethodEmail" onclick="switchSignupMethod('email')">
+                        <i class="fas fa-envelope"></i> <span data-translate="auth-signup-method-email">Email ilə</span>
+                    </button>
+                </div>
+
+                <!-- ── Social buttons ── -->
+                <div class="social-row">
+                    <button class="social-btn google" id="signupGoogleBtn" type="button">
+                        <i class="fab fa-google"></i> Google
+                    </button>
+                    <button class="social-btn facebook" id="signupFacebookBtn" type="button">
+                        <i class="fab fa-facebook-f"></i> Facebook
+                    </button>
+                    <button class="social-btn apple" id="signupAppleBtn" type="button">
+                        <i class="fab fa-apple"></i> Apple
+                    </button>
+                </div>
+
+                <div class="auth-divider" data-translate="auth-or">və ya</div>
+
+                <!-- Step dots -->
+                <div class="step-indicator" id="stepIndicator">
+                    <div class="step-dot active" id="stepDot1"></div>
+                    <div class="step-dot" id="stepDot2"></div>
+                    <div class="step-dot" id="stepDot3"></div>
+                </div>
+
+                <!-- ══ PHONE signup (SMS method) ═══════════════════════ -->
+                <form id="phoneSignupForm" novalidate>
+
+                    <!-- Step 1: basic info -->
+                    <div id="phoneSignupStep1">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="signupFirstName" data-translate="auth-first-name">Ad</label>
+                                <input type="text" id="signupFirstName" placeholder="Əli" data-translate-placeholder="auth-ph-name" autocomplete="given-name" required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                            <div class="input-group">
+                                <label for="signupLastName" data-translate="auth-last-name">Soyad</label>
+                                <input type="text" id="signupLastName" placeholder="Həsənov" data-translate-placeholder="auth-ph-surname-signup" autocomplete="family-name" required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupPhone" data-translate="auth-phone">Telefon nömrəsi</label>
+                            <div class="phone-combo">
+                                <div class="prefix-wrap input-group" style="margin-bottom:0;">
+                                    <i class="fas fa-flag input-icon"></i>
+                                    <select id="signupPhonePrefix" aria-label="Ölkə kodu">
+                                        <option value="+994">🇦🇿 +994</option>
+                                        <option value="+90">🇹🇷 +90</option>
+                                        <option value="+7">🇷🇺 +7</option>
+                                        <option value="+1">🇺🇸 +1</option>
+                                        <option value="+44">🇬🇧 +44</option>
+                                        <option value="+49">🇩🇪 +49</option>
+                                    </select>
+                                </div>
+                                <div class="number-wrap input-group" style="margin-bottom:0;">
+                                    <input type="tel" id="signupPhone" placeholder="55 123 45 67" autocomplete="tel" required>
+                                    <i class="fas fa-mobile-alt input-icon"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" class="auth-submit-btn" id="sendPhoneSignupBtn" onclick="sendSignupSMS()">
+                            <span class="btn-text" data-translate="auth-btn-send-sms">SMS Kodu Göndər</span>
+                            <span class="btn-spinner"></span>
+                        </button>
                     </div>
-                    <div class="input-group">
-                        <i class="fas fa-user"></i>
-                        <input type="text" data-translate-placeholder="signup-lastname-placeholder" placeholder="Soyad"
-                            required>
+
+                    <!-- Step 2: OTP verify -->
+                    <div id="phoneSignupStep2" class="otp-section">
+                        <p class="otp-hint"><span data-translate="auth-sms-sent-1">SMS kodu</span> <strong id="signupPhoneDisplay"></strong> <span data-translate="auth-sms-sent-2">nömrəsinə göndərildi.</span></p>
+                        <div class="otp-inputs" id="signupSmsOtpInputs">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 1">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 2">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 3">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 4">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 5">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 6">
+                        </div>
+                        <div class="otp-resend">
+                            <span data-translate="auth-no-code">Kodu almadınız?</span>
+                            <button type="button" id="signupSmsResendBtn" disabled onclick="resendSignupSMS()">
+                                <span data-translate="auth-resend">Yenidən göndər</span> (<span class="otp-timer" id="signupSmsTimer">60</span>s)
+                            </button>
+                        </div>
+                        <button type="button" class="auth-submit-btn" id="verifyPhoneSignupBtn" onclick="verifySignupSMS()">
+                            <span class="btn-text" data-translate="auth-btn-verify-phone">Nömrəni Təsdiqlə</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                        <button type="button" style="display:block;background:none;border:none;cursor:pointer;font-family:inherit;color:#7c3aed;font-size:0.88rem;margin-top:0.8rem;text-align:center;width:100%;" onclick="backToPhoneStep1()">
+                            <span data-translate="auth-change-num">← Nömrəni dəyiş</span>
+                        </button>
                     </div>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" data-translate-placeholder="signup-email-placeholder" placeholder="Email ünvanı"
-                        required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-phone"></i>
-                    <input type="tel" data-translate-placeholder="signup-phone-placeholder"
-                        placeholder="Telefon nömrəsi" required>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" data-translate-placeholder="login-password-placeholder"
-                        placeholder="Şifrə" required>
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword('password')"></i>
-                </div>
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="confirm-password"
-                        data-translate-placeholder="signup-confirm-password-placeholder" placeholder="Şifrəni təsdiqlə"
-                        required>
-                    <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm-password')"></i>
-                </div>
-                <div class="terms-checkbox">
-                    <input type="checkbox" id="terms" required>
-                    <label for="terms"><a href="#" data-translate="signup-terms">İstifadə şərtləri</a> <span
-                            data-translate="signup-and">və</span> <a href="#" data-translate="signup-privacy">Gizlilik
-                            siyasəti</a> <span data-translate="signup-terms-agree">ilə razıyam</span></label>
-                </div>
-                <button type="submit" class="signup-btn" data-translate="signup-title">Qeydiyyatdan Keç</button>
-            </form>
-            <div class="login-link">
-                <p><span data-translate="signup-has-account">Artıq hesabınız var?</span> <a href="login.html"
-                        data-translate="signup-login-link">Daxil olun</a></p>
+
+                    <!-- Step 3: password & finalize -->
+                    <div id="phoneSignupStep3" class="otp-section">
+                        <p class="otp-hint" style="color:#22c55e;"><i class="fas fa-check-circle"></i> <span data-translate="auth-phone-verified">Nömrəniz təsdiqləndi!</span></p>
+
+                        <div class="input-group">
+                            <label for="signupEmailOptional" data-translate="auth-email-optional">Email (istəyə bağlı)</label>
+                            <input type="email" id="signupEmailOptional" placeholder="example@email.com" data-translate-placeholder="auth-ph-email" autocomplete="email">
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupPassword" data-translate="auth-pwd">Şifrə</label>
+                            <input type="password" id="signupPassword" placeholder="••••••••" autocomplete="new-password"
+                                   oninput="checkPasswordStrength(this.value)" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupPwd"
+                               onclick="togglePwd('signupPassword','toggleSignupPwd')"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                            <span class="strength-text" id="strengthText"></span>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupConfirm" data-translate="auth-pwd-confirm">Şifrəni təsdiqlə</label>
+                            <input type="password" id="signupConfirm" placeholder="••••••••" autocomplete="new-password" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirm"
+                               onclick="togglePwd('signupConfirm','toggleSignupConfirm')"></i>
+                        </div>
+
+                        <div class="terms-row">
+                            <input type="checkbox" id="signupTermsPhone" required>
+                            <label for="signupTermsPhone" data-translate="auth-terms-consent">
+                                <a href="#">İstifadə şərtləri</a> və <a href="#">Gizlilik siyasəti</a> ilə razıyam
+                            </label>
+                        </div>
+
+                        <button type="submit" class="auth-submit-btn" id="finalPhoneSignupBtn">
+                            <span class="btn-text" data-translate="auth-btn-create-account">Hesab Yarat</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ══ EMAIL signup ══════════════════════════════════════ -->
+                <form id="emailSignupForm" style="display:none;" novalidate>
+
+                    <!-- Step 1: basic info + email -->
+                    <div id="emailSignupStep1">
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label for="signupFirstNameE" data-translate="auth-first-name">Ad</label>
+                                <input type="text" id="signupFirstNameE" placeholder="Əli" data-translate-placeholder="auth-ph-name" autocomplete="given-name" required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                            <div class="input-group">
+                                <label for="signupLastNameE" data-translate="auth-last-name">Soyad</label>
+                                <input type="text" id="signupLastNameE" placeholder="Həsənov" data-translate-placeholder="auth-ph-surname-signup" autocomplete="family-name" required>
+                                <i class="fas fa-user input-icon"></i>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupEmailVerify" data-translate="auth-email">Email ünvanı</label>
+                            <input type="email" id="signupEmailVerify" placeholder="example@email.com" data-translate-placeholder="auth-ph-email" autocomplete="email" required>
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+
+                        <button type="button" class="auth-submit-btn" id="sendEmailSignupBtn" onclick="sendSignupEmail()">
+                            <span class="btn-text" data-translate="auth-btn-send-email">Email Kodu Göndər</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: OTP verify -->
+                    <div id="emailSignupStep2" class="otp-section">
+                        <p class="otp-hint"><span data-translate="auth-email-sent-1">6 rəqəmli kod</span> <strong id="signupEmailDisplay"></strong> <span data-translate="auth-email-sent-2">ünvanına göndərildi.</span></p>
+                        <div class="otp-inputs" id="signupEmailOtpInputs">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 1">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 2">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 3">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 4">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 5">
+                            <input class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" aria-label="Rəqəm 6">
+                        </div>
+                        <div class="otp-resend">
+                            <span data-translate="auth-no-code">Kodu almadınız?</span>
+                            <button type="button" id="signupEmailResendBtn" disabled onclick="resendSignupEmail()">
+                                <span data-translate="auth-resend">Yenidən göndər</span> (<span class="otp-timer" id="signupEmailTimer">60</span>s)
+                            </button>
+                        </div>
+                        <button type="button" class="auth-submit-btn" id="verifyEmailSignupBtn" onclick="verifySignupEmail()">
+                            <span class="btn-text" data-translate="auth-btn-verify-email">Email-i Təsdiqlə</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                        <button type="button" style="display:block;background:none;border:none;cursor:pointer;font-family:inherit;color:#7c3aed;font-size:0.88rem;margin-top:0.8rem;text-align:center;width:100%;" onclick="backToEmailSignupStep1()">
+                            <span data-translate="auth-change-email">← Email-i dəyiş</span>
+                        </button>
+                    </div>
+
+                    <!-- Step 3: password & finalize -->
+                    <div id="emailSignupStep3" class="otp-section">
+                        <p class="otp-hint" style="color:#22c55e;"><i class="fas fa-check-circle"></i> <span data-translate="auth-email-verified">Email-iniz təsdiqləndi!</span></p>
+
+                        <div class="input-group">
+                            <label for="signupPhoneOptional" data-translate="auth-phone-optional">Telefon (istəyə bağlı)</label>
+                            <input type="tel" id="signupPhoneOptional" placeholder="55 123 45 67" data-translate-placeholder="auth-ph-phone" autocomplete="tel">
+                            <i class="fas fa-mobile-alt input-icon"></i>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupPasswordE" data-translate="auth-pwd">Şifrə</label>
+                            <input type="password" id="signupPasswordE" placeholder="••••••••" autocomplete="new-password"
+                                   oninput="checkPasswordStrength(this.value)" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupPwdE"
+                               onclick="togglePwd('signupPasswordE','toggleSignupPwdE')"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar"><div class="strength-fill" id="strengthFillE"></div></div>
+                            <span class="strength-text" id="strengthTextE"></span>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="signupConfirmE" data-translate="auth-pwd-confirm">Şifrəni təsdiqlə</label>
+                            <input type="password" id="signupConfirmE" placeholder="••••••••" autocomplete="new-password" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirmE"
+                               onclick="togglePwd('signupConfirmE','toggleSignupConfirmE')"></i>
+                        </div>
+
+                        <div class="terms-row">
+                            <input type="checkbox" id="signupTermsEmail" required>
+                            <label for="signupTermsEmail" data-translate="auth-terms-consent">
+                                <a href="#">İstifadə şərtləri</a> və <a href="#">Gizlilik siyasəti</a> ilə razıyam
+                            </label>
+                        </div>
+
+                        <button type="submit" class="auth-submit-btn" id="finalEmailSignupBtn">
+                            <span class="btn-text" data-translate="auth-btn-create-account">Hesab Yarat</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                    </div>
+                </form>
+
+                <p class="auth-switch-link"><span data-translate="auth-has-account">Artıq hesabınız var?</span> <a href="login.html" data-translate="auth-go-login">Daxil olun</a></p>
             </div>
-        </div>
+        </main>
     </div>
 
+    <!-- ── FOOTER ────────────────────────────────────────────── -->
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-column">
                 <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
                 <ul>
-                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
-                    </li>
-                    <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
-                                Təhlükəsizlik</span></a></li>
-                    <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
-                                qaydaları</span></a></li>
-                    <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
-                                siyasəti</span></a></li>
+                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
+                    <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
+                    <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
+                    <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
                 </ul>
             </div>
             <div class="footer-column">
@@ -157,14 +371,17 @@
                 </div>
             </div>
         </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-        </div>
+        <div class="footer-bottom"><p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p></div>
     </footer>
 
+    <!-- ── TOAST ─────────────────────────────────────────────── -->
+    <div class="auth-toast" id="authToast" role="alert" aria-live="polite">
+        <i class="fas fa-circle-check" id="toastIcon"></i>
+        <span id="toastMsg"></span>
+    </div>
+
     <script src="JS/auth.js"></script>
-    <script src="JS/signup.js"></script>
+    <script src="JS/auth-otp.js"></script>
     <script src="JS/script.js"></script>
 </body>
-
 </html>

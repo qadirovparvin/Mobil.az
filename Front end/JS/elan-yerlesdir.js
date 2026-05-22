@@ -358,95 +358,131 @@ fileUploadArea.addEventListener('drop', e => {
 });
 
 /* =========================================================
-   FORM SUBMIT — save to localStorage
+   FORM SUBMIT — POST to real backend API
    ========================================================= */
+
+const API_BASE = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+
 document.getElementById('adForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
+  // ── 1. Auth guard ───────────────────────────────────────
+  const token = localStorage.getItem('token');
+  if (!token) {
+    alert('Elan yerləşdirmək üçün hesabınıza daxil olun.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  // ── 2. Basic validation ─────────────────────────────────
   const category = categorySelect.value;
   const brand    = brandSelect.value;
   const model    = modelSelect.value;
   const price    = document.getElementById('price').value;
   const phone    = document.getElementById('phone').value;
+  const cityEl   = document.getElementById('city');
+  const city     = cityEl.value;
 
-  if (!category)          { alert('Zəhmət olmasa kateqoriya seçin.');  return; }
-  if (!brand)             { alert('Zəhmət olmasa marka seçin.');       return; }
-  if (!model)             { alert('Zəhmət olmasa model seçin.');       return; }
-  if (!price || price<=0) { alert('Düzgün qiymət daxil edin.');         return; }
-  if (!phone)             { alert('Əlaqə nömrəsini daxil edin.');         return; }
+  if (!category)           { alert('Zəhmət olmasa kateqoriya seçin.');  return; }
+  if (!brand)              { alert('Zəhmət olmasa marka seçin.');       return; }
+  if (!model)              { alert('Zəhmət olmasa model seçin.');       return; }
+  if (!price || price <= 0){ alert('Düzgün qiymət daxil edin.');        return; }
+  if (!city)               { alert('Zəhmət olmasa region seçin.');      return; }
+  if (!phone)              { alert('Əlaqə nömrəsini daxil edin.');      return; }
 
-  // Format price with spaces: 2200 -> '2 200'
-  const formattedPrice = Number(price).toLocaleString('az-AZ').replace(',', ' ');
-
-  // Determine seller badge label
-  const categoryBadgeMap = {
-    'Telefon':'phone', 'Planşet':'tablet', 'Aksesuar':'accessory', 'Qulaqlıq':'headphone'
-  };
-  const categoryData = categoryBadgeMap[category] || 'phone';
-
-  // City label
-  const cityEl = document.getElementById('city');
-  const cityLabel = cityEl.options[cityEl.selectedIndex]?.text?.trim() || cityEl.value;
-
-  // Condition
-  const conditionEl = document.getElementById('condition');
-  const conditionLabel = conditionEl.options[conditionEl.selectedIndex]?.text?.trim() || conditionEl.value;
-
-  // Build ad title
-  const titleStr = `${brand} ${model} ${document.getElementById('memory')?.value || ''}`.trim();
-
-  // Read first image as base64 (if any)
-  async function getFirstImageBase64() {
-    return new Promise((resolve) => {
-      const files = document.getElementById('images')?.files;
-      if (!files || files.length === 0) { resolve(null); return; }
-      const reader = new FileReader();
-      reader.onload = (ev) => resolve(ev.target.result);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(files[0]);
-    });
+  const imageFiles = document.getElementById('images')?.files;
+  if (!imageFiles || imageFiles.length === 0) {
+    alert('Ən azı 1 şəkil əlavə edin.');
+    return;
   }
 
-  const imageBase64 = await getFirstImageBase64();
+  // ── 3. UI: show loading state ───────────────────────────
+  const submitBtn  = document.querySelector('.ad-form-btn');
+  const btnSpan    = submitBtn.querySelector('span') || submitBtn;
+  const originalTxt = btnSpan.textContent;
+  submitBtn.disabled = true;
+  btnSpan.textContent = 'Şəkillər yüklənir…';
 
-  // Unique ID
-  const adId = 'AD-' + Date.now();
+  try {
+    // ── 4. Upload images ──────────────────────────────────
+    const formData = new FormData();
+    Array.from(imageFiles).forEach(file => formData.append('images', file));
 
-  // Now timestamp
-  const now = new Date();
-  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    const uploadRes = await fetch(`${API_BASE}/upload/multiple`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: formData
+    });
 
-  const adObject = {
-    id: adId,
-    category: categoryData,
-    brand,
-    model,
-    title: titleStr,
-    price: formattedPrice + ' AZN',
-    priceRaw: Number(price),
-    city: cityLabel,
-    condition: conditionLabel,
-    memory: document.getElementById('memory')?.value || '',
-    color: document.getElementById('color')?.value || '',
-    nfc:         document.getElementById('nfc')?.checked || false,
-    fingerprint: document.getElementById('fingerprint')?.checked || false,
-    waterproof:  document.getElementById('waterproof')?.checked || false,
-    expandable:  document.getElementById('expandable')?.checked || false,
-    delivery:    document.getElementById('delivery')?.checked || false,
-    description: document.getElementById('description')?.value || '',
-    phone,
-    image: imageBase64,
-    seller: 'private',
-    dateLabel: 'Bugün ' + timeStr,
-    postedAt: now.toISOString(),
-  };
+    if (!uploadRes.ok) {
+      const err = await uploadRes.json();
+      throw new Error(err.message || 'Şəkil yükləmə xətası');
+    }
 
-  // Save to localStorage array
-  const existing = JSON.parse(localStorage.getItem('userAds') || '[]');
-  existing.unshift(adObject); // newest first
-  localStorage.setItem('userAds', JSON.stringify(existing));
+    const uploadData = await uploadRes.json();
+    const imageUrls  = uploadData.urls; // array of "/uploads/filename.jpg"
 
-  // Redirect to homepage
-  alert('İlan uğurla yerleşdirildi! Ana səhifəyə yönləndirilirsiniz...');
-  window.location.href = 'index.html';
+    // ── 5. Build specs object ─────────────────────────────
+    const specs = {
+      memory:     document.getElementById('memory')?.value      || '',
+      ram:        document.getElementById('ram')?.value         || '',
+      color:      document.getElementById('color')?.value       || '',
+      screenSize: document.getElementById('screen_size')?.value || '',
+      battery:    document.getElementById('battery')?.value     || '',
+      features: {
+        nfc:         document.getElementById('nfc')?.checked         || false,
+        fingerprint: document.getElementById('fingerprint')?.checked || false,
+        waterproof:  document.getElementById('waterproof')?.checked  || false,
+        expandable:  document.getElementById('expandable')?.checked  || false,
+        delivery:    document.getElementById('delivery')?.checked    || false,
+      }
+    };
+
+    // Condition value
+    const conditionEl = document.getElementById('condition');
+    const condition = conditionEl.value ||
+      conditionEl.options[conditionEl.selectedIndex]?.text?.trim() || '';
+
+    // ── 6. Submit ad ──────────────────────────────────────
+    btnSpan.textContent = 'Elan göndərilir…';
+
+    const adPayload = {
+      category,
+      brand,
+      modelName: model,
+      price:        Number(price),
+      condition,
+      description:  document.getElementById('description')?.value || '',
+      images:       imageUrls,
+      city,
+      contactPhone: phone,
+      sellerType:   'personal',
+      specs
+    };
+
+    const adRes = await fetch(`${API_BASE}/ads`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(adPayload)
+    });
+
+    const adData = await adRes.json();
+
+    if (!adRes.ok) {
+      throw new Error(adData.message || 'Elan yerləşdirmə xətası');
+    }
+
+    // ── 7. Success ────────────────────────────────────────
+    alert('Elanınız uğurla göndərildi! Moderasiyadan keçdikdən sonra dərc ediləcək. Kabinənizə yönləndirilirsiniz…');
+    window.location.href = 'cabinet.html';
+
+  } catch (error) {
+    console.error('Ad submission error:', error);
+    alert('Xəta: ' + error.message);
+    submitBtn.disabled = false;
+    btnSpan.textContent = originalTxt;
+  }
 });

@@ -1,43 +1,68 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const STORAGE_KEY = 'mobilaz_favorites';
+    const API_URL = window.API_URL || 'http://localhost:5000/api';
+    let userFavorites = []; // Array of ad IDs from MongoDB
     
-    function getFavorites() {
-        try { 
-            let data = JSON.parse(localStorage.getItem(STORAGE_KEY));
-            if (!Array.isArray(data)) return [];
-            data = data.filter(item => item !== null && typeof item === 'object' && item.outerHTML);
-            return data;
-        }
-        catch { return []; }
-    }
-    
-    function saveFavorites(favs) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+    function getToken() {
+        return localStorage.getItem('token');
     }
 
-    function getAdId(card) {
-        let id = card.getAttribute('data-id');
-        if (!id) {
-            const title = card.querySelector('.ad-title')?.textContent.trim() || '';
-            const price = card.querySelector('.ad-price')?.textContent.trim() || '';
-            id = (title + '_' + price).replace(/[^a-zA-Z0-9_]/g, ''); // safe ID string
-            card.setAttribute('data-id', id);
+    async function fetchUserFavorites() {
+        const token = getToken();
+        if (!token) return [];
+        
+        try {
+            const res = await fetch(`${API_URL}/ads/favorites`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok && data.ads) {
+                return data.ads.map(ad => ad._id);
+            }
+            return [];
+        } catch (e) {
+            console.error('Error fetching favorites:', e);
+            return [];
         }
-        return id;
+    }
+
+    async function toggleFavoriteAPI(adId) {
+        const token = getToken();
+        if (!token) {
+            if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+            else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
+            return null;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/ads/${adId}/favorite`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                return data.favorites; // Returns updated array of favorite IDs
+            }
+            if(typeof showToast === 'function') showToast(data.message || 'Xəta baş verdi', 'error');
+            return null;
+        } catch (e) {
+            console.error('Error toggling favorite:', e);
+            if(typeof showToast === 'function') showToast('Serverlə əlaqə yaradılmadı', 'error');
+            return null;
+        }
     }
 
     function initFavoriteButtons() {
-        const favs = getFavorites();
-        const existingIds = favs.map(f => f.id);
-        
         document.querySelectorAll('.ad-card').forEach(card => {
             const btn = card.querySelector('.favorite-btn');
             if (!btn) return;
             
-            const id = getAdId(card);
-            const icon = btn.querySelector('i');
+            let id = card.getAttribute('data-id');
+            if (!id) return;
             
-            if (existingIds.includes(id)) {
+            const icon = btn.querySelector('i');
+            const isFavorited = userFavorites.includes(id);
+            
+            if (isFavorited) {
                 icon.className = 'fas fa-heart';
                 icon.style.color = '#e74c3c';
                 btn.classList.add('favorited');
@@ -47,115 +72,200 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.classList.remove('favorited');
             }
             
+            // Remove existing listeners by replacing the button
             const newBtn = btn.cloneNode(true);
             btn.replaceWith(newBtn);
             
-            newBtn.addEventListener('click', (e) => {
+            newBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                let currentFavs = getFavorites();
-                const iconElem = newBtn.querySelector('i');
-                const isFavorited = newBtn.classList.contains('favorited');
+                if (!getToken()) {
+                    if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+                    else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
+                    return;
+                }
                 
-                if (isFavorited) {
-                    currentFavs = currentFavs.filter(f => f.id !== id);
-                    saveFavorites(currentFavs);
-                    newBtn.classList.remove('favorited');
-                    iconElem.className = 'far fa-heart';
-                    iconElem.style.color = '';
+                const currentIsFavorited = newBtn.classList.contains('favorited');
+                const newFavorites = await toggleFavoriteAPI(id);
+                
+                if (newFavorites !== null) {
+                    userFavorites = newFavorites; // Update local state
+                    const updatedIcon = newBtn.querySelector('i');
                     
-                    if (document.getElementById('favorites-grid')) {
-                        card.remove();
-                        updateFavoritesPageCount();
-                    }
-                } else {
-                    if (!currentFavs.find(f => f.id === id)) {
+                    if (!currentIsFavorited) {
                         newBtn.classList.add('favorited'); 
-                        iconElem.className = 'fas fa-heart';
-                        iconElem.style.color = '#e74c3c';
+                        updatedIcon.className = 'fas fa-heart';
+                        updatedIcon.style.color = '#e74c3c';
+                        if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə edildi!', 'success');
+                    } else {
+                        newBtn.classList.remove('favorited');
+                        updatedIcon.className = 'far fa-heart';
+                        updatedIcon.style.color = '';
+                        if(typeof showToast === 'function') showToast('Seçilmişlərdən çıxarıldı!', 'info');
                         
-                        // Clean outerHTML dynamically so it saves clean structure
-                        const clone = card.cloneNode(true);
-                        const cloneIcon = clone.querySelector('.favorite-btn i');
-                        if (cloneIcon) {
-                            cloneIcon.className = 'fas fa-heart';
-                            cloneIcon.style.color = '#e74c3c';
-                            clone.querySelector('.favorite-btn').classList.add('favorited');
+                        // If we are on the favorites page, remove the card dynamically
+                        if (document.getElementById('favorites-grid')) {
+                            card.closest('a') ? card.closest('a').remove() : card.remove();
+                            updateFavoritesPageCount(userFavorites.length);
+                            if (userFavorites.length === 0) {
+                                showEmptyFavorites();
+                            }
                         }
-                        
-                        currentFavs.push({ id: id, outerHTML: clone.outerHTML });
-                        saveFavorites(currentFavs);
                     }
                 }
             });
         });
     }
 
-    function renderFavoritesPage() {
+    // Detail page logic
+    function initDetailPageFavorite() {
+        const detailFavBtn = document.getElementById('galleryFavBtn');
+        if (!detailFavBtn) return;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+        if (!id) return;
+
+        let isFaved = userFavorites.includes(id);
+
+        const icon = detailFavBtn.querySelector('i');
+        if(icon) {
+            icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
+            icon.style.color = isFaved ? '#e74c3c' : '';
+        }
+        detailFavBtn.classList.toggle('active', isFaved);
+
+        // Remove old event listeners
+        const newDetailFavBtn = detailFavBtn.cloneNode(true);
+        detailFavBtn.replaceWith(newDetailFavBtn);
+
+        newDetailFavBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            
+            if (!getToken()) {
+                if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+                else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
+                return;
+            }
+
+            const newFavorites = await toggleFavoriteAPI(id);
+            if (newFavorites !== null) {
+                userFavorites = newFavorites;
+                isFaved = !isFaved;
+                
+                const newIcon = newDetailFavBtn.querySelector('i');
+                if(newIcon) {
+                    newIcon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
+                    newIcon.style.color = isFaved ? '#e74c3c' : '';
+                }
+                newDetailFavBtn.classList.toggle('active', isFaved);
+                newDetailFavBtn.style.transform = 'scale(1.3)';
+                setTimeout(() => newDetailFavBtn.style.transform = '', 200);
+
+                if(typeof showToast === 'function') {
+                    showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!', isFaved ? 'success' : 'info');
+                }
+            }
+        });
+    }
+
+    // Render Favorites Page
+    async function renderFavoritesPage() {
         const grid = document.getElementById('favorites-grid');
         if (!grid) return; 
         
-        const favs = getFavorites();
-        grid.innerHTML = '';
+        grid.innerHTML = '<div style="text-align:center; padding: 40px; width:100%;"><i class="fas fa-spinner fa-spin" style="font-size:24px; color:var(--accent);"></i> Yüklənir...</div>';
         
-        if (favs.length === 0) {
-            showEmptyFavorites();
-        } else {
-            favs.forEach(ad => {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = ad.outerHTML;
-                const card = tempDiv.firstElementChild;
-                
-                // Inject selection checkbox
-                const checkboxContainer = document.createElement('label');
-                checkboxContainer.className = 'fav-card-checkbox';
-                checkboxContainer.style.cssText = 'position:absolute; top:12px; left:12px; z-index:10; background:rgba(255,255,255,0.9); padding:6px; border-radius:6px; cursor:pointer; display:flex; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
-                checkboxContainer.innerHTML = `<input type="checkbox" class="card-select-cb" data-id="${ad.id}" style="width:20px;height:20px;cursor:pointer;">`;
-                
-                // Prevent inner button propagating click
-                checkboxContainer.addEventListener('click', e => e.stopPropagation());
-                
-                card.style.position = 'relative'; 
-                card.appendChild(checkboxContainer);
-                
-                grid.appendChild(card);
-            });
-            initFavoriteButtons(); 
+        const token = getToken();
+        if (!token) {
+            showEmptyFavorites("Seçilmiş elanları görmək üçün sistemə daxil olun.");
+            updateFavoritesPageCount(0);
+            return;
         }
-        updateFavoritesPageCount();
-        
-        // Trigger translation manually if on favorite page and elements injected
-        if (window.updateTranslations) {
-            window.updateTranslations();
-        } else {
-            // Give script.js a moment to register if they race condition
-            setTimeout(() => {
-                const langEvent = new Event('change');
-                document.querySelector('.language-selector')?.dispatchEvent(langEvent);
-            }, 100);
+
+        try {
+            const res = await fetch(`${API_URL}/ads/favorites`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            grid.innerHTML = '';
+            
+            if (!res.ok || !data.ads || data.ads.length === 0) {
+                showEmptyFavorites();
+                updateFavoritesPageCount(0);
+            } else {
+                const API_ORIGIN = API_URL.replace(/\\/api\\/?$/, "");
+                
+                data.ads.forEach(ad => {
+                    const imageUrl = ad.images && ad.images.length > 0 ? (ad.images[0].startsWith('http') ? ad.images[0] : `${API_ORIGIN}${ad.images[0]}`) : "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800";
+                    const city = ad.city || "";
+                    const title = [ad.brand, ad.modelName].filter(Boolean).join(" ");
+                    const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
+                    const date = new Date(ad.createdAt).toLocaleDateString("az-AZ", { day: "2-digit", month: "short", year: "numeric" });
+                    
+                    const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
+                    const badgeStyle = ad.sellerType === "store" ? "" : ' style="background:var(--accent-hover);"';
+                    const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
+                    
+                    const aTag = document.createElement('a');
+                    aTag.href = detailUrl;
+                    aTag.style.cssText = "text-decoration:none;color:inherit;position:relative;display:block;";
+                    
+                    aTag.innerHTML = `
+                        <div class="ad-card" data-id="${ad._id}" style="position:relative;">
+                            <div class="ad-image">
+                                <img src="${imageUrl}" alt="${title}">
+                                <span class="ad-badge"${badgeStyle}>${sellerType}</span>
+                                <button class="favorite-btn favorited"><i class="fas fa-heart" style="color:#e74c3c;"></i></button>
+                            </div>
+                            <div class="ad-info">
+                                <div class="ad-price">${price}</div>
+                                <div class="ad-title">${title}</div>
+                                <div class="ad-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${city}</span>
+                                    <span class="ad-date">${date}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Inject selection checkbox for bulk edit -->
+                            <label class="fav-card-checkbox" style="position:absolute; top:12px; left:12px; z-index:10; background:rgba(255,255,255,0.9); padding:6px; border-radius:6px; cursor:pointer; display:flex; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" onclick="event.stopPropagation(); event.preventDefault();">
+                                <input type="checkbox" class="card-select-cb" data-id="${ad._id}" style="width:20px;height:20px;cursor:pointer;" onclick="event.stopPropagation();">
+                            </label>
+                        </div>
+                    `;
+                    grid.appendChild(aTag);
+                });
+                
+                initFavoriteButtons(); 
+                updateFavoritesPageCount(data.ads.length);
+            }
+        } catch (e) {
+            console.error(e);
+            showEmptyFavorites("Yükləmə xətası baş verdi.");
+            updateFavoritesPageCount(0);
         }
     }
     
-    function showEmptyFavorites() {
+    function showEmptyFavorites(customMessage) {
         const grid = document.getElementById('favorites-grid');
+        const msg = customMessage || "Hələ heç bir elan seçilmişlərə əlavə edilməyib.";
         grid.innerHTML = `
-        <div class="empty-favorites">
-            <i class="far fa-heart"></i>
-            <p data-translate="fav-empty-desc">Hələ heç bir elan seçilmişlərə əlavə edilməyib.</p>
-            <a href="index.html" data-translate="fav-empty-link">Elanlara baxın</a>
+        <div class="empty-favorites" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+            <i class="far fa-heart" style="font-size: 48px; color: var(--text-muted); margin-bottom: 16px;"></i>
+            <p data-translate="fav-empty-desc">${msg}</p>
+            <a href="index.html" class="btn btn-primary" style="margin-top:16px; display:inline-block; padding:10px 20px; border-radius:8px; background:var(--accent); color:white; text-decoration:none;" data-translate="fav-empty-link">Elanlara baxın</a>
         </div>`;
     }
     
-    function updateFavoritesPageCount() {
+    function updateFavoritesPageCount(count) {
         const countEl = document.getElementById('fav-count');
-        const grid = document.getElementById('favorites-grid');
         const actionsBar = document.getElementById('fav-actions');
-        if (!countEl || !grid) return;
+        if (!countEl) return;
         
-        const currentFavs = getFavorites();
-        if (currentFavs.length === 0) {
-            showEmptyFavorites();
+        if (count === 0) {
             countEl.style.display = 'none';
             if (actionsBar) actionsBar.style.display = 'none';
         } else {
@@ -166,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(window.translations && window.translations[lang]) {
                 suffix = window.translations[lang]['fav-count-text'] || suffix;
             }
-            countEl.innerHTML = `<span id="fav-count-num">${currentFavs.length}</span> <span data-translate="fav-count-text">${suffix}</span>`;
+            countEl.innerHTML = `<span id="fav-count-num">${count}</span> <span data-translate="fav-count-text">${suffix}</span>`;
         }
     }
 
@@ -183,120 +293,66 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     if (deleteSelectedBtn) {
-        deleteSelectedBtn.addEventListener('click', () => {
+        deleteSelectedBtn.addEventListener('click', async () => {
             const checked = document.querySelectorAll('.card-select-cb:checked');
             if (checked.length === 0) return;
             
+            const btnOriginalText = deleteSelectedBtn.innerHTML;
+            deleteSelectedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Silinir...';
+            deleteSelectedBtn.disabled = true;
+
             const idsToRemove = Array.from(checked).map(cb => cb.getAttribute('data-id'));
-            let currentFavs = getFavorites();
-            currentFavs = currentFavs.filter(f => !idsToRemove.includes(f.id));
-            saveFavorites(currentFavs);
+            
+            for (let id of idsToRemove) {
+                // Remove one by one
+                await toggleFavoriteAPI(id);
+            }
             
             if(selectAllCb) selectAllCb.checked = false;
-            renderFavoritesPage(); 
+            
+            // Re-fetch and render
+            const favs = await fetchUserFavorites();
+            userFavorites = favs;
+            renderFavoritesPage();
+            
+            deleteSelectedBtn.innerHTML = btnOriginalText;
+            deleteSelectedBtn.disabled = false;
         });
     }
     
     if (deleteAllBtn) {
-        deleteAllBtn.addEventListener('click', () => {
-            let lang = localStorage.getItem('site_lang') || 'AZ';
+        deleteAllBtn.addEventListener('click', async () => {
             let confirmMsg = 'Bütün seçilmiş elanları silmək istədiyinizə əminsiniz?'; 
-            if (window.translations && window.translations[lang]) {
-                confirmMsg = window.translations[lang]['fav-delete-confirm'] || confirmMsg;
-            }
             if (confirm(confirmMsg)) {
-                saveFavorites([]);
-                if(selectAllCb) selectAllCb.checked = false;
-                renderFavoritesPage();
-            }
-        });
-    }
-
-    function initDetailPageFavorite() {
-        const detailFavBtn = document.getElementById('galleryFavBtn');
-        if (!detailFavBtn) return;
-
-        let titleStr = document.querySelector('.ad-main-title')?.textContent.trim() || '';
-        let priceNum = document.querySelector('.ad-main-price')?.textContent.trim() || '';
-        let curr = document.querySelector('.ad-currency')?.textContent.trim() || '';
-        if (curr && priceNum && !priceNum.includes(curr)) {
-            priceNum = priceNum.replace(curr, '').trim() + ' ' + curr;
-        }
-        
-        let id = (titleStr + '_' + priceNum).replace(/[^a-zA-Z0-9_]/g, '');
-        if(!id) return;
-
-        let currentFavs = getFavorites();
-        let isFaved = currentFavs.some(f => f.id === id);
-
-        const icon = detailFavBtn.querySelector('i');
-        if(icon) {
-            icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
-            icon.style.color = isFaved ? '#e74c3c' : '';
-        }
-        detailFavBtn.classList.toggle('active', isFaved);
-
-        detailFavBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            let favs = getFavorites();
-            isFaved = !isFaved;
-            
-            if(icon) {
-                icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
-                icon.style.color = isFaved ? '#e74c3c' : '';
-            }
-            detailFavBtn.classList.toggle('active', isFaved);
-            detailFavBtn.style.transform = 'scale(1.3)';
-            setTimeout(() => detailFavBtn.style.transform = '', 200);
-
-            if (isFaved) {
-                if (!favs.find(f => f.id === id)) {
-                    let imgUrl = document.getElementById('mainImage')?.src || '';
-                    let locationText = 'Bakı';
-                    let dateText = 'Bugün';
-
-                    let locItems = document.querySelectorAll('.location-item span strong');
-                    if(locItems.length > 0) locationText = locItems[0].textContent.trim();
-                    
-                    let dateEl = document.querySelector('.ad-date-views span');
-                    if(dateEl) dateText = dateEl.textContent.trim().replace('Bugün, ', '') || 'Bugün';
-
-                    let mockCard = document.createElement('a');
-                    mockCard.className = 'ad-card';
-                    mockCard.href = window.location.href;
-                    mockCard.setAttribute('data-id', id);
-                    mockCard.innerHTML = `
-                        <div class="ad-image">
-                            <img src="${imgUrl}">
-                            <span class="ad-badge">Seçilmiş</span>
-                        </div>
-                        <div class="ad-info">
-                            <div class="ad-price">${priceNum}</div>
-                            <div class="ad-title">${titleStr}</div>
-                            <div class="ad-location">
-                                <span><i class="fas fa-map-marker-alt"></i> ${locationText}</span>
-                                <span>${dateText}</span>
-                            </div>
-                        </div>
-                        <button class="favorite-btn favorited" style="position: absolute; top: 10px; right: 10px; z-index: 5; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
-                            <i class="fas fa-heart" style="color: #e74c3c; font-size: 16px;"></i>
-                        </button>
-                    `;
-                    favs.push({ id: id, outerHTML: mockCard.outerHTML });
-                    saveFavorites(favs);
+                const btnOriginalText = deleteAllBtn.innerHTML;
+                deleteAllBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Silinir...';
+                deleteAllBtn.disabled = true;
+                
+                // Get all current favorite IDs
+                for (let id of userFavorites) {
+                    await toggleFavoriteAPI(id);
                 }
-            } else {
-                favs = favs.filter(f => f.id !== id);
-                saveFavorites(favs);
-            }
-            
-            if(typeof showToast === 'function') {
-                showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!');
+                
+                if(selectAllCb) selectAllCb.checked = false;
+                
+                // Re-fetch and render
+                userFavorites = [];
+                renderFavoritesPage();
+                
+                deleteAllBtn.innerHTML = btnOriginalText;
+                deleteAllBtn.disabled = false;
             }
         });
     }
 
-    initFavoriteButtons();
-    initDetailPageFavorite();
-    renderFavoritesPage();
+    // Expose init function globally so dynamically loaded ads can re-bind
+    window.initializeFavoriteButtons = initFavoriteButtons;
+
+    // Initial load: fetch favorites, then init buttons and render page
+    fetchUserFavorites().then(favs => {
+        userFavorites = favs;
+        initFavoriteButtons();
+        initDetailPageFavorite();
+        renderFavoritesPage();
+    });
 });

@@ -1,16 +1,112 @@
-/**
- * Cabinet Interactivity Logic (cabinet.js)
- * Handles custom toast notifications, mock filtering, and mock chat integrations.
- */
-
 document.addEventListener('DOMContentLoaded', () => {
+    const API_BASE = window.API_URL || 'http://localhost:5000/api';
+    const CABINET_TRANSLATIONS = {
+        AZ: {
+            userFallback: 'istifadəçi',
+            roleAdmin: 'Admin Hesab',
+            roleVip: 'VIP Hesab',
+            rolePro: 'PRO Hesab',
+            roleStandard: 'Standart Hesab',
+            adminSwitch: 'Adminliyə keç',
+            adminPanel: 'Admin paneli',
+            dashboardWelcome: 'Xoş gəldiniz, {{name}}. Bugünkü statistikanızla tanış olun.',
+            statusActive: 'Aktiv',
+            statusPending: 'Yoxlanılır',
+            statusRejected: 'Rədd edildi',
+            statusArchived: 'Arxivdə',
+            statusSold: 'Satılıb',
+            noAds: 'Hələ sizin elanınız yoxdur.',
+            loadingAds: 'Elanlar yüklənir...',
+            adsLoadError: 'Elanlar yüklənmədi.',
+            walletRedirect: 'Ödəniş sisteminə yönləndirilir...',
+            profileSaved: 'Profil məlumatları yadda saxlanıldı!',
+            nameRequired: 'Ad boş ola bilməz.',
+            currentPasswordRequired: 'Cari şifrəni daxil edin.',
+            passwordMin: 'Şifrə ən azı 6 simvol olmalıdır.',
+            securitySaved: 'Təhlükəsizlik tənzimləmələri yadda saxlanıldı!',
+            privacySaved: 'Məxfilik tənzimləmələri yadda saxlanıldı!',
+            deleteAdConfirm: 'Bu elanı silmək istədiyinizdən əminsiniz?',
+            adDeleted: 'Elan silindi.',
+            freezeConfirm: 'Hesabınızı dondurmaq istədiyinizdən əminsiniz? Bütün aktiv elanlarınız gizlədiləcək.',
+            accountFrozen: 'Hesabınız donduruldu. Sistemdən çıxış edilir...',
+            deleteConfirmOne: 'XƏBƏRDARLIQ: Hesabınız və bütün məlumatlarınız həmişəlik silinəcək. Davam etmək istəyirsiniz?',
+            deleteConfirmTwo: 'Son təsdiq: Bu əməliyyat GERİ QAYTARILA BİLMƏZ. Silmək istəyirsiniz?',
+            accountDeleted: 'Hesabınız silindi. Yönləndirilirsiniz...',
+            promoNotReady: 'Elan tanıtımı hissəsi hələ backend-ə qoşulmayıb.',
+            copySuccess: 'Referal linki kopyalandı!'
+        },
+        ENG: {
+            userFallback: 'user',
+            roleAdmin: 'Admin Account',
+            roleVip: 'VIP Account',
+            rolePro: 'PRO Account',
+            roleStandard: 'Standard Account',
+            adminSwitch: 'Switch to Admin',
+            adminPanel: 'Admin Panel',
+            dashboardWelcome: 'Welcome, {{name}}. Review your stats for today.',
+            statusActive: 'Active',
+            statusPending: 'Pending Review',
+            statusRejected: 'Rejected',
+            statusArchived: 'Archived',
+            statusSold: 'Sold',
+            noAds: 'You do not have any ads yet.',
+            loadingAds: 'Loading ads...',
+            adsLoadError: 'Ads could not be loaded.',
+            walletRedirect: 'Redirecting to the payment system...',
+            profileSaved: 'Profile information has been saved!',
+            nameRequired: 'First name cannot be empty.',
+            currentPasswordRequired: 'Enter your current password.',
+            passwordMin: 'Password must be at least 6 characters long.',
+            securitySaved: 'Security settings have been saved!',
+            privacySaved: 'Privacy settings have been saved!',
+            deleteAdConfirm: 'Are you sure you want to delete this ad?',
+            adDeleted: 'Ad deleted.',
+            freezeConfirm: 'Are you sure you want to freeze your account? All active ads will be hidden.',
+            accountFrozen: 'Your account has been frozen. Signing out...',
+            deleteConfirmOne: 'WARNING: Your account and all your data will be deleted permanently. Do you want to continue?',
+            deleteConfirmTwo: 'Final confirmation: This action CANNOT BE UNDONE. Do you want to delete it?',
+            accountDeleted: 'Your account has been deleted. Redirecting...',
+            promoNotReady: 'The ad promotion section is not connected to the backend yet.',
+            copySuccess: 'Referral link copied!'
+        },
+        RUS: {
+            userFallback: 'пользователь',
+            roleAdmin: 'Админ-аккаунт',
+            roleVip: 'VIP-аккаунт',
+            rolePro: 'PRO-аккаунт',
+            roleStandard: 'Стандартный аккаунт',
+            adminSwitch: 'Перейти в админку',
+            adminPanel: 'Админ-панель',
+            dashboardWelcome: 'Добро пожаловать, {{name}}. Ознакомьтесь с вашей статистикой за сегодня.',
+            statusActive: 'Активно',
+            statusPending: 'На проверке',
+            statusRejected: 'Отклонено',
+            statusArchived: 'В архиве',
+            statusSold: 'Продано',
+            noAds: 'У вас пока нет объявлений.',
+            loadingAds: 'Загрузка объявлений...',
+            adsLoadError: 'Не удалось загрузить объявления.',
+            walletRedirect: 'Переход к платежной системе...',
+            profileSaved: 'Данные профиля сохранены!',
+            nameRequired: 'Имя не может быть пустым.',
+            currentPasswordRequired: 'Введите текущий пароль.',
+            passwordMin: 'Пароль должен содержать не менее 6 символов.',
+            securitySaved: 'Настройки безопасности сохранены!',
+            privacySaved: 'Настройки конфиденциальности сохранены!',
+            deleteAdConfirm: 'Вы уверены, что хотите удалить это объявление?',
+            adDeleted: 'Объявление удалено.',
+            freezeConfirm: 'Вы уверены, что хотите заморозить аккаунт? Все активные объявления будут скрыты.',
+            accountFrozen: 'Ваш аккаунт заморожен. Выполняется выход...',
+            deleteConfirmOne: 'ВНИМАНИЕ: Ваш аккаунт и все данные будут удалены навсегда. Продолжить?',
+            deleteConfirmTwo: 'Последнее подтверждение: Это действие НЕЛЬЗЯ ОТМЕНИТЬ. Удалить?',
+            accountDeleted: 'Ваш аккаунт удален. Перенаправление...',
+            promoNotReady: 'Раздел продвижения объявления пока не подключен к backend.',
+            copySuccess: 'Реферальная ссылка скопирована!'
+        }
+    };
 
-    /* ==============================
-       1. Toast Notification System
-       ============================== */
     class ToastNotifier {
         constructor() {
-            // Create container if it doesn't exist
             this.container = document.querySelector('.cab-toast-container');
             if (!this.container) {
                 this.container = document.createElement('div');
@@ -22,10 +118,11 @@ document.addEventListener('DOMContentLoaded', () => {
         show(message, type = 'success', duration = 3000) {
             const toast = document.createElement('div');
             toast.className = `cab-toast cab-toast-${type}`;
-            
+
             let iconClass = 'fas fa-info';
-            if(type === 'success') iconClass = 'fas fa-check';
-            if(type === 'warning') iconClass = 'fas fa-exclamation';
+            if (type === 'success') iconClass = 'fas fa-check';
+            if (type === 'warning') iconClass = 'fas fa-exclamation';
+            if (type === 'error') iconClass = 'fas fa-times';
 
             toast.innerHTML = `
                 <div class="cab-toast-icon"><i class="${iconClass}"></i></div>
@@ -33,14 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             this.container.appendChild(toast);
-            
-            // Trigger animation
             setTimeout(() => toast.classList.add('show'), 10);
-
-            // Remove logic
             setTimeout(() => {
                 toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 400); // wait for exit animation
+                setTimeout(() => toast.remove(), 400);
             }, duration);
         }
     }
@@ -48,257 +141,1459 @@ document.addEventListener('DOMContentLoaded', () => {
     window.toast = new ToastNotifier();
     const toast = window.toast;
 
-    /* ==============================
-       2. General Action Buttons
-       ============================== */
-    
-    // Wallet Buttons
-    const walletBtns = document.querySelectorAll('.btn-wallet');
-    walletBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const action = e.target.innerText.trim();
-            if (action.includes('Artır')) {
-                toast.show('Ödəmə sisteminə yönləndirilir...', 'info');
-            } else if (action.includes('Paket')) {
-                window.location.href = 'create-shop.html';
-            }
-        });
-    });
+    function getToken() {
+        return localStorage.getItem('token') || '';
+    }
 
-    // Form Save Buttons (Settings)
-    const settingsBtns = document.querySelectorAll('.settings-panel .btn-primary');
-    settingsBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            const originalText = btn.innerText;
-            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Yüklənir...`;
-            btn.style.opacity = '0.7';
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-                btn.style.opacity = '1';
-                toast.show('Dəyişikliklər vurğulandı və yadda saxlanıldı!', 'success');
-            }, 800);
-        });
-    });
+    function getCurrentLang() {
+        const lang = localStorage.getItem('lang');
+        return lang === 'ENG' || lang === 'RUS' ? lang : 'AZ';
+    }
 
-    /* ==============================
-       3. Ad Filters & Actions
-       ============================== */
-    
-    const filterPills = document.querySelectorAll('.ad-filters .filter-pill');
-    const adItems = document.querySelectorAll('.my-ad-item');
+    function getLocale() {
+        const localeMap = {
+            AZ: 'az-AZ',
+            ENG: 'en-GB',
+            RUS: 'ru-RU'
+        };
 
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            // Update active state
-            filterPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
+        return localeMap[getCurrentLang()] || 'az-AZ';
+    }
 
-            const filterType = pill.getAttribute('data-filter') || 'all';
+    function t(key, fallback = '') {
+        const lang = getCurrentLang();
+        return CABINET_TRANSLATIONS[lang]?.[key]
+            || window.translations?.[lang]?.[key]
+            || fallback;
+    }
 
-            // Filter the DOM visually
-            adItems.forEach(ad => {
-                const status = ad.getAttribute('data-status');
-                if (filterType === 'all' || status === filterType) {
-                    ad.style.display = 'flex';
-                    // small animation effect
-                    ad.style.animation = 'none';
-                    setTimeout(() => ad.style.animation = 'cabFadeIn 0.3s ease', 10);
-                } else {
-                    ad.style.display = 'none';
-                }
-            });
-        });
-    });
+    window.cabinetT = t;
 
-    // Boost, Edit, Delete Buttons
-    document.querySelectorAll('.btn-boost').forEach(btn => {
-        btn.addEventListener('click', () => {
-            toast.show('Elan uğurla irəli çəkildi! Balansdan çıxıldı.', 'success');
-        });
-    });
+    const BILLING_COPY = {
+        AZ: {
+            billingHeading: 'Paketlər və ödənişlər',
+            subtitle: 'Hesabınıza uyğun paketi seçin, ödənişi tamamlayın və üstünlükləri dərhal aktivləşdirin.',
+            topUpBalance: 'Balansı artır',
+            currentPackage: 'Cari paket',
+            historyTitle: 'Ödəniş tarixçəsi',
+            walletBalance: 'Balans',
+            selectedDuration: 'Müddət',
+            nextPayment: 'Növbəti ödəniş',
+            whyUpgrade: 'Niyə yüksəldəsiniz?',
+            highlightTitle: 'Daha çox görünürlük, daha rahat ödəniş axını',
+            highlightFastTitle: 'Sürətli seçim',
+            highlightFastText: 'Paket, müddət və ödəniş üsulu bir yerdə aydın göstərilir.',
+            highlightGrowthTitle: 'Aydın üstünlüklər',
+            highlightGrowthText: 'Hər paket üzrə elan limiti və görünürlük fərqi əvvəlcədən görünür.',
+            highlightTrustTitle: 'Etibarlı ödəniş',
+            highlightTrustText: 'Ödənişdən əvvəl yekun məbləğ və seçilmiş üsul dəqiq göstərilir.',
+            choosePackage: 'Paket seçin',
+            choosePackageHint: 'Elan sayınıza və satış həcminizə uyğun paketi seçin.',
+            duration30: '30 gün',
+            duration90: '90 gün',
+            paymentMethod: 'Ödəniş üsulu',
+            paymentMethodHint: 'Ödənişi tamamlamaq üçün uyğun üsulu seçin.',
+            orderSummary: 'Sifariş xülasəsi',
+            summaryPackage: 'Paket',
+            summaryDuration: 'Müddət',
+            summaryMethod: 'Üsul',
+            summaryTotal: 'Yekun',
+            confirmPurchase: 'Paketi aktivləşdir',
+            needBalance: 'Balansı artır',
+            historyHint: 'Son ödənişlər və aktivləşdirmələr burada görünür.',
+            historyEmpty: 'Hələ heç bir ödəniş əməliyyatı yoxdur.',
+            currentPlan: 'Cari plan',
+            freePlan: 'Pulsuz',
+            featuredPopular: 'Ən çox seçilən',
+            featuredMax: 'Ən güclü',
+            methodWallet: 'Daxili balans',
+            methodWalletDesc: 'Balans kifayət edirsə, paket dərhal aktivləşir.',
+            methodCard: 'Bank kartı',
+            methodCardDesc: 'Visa və Mastercard ilə onlayn ödəniş edin.',
+            methodTransfer: 'Köçürmə / qaimə',
+            methodTransferDesc: 'Hüquqi şəxslər üçün qaimə və bank köçürməsi.',
+            enoughBalance: 'Balans kifayətdir',
+            lowBalance: 'Balans azdır',
+            fastest: 'Ən sürətli',
+            secure: 'Təhlükəsiz',
+            pendingLabel: 'Gözləyir',
+            inactiveStatus: 'Aktiv deyil',
+            currentPackageNoteStandard: 'Hazırda standart hesabdan istifadə edirsiniz. Daha çox görünürlük üçün paket seçin.',
+            currentPackageNoteVip: 'VIP paket elanlarınıza daha çox diqqət gətirir və görünürlüğü artırır.',
+            currentPackageNotePro: 'PRO paket maksimum görünürlük, prioritet yerləşdirmə və güclü üstünlüklər verir.',
+            nextPaymentNone: 'Planlaşdırılmayıb',
+            daysRemaining: '{{count}} gün qalıb',
+            activeDurationNone: 'Aktiv deyil',
+            noPaymentRequired: 'Ödəniş tələb olunmur',
+            purchaseSuccess: 'Paket uğurla aktivləşdirildi.',
+            insufficientBalance: 'Balans kifayət etmir. Əvvəlcə balansınızı artırın.',
+            redirectCard: 'Kart ödənişinə keçid başladılır.',
+            redirectTransfer: 'Qaimə və köçürmə məlumatları açılır.',
+            historyPaid: 'Ödənilib',
+            historyPending: 'Gözləyir',
+            historyPackage: 'paketi',
+            historyActivated: 'aktiv edildi',
+            historyMethod: 'Üsul',
+            standardDescription: 'Fərdi istifadəçilər üçün sadə başlanğıc paketi.',
+            vipDescription: 'Daha çox elan və daha güclü görünürlük istəyənlər üçün.',
+            proDescription: 'Mağazalar və peşəkar satıcılar üçün tam paket həlli.',
+            standardFeature1: '3 aktiv elan',
+            standardFeature2: 'Standart sıralama',
+            standardFeature3: 'E-poçt bildirişləri',
+            vipFeature1: '10 aktiv elan',
+            vipFeature2: 'VIP nişanı və vurğulanan kart',
+            vipFeature3: 'Daha sürətli moderasiya',
+            proFeature1: '25 aktiv elan',
+            proFeature2: 'Ana səhifədə üstün görünürlük',
+            proFeature3: 'Prioritet dəstək və analitika',
+            selectNow: 'Seç',
+            selectedNow: 'Seçildi',
+            includedPlan: 'Daxildir',
+            perPeriod: 'müddət üçün'
+        },
+        ENG: {
+            billingHeading: 'Packages and payments',
+            subtitle: 'Choose the right package, complete payment, and activate the benefits instantly.',
+            topUpBalance: 'Top up balance',
+            currentPackage: 'Current package',
+            historyTitle: 'Payment history',
+            walletBalance: 'Balance',
+            selectedDuration: 'Duration',
+            nextPayment: 'Next payment',
+            whyUpgrade: 'Why upgrade?',
+            highlightTitle: 'More visibility, less friction',
+            highlightFastTitle: 'Faster selection',
+            highlightFastText: 'Package, term, and payment method are shown together.',
+            highlightGrowthTitle: 'Clear value',
+            highlightGrowthText: 'Each plan explains the visibility and listing difference.',
+            highlightTrustTitle: 'Safer checkout',
+            highlightTrustText: 'The final amount and method are confirmed before payment.',
+            choosePackage: 'Choose a package',
+            choosePackageHint: 'Pick the level that matches your activity.',
+            duration30: '30 days',
+            duration90: '90 days',
+            paymentMethod: 'Payment method',
+            paymentMethodHint: 'Select the payment channel you want to use.',
+            orderSummary: 'Order summary',
+            summaryPackage: 'Package',
+            summaryDuration: 'Duration',
+            summaryMethod: 'Method',
+            summaryTotal: 'Total',
+            confirmPurchase: 'Activate package',
+            needBalance: 'Need balance?',
+            historyHint: 'Your recent transactions appear here.',
+            historyEmpty: 'No payment activity yet.',
+            currentPlan: 'Current plan',
+            freePlan: 'Free',
+            featuredPopular: 'Popular',
+            featuredMax: 'Maximum',
+            methodWallet: 'Internal wallet',
+            methodWalletDesc: 'If balance is enough, activation is instant.',
+            methodCard: 'Bank card',
+            methodCardDesc: 'Pay online with Visa or Mastercard.',
+            methodTransfer: 'Transfer / invoice',
+            methodTransferDesc: 'Invoice and transfer flow for legal entities.',
+            enoughBalance: 'Enough balance',
+            lowBalance: 'Low balance',
+            fastest: 'Fastest',
+            secure: 'Secure',
+            pendingLabel: 'Pending',
+            inactiveStatus: 'Inactive',
+            currentPackageNoteStandard: 'You are on the standard account. Upgrade for more visibility.',
+            currentPackageNoteVip: 'VIP gives your listings more attention in the feed.',
+            currentPackageNotePro: 'PRO unlocks maximum visibility and premium placement.',
+            nextPaymentNone: 'Not scheduled',
+            daysRemaining: '{{count}} days left',
+            activeDurationNone: 'Inactive',
+            noPaymentRequired: 'No payment required',
+            purchaseSuccess: 'Package activated successfully.',
+            insufficientBalance: 'Not enough balance. Top up first.',
+            redirectCard: 'Redirecting to card payment.',
+            redirectTransfer: 'Opening invoice and transfer instructions.',
+            historyPaid: 'Paid',
+            historyPending: 'Pending',
+            historyPackage: 'package',
+            historyActivated: 'activated',
+            historyMethod: 'Method',
+            standardDescription: 'A simple starting point for individual sellers.',
+            vipDescription: 'For users who want more listings and stronger visibility.',
+            proDescription: 'Maximum package for stores and active sellers.',
+            standardFeature1: '3 active ads',
+            standardFeature2: 'Regular ranking',
+            standardFeature3: 'Email notifications',
+            vipFeature1: '10 active ads',
+            vipFeature2: 'VIP badge and highlighted card',
+            vipFeature3: 'Faster moderation',
+            proFeature1: '25 active ads',
+            proFeature2: 'Homepage priority visibility',
+            proFeature3: 'Priority support and analytics',
+            selectNow: 'Choose',
+            selectedNow: 'Selected',
+            includedPlan: 'Included',
+            perPeriod: 'per period'
+        },
+        RUS: {
+            billingHeading: 'Пакеты и платежи',
+            subtitle: 'Выберите подходящий пакет, завершите оплату и сразу активируйте преимущества.',
+            topUpBalance: 'Пополнить баланс',
+            currentPackage: 'Текущий пакет',
+            historyTitle: 'История платежей',
+            walletBalance: 'Баланс',
+            selectedDuration: 'Срок',
+            nextPayment: 'Следующий платеж',
+            whyUpgrade: 'Зачем повышать тариф?',
+            highlightTitle: 'Больше видимости, меньше лишних шагов',
+            highlightFastTitle: 'Быстрый выбор',
+            highlightFastText: 'Пакет, срок и способ оплаты собраны в одном месте.',
+            highlightGrowthTitle: 'Понятные преимущества',
+            highlightGrowthText: 'Лимиты и уровень видимости каждого пакета видны сразу.',
+            highlightTrustTitle: 'Надежная оплата',
+            highlightTrustText: 'Перед оплатой показываются итоговая сумма и выбранный способ.',
+            choosePackage: 'Выберите пакет',
+            choosePackageHint: 'Подберите пакет под количество объявлений и ваш темп продаж.',
+            duration30: '30 дней',
+            duration90: '90 дней',
+            paymentMethod: 'Способ оплаты',
+            paymentMethodHint: 'Выберите удобный способ для завершения оплаты.',
+            orderSummary: 'Сводка заказа',
+            summaryPackage: 'Пакет',
+            summaryDuration: 'Срок',
+            summaryMethod: 'Способ',
+            summaryTotal: 'Итого',
+            confirmPurchase: 'Активировать пакет',
+            needBalance: 'Пополнить баланс',
+            historyHint: 'Здесь отображаются последние платежи и активации.',
+            historyEmpty: 'Платежных операций пока нет.',
+            currentPlan: 'Текущий план',
+            freePlan: 'Бесплатно',
+            featuredPopular: 'Самый популярный',
+            featuredMax: 'Максимум',
+            methodWallet: 'Внутренний баланс',
+            methodWalletDesc: 'Если средств достаточно, пакет активируется сразу.',
+            methodCard: 'Банковская карта',
+            methodCardDesc: 'Онлайн-оплата картами Visa и Mastercard.',
+            methodTransfer: 'Перевод / счет',
+            methodTransferDesc: 'Счет и банковский перевод для юридических лиц.',
+            enoughBalance: 'Средств хватает',
+            lowBalance: 'Недостаточно средств',
+            fastest: 'Быстрее всего',
+            secure: 'Безопасно',
+            pendingLabel: 'Ожидает',
+            inactiveStatus: 'Не активен',
+            currentPackageNoteStandard: 'Сейчас у вас стандартный аккаунт. Обновите пакет для большей видимости.',
+            currentPackageNoteVip: 'VIP-пакет делает ваши объявления заметнее и привлекает больше внимания.',
+            currentPackageNotePro: 'PRO-пакет дает максимальную видимость и приоритетное размещение.',
+            nextPaymentNone: 'Не запланирован',
+            daysRemaining: 'Осталось {{count}} дней',
+            activeDurationNone: 'Не активен',
+            noPaymentRequired: 'Оплата не требуется',
+            purchaseSuccess: 'Пакет успешно активирован.',
+            insufficientBalance: 'Недостаточно средств. Сначала пополните баланс.',
+            redirectCard: 'Запускается переход к оплате картой.',
+            redirectTransfer: 'Открываются реквизиты для счета и перевода.',
+            historyPaid: 'Оплачено',
+            historyPending: 'Ожидает',
+            historyPackage: 'пакет',
+            historyActivated: 'активирован',
+            historyMethod: 'Способ',
+            standardDescription: 'Простой стартовый пакет для частных продавцов.',
+            vipDescription: 'Для тех, кому нужно больше объявлений и лучшая видимость.',
+            proDescription: 'Полный пакет для магазинов и профессиональных продавцов.',
+            standardFeature1: '3 активных объявления',
+            standardFeature2: 'Стандартная выдача',
+            standardFeature3: 'Email-уведомления',
+            vipFeature1: '10 активных объявлений',
+            vipFeature2: 'VIP-значок и выделенная карточка',
+            vipFeature3: 'Более быстрая модерация',
+            proFeature1: '25 активных объявлений',
+            proFeature2: 'Приоритетная видимость на главной',
+            proFeature3: 'Приоритетная поддержка и аналитика',
+            selectNow: 'Выбрать',
+            selectedNow: 'Выбрано',
+            includedPlan: 'Включено',
+            perPeriod: 'за период'
+        }
+    };
 
-    document.querySelectorAll('.my-ad-actions .delete-action').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // Find parent ad item
-            const adItem = e.target.closest('.my-ad-item');
-            if (confirm('Bu elanı silmək istədiyinizdən əminsiniz?')) {
-                adItem.style.opacity = '0';
-                adItem.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    adItem.remove();
-                    toast.show('Elan silindi.', 'warning');
-                }, 300);
-            }
-        });
-    });
+    const BILLING_PACKAGES = [
+        {
+            id: 'standard',
+            names: { AZ: 'Standart', ENG: 'Standard', RUS: 'Standart' },
+            icon: 'fa-layer-group',
+            descriptionKey: 'standardDescription',
+            featureKeys: ['standardFeature1', 'standardFeature2', 'standardFeature3'],
+            prices: { 30: 0, 90: 0 }
+        },
+        {
+            id: 'vip',
+            names: { AZ: 'VIP', ENG: 'VIP', RUS: 'VIP' },
+            icon: 'fa-crown',
+            descriptionKey: 'vipDescription',
+            featureKeys: ['vipFeature1', 'vipFeature2', 'vipFeature3'],
+            prices: { 30: 12, 90: 30 },
+            featuredLabelKey: 'featuredPopular'
+        },
+        {
+            id: 'pro',
+            names: { AZ: 'PRO', ENG: 'PRO', RUS: 'PRO' },
+            icon: 'fa-bolt',
+            descriptionKey: 'proDescription',
+            featureKeys: ['proFeature1', 'proFeature2', 'proFeature3'],
+            prices: { 30: 24, 90: 60 },
+            featuredLabelKey: 'featuredMax'
+        }
+    ];
 
-    document.querySelectorAll('.my-ad-actions .edit-action').forEach(btn => {
-        btn.addEventListener('click', () => {
-             toast.show('Redaktə səhifəsinə yönləndirilir...', 'info');
-             setTimeout(() => { window.location.href = 'elan-yerlesdir.html'; }, 800);
-        });
-    });
+    const BILLING_METHODS = [
+        { id: 'wallet', icon: 'fa-wallet', nameKey: 'methodWallet', descriptionKey: 'methodWalletDesc', chipKey: 'fastest' },
+        { id: 'card', icon: 'fa-credit-card', nameKey: 'methodCard', descriptionKey: 'methodCardDesc', chipKey: 'secure' },
+        { id: 'transfer', icon: 'fa-building-columns', nameKey: 'methodTransfer', descriptionKey: 'methodTransferDesc', chipKey: 'pendingLabel' }
+    ];
 
-    /* ==============================
-       4. Messenger Simulation (Two-Column Chat)
-       ============================== */
-    
-    const chatContacts = document.querySelectorAll('.chat-contact');
-    const chatHeaderName = document.querySelector('.chat-header-info h3');
-    const chatHeaderSub = document.querySelector('.chat-header-info p');
-    const chatMessagesContainer = document.querySelector('.chat-messages');
-    
-    // Switch contact mock
-    chatContacts.forEach(contact => {
-        contact.addEventListener('click', () => {
-            // Update active styling
-            chatContacts.forEach(c => c.classList.remove('active'));
-            contact.classList.add('active');
-            contact.classList.remove('unread'); // mark read
+    const BILLING_HISTORY_PREFIX = 'mobilaz_billing_history_';
+    const billingState = {
+        packageId: 'vip',
+        duration: 30,
+        method: 'wallet',
+        initialized: false
+    };
 
-            const name = contact.querySelector('h4').innerText;
-            chatHeaderName.innerText = name;
+    function billingText(key, fallback = '') {
+        const lang = getCurrentLang();
+        return BILLING_COPY[lang]?.[key] || BILLING_COPY.AZ?.[key] || fallback;
+    }
 
-            // Simple mock message reloading
-            chatMessagesContainer.innerHTML = `
-                <div class="bubble bubble-received">
-                    Salam, mən ${name}. Bu elanla bağlı yazıram.
-                    <span class="bubble-time">${new Date().toLocaleTimeString('az-AZ', {hour: '2-digit', minute:'2-digit'})}</span>
-                </div>
-            `;
-        });
-    });
+    function getBillingPackage(packageId) {
+        return BILLING_PACKAGES.find((pkg) => pkg.id === packageId) || BILLING_PACKAGES[0];
+    }
 
-    // Send Message Input logic
-    const sendBtn = document.querySelector('.btn-send');
-    const chatInput = document.querySelector('.chat-input input');
+    function getBillingMethod(methodId) {
+        return BILLING_METHODS.find((method) => method.id === methodId) || BILLING_METHODS[0];
+    }
 
-    function sendMessage() {
-        const text = chatInput.value.trim();
-        if (text !== '') {
-            const time = new Date().toLocaleTimeString('az-AZ', {hour: '2-digit', minute:'2-digit'});
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble bubble-sent';
-            bubble.innerHTML = `
-                ${text}
-                <span class="bubble-time">${time}</span>
-            `;
-            chatMessagesContainer.appendChild(bubble);
-            chatInput.value = '';
-            
-            // Scroll to bottom
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+    function resolveCurrentPackageId(user) {
+        const activePackage = String(user?.activePackage || '').toLowerCase();
+        if (activePackage === 'vip' || activePackage === 'pro') {
+            return activePackage;
+        }
+
+        return 'standard';
+    }
+
+    function getBillingPackageName(packageId) {
+        const lang = getCurrentLang();
+        const pkg = getBillingPackage(packageId);
+        return pkg.names?.[lang] || pkg.names?.AZ || packageId;
+    }
+
+    function getBillingPrice(packageId = billingState.packageId, duration = billingState.duration) {
+        return Number(getBillingPackage(packageId).prices?.[duration] || 0);
+    }
+
+    function isBillingPurchasable(packageId = billingState.packageId) {
+        return packageId !== 'standard';
+    }
+
+    function getBillingHistoryKey(user) {
+        return `${BILLING_HISTORY_PREFIX}${user?.email || user?.phone || 'guest'}`;
+    }
+
+    function getBillingHistory(user) {
+        const raw = localStorage.getItem(getBillingHistoryKey(user));
+        if (!raw) return [];
+
+        try {
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
         }
     }
 
-    if (sendBtn && chatInput) {
+    function saveBillingHistory(user, history) {
+        localStorage.setItem(getBillingHistoryKey(user), JSON.stringify(history.slice(0, 8)));
+    }
+
+    function appendBillingHistory(user, entry) {
+        const history = getBillingHistory(user);
+        history.unshift(entry);
+        saveBillingHistory(user, history);
+    }
+
+    function formatCurrency(amount) {
+        return `${Number(amount || 0).toLocaleString(getLocale(), {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} AZN`;
+    }
+
+    function getBillingCurrentNote(packageId) {
+        if (packageId === 'vip') return billingText('currentPackageNoteVip', 'VIP paket elanlarınıza daha çox diqqət gətirir.');
+        if (packageId === 'pro') return billingText('currentPackageNotePro', 'PRO paket maksimum görünürlük və prioritet yerləşdirmə verir.');
+        return billingText('currentPackageNoteStandard', 'Hazırda standart hesabdan istifadə edirsiniz. Daha çox görünürlük üçün paket seçin.');
+    }
+
+    function getBillingActiveDuration(user) {
+        const currentPackageId = resolveCurrentPackageId(user);
+        if (currentPackageId === 'standard' || !user?.billingExpiresAt) {
+            return billingText('activeDurationNone', 'Inactive');
+        }
+
+        const expiresAt = new Date(user.billingExpiresAt);
+        if (Number.isNaN(expiresAt.getTime())) {
+            return billingText('activeDurationNone', 'Inactive');
+        }
+
+        const remainingDays = Math.max(1, Math.ceil((expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+        if (remainingDays <= 0) {
+            return billingText('activeDurationNone', 'Inactive');
+        }
+
+        return billingText('daysRemaining', '{{count}} days left').replace('{{count}}', String(remainingDays));
+    }
+
+    function getBillingNextPayment(user) {
+        if (!user?.billingExpiresAt) {
+            return billingText('nextPaymentNone', 'Planlasdirilmayib');
+        }
+
+        return formatDate(user.billingExpiresAt);
+    }
+
+    function syncBillingText() {
+        document.querySelectorAll('[data-billing-i18n]').forEach((node) => {
+            const key = node.getAttribute('data-billing-i18n');
+            if (!key) return;
+            node.textContent = billingText(key, node.textContent.trim());
+        });
+    }
+
+    function renderBillingCurrentCard(user) {
+        const currentPackageId = resolveCurrentPackageId(user);
+        const currentPackageName = document.getElementById('billingCurrentPackageName');
+        const currentPackageNote = document.getElementById('billingCurrentPackageNote');
+        const currentPackageBadge = document.getElementById('billingCurrentPackageBadge');
+        const walletBalance = document.getElementById('billingWalletBalance');
+        const activeDuration = document.getElementById('billingActiveDuration');
+        const nextPayment = document.getElementById('billingNextPayment');
+
+        if (currentPackageName) currentPackageName.textContent = getBillingPackageName(currentPackageId);
+        if (currentPackageNote) currentPackageNote.textContent = getBillingCurrentNote(currentPackageId);
+        if (walletBalance) walletBalance.textContent = formatCurrency(user?.walletBalance || 0);
+        if (activeDuration) activeDuration.textContent = getBillingActiveDuration(user);
+        if (nextPayment) nextPayment.textContent = getBillingNextPayment(user);
+
+        if (currentPackageBadge) {
+            const isActive = currentPackageId !== 'standard';
+            currentPackageBadge.textContent = isActive
+                ? t('statusActive', 'Aktiv')
+                : billingText('includedPlan', 'Included');
+            currentPackageBadge.classList.toggle('is-active', isActive);
+            currentPackageBadge.classList.toggle('is-included', !isActive);
+        }
+    }
+
+    function renderBillingPackages(user) {
+        const packageGrid = document.getElementById('billingPackageGrid');
+        if (!packageGrid) return;
+
+        const currentPackageId = resolveCurrentPackageId(user);
+        packageGrid.innerHTML = BILLING_PACKAGES.map((pkg) => {
+            const price = getBillingPrice(pkg.id, billingState.duration);
+            const isSelected = billingState.packageId === pkg.id;
+            const isFeatured = Boolean(pkg.featuredLabelKey);
+            const featuredLabel = isFeatured ? escapeHtml(billingText(pkg.featuredLabelKey, '')) : '';
+            const stateLabel = currentPackageId === pkg.id
+                ? billingText('currentPlan', 'Current plan')
+                : (pkg.id === 'standard'
+                    ? billingText('includedPlan', 'Included')
+                    : (featuredLabel || billingText('featuredPopular', 'Popular')));
+            const footerLabel = isSelected
+                ? billingText('selectedNow', 'Selected')
+                : billingText('selectNow', 'Choose');
+            const durationLabel = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} days`));
+            const features = pkg.featureKeys.map((key) => `
+                <div class="billing-package-feature">
+                    <i class="fas fa-check-circle"></i>
+                    <span>${escapeHtml(billingText(key, key))}</span>
+                </div>
+            `).join('');
+
+            return `
+                <article class="billing-package-option ${isSelected ? 'is-selected' : ''} ${isFeatured ? 'is-featured' : ''}" data-package-id="${pkg.id}" role="button" tabindex="0" aria-pressed="${isSelected ? 'true' : 'false'}" ${isFeatured ? `data-featured-label="${featuredLabel}"` : ''}>
+                    <div class="billing-package-top">
+                        <div class="billing-package-title-group">
+                            <div class="billing-package-icon billing-package-icon-${pkg.id}">
+                                <i class="fas ${pkg.icon || 'fa-box'}"></i>
+                            </div>
+                            <div>
+                                <h5 class="billing-package-name">${escapeHtml(getBillingPackageName(pkg.id))}</h5>
+                                <p class="billing-package-description">${escapeHtml(billingText(pkg.descriptionKey, ''))}</p>
+                            </div>
+                        </div>
+                        <div class="billing-method-chip">${escapeHtml(stateLabel)}</div>
+                    </div>
+                    <div class="billing-package-price-row">
+                        <div class="billing-package-price">
+                            ${price === 0 ? escapeHtml(billingText('freePlan', 'Free')) : escapeHtml(String(price))}
+                            <small>${escapeHtml(price === 0 ? '' : 'AZN')}</small>
+                        </div>
+                        <div class="billing-package-period">
+                            <strong>${durationLabel}</strong>
+                            <span>${escapeHtml(price === 0 ? billingText('includedPlan', 'Included') : billingText('perPeriod', 'per period'))}</span>
+                        </div>
+                    </div>
+                    <div class="billing-package-features">${features}</div>
+                    <div class="billing-package-footer">
+                        <span>${escapeHtml(footerLabel)}</span>
+                        <i class="fas ${isSelected ? 'fa-circle-check' : 'fa-arrow-right'}"></i>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    function renderBillingMethods(user) {
+        const methodGrid = document.getElementById('billingMethodGrid');
+        if (!methodGrid) return;
+
+        const selectedPrice = getBillingPrice();
+        const walletBalance = Number(user?.walletBalance || 0);
+
+        methodGrid.innerHTML = BILLING_METHODS.map((method) => {
+            const isSelected = billingState.method === method.id;
+            const chipLabel = method.id === 'wallet'
+                ? billingText(walletBalance >= selectedPrice ? 'enoughBalance' : 'lowBalance', 'Enough balance')
+                : billingText(method.chipKey, method.chipKey);
+
+            return `
+                <article class="billing-method-option ${isSelected ? 'is-selected' : ''} ${!isBillingPurchasable() ? 'is-disabled' : ''}" data-method-id="${method.id}" role="button" tabindex="${isBillingPurchasable() ? '0' : '-1'}" aria-pressed="${isSelected ? 'true' : 'false'}" aria-disabled="${isBillingPurchasable() ? 'false' : 'true'}">
+                    <div class="billing-method-top">
+                        <div class="billing-method-icon"><i class="fas ${method.icon}"></i></div>
+                        <div class="billing-method-chip">${escapeHtml(chipLabel)}</div>
+                    </div>
+                    <h5 class="billing-method-name">${escapeHtml(billingText(method.nameKey, method.id))}</h5>
+                    <p class="billing-method-description">${escapeHtml(billingText(method.descriptionKey, ''))}</p>
+                </article>
+            `;
+        }).join('');
+    }
+
+    function renderBillingSummary(user = getStoredUser()) {
+        const selectedPackage = getBillingPackage(billingState.packageId);
+        const selectedMethod = getBillingMethod(billingState.method);
+        const total = getBillingPrice();
+        const canPurchase = isBillingPurchasable(selectedPackage.id);
+
+        const summaryPackage = document.getElementById('billingSummaryPackage');
+        const summaryDuration = document.getElementById('billingSummaryDuration');
+        const summaryMethod = document.getElementById('billingSummaryMethod');
+        const summaryTotal = document.getElementById('billingSummaryTotal');
+        const confirmBtn = document.getElementById('billingConfirmBtn');
+        const confirmBtnText = confirmBtn?.querySelector('span');
+        const walletBtn = document.getElementById('billingGoWalletBtn');
+        const walletBalance = Number(user?.walletBalance || 0);
+
+        if (summaryPackage) summaryPackage.textContent = getBillingPackageName(selectedPackage.id);
+        if (summaryDuration) summaryDuration.textContent = canPurchase
+            ? billingText(`duration${billingState.duration}`, `${billingState.duration} days`)
+            : billingText('includedPlan', 'Included');
+        if (summaryMethod) summaryMethod.textContent = canPurchase
+            ? billingText(selectedMethod.nameKey, selectedMethod.id)
+            : billingText('includedPlan', 'Included');
+        if (summaryTotal) summaryTotal.textContent = formatCurrency(total);
+
+        if (confirmBtn) {
+            confirmBtn.disabled = !canPurchase;
+            confirmBtn.classList.toggle('is-disabled', !canPurchase);
+            confirmBtn.setAttribute('aria-disabled', canPurchase ? 'false' : 'true');
+        }
+        if (confirmBtnText) {
+            confirmBtnText.textContent = canPurchase
+                ? billingText('confirmPurchase', 'Activate package')
+                : billingText('noPaymentRequired', 'No payment required');
+        }
+
+        if (walletBtn) {
+            walletBtn.hidden = !canPurchase || billingState.method !== 'wallet' || walletBalance >= total;
+        }
+    }
+
+    function renderBillingHistory(user) {
+        const historyList = document.getElementById('billingHistoryList');
+        if (!historyList) return;
+
+        const history = getBillingHistory(user);
+        if (!history.length) {
+            historyList.innerHTML = `
+                <div class="billing-history-empty">
+                    <i class="fas fa-receipt"></i>
+                    <span>${escapeHtml(billingText('historyEmpty', 'No payment activity yet.'))}</span>
+                </div>
+            `;
+            return;
+        }
+
+        historyList.innerHTML = history.map((item) => {
+            const isPaid = item.status === 'paid';
+            const method = getBillingMethod(item.method);
+            const packageName = getBillingPackageName(item.packageId || 'standard');
+            const title = `${packageName} ${billingText('historyPackage', 'package')}`;
+            const subtitle = `${formatDate(item.date)} - ${billingText('historyMethod', 'Method')}: ${billingText(method.nameKey, method.id)}`;
+
+            return `
+                <div class="billing-history-item">
+                    <div class="billing-history-main">
+                        <i class="fas ${method.icon}"></i>
+                        <div>
+                            <strong>${escapeHtml(title)}</strong>
+                            <span>${escapeHtml(subtitle)}</span>
+                        </div>
+                    </div>
+                    <div class="billing-history-amount">
+                        <strong>${escapeHtml(formatCurrency(item.amount || 0))}</strong>
+                        <small>${escapeHtml(isPaid ? billingText('historyPaid', 'Paid') : billingText('historyPending', 'Pending'))}</small>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderBillingPanel(user = getStoredUser()) {
+        const panel = document.getElementById('panel-billing');
+        if (!panel) return;
+
+        syncBillingText();
+
+        const billingHeading = panel.querySelector('.billing-panel-head h3');
+        if (billingHeading) billingHeading.textContent = billingText('billingHeading', 'Paketlər və ödənişlər');
+
+        const currentPackageId = resolveCurrentPackageId(user);
+        if (!billingState.initialized) {
+            billingState.packageId = currentPackageId === 'standard' ? 'vip' : currentPackageId;
+            billingState.initialized = true;
+        }
+
+        if (!getBillingPackage(billingState.packageId)) {
+            billingState.packageId = 'vip';
+        }
+
+        renderBillingCurrentCard(user || {});
+        renderBillingPackages(user || {});
+        renderBillingMethods(user || {});
+        renderBillingSummary(user || {});
+        renderBillingHistory(user || {});
+
+        document.querySelectorAll('.billing-duration-btn').forEach((button) => {
+            button.classList.toggle('active', Number(button.dataset.duration) === billingState.duration);
+        });
+    }
+
+    function openBillingPanel() {
+        const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
+        const contents = document.querySelectorAll('.cabinet-tab');
+        const settingsTabLink = document.querySelector('.tab-link[data-target="tab-settings"]');
+        const settingsPanelButton = document.querySelector('.settings-nav button[onclick*="panel-billing"]');
+        const settingsTab = document.getElementById('tab-settings');
+
+        tabs.forEach((tab) => tab.classList.remove('active'));
+        contents.forEach((content) => {
+            content.style.display = 'none';
+            content.classList.remove('active');
+        });
+
+        if (settingsTabLink) settingsTabLink.classList.add('active');
+        if (settingsTab) {
+            settingsTab.style.display = 'block';
+            settingsTab.classList.add('active');
+        }
+
+        if (window.showSettingsPanel && settingsPanelButton) {
+            window.showSettingsPanel('panel-billing', settingsPanelButton);
+        }
+
+        renderBillingPanel(getStoredUser());
+    }
+
+    function bindBillingPanel() {
+        const panel = document.getElementById('panel-billing');
+        if (!panel || panel.dataset.bound === 'true') return;
+
+        panel.dataset.bound = 'true';
+        panel.addEventListener('click', (event) => {
+            const durationButton = event.target.closest('.billing-duration-btn');
+            if (durationButton) {
+                billingState.duration = Number(durationButton.dataset.duration) || 30;
+                renderBillingPanel(getStoredUser());
+                return;
+            }
+
+            const packageOption = event.target.closest('[data-package-id]');
+            if (packageOption) {
+                billingState.packageId = packageOption.getAttribute('data-package-id') || 'vip';
+                renderBillingPanel(getStoredUser());
+                return;
+            }
+
+            const methodOption = event.target.closest('[data-method-id]');
+            if (methodOption) {
+                if (!isBillingPurchasable()) return;
+                billingState.method = methodOption.getAttribute('data-method-id') || 'wallet';
+                renderBillingPanel(getStoredUser());
+            }
+        });
+
+        panel.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+
+            const interactiveCard = event.target.closest('[data-package-id], [data-method-id]');
+            if (!interactiveCard) return;
+
+            event.preventDefault();
+            interactiveCard.click();
+        });
+
+        const topUpHandler = () => {
+            toast.show(t('walletRedirect', 'Redirecting to the payment system...'), 'info');
+        };
+
+        document.getElementById('billingTopUpBtn')?.addEventListener('click', topUpHandler);
+        document.getElementById('billingGoWalletBtn')?.addEventListener('click', topUpHandler);
+
+        document.getElementById('billingConfirmBtn')?.addEventListener('click', () => {
+            const user = getStoredUser() || {};
+            const price = getBillingPrice();
+            const methodId = billingState.method;
+            const nextExpiry = new Date();
+            nextExpiry.setDate(nextExpiry.getDate() + billingState.duration);
+
+             if (!isBillingPurchasable()) {
+                return;
+            }
+
+            if (methodId === 'wallet') {
+                const walletBalance = Number(user.walletBalance || 0);
+                if (walletBalance < price) {
+                    toast.show(billingText('insufficientBalance', 'Not enough balance. Top up first.'), 'warning');
+                    return;
+                }
+
+                const updatedUser = {
+                    ...user,
+                    walletBalance: Number((walletBalance - price).toFixed(2)),
+                    activePackage: billingState.packageId === 'standard' ? null : billingState.packageId.toUpperCase(),
+                    billingExpiresAt: billingState.packageId === 'standard' ? null : nextExpiry.toISOString()
+                };
+
+                persistUser(updatedUser);
+                appendBillingHistory(updatedUser, {
+                    packageId: billingState.packageId,
+                    duration: billingState.duration,
+                    amount: price,
+                    method: methodId,
+                    status: 'paid',
+                    date: new Date().toISOString()
+                });
+
+                renderCurrentUser(updatedUser);
+                toast.show(billingText('purchaseSuccess', 'Package activated successfully.'), 'success');
+                return;
+            }
+
+            appendBillingHistory(user, {
+                packageId: billingState.packageId,
+                duration: billingState.duration,
+                amount: price,
+                method: methodId,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            renderBillingHistory(user);
+            toast.show(
+                methodId === 'card'
+                    ? billingText('redirectCard', 'Redirecting to card payment.')
+                    : billingText('redirectTransfer', 'Opening invoice and transfer instructions.'),
+                'info'
+            );
+        });
+    }
+
+    window.openBillingPanel = openBillingPanel;
+
+    function getStoredUser() {
+        const raw =
+            localStorage.getItem('user') ||
+            localStorage.getItem('mobilaz_current_user') ||
+            localStorage.getItem('adminUser');
+
+        if (!raw) return null;
+
+        try {
+            return JSON.parse(raw);
+        } catch {
+            return null;
+        }
+    }
+
+    function getDisplayName(user) {
+        return [user?.name, user?.lastName].filter(Boolean).join(' ') || user?.email || t('userFallback', 'İstifadəçi');
+    }
+
+    function persistUser(user) {
+        if (!user) return;
+
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('mobilaz_current_user', JSON.stringify(user));
+
+        if (user.role === 'admin') {
+            const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            if (token) {
+                localStorage.setItem('adminToken', token);
+            }
+            localStorage.setItem('adminUser', JSON.stringify(user));
+        }
+    }
+
+    function getRoleLabel(user) {
+        if (user?.role === 'admin') return t('roleAdmin', 'Admin Hesab');
+        if (user?.activePackage === 'VIP') return t('roleVip', 'VIP Hesab');
+        if (user?.activePackage === 'PRO') return t('rolePro', 'PRO Hesab');
+        return t('roleStandard', 'Standart Hesab');
+    }
+
+    function ensureAdminShortcut(isAdmin) {
+        const adminPanelNav = document.getElementById('adminPanelNav');
+        if (adminPanelNav) {
+            adminPanelNav.hidden = !isAdmin;
+            const adminSwitchLabel = adminPanelNav.querySelector('.menu-left span:last-child');
+            if (adminSwitchLabel) {
+                adminSwitchLabel.textContent = t('adminSwitch', 'Adminliyə keç');
+            }
+        }
+
+        if (!isAdmin) {
+            return;
+        }
+
+        const header = document.querySelector('#tab-profile .cabinet-header');
+        if (!header || header.querySelector('#adminPanelButton')) {
+            return;
+        }
+
+        const newAdButton = header.querySelector('a[href="elan-yerlesdir.html"]');
+        const adminButton = document.createElement('a');
+        adminButton.id = 'adminPanelButton';
+        adminButton.href = 'admin.html';
+        adminButton.className = 'btn-primary';
+        adminButton.textContent = t('adminPanel', 'Admin paneli');
+
+        if (newAdButton) {
+            let actionsWrap = newAdButton.parentElement;
+            if (!actionsWrap.classList.contains('cabinet-header-actions')) {
+                actionsWrap = document.createElement('div');
+                actionsWrap.className = 'cabinet-header-actions';
+                header.insertBefore(actionsWrap, newAdButton);
+                actionsWrap.appendChild(newAdButton);
+            }
+
+            actionsWrap.insertBefore(adminButton, newAdButton);
+        } else {
+            header.appendChild(adminButton);
+        }
+    }
+
+    function renderCurrentUser(user) {
+        if (!user) return;
+
+        const displayName = getDisplayName(user);
+        const firstName = user.name || t('userFallback', 'istifadəçi');
+
+        const sidebarUserName = document.getElementById('sidebarUserName');
+        const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+        const sidebarUserRole = document.getElementById('sidebarUserRole');
+        const welcomeText = document.querySelector('#tab-profile .cabinet-header p');
+        const walletAmountValue = document.getElementById('walletAmountValue');
+        const referralBalanceValue = document.getElementById('referralBalanceValue');
+        const referralLink = document.getElementById('referralLink');
+        const facebookProfileName = document.querySelector('.social-connect-card.connected .social-info span');
+
+        if (sidebarUserName) sidebarUserName.textContent = displayName;
+        if (sidebarUserEmail) sidebarUserEmail.textContent = user.email || user.phone || '—';
+        if (sidebarUserRole) sidebarUserRole.textContent = getRoleLabel(user);
+        if (welcomeText) {
+            welcomeText.textContent = t('dashboardWelcome', 'Xoş gəldiniz, {{name}}. Bugünkü statistikanızla tanış olun.').replace('{{name}}', firstName);
+        }
+        if (walletAmountValue) {
+            walletAmountValue.textContent = Number(user.walletBalance || 0).toLocaleString(getLocale(), {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        if (referralBalanceValue) {
+            referralBalanceValue.textContent = Number(user.referralCredits || 0).toLocaleString(getLocale(), {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+        userReferralBalance = Number(user.referralCredits || 0);
+        if (referralLink) {
+            referralLink.value = user.referralCode
+                ? `https://mobil.az/ref/${user.referralCode}`
+                : 'https://mobil.az/ref/...';
+        }
+        if (facebookProfileName) facebookProfileName.textContent = displayName;
+
+        const profileFirstName = document.getElementById('profileFirstName');
+        const profileLastName = document.getElementById('profileLastName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profilePhone = document.getElementById('profilePhone');
+        const twoFactorCheckbox = document.getElementById('two_fa');
+        const privacyShowPhone = document.getElementById('privacyShowPhone');
+        const privacyAllowMessages = document.getElementById('privacyAllowMessages');
+        const privacyShowOnline = document.getElementById('privacyShowOnline');
+
+        if (profileFirstName) profileFirstName.value = user.name || '';
+        if (profileLastName) profileLastName.value = user.lastName || '';
+        if (profileEmail) profileEmail.value = user.email || '';
+        if (profilePhone) profilePhone.value = user.phone || '';
+        if (twoFactorCheckbox) twoFactorCheckbox.checked = Boolean(user.twoFactorEnabled);
+        if (privacyShowPhone) privacyShowPhone.checked = user.privacySettings?.showPhone ?? true;
+        if (privacyAllowMessages) privacyAllowMessages.checked = user.privacySettings?.allowMessages ?? true;
+        if (privacyShowOnline) privacyShowOnline.checked = user.privacySettings?.showOnlineStatus ?? true;
+
+        ensureAdminShortcut(user.role === 'admin');
+        renderBillingPanel(user);
+
+        if (window.updateNavbar) {
+            window.updateNavbar(user);
+        }
+    }
+
+    async function hydrateCurrentUser() {
+        const token = getToken();
+        const storedUser = getStoredUser();
+
+        if (storedUser) {
+            renderCurrentUser(storedUser);
+        }
+
+        if (!token) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/auth/me`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => localStorage.removeItem(key));
+                window.location.href = 'login.html';
+                return;
+            }
+
+            if (!response.ok) {
+                return;
+            }
+
+            const user = await response.json();
+            persistUser(user);
+            renderCurrentUser(user);
+        } catch (error) {
+            console.warn('Cabinet user hydrate failed:', error);
+        }
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatDate(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '-';
+        return date.toLocaleDateString(getLocale(), {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+        });
+    }
+
+    function getImageUrl(image) {
+        if (!image) {
+            return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800';
+        }
+
+        if (image.startsWith('http://') || image.startsWith('https://')) {
+            return image;
+        }
+
+        return API_BASE.replace(/\/api\/?$/, '') + image;
+    }
+
+    function getUiStatus(status) {
+        if (status === 'Active') return 'active';
+        if (status === 'Pending') return 'pending';
+        return 'expired';
+    }
+
+    function getStatusBadge(status) {
+        const labels = {
+            Active: t('statusActive', 'Aktiv'),
+            Pending: t('statusPending', 'Yoxlanılır'),
+            Rejected: t('statusRejected', 'Rədd edildi'),
+            Archived: t('statusArchived', 'Arxivdə'),
+            Sold: t('statusSold', 'Satılıb')
+        };
+
+        return labels[status] || status;
+    }
+
+    function getMyAdsList() {
+        return document.querySelector('.my-ads-list');
+    }
+
+    function updateFilterCounts(ads) {
+        const counts = {
+            all: ads.length,
+            active: ads.filter((ad) => ad.status === 'Active').length,
+            pending: ads.filter((ad) => ad.status === 'Pending').length,
+            expired: ads.filter((ad) => !['Active', 'Pending'].includes(ad.status)).length
+        };
+
+        document.querySelectorAll('.ad-filters .filter-pill').forEach((pill) => {
+            const filter = pill.getAttribute('data-filter') || 'all';
+            const label = pill.querySelector('span')?.outerHTML || pill.textContent || '';
+            pill.innerHTML = `${label} (${counts[filter] || 0})`;
+        });
+    }
+
+    function applyAdFilter(filterType) {
+        document.querySelectorAll('.my-ad-item').forEach((ad) => {
+            const status = ad.getAttribute('data-status');
+            ad.style.display = filterType === 'all' || status === filterType ? 'flex' : 'none';
+        });
+    }
+
+    function bindFilterPills() {
+        const filterPills = document.querySelectorAll('.ad-filters .filter-pill');
+        filterPills.forEach((pill) => {
+            pill.addEventListener('click', () => {
+                filterPills.forEach((p) => p.classList.remove('active'));
+                pill.classList.add('active');
+                applyAdFilter(pill.getAttribute('data-filter') || 'all');
+            });
+        });
+    }
+
+    function renderMyAds(ads) {
+        const list = getMyAdsList();
+        if (!list) return;
+
+        if (!ads.length) {
+            list.innerHTML = `
+                <div class="cab-glass" style="padding:24px;text-align:center;color:var(--cab-text-secondary);">
+                    ${escapeHtml(t('noAds', 'Hələ sizin elanınız yoxdur.'))}
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = ads.map((ad) => `
+            <div class="my-ad-item cab-glass" data-status="${getUiStatus(ad.status)}" data-id="${escapeHtml(ad._id)}">
+                <span class="ad-status-badge">${escapeHtml(getStatusBadge(ad.status))}</span>
+                <img src="${escapeHtml(getImageUrl(ad.images?.[0]))}" class="my-ad-img" alt="${escapeHtml(ad.brand)}">
+                <div class="my-ad-details">
+                    <h4>${escapeHtml(ad.brand)} ${escapeHtml(ad.modelName)}</h4>
+                    <div class="ad-meta">
+                        <span><i class="fas fa-eye"></i> ${ad.views || 0}</span>
+                        <span><i class="fas fa-heart"></i> ${ad.favorites || 0}</span>
+                        <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(formatDate(ad.createdAt))}</span>
+                    </div>
+                    <p class="ad-price">${Number(ad.price || 0).toLocaleString(getLocale())} AZN</p>
+                </div>
+                <div class="my-ad-controls">
+                    <button class="btn-boost" data-id="${escapeHtml(ad._id)}">
+                        <i class="fas fa-rocket"></i> <span>${escapeHtml(window.translations?.[getCurrentLang()]?.['mon-promote-ad'] || 'Tanıt')}</span>
+                    </button>
+                    <div class="my-ad-actions">
+                        <button class="btn-action edit-action" data-id="${escapeHtml(ad._id)}"><i class="fas fa-edit"></i></button>
+                        <button class="btn-action delete-action" data-id="${escapeHtml(ad._id)}"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function loadMyAds() {
+        const token = getToken();
+        const list = getMyAdsList();
+        if (!token || !list) return;
+
+        list.innerHTML = `
+            <div class="cab-glass" style="padding:24px;text-align:center;color:var(--cab-text-secondary);">
+                ${escapeHtml(t('loadingAds', 'Elanlar yüklənir...'))}
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`${API_BASE}/ads/my`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Elanlar yüklənmədi');
+            }
+
+            const ads = Array.isArray(data.ads) ? data.ads : [];
+            renderMyAds(ads);
+            updateFilterCounts(ads);
+
+            const activeFilter = document.querySelector('.ad-filters .filter-pill.active')?.getAttribute('data-filter') || 'all';
+            applyAdFilter(activeFilter);
+        } catch (error) {
+            list.innerHTML = `
+                <div class="cab-glass" style="padding:24px;text-align:center;color:var(--cab-danger);">
+                    ${escapeHtml(error.message || t('adsLoadError', 'Elanlar yüklənmədi.'))}
+                </div>
+            `;
+        }
+    }
+
+    async function deleteAd(adId) {
+        const token = getToken();
+        const response = await fetch(`${API_BASE}/ads/${adId}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Elan silinmədi');
+        }
+    }
+
+    function bindMyAdActions() {
+        const list = getMyAdsList();
+        if (!list) return;
+
+        list.addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.delete-action');
+            const editBtn = e.target.closest('.edit-action');
+            const boostBtn = e.target.closest('.btn-boost');
+
+            if (boostBtn) {
+                window.openPromotionModal(boostBtn.getAttribute('data-id'));
+                return;
+            }
+
+            if (editBtn) {
+                const adId = editBtn.getAttribute('data-id');
+                if (adId) {
+                    window.location.href = `elan-yerlesdir.html?edit=${adId}`;
+                }
+                return;
+            }
+
+            if (!deleteBtn) {
+                return;
+            }
+
+            const adId = deleteBtn.getAttribute('data-id');
+            if (!adId) return;
+
+            if (!confirm(t('deleteAdConfirm', 'Bu elanı silmək istədiyinizdən əminsiniz?'))) {
+                return;
+            }
+
+            try {
+                await deleteAd(adId);
+                toast.show(t('adDeleted', 'Elan silindi.'), 'warning');
+                await loadMyAds();
+            } catch (error) {
+                toast.show(error.message, 'error');
+            }
+        });
+    }
+
+    function bindStaticButtons() {
+        // ── Wallet buttons ────────────────────────────────
+        document.querySelectorAll('.btn-wallet').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const actionKey = btn.getAttribute('data-translate');
+                if (actionKey === 'cab-increase') {
+                    toast.show(t('walletRedirect', 'Ödəniş sisteminə yönləndirilir...'), 'info');
+                    openBillingPanel();
+                } else if (actionKey === 'cab-buy-package') {
+                    openBillingPanel();
+                }
+            });
+        });
+
+        // ── Helper: API call with Bearer token ────────────────
+        async function apiPut(endpoint, body) {
+            const res = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        async function apiPost(endpoint, body = {}) {
+            const res = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getToken()}`
+                },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        async function apiDelete(endpoint) {
+            const res = await fetch(`${API_BASE}/${endpoint}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            return data;
+        }
+
+        function setButtonLoading(btn, loading) {
+            if (!btn) return;
+            if (loading) {
+                btn.disabled = true;
+                btn._originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = btn._originalText || btn.innerHTML;
+            }
+        }
+
+        // ── Save Personal Profile → PUT /api/user/profile ──────
+        const btnSaveProfile = document.getElementById('btnSaveProfile');
+        if (btnSaveProfile) {
+            btnSaveProfile.addEventListener('click', async () => {
+                const name     = document.getElementById('profileFirstName')?.value.trim();
+                const lastName = document.getElementById('profileLastName')?.value.trim();
+                const email    = document.getElementById('profileEmail')?.value.trim();
+                const phone    = document.getElementById('profilePhone')?.value.trim();
+
+                if (!name) { toast.show(t('nameRequired', 'Ad boş ola bilməz.'), 'error'); return; }
+
+                setButtonLoading(btnSaveProfile, true);
+                try {
+                    const updated = await apiPut('user/profile', { name, lastName, email, phone });
+                    // Refresh localStorage so navbar updates immediately
+                    const stored = JSON.parse(localStorage.getItem('user') || '{}');
+                    const merged = { ...stored, ...updated };
+                    persistUser(merged);
+                    renderCurrentUser(merged);
+                    toast.show(t('profileSaved', 'Profil məlumatları yadda saxlanıldı!'), 'success');
+                } catch (err) {
+                    toast.show(err.message, 'error');
+                } finally {
+                    setButtonLoading(btnSaveProfile, false);
+                }
+            });
+        }
+
+        // ── Save Security (password + 2FA) → PUT /api/user/security ─
+        const btnSaveSecurity = document.getElementById('btnSaveSecurity');
+        if (btnSaveSecurity) {
+            btnSaveSecurity.addEventListener('click', async () => {
+                const oldPassword      = document.getElementById('secOldPassword')?.value;
+                const newPassword      = document.getElementById('secNewPassword')?.value;
+                const twoFactorEnabled = document.getElementById('two_fa')?.checked;
+
+                const body = { twoFactorEnabled };
+                if (oldPassword || newPassword) {
+                    if (!oldPassword) { toast.show(t('currentPasswordRequired', 'Cari şifrəni daxil edin.'), 'error'); return; }
+                    if (!newPassword || newPassword.length < 6) { toast.show(t('passwordMin', 'Şifrə ən azı 6 simvol olmalıdır.'), 'error'); return; }
+                    body.oldPassword = oldPassword;
+                    body.newPassword = newPassword;
+                }
+
+                setButtonLoading(btnSaveSecurity, true);
+                try {
+                    await apiPut('user/security', body);
+                    // Clear password fields after success
+                    if (document.getElementById('secOldPassword')) document.getElementById('secOldPassword').value = '';
+                    if (document.getElementById('secNewPassword')) document.getElementById('secNewPassword').value = '';
+                    toast.show(t('securitySaved', 'Təhlükəsizlik tənzimləmələri yadda saxlanıldı!'), 'success');
+                } catch (err) {
+                    toast.show(err.message, 'error');
+                } finally {
+                    setButtonLoading(btnSaveSecurity, false);
+                }
+            });
+        }
+
+        // ── Save Privacy Toggles → PUT /api/user/privacy ───────
+        const btnSavePrivacy = document.getElementById('btnSavePrivacy');
+        if (btnSavePrivacy) {
+            btnSavePrivacy.addEventListener('click', async () => {
+                const body = {
+                    showPhone:        document.getElementById('privacyShowPhone')?.checked        ?? true,
+                    allowMessages:    document.getElementById('privacyAllowMessages')?.checked    ?? true,
+                    showOnlineStatus: document.getElementById('privacyShowOnline')?.checked       ?? true
+                };
+                setButtonLoading(btnSavePrivacy, true);
+                try {
+                    await apiPut('user/privacy', body);
+                    toast.show(t('privacySaved', 'Məxfilik tənzimləmələri yadda saxlanıldı!'), 'success');
+                } catch (err) {
+                    toast.show(err.message, 'error');
+                } finally {
+                    setButtonLoading(btnSavePrivacy, false);
+                }
+            });
+        }
+
+        // ── Freeze Account → POST /api/user/freeze ────────────
+        const freezeBtn = document.querySelector('.btn-outline-warning');
+        if (freezeBtn) {
+            freezeBtn.addEventListener('click', async () => {
+                if (!confirm(t('freezeConfirm', 'Hesabınızı dondurmaq istədiyinizdən əminsiniz? Bütün aktiv elanlarınız gizlədiləcək.'))) return;
+                setButtonLoading(freezeBtn, true);
+                try {
+                    await apiPost('user/freeze');
+                    toast.show(t('accountFrozen', 'Hesabınız donduruldu. Sistemdən çıxış edilir...'), 'warning', 2500);
+                    setTimeout(() => {
+                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => localStorage.removeItem(k));
+                        window.location.href = 'login.html';
+                    }, 2500);
+                } catch (err) {
+                    toast.show(err.message, 'error');
+                    setButtonLoading(freezeBtn, false);
+                }
+            });
+        }
+
+        // ── Delete Account → DELETE /api/user/delete ─────────
+        const deleteAccBtn = document.querySelector('.btn-outline-danger');
+        if (deleteAccBtn) {
+            deleteAccBtn.addEventListener('click', async () => {
+                if (!confirm(t('deleteConfirmOne', 'XƏBƏRDARLIQ: Hesabınız və bütün məlumatlarınız həmişəlik silinəcək. Davam etmək istəyirsiniz?'))) return;
+                if (!confirm(t('deleteConfirmTwo', 'Son təsdiq: Bu əməliyyat GERİ QAYTARILA BİLMƏZ. Silmək istəyirsiniz?'))) return;
+                setButtonLoading(deleteAccBtn, true);
+                try {
+                    await apiDelete('user/delete');
+                    toast.show(t('accountDeleted', 'Hesabınız silindi. Yönləndirilirsiniz...'), 'error', 2500);
+                    setTimeout(() => {
+                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => localStorage.removeItem(k));
+                        window.location.href = 'index.html';
+                    }, 2500);
+                } catch (err) {
+                    toast.show(err.message, 'error');
+                    setButtonLoading(deleteAccBtn, false);
+                }
+            });
+        }
+    }
+
+    function bindChatMock() {
+        const sendBtn = document.querySelector('.btn-send');
+        const chatInput = document.querySelector('.chat-input input');
+        const chatMessagesContainer = document.querySelector('.chat-messages');
+
+        if (!sendBtn || !chatInput || !chatMessagesContainer) {
+            return;
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            const time = new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble bubble-sent';
+            bubble.innerHTML = `${escapeHtml(text)}<span class="bubble-time">${time}</span>`;
+            chatMessagesContainer.appendChild(bubble);
+            chatInput.value = '';
+            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        }
+
         sendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') sendMessage();
         });
     }
 
-    /* ==============================
-       5. Danger Zone & Social Actions
-       ============================== */
-    
-    // Account Freeze / Delete
-    const freezeBtn = document.querySelector('.btn-outline-warning');
-    const deleteBtn = document.querySelector('.btn-outline-danger');
+    bindFilterPills();
+    bindMyAdActions();
+    bindBillingPanel();
+    bindStaticButtons();
+    bindChatMock();
+    renderBillingPanel(getStoredUser() || {});
+    hydrateCurrentUser();
+    loadMyAds();
 
-    if (freezeBtn) {
-        freezeBtn.addEventListener('click', () => {
-            if (confirm('Hesabınızı dondurmaq istədiyinizdən əminsiniz? Bütün elanlarınız gizlədiləcək.')) {
-                toast.show('Hesabınız uğurla donduruldu. Çıxış edilir...', 'warning', 3000);
-                // Backend integration goes here
-                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-            }
-        });
-    }
-
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => {
-             if (confirm('DİQQƏT: Hesabınızı həmişəlik silmək istədiyinizdən əminsiniz? Bu əməliyyat geri qaytarıla bilməz!')) {
-                toast.show('Hesabınız həmişəlik silindi.', 'warning', 3000);
-                // Backend integration goes here
-                setTimeout(() => { window.location.href = 'index.html'; }, 2000);
-            }
-        });
-    }
-
-    // Social Connect / Disconnect mock
-    document.querySelectorAll('.btn-connect').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            toast.show('Platformaya yönləndirilir...', 'info');
-            setTimeout(() => {
-                const card = btn.closest('.social-connect-card');
-                card.classList.add('connected');
-                const infoSpan = card.querySelector('.social-info span');
-                infoSpan.innerText = 'Bağlandı';
-                btn.outerHTML = '<button class="btn-disconnect" aria-label="Ayır"><i class="fas fa-times"></i></button>';
-                toast.show('Hesab uğurla bağlandı!', 'success');
-            }, 1000);
-        });
-    });
-
-    document.addEventListener('click', function(e) {
-        if(e.target && (e.target.className === 'btn-disconnect' || e.target.closest('.btn-disconnect'))) {
-            if(confirm('Bu sosial hesabı ayırmaq istədiyinizdən əminsiniz?')) {
-                const card = e.target.closest('.social-connect-card');
-                if (card) {
-                    card.classList.remove('connected');
-                    const infoSpan = card.querySelector('.social-info span');
-                    if (infoSpan) infoSpan.innerText = 'Bağlanmayıb';
-                    
-                    const btnObj = e.target.closest('.btn-disconnect');
-                    btnObj.outerHTML = '<button class="btn-connect">Bağla</button>';
-                    toast.show('Sosial hesab ayrıldı.', 'warning');
-                }
-            }
+    document.addEventListener('mobilaz:languagechange', () => {
+        const storedUser = getStoredUser();
+        if (storedUser) {
+            renderCurrentUser(storedUser);
         }
+        renderBillingPanel(storedUser || {});
+        loadMyAds();
+        updateTotal();
     });
-
 });
-
-/* ==============================
-   6. Monetization & Referral Logic (Global)
-   ============================== */
 
 let currentPromoAdId = null;
 let selectedPkg = 'bump';
 let selectedDuration = 1;
-let userWalletBalance = 0.00;
-let userReferralBalance = 15.00;
+let userReferralBalance = 15.0;
 
 const prices = {
-    bump: { 1: 1.00 },
-    vip: { 1: 2.00, 3: 4.00 },
-    pro: { 1: 4.00, 3: 8.00 }
+    bump: { 1: 1.0 },
+    vip: { 1: 2.0, 3: 4.0 },
+    pro: { 1: 4.0, 3: 8.0 }
 };
 
-window.openPromotionModal = function(adId) {
+window.openPromotionModal = function (adId) {
     currentPromoAdId = adId;
     const modal = document.getElementById('promotionModal');
     if (modal) {
         modal.classList.add('active');
-        selectPackage('bump'); // default
+        selectPackage('bump');
     }
 };
 
-window.closePromotionModal = function() {
+window.closePromotionModal = function () {
     const modal = document.getElementById('promotionModal');
     if (modal) modal.classList.remove('active');
 };
 
-window.selectPackage = function(pkg) {
+window.selectPackage = function (pkg) {
     selectedPkg = pkg;
-    
-    // Update UI
-    document.querySelectorAll('.promo-pkg-card').forEach(card => {
+
+    document.querySelectorAll('.promo-pkg-card').forEach((card) => {
         const input = card.querySelector('input');
-        if(input.value === pkg) input.checked = true;
+        if (input.value === pkg) input.checked = true;
     });
 
     const tierSelector = document.getElementById('tierSelector');
@@ -311,66 +1606,48 @@ window.selectPackage = function(pkg) {
             setDuration(selectedDuration);
         }
     }
+
     updateTotal();
 };
 
-window.setDuration = function(days) {
+window.setDuration = function (days) {
     selectedDuration = days;
-    document.querySelectorAll('.btn-tier').forEach(btn => {
-        if(parseInt(btn.getAttribute('data-days')) === days) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+    document.querySelectorAll('.btn-tier').forEach((btn) => {
+        btn.classList.toggle('active', parseInt(btn.getAttribute('data-days')) === days);
     });
     updateTotal();
 };
 
-window.updateTotal = function() {
+window.updateTotal = function () {
     let price = prices[selectedPkg][selectedDuration] || 0;
     const checkbox = document.getElementById('useReferralCredit');
     const finalPriceElem = document.getElementById('finalPrice');
-    
+
     if (checkbox && checkbox.checked) {
-        let maxDiscount = price * 0.5;
-        let actualDiscount = Math.min(maxDiscount, userReferralBalance);
+        const maxDiscount = price * 0.5;
+        const actualDiscount = Math.min(maxDiscount, userReferralBalance);
         price -= actualDiscount;
     }
 
     if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
 };
 
-window.confirmPromotion = function() {
-    const btn = document.getElementById('btnPayPromo');
-    if (!btn) return;
-
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Gözləyin...`;
-    btn.disabled = true;
-
-    // Use a small helper to get toast if not global
-    const t = window.toast || { show: (m) => alert(m) };
-
-    setTimeout(() => {
-        t.show('Ödəniş uğurla tamamlandı! Elanınızın statusu yeniləndi.', 'success');
-        closePromotionModal();
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        
-        const checkbox = document.getElementById('useReferralCredit');
-        if (checkbox) checkbox.checked = false;
-    }, 1500);
+window.confirmPromotion = function () {
+    const t = window.toast || { show: (message) => alert(message) };
+    const translate = window.cabinetT || ((key, fallback) => fallback);
+    t.show(translate('promoNotReady', 'Elan tanıtımı hissəsi hələ backend-ə qoşulmayıb.'), 'info');
+    window.closePromotionModal();
 };
 
-window.copyReferralLink = function() {
+window.copyReferralLink = function () {
     const linkInput = document.getElementById('referralLink');
     if (!linkInput) return;
 
     linkInput.select();
     linkInput.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(linkInput.value);
-    
-    const t = window.toast || { show: (m) => alert(m) };
-    t.show('Referal linki kopyalandı!', 'success');
-};
 
+    const t = window.toast || { show: (message) => alert(message) };
+    const translate = window.cabinetT || ((key, fallback) => fallback);
+    t.show(translate('copySuccess', 'Referal linki kopyalandı!'), 'success');
+};

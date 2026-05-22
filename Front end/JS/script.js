@@ -21,8 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "all-brand": "Bütün markalar",
             other: "Digər",
             "select-brand": "Əvvəlcə marka seçin",
-            "all-models": "Bütün modellər",
-            "other-model": "Digər model",
             "price-range": "Qiymət aralığı",
             city: "Şəhər",
             "all-city": "Bütün şəhərlər",
@@ -170,11 +168,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "stores-add-btn": "Mağaza aç",
             "stores-view-btn": "Mağazaya bax",
             "stores-contact-btn": "Əlaqə",
-            "stores-active-ads": "Aktiv Elan",
-            "stores-review": "rəy",
-            "stores-nationwide-delivery": "Ölkədaxili Çatdırılma",
-            "stores-barter": "Barter mümkündür",
-            "stores-warranty": "İl Rəsmi Zəmanət",
             "phone-h2": "Telefon modelləri",
             "elan-h2": "Yeni Elan Yerləşdir",
             "elan-category": "Kateqoriya",
@@ -185,9 +178,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "elan-price": "Qiymət (AZN)",
             "elan-condition": "Vəziyyəti",
             "elan-memory": "Yaddaş (GB)",
-            "elan-ram": "RAM (GB)",
-            "elan-screen": "Ekran ölçüsü",
-            "elan-battery": "Batareya (mAh)",
             "elan-color": "Rəng",
             "elan-fingerprint": "Barmaq izi sensoru",
             "elan-nfc": "NFC",
@@ -214,30 +204,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "elan-rule10": "Məhsulun zəmanəti varsa, təsvir bölməsində qeyd edilməlidir.",
             "elan-rule11": "Elan yerləşdirərkən etik qaydalara riayət edin.",
             "elan-select": "Seçin",
-            "opt-telefon": "Telefon",
-            "opt-planshet": "Planşet",
-            "opt-aksesuar": "Aksesuar",
-            "opt-headphone": "Qulaqlıq",
-            "opt-yeni": "Yeni",
-            "opt-islenmiş": "İşlənmiş",
-            "opt-64-az": "64 GB-dən az",
-            "opt-64": "64 GB",
-            "opt-128": "128 GB",
-            "opt-256": "256 GB",
-            "opt-512": "512 GB",
-            "opt-512-cox": "512 GB-dən daha çox",
-            "opt-qara": "Qara",
-            "opt-ag": "Ağ",
-            "opt-qizili": "Qızılı",
-            "opt-gumushu": "Gümüşü",
-            "opt-boz": "Boz",
-            "opt-mavi": "Mavi",
-            "opt-diger": "Digər",
-            "opt-brand-placeholder": "Əvvəlcə kateqoriya seçin",
-            "opt-model-placeholder-cat": "Əvvəlcə kateqoriya seçin",
-            "opt-model-placeholder-brand": "Model seçin",
-            "opt-diger-brand": "Digər",
-            "opt-diger-model": "Digər model",
             "fav-h1": "Seçilmişlər",
             "fav-empty-p": "Hələ heç bir elan seçilmişlərə əlavə edilməyib.",
             "fav-empty-a": "Elanlara baxın",
@@ -257,6 +223,87 @@ document.addEventListener("DOMContentLoaded", function () {
             "cab-phone-lbl": "Telefon:",
             "cab-email-lbl": "E-poçt:",
             "cab-edit-btn": "Redaktə et",
+            "cab-standard-acc": "Standart Hesab",
+            "cab-dashboard": "İdarə Paneli",
+            "cab-dashboard-desc": "Xoş gəldiniz. Bugünkü statistikanızla tanış olun.",
+            "cab-new-ad": "Yeni Elan",
+            "cab-balance": "Balansınız",
+            "cab-increase": "Artır",
+            "cab-buy-package": "Paket al",
+            "cab-total-views-month": "Ümumi baxış (Bu ay)",
+            "cab-wa-clicks": "WhatsApp keçidləri",
+            "cab-recent-activity": "Son Aktivlik",
+            "cab-ref-bonus": "Referal Bonusu",
+            "cab-ref-bonus-desc": "Dostunuz \"Həsən Ə.\" qeydiyyatdan keçdiyi üçün 5 AZN qazandınız.",
+            "cab-sys-login": "Sistem Girişi",
+            "cab-sys-login-desc": "Hesabınıza yeni giriş aşkarlandı (Bakı, 192.168.1.1)",
+            "cab-my-ads-desc": "Bütün aktiv və passiv elanlarınızı idarə edin.",
+            "cab-filter-all": "Bütün elanlar",
+            "cab-filter-active": "Aktiv",
+            "cab-filter-pending": "Yoxlanılır",
+            "cab-filter-expired": "Müddəti bitmiş",
+            "cab-messages-desc": "Alıcı və satıcılarla əlaqə",
+            "cab-search-msg": "Mesaj axtar...",
+            "cab-msg-empty": "Mesaj qutunuz boşdur.",
+            "cab-no-user": "İstifadəçi seçilməyib",
+            "cab-select-msg": "Söhbətə başlamaq üçün soldan mesaj seçin",
+            "cab-write-msg": "Mesajınızı yazın...",
+            "cab-settings-desc": "Hesab məlumatlarınızı idarə edin",
+            "cab-notifications": "Bildirişlər",
+            "cab-security": "Təhlükəsizlik",
+            "cab-privacy": "Məxfilik",
+            "cab-name": "Ad",
+            "cab-surname": "Soyad",
+            "cab-email": "Email",
+            "cab-phone": "Telefon",
+            "cab-save": "Yadda saxla",
+            "cab-notif-desc": "Platformadan hansı məlumatları necə almaq istədiyinizi seçin.",
+            "cab-email-notifs": "Email Bildirişləri",
+            "cab-new-msgs": "Yeni Mesajlar",
+            "cab-new-msgs-desc": "Kimsə sizə alıcı və ya satıcı kimi mesaj yazdıqda dərhal email alın",
+            "cab-ad-status": "Elan Statusu",
+            "cab-ad-status-desc": "Elanınız təsdiqləndikdə, rədd edildikdə və ya müddəti bitdikdə",
+            "cab-news-camp": "Xəbərlər və Kampaniyalar",
+            "cab-news-camp-desc": "Mobil.az-dan yeniliklər, endirimlər və xüsusi təkliflər barədə xəbərlər",
+            "cab-curr-pass": "Cari Şifrə",
+            "cab-new-pass": "Yeni Şifrə",
+            "cab-2fa": "İki mərhələli təsdiqləməni (2FA) aktiv et",
+            "cab-update": "Yenilə",
+            "cab-acc-manage": "Hesabın İdarəedilməsi",
+            "cab-freeze-acc": "Hesabı Dondur",
+            "cab-freeze-desc": "Hesabınız və bütün aktiv elanlarınız müvəqqəti olaraq gizlədiləcək.",
+            "cab-freeze-btn": "Dondur",
+            "cab-del-acc": "Hesabı Sil",
+            "cab-del-desc": "Bütün məlumatlarınız və elanlarınız həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.",
+            "cab-del-btn": "Hesabı Sil",
+            "cab-priv-desc": "Məlumatlarınızın platformada necə görünəcəyini idarə edin.",
+            "cab-show-num": "Nömrəni Göstər",
+            "cab-show-num-desc": "Bütün elanlarınızda əlaqə nömrəniz alıcılara göstərilsin",
+            "cab-allow-msg": "Mesajlara İcazə Ver",
+            "cab-allow-msg-desc": "Digər istifadəçilər daxili sistem vasitəsilə sizə mesaj yaza bilsin",
+            "cab-online-status": "Onlayn Statusu",
+            "cab-online-desc": "Profilinizdə nə vaxt onlayn olduğunuz görünsün",
+            "cab-social-title": "Sosial Hesablar",
+            "cab-social-desc": "Daha sürətli və təhlükəsiz giriş üçün sosial media hesablarınızı bağlayın.",
+            "cab-unlinked": "Bağlanmayıb",
+            "cab-link": "Bağla",
+            "cab-billing": "Paket və Ödənişlər",
+            "cab-curr-pkg": "Cari Paket",
+            "cab-no-pkg": "Heç bir fəal paket yoxdur.",
+            "cab-pay-hist": "Ödəniş Tarixçəsi",
+            "cab-no-trans": "Heç bir əməliyyat tapılmadı.",
+            "mon-referral-title": "Dostunu gətir, 5 AZN qazan!",
+            "mon-referral-desc": "Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN hədiyyə olunacaq.",
+            "mon-referral-credit": "Referal balansı",
+            "mon-copy-link": "Kopyala",
+            "mon-promote-ad": "Tanıt",
+            "mon-bump": "İrəli çək",
+            "mon-vip": "VİP",
+            "mon-pro": "PRO",
+            "mon-duration": "Müddət:",
+            "mon-use-credit": "Referal kreditindən istifadə et (max 50%)",
+            "mon-total": "Cəmi:",
+            "mon-pay-btn": "Ödəniş et",
             // Rules page
             "rules-page-h1": "Qaydalar və Təhlükəsizlik",
             "rules-page-sub": "Platformamızdan təhlükəsiz və rahat istifadə etmək üçün bu qaydaları oxuyun.",
@@ -264,40 +311,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "rules-tab-posting": "Elan Yerləşdirmə",
             "rules-tab-safety": "Təhlükəsizlik",
             "rules-tab-prohibited": "Qadağalar",
-            "rules-h2-general": "Ümumi İstifadə Qaydaları",
-            "rules-g1": "Platforma yalnız mobil telefon, planşet, qulaqlıq və telefon aksesuarlarının alqı-satqısı üçün nəzərdə tutulmuşdur.",
-            "rules-g2": "Qeydiyyatdan keçmək üçün real şəxsi məlumatlarınızı (ad, soyad, telefon nömrəsi) daxil etməlisiniz.",
-            "rules-g3": "Hər istifadəçinin yalnız bir hesabı ola bilər. Çoxsaylı hesablar bloklanacaq.",
-            "rules-g4": "Platformada yerləşdirilən bütün elanlar moderasiyadan keçir. Müvafiq olmayan elanlar silinir.",
-            "rules-g5": "Elanın müddəti 30 gündür. Müddəti bitmiş elanlar avtomatik arxivlənir.",
-            "rules-g6": "Eyni elanı bir neçə dəfə yerləşdirmək qadağandır. Belə elanlar sistematik olaraq silinəcəkdir.",
-            "rules-h2-posting": "Elan Yerləşdirmə Qaydaları",
-            "rules-p1": "Elanı düzgün kateqoriyada yerləşdirin: Telefonlar, Planşetlər, Qulaqlıqlar və ya Aksesuarlar.",
-            "rules-p2": "Başlıqda qiymət yazmayın — bunun üçün qiymət sahəsi ayrılmışdır. Bu tip elanlara düzəliş edilməlidir.",
-            "rules-p3": "Məhsulun real vəziyyətini qeyd edin: Yeni, İşlənmiş və s. Yanıltıcı məlumat vermək qadağandır.",
-            "rules-p4": "Ən az 1, maksimum 10 keyfiyyətli şəkil əlavə edin. Hər şəklin ölçüsü 5MB-dan artıq olmamalıdır.",
-            "rules-p5": "Şəkillərdə, başlıqda və ya təsvirdə telefon nömrəsi, e-mail ünvanı və ya sayt adresi göstərməyin.",
-            "rules-p6": "Məhsulun texniki xüsusiyyətlərini (yaddaş, rəng, NFC, suya davamlılıq və s.) dürüst qeyd edin.",
-            "rules-p7": "Zəmanəti olan məhsullar üçün zəmanət müddəti mütləq qeyd edilməlidir.",
-            "rules-p8": "Qiymət AZN (Azərbaycan Manatı) ilə göstərilməlidir. Başqa valyutada göstərmək qadağandır.",
-            "rules-p9": "Hər kateqoriya üçün müəyyən sayda aktiv elan limiti mövcuddur. Premium paketlər bu limiti artırır.",
-            "rules-p10": "Elanınızla əlaqədar bütün bildirişlər qeydiyyatda istifadə etdiyiniz e-mail ünvanına göndəriləcəkdir.",
-            "rules-h2-safety": "Təhlükəsizlik Tövsiyələri",
-            "safety-c1-h": "Şəxsən görüşün",
-            "safety-c1-p": "Mümkün qədər alıcı və ya satıcı ilə ictimai yerdə, gündüz vaxtı görüşün. Tənha və ya qaranlıq yerlərdə görüşməkdən çəkinin.",
-            "safety-c2-h": "Məhsulu yoxlayın",
-            "safety-c2-p": "Məhsulu almazdan əvvəl onun IMEI kodunu, batareya sağlamlığını, ekranını və bütün mövcud funksiyalarını yoxlayın.",
-            "safety-c3-h": "Ödəniş",
-            "safety-c3-p": "Ödənişi yalnız məhsulu təhvil aldıqdan sonra və şəxsən həyata keçirin. Avans ödənişi etməkdən çəkinin.",
-            "safety-c4-h": "Şübhəli elanları bildirin",
-            "safety-c4-p": "Hər hansı şübhəli və ya yanıltıcı elanı \"Şikayət et\" düyməsi vasitəsilə dərhal moderatorlara bildirin.",
-            "safety-warning": "Diqqət: Mobil.az heç vaxt SMS, e-mail və ya zənglə sizin şifrənizi, bank kartı məlumatlarınızı tələb etmir. Belə sorğuları dərhal rədd edin.",
-            "rules-h2-prohibited": "Qadağan Edilən Fəaliyyətlər",
-            "rules-pr1": "Oğurlanmış, saxta və ya müvafiq sənədi olmayan məhsulları satmaq qadağandır. Bu cür elanlar silinir, hesab bloklanır və hüquq orqanlarına xəbər verilir.",
-            "rules-pr2": "Başqasına məxsus şəkillərdən, adlardan və ya marka loqotiplərindən icazəsiz istifadə edərək elan yerləşdirmək qadağandır.",
-            "rules-pr3": "Aldadıcı qiymətlər, yalançı texniki xüsusiyyətlər və yanıltıcı fotoşəkillərdən istifadə etmək qadağandır.",
-            "rules-pr4": "Digər istifadəçilərə qarşı təhqiredici, ayrı-seçkilik xarakterli və ya aqressiv ünsiyyət formaları qadağandır.",
-            "rules-pr5": "Spam təbiətli elanlar və eyni elanın sistematik olaraq yenidən yerləşdirilməsi qadağandır.",
             // Privacy page
             "privacy-page-h1": "Məxfilik Siyasəti",
             "privacy-page-sub": "Mobil.az istifadəçilərimizin məxfiliyini qorumağı prinsip kimi qəbul edir.",
@@ -309,291 +322,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "privacy-h2-rights": "İstifadəçi Hüquqları",
             "privacy-h2-security": "Məlumat Təhlükəsizliyi",
             "privacy-h2-changes": "Siyasətdə Dəyişikliklər",
-            "privacy-h2-contact": "Bizimlə Əlaqə",
-            "privacy-p-collect": "Mobil.az-da qeydiyyatdan keçdiyiniz zaman aşağıdakı məlumatları toplamaq lazım gəlir:",
-            "privacy-collect-1": "Ad, soyad — hesabınızı fərdiləşdirmək və identifikasiya etmək üçün.",
-            "privacy-collect-2": "Telefon nömrəsi — elanla bağlı əlaqə üçün və hesab doğrulaması üçün.",
-            "privacy-collect-3": "E-mail ünvanı — bildirişlər, şifrə sıfırlanması və sistemdən məlumatlar göndərmək üçün.",
-            "privacy-collect-4": "Yerləşdirdiyiniz elan məlumatları (şəkillər, təsvir, qiymət, məhsul xüsusiyyətləri).",
-            "privacy-collect-5": "Texniki məlumatlar: IP ünvanı, brauzer növü, platforma fəaliyyət jurnalları (log).",
-            "privacy-p-use": "Topladığımız məlumatlar aşağıdakı məqsədlər üçün istifadə olunur:",
-            "privacy-use-1": "Hesabınızı yaratmaq, idarə etmək və qorumaq.",
-            "privacy-use-2": "Elanlarınızı platformada yerləşdirmək və göstərmək.",
-            "privacy-use-3": "Alıcı ilə satıcı arasında ünsiyyəti asanlaşdırmaq.",
-            "privacy-use-4": "Şübhəli fəaliyyətləri aşkar etmək və platformanın təhlükəsizliyini təmin etmək.",
-            "privacy-use-5": "Elan, hesab vəziyyəti haqqında bildirişlər göndərmək.",
-            "privacy-use-6": "Xidmətimizi inkişaf etdirmək üçün statistik təhlil aparmaq (şəxsi məlumatlar anonim şəkildə).",
-            "privacy-p-share1": "Mobil.az şəxsi məlumatlarınızı üçüncü şəxslərə satmır. Məlumatlar yalnız aşağıdakı hallardan birinin yarandığı zaman paylaşıla bilər:",
-            "privacy-share-1": "Qanunvericiliyin tələb etdiyi hallarda (məhkəmə qərarı, hüquq mühafizə orqanlarının sorğusu).",
-            "privacy-share-2": "Xidmət təminatçıları ilə (hosting, e-mail göndərmə) — yalnız xidmət çərçivəsində.",
-            "privacy-share-3": "Fırıldaqçılıq hallarında platformanı qorumaq məqsədilə iş ortaqlarımızla.",
-            "privacy-note-share": "Elanınızda göstərdiyiniz telefon nömrəsi elanı görən bütün istifadəçilər tərəfindən görülə bilər. Telefon nömrənizi elanda göstərmək istəyib-istəmədiyinizi siz seçirsiniz.",
-            "privacy-p-cookies1": "Mobil.az veb saytımızın düzgün işləməsi üçün çərəzlərdən istifadə edir. Çərəzlər sizin brauzerinizdə saxlanan kiçik məlumat fayllarıdır.",
-            "privacy-p-cookies2": "İstifadə etdiyimiz çərəzlər:",
-            "privacy-cookie-1": "<strong>Sessiya çərəzləri:</strong> Siz saytı bağladıqdan sonra silinir. Giriş statusunu saxlamaq üçün istifadə olunur.",
-            "privacy-cookie-2": "<strong>Daimi çərəzlər:</strong> Dil seçimi, qaranlıq rejim kimi tercihləriniizi yadda saxlamaq üçün istifadə olunur.",
-            "privacy-p-cookies3": "Brauzerin parametrlərini dəyişdirərək çərəzləri qəbul etməkdən imtina edə bilərsiniz, amma bu halda bəzi funksiyalar düzgün işləməyə bilər.",
-            "privacy-p-rights": "Siz öz məlumatlarınıza dair aşağıdakı hüquqlara maliksiniz:",
-            "privacy-right-1": "Hesabınızdakı şəxsi məlumatlarınıza baxmaq və onları yeniləmək hüququ.",
-            "privacy-right-2": "Hesabınızı tamamilə silmək hüququ — bu halda bütün məlumatlarınız sistemdən silinir.",
-            "privacy-right-3": "Marketinq bildirişlərindən imtina etmək hüququ.",
-            "privacy-right-4": "Məlumatlarınızın işlənməsinə itiraz etmək hüququ (qanuni əsaslar daxilində).",
-            "privacy-rights-note": "Bu hüquqlarınızı həyata keçirmək üçün aşağıdakı e-mail ünvanı vasitəsilə bizimlə əlaqə saxlaya bilərsiniz.",
-            "privacy-p-security1": "Məlumatlarınızın təhlükəsizliyi bizim əsas prioritetimizdir. Mobil.az istifadəçilərin məlumatlarını qorumaq üçün lazımi təhlükəsizlik tədbirləri görür. Şifrələr təhlükəsiz kriptoqrafik üsullarla saxlanılır.",
-            "privacy-p-security2": "Bununla belə, heç bir internet platforması tam 100% təhlükəsizlik zəmanəti verə bilməz. Şifrənizi heç kimlə paylaşmayın və güclü, unikal şifrə istifadə edin.",
-            "privacy-p-changes": "Bu məxfilik siyasəti zaman-zaman yenilənə bilər. Əhəmiyyətli dəyişikliklər olduqda e-mail vasitəsilə məlumatlandırılacaqsınız. Maksimum şəffaflıq üçün bu səhifəni müntəzəm yoxlamağınızı tövsiyə edirik.",
-            "privacy-p-contact": "Məxfilik siyastimizlə bağlı hər hansı sualınız varsa, bizimlə əlaqə saxlayın:",
-            "privacy-contact-email-h": "E-mail",
-            "privacy-contact-phone-h": "Telefon",
-            "stores-h1": "Sevdiyiniz mağazaları kəşf edin",
-            "stores-p": "Sizin üçün ən yaxşı mağazaları bir araya gətirdik",
-            "stores-search-placeholder": "Mağaza axtar...",
-            "stores-search-btn": "Axtar",
-            "stores-add-btn": "Mağaza aç",
-            "stores-view-btn": "Mağazaya bax",
-            "stores-contact-btn": "Əlaqə",
-            // Create Shop page
-            "cs-hero-h1": "Öz Mağazanızı Açın",
-            "cs-hero-p": "Mobil.az-ın gücündən yararlanın — minlərlə alıcıya çatın, elanlarınızı idarə edin və biznesinizi böyüdün.",
-            "cs-badge-fast": "Sürətli Qeydiyyat",
-            "cs-badge-users": "Günlük Artan İstifadəçi Bazası",
-            "cs-badge-safe": "Təhlükəsiz & Rəsmi",
-            "cs-pkg-chip": "Paketlər",
-            "cs-pkg-h2": "Biznesinizə Uyğun Paketi Seçin",
-            "cs-pkg-sub": "Hamısı 30 günlük pulsuz sınaq dövrü ilə başlayır. İstədiyiniz vaxt dəyişdirin.",
-            "cs-pkg-select": "Paketi Seç",
-            "cs-popular-badge": "Ən Populyar",
-            "cs-starter-name": "Başlanğıc",
-            "cs-starter-tag": "Kiçik satıcılar üçün ideal",
-            "cs-starter-price": "Pulsuz",
-            "cs-starter-period": "Başlanğıc üçün · Ödənişsiz",
-            "cs-starter-f1": "5 aktiv elan",
-            "cs-starter-f2": "Əsas mağaza profili",
-            "cs-starter-f3": "Mobil.az siyahısında görünmə",
-            "cs-starter-f4": "Rəsmi mağaza nişanı yoxdur",
-            "cs-starter-f5": "Seçilmiş elan dəstəyi yoxdur",
-            "cs-starter-f6": "Analitika paneli yoxdur",
-            "cs-pro-name": "Pro Mağaza",
-            "cs-pro-tag": "Aktiv satış edən və müştəri etibarı qazanmaq istəyən mağazalar üçün.",
-            "cs-monthly": "/ ay · aylıq ödəniş",
-            "cs-pro-f1": "50 aktiv elan",
-            "cs-pro-f2": "Mavi Doğrulama Nişanı ✓",
-            "cs-pro-f3": "Şəxsi mağaza linki (Instagram profilinə qoymaq üçün)",
-            "cs-pro-f4": "Əsas Analitika: yalnız baxış sayı",
-            "cs-pro-f5": "Hər ay 3 elan üçün avtomatik «Irəli çək» hədiyyəsi",
-            "cs-elite-tag": "Böyük mağazalar & distribüterlar",
-            "cs-elite-f1": "Limitsiz elan",
-            "cs-elite-f2": "Premium qızıl nişan 👑",
-            "cs-elite-f3": "Limitsiz seçilmiş elan",
-            "cs-elite-f4": "Ana səhifə banner reklamı",
-            "cs-elite-f5": "Ətraflı analitika və hesabatlar",
-            "cs-elite-f6": "Xüsusi dəstək (7/24)",
-            "cs-form-chip": "Qeydiyyat",
-            "cs-form-h2": "Mağaza Məlumatlarını Daxil Edin",
-            "cs-form-sub": "Aşağıdakı formu doldurun, komandamız sizinlə əlaqə saxlayacaq.",
-            "cs-form-pkg-default": "Pro Mağaza paketi seçildi",
-            "cs-form-pkg-hint": "Paketi dəyişmək üçün yuxarıdan seçin",
-            "cs-lbl-store-name": "Mağaza Adı *",
-            "cs-ph-store-name": "Məs: LeadTech Mobile",
-            "cs-lbl-owner": "Sahibin Adı Soyadı *",
-            "cs-ph-owner": "Məs: Əli Məmmədov",
-            "cs-lbl-phone": "Əlaqə Nömrəsi *",
-            "cs-lbl-email": "E-poçt *",
-            "cs-ph-email": "magaza@example.com",
-            "cs-lbl-category": "Mağaza Kateqoriyası *",
-            "cs-ph-category": "Kateqoriya seçin",
-            "cs-cat-phones": "Smartfonlar",
-            "cs-cat-accessories": "Aksesuarlar",
-            "cs-cat-tablets": "Planşetlər",
-            "cs-cat-repair": "Təmir & Servis",
-            "cs-lbl-address": "Ünvan *",
-            "cs-ph-address": "Küçə, bina, mağaza nömrəsi...",
-            "cs-lbl-desc": "Mağaza Haqqında *",
-            "cs-ph-desc": "Mağazanız, satdığınız məhsullar, zəmanət şərtləri haqqında qısa məlumat...",
-            "cs-lbl-logo": "Mağaza Logosu",
-            "cs-logo-click": "Şəkil yükləmək üçün klikləyin",
-            "cs-logo-drag": "və ya sürükleyin",
-            "cs-logo-max": "Maks. 5 MB",
-            "cs-lbl-whatsapp": "WhatsApp Nömrəsi",
-            "cs-lbl-instagram": "Instagram Linki",
-            "cs-ph-instagram": "https://instagram.com/magaza",
-            "cs-optional": "(İstəyə bağlı)",
-            "cs-submit": "Mağazamı Aç",
-            "cs-form-note": "Formu göndərməklə <a href='rules.html'>Qaydalar</a> və <a href='privacy.html'>Məxfilik Siyasəti</a> ilə razılaşırsınız.",
-            "cs-lbl-city": "Şəhər *",
-            "cs-ph-city": "Şəhər seçin",
-            "cs-ben-chip": "Üstünlüklər",
-            "cs-ben-h2": "Niyə Mobil.az?",
-            "cs-ben1-h": "Artan Alıcı Bazası",
-            "cs-ben1-p": "Hər gün platformamızı ziyarət edən aktiv alıcılara mağazanızı tanıdın.",
-            "cs-ben2-h": "Satışlarınızı İzləyin",
-            "cs-ben2-p": "Analitika paneliylə baxışları, klikləri və müştəri davranışını izləyin.",
-            "cs-ben3-h": "Tam Mobil Uyğun",
-            "cs-ben3-p": "Müştəriləriniz istənilən cihazdan mağazanıza rahat daxil ola bilər.",
-            "cs-ben4-h": "Dəstək Komandası",
-            "cs-ben4-p": "Hər sualınız üçün peşəkar dəstək komandamız həmişə sizin yanınızdadır.",
-            "cs-pro-f6": "WhatsApp inteqrasiyası",
-            "cs-elite-name": "Premium",
-            "elan-badge": "Aktiv",
-            "elan-subtitle": "Telefon, planşet, qulaqlıq və aksesuarlarınızı sürətlə doğru alıcıya çatdırın",
-            "elan-stat-safe": "Güvənli platforma",
-            "elan-stat-free": "Pulsuz elan",
-            "elan-stat-days": "30 gün aktiv",
-            "elan-step1": "Məlumatlar",
-            "elan-step2": "Şəkillər",
-            "elan-step3": "Yayımla",
-            "elan-section1": "Əsas Məlumat",
-            "elan-region": "Region *",
-            "elan-section2": "Texniki Xüsusiyyətlər",
-            "elan-features-label": "Xüsusiyyətlər",
-            "elan-chip-nfc": "NFC",
-            "elan-chip-fingerprint": "Barmaq izi",
-            "elan-chip-waterproof": "Suya davamlı",
-            "elan-chip-expandable": "Əlavə yaddaş",
-            "elan-chip-delivery": "Çatdırılma",
-            "elan-section3": "Təsvir və Şəkillər",
-            "elan-upload-text": "Şəkilləri buraya sürükleyin və ya",
-            "elan-upload-span": "seçin",
-            "elan-section4": "Əlaqə Məlumatları",
-            "elan-submit-note": "Elanınız dərc edilməzdən əvvəl moderasiyadan keçəcək.",
-            "elan-tip-title": "Məsləhət",
-            "elan-tip-text": "Yüksək keyfiyyətli şəkillər elanınızın 3x daha tez satışına kömək edir. Ən azı 4–6 fotoşəkil əlavə edin.",
-            "filter-memory-label": "Yaddaş (ROM)",
-            "filter-ram-label": "RAM",
-            "ram-2gb": "2 GB",
-            "ram-4gb": "4 GB",
-            "ram-6gb": "6 GB",
-            "ram-8gb": "8 GB",
-            "ram-12gb": "12 GB",
-            "ram-16gb": "16 GB+",
-            "filter-screen-label": "Ekran ölçüsü",
-            "screen-small": "<5.5\"",
-            "screen-medium": "5.5–6.1\"",
-            "screen-large": "6.1–6.7\"",
-            "screen-xlarge": ">6.7\"",
-            "filter-battery-label": "Batareya",
-            "battery-low": "<3000 mAh",
-            "battery-mid": "3000–4500 mAh",
-            "battery-high": ">4500 mAh",
-            "filter-seller-label": "Satıcı növü",
-            "seller-private": "Şəxsi",
-            "seller-store": "Mağaza",
-            "filter-category-label": "Kateqoriya",
-            "filter-cat-all": "Hamısı",
-            "filter-cat-phone": "Telefonlar",
-            "filter-cat-tablet": "Planşetlər",
-            "filter-cat-headphone": "Qulaqcıqlar",
-            "filter-cat-accessory": "Aksesuarlar",
-            "cabinet-title": "Şəxsi Kabinet",
-            "cab-profile": "Profil",
-            "cab-my-ads": "Mənim elanlarım",
-            "cab-messages": "Mesajlar",
-            "cab-settings": "Tənzimləmələr",
-            "cab-logout": "Çıxış",
-            "cab-welcome": "Xoş gəldiniz,",
-            "cab-active-ads": "Aktiv elanlar",
-            "cab-total-views": "Ümumi baxış",
-            "cab-favorites": "Seçilmişlər",
-            "cab-personal-info": "Şəxsi məlumatlar",
-            "cab-edit-btn": "Redaktə et",
-            "cab-name-lbl": "Ad:",
-            "cab-surname-lbl": "Soyad:",
-            "cab-phone-lbl": "Telefon:",
-            "cab-email-lbl": "E-poçt:",
-            "fav-empty-desc": "Hələ heç bir elan seçilmişlərə əlavə edilməyib.",
-            "fav-empty-link": "Elanlara baxın",
-            "fav-count-text": "elan seçilmişlərə əlavə edilib",
-            "fav-select-all": "Hamısını seç",
-            "fav-delete-selected": "Seçilənləri sil",
-            "fav-delete-all": "Hamısını sil",
-            "fav-delete-confirm": "Bütün seçilmiş elanları silmək istədiyinizə əminsiniz?",
-            "cs-lbl-payment": "Ödəniş Üsulu *",
-            "cs-pay-card": "Bank Kartı",
-            "cs-pay-card-sub": "Onlayn ödəniş (Visa/MasterCard)",
-            "cs-pay-transfer": "Bank Köçürməsi",
-            "cs-pay-transfer-sub": "Şirkət hesabına ödəniş",
-            "cs-pay-terminal": "Terminal",
-            "cs-pay-terminal-sub": "eManat / MilliÖn",
-            "cs-pay-card-details": "Kart Məlumatları",
-            "cs-lbl-card-num": "Kartın Nömrəsi",
-            "cs-lbl-card-exp": "Bitmə Tarixi",
-            "cs-lbl-card-cvv": "CVV",
-            "cs-pay-transfer-details": "Köçürmə Məlumatları",
-            "cs-pay-transfer-info": "Zəhmət olmasa, ödənişi aşağıdakı hesaba edin və VÖEN-inizi daxil edin:",
-            "cs-lbl-voen": "Sizin VÖEN / İNV",
-            "cs-pay-terminal-details": "Terminal (MilliÖn / eManat)",
-            "cs-pay-terminal-info": "Ödənişi terminal vasitəsilə etdikdən sonra qəbz nömrəsini daxil edin.",
-            "cs-lbl-receipt": "Qəbz Nömrəsi",
-            // Ad Detail page
-            "det-badge-new": "Yeni",
-            "det-condition-label": "Vəziyyəti:",
-            "det-city-label": "Şəhər:",
-            "det-delivery-label": "Çatdırılma:",
-            "det-delivery-yes": "Var",
-            "det-delivery-no": "Yoxdur",
-            "det-price-note": "Qiymət sabitdir · Barter mümkündür",
-            "det-spec-storage": "Yaddaş",
-            "det-spec-screen": "Ekran ölçüsü",
-            "det-spec-refresh": "Ekran yenilənmə",
-            "det-spec-battery": "Batareya",
-            "det-spec-processor": "Prosessor",
-            "det-spec-cam-rear": "Kamera (arxa)",
-            "det-spec-cam-front": "Kamera (ön)",
-            "det-spec-color": "Rəng",
-            "det-spec-condition": "Vəziyyəti",
-            "det-spec-waterproof": "Suya davamlılıq",
-            "det-feat-fingerprint": "Barmaq izi",
-            "det-feat-waterproof-chip": "IP68 Suya davamlı",
-            "det-feat-no-expandable": "Əlavə yaddaş yox",
-            "det-spec-included": "✓ Daxildir",
-            "det-spec-available": "✓ Var",
-            "det-specs-title": "Texniki Xüsusiyyətlər",
-            "det-desc-title": "Şəxsi açıqlama",
-            "det-reviews-title": "Satıcı haqqında rəylər",
-            "det-reviews-based": "rəy əsasında",
-            "det-write-review-title": "Öz rəyinizi yazın",
-            "det-review-name-ph": "Adınız (məs. Əli M.)",
-            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın...",
-            "det-review-submit": "Rəy Göndər",
-            "det-ad-no": "Elan №:",
-            "det-posted": "Yərləşdirildi:",
-            "det-updated": "Yeniləndi:",
-            "det-seller-personal": "Şəxsi hesab",
-            "det-seller-since": "Üzv olub:",
-            "det-ads-shared": "Paylaşılan elan",
-            "det-rating": "★ Reytinq",
-            "det-positive": "Müsbət rəy",
-            "det-btn-call": "Nömrəni Göstər",
-            "det-btn-whatsapp": "WhatsApp ilə Yazın",
-            "det-btn-message": "Mesaj Göndər",
-            "det-sidebar-review-title": "Müsbət rəy yazın",
-            "det-sidebar-review-ph": "Bu satıcı haqqında rəyiniz...",
-            "det-safety-title": "Təhlükəsiz Alış",
-            "det-safety-1": "Mümkün qədər ictimai yərdə görüşün",
-            "det-safety-2": "IMEI kodunu yoxlamadan almayın",
-            "det-safety-3": "Avans ödənişindən çəkinin",
-            "det-safety-4": "Şüphəli elanı bildirin",
-            "det-btn-share": "Paylaş",
-            "det-btn-report": "Şikayət et",
-            "det-related-title": "Oxşar Elanlar",
-            "det-breadcrumb-home": "Ana Səhifə",
-            "det-breadcrumb-phones": "Telefonlar",
-            // Monetization
-            "mon-bump": "İrəli çək",
-            "mon-vip": "VİP",
-            "mon-pro": "PRO",
-            "mon-1day": "1 Gün",
-            "mon-3day": "3 Gün",
-            "mon-referral-title": "Dostunu gətir, 5 AZN qazan!",
-            "mon-referral-desc": "Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN hədiyyə olunacaq.",
-            "mon-copy-link": "Linki kopyala",
-            "mon-referral-credit": "Referal balansı",
-            "mon-promote-ad": "Elanı tanıt",
-            "mon-package": "Paket",
-            "mon-duration": "Müddət",
-            "mon-total": "Cəmi",
-            "mon-use-credit": "Referal kreditindən istifadə et (max 50%)",
-            "mon-pay-btn": "Ödəniş et"
+            "privacy-h2-contact": "Bizimlə Əlaqə"
         },
         ENG: {
             Contact: "Contact",
@@ -615,8 +344,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "all-brand": "All brands",
             other: "Other",
             "select-brand": "Select brand first",
-            "all-models": "All models",
-            "other-model": "Other model",
             "price-range": "Price range",
             city: "City",
             "all-city": "All cities",
@@ -764,11 +491,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "stores-add-btn": "Open Store",
             "stores-view-btn": "View store",
             "stores-contact-btn": "Contact",
-            "stores-active-ads": "Active Listings",
-            "stores-review": "reviews",
-            "stores-nationwide-delivery": "Nationwide Delivery",
-            "stores-barter": "Barter available",
-            "stores-warranty": "Year Official Warranty",
             "phone-h2": "Phone models",
             "elan-h2": "Place New Ad",
             "elan-category": "Category",
@@ -779,9 +501,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "elan-price": "Price (AZN)",
             "elan-condition": "Condition",
             "elan-memory": "Memory (GB)",
-            "elan-ram": "RAM (GB)",
-            "elan-screen": "Screen Size",
-            "elan-battery": "Battery (mAh)",
             "elan-color": "Color",
             "elan-fingerprint": "Fingerprint sensor",
             "elan-nfc": "NFC",
@@ -808,30 +527,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "elan-rule10": "If the product has a warranty, it should be noted in the description section.",
             "elan-rule11": "Observe ethical rules when posting an ad.",
             "elan-select": "Select",
-            "opt-telefon": "Phone",
-            "opt-planshet": "Tablet",
-            "opt-aksesuar": "Accessory",
-            "opt-headphone": "Headphones",
-            "opt-yeni": "New",
-            "opt-islenmiş": "Used",
-            "opt-64-az": "Below 64 GB",
-            "opt-64": "64 GB",
-            "opt-128": "128 GB",
-            "opt-256": "256 GB",
-            "opt-512": "512 GB",
-            "opt-512-cox": "More than 512 GB",
-            "opt-qara": "Black",
-            "opt-ag": "White",
-            "opt-qizili": "Gold",
-            "opt-gumushu": "Silver",
-            "opt-boz": "Grey",
-            "opt-mavi": "Blue",
-            "opt-diger": "Other",
-            "opt-brand-placeholder": "Select a category first",
-            "opt-model-placeholder-cat": "Select a category first",
-            "opt-model-placeholder-brand": "Select a model",
-            "opt-diger-brand": "Other",
-            "opt-diger-model": "Other model",
             "fav-h1": "Favorites",
             "fav-empty-p": "No ads have been added to favorites yet.",
             "fav-empty-a": "View ads",
@@ -851,13 +546,87 @@ document.addEventListener("DOMContentLoaded", function () {
             "cab-phone-lbl": "Phone:",
             "cab-email-lbl": "Email:",
             "cab-edit-btn": "Edit",
-            "fav-empty-desc": "No ads have been added to favorites yet.",
-            "fav-empty-link": "View ads",
-            "fav-count-text": "ads have been added to favorites",
-            "fav-select-all": "Select all",
-            "fav-delete-selected": "Delete selected",
-            "fav-delete-all": "Delete all",
-            "fav-delete-confirm": "Are you sure you want to delete all favorite ads?",
+            "cab-standard-acc": "Standard Account",
+            "cab-dashboard": "Dashboard",
+            "cab-dashboard-desc": "Welcome. Review your stats for today.",
+            "cab-new-ad": "New Ad",
+            "cab-balance": "Your Balance",
+            "cab-increase": "Top Up",
+            "cab-buy-package": "Buy Package",
+            "cab-total-views-month": "Total Views (This Month)",
+            "cab-wa-clicks": "WhatsApp Clicks",
+            "cab-recent-activity": "Recent Activity",
+            "cab-ref-bonus": "Referral Bonus",
+            "cab-ref-bonus-desc": "You earned 5 AZN because your friend \"Hasan A.\" registered.",
+            "cab-sys-login": "System Login",
+            "cab-sys-login-desc": "A new login to your account was detected (Baku, 192.168.1.1)",
+            "cab-my-ads-desc": "Manage all your active and inactive ads.",
+            "cab-filter-all": "All Ads",
+            "cab-filter-active": "Active",
+            "cab-filter-pending": "Pending Review",
+            "cab-filter-expired": "Expired",
+            "cab-messages-desc": "Contact buyers and sellers",
+            "cab-search-msg": "Search messages...",
+            "cab-msg-empty": "Your inbox is empty.",
+            "cab-no-user": "No user selected",
+            "cab-select-msg": "Choose a message from the left to start chatting",
+            "cab-write-msg": "Write your message...",
+            "cab-settings-desc": "Manage your account information",
+            "cab-notifications": "Notifications",
+            "cab-security": "Security",
+            "cab-privacy": "Privacy",
+            "cab-name": "First Name",
+            "cab-surname": "Last Name",
+            "cab-email": "Email",
+            "cab-phone": "Phone",
+            "cab-save": "Save",
+            "cab-notif-desc": "Choose what information you want to receive from the platform and how.",
+            "cab-email-notifs": "Email Notifications",
+            "cab-new-msgs": "New Messages",
+            "cab-new-msgs-desc": "Receive an email immediately when someone messages you as a buyer or seller",
+            "cab-ad-status": "Ad Status",
+            "cab-ad-status-desc": "When your ad is approved, rejected, or expires",
+            "cab-news-camp": "News and Campaigns",
+            "cab-news-camp-desc": "Updates, discounts, and special offers from Mobil.az",
+            "cab-curr-pass": "Current Password",
+            "cab-new-pass": "New Password",
+            "cab-2fa": "Enable two-factor authentication (2FA)",
+            "cab-update": "Update",
+            "cab-acc-manage": "Account Management",
+            "cab-freeze-acc": "Freeze Account",
+            "cab-freeze-desc": "Your account and all active ads will be hidden temporarily.",
+            "cab-freeze-btn": "Freeze",
+            "cab-del-acc": "Delete Account",
+            "cab-del-desc": "All your data and ads will be deleted permanently. This action cannot be undone.",
+            "cab-del-btn": "Delete Account",
+            "cab-priv-desc": "Control how your information appears on the platform.",
+            "cab-show-num": "Show Phone Number",
+            "cab-show-num-desc": "Display your contact number on all your ads",
+            "cab-allow-msg": "Allow Messages",
+            "cab-allow-msg-desc": "Let other users send you messages through the internal system",
+            "cab-online-status": "Online Status",
+            "cab-online-desc": "Show when you were last online on your profile",
+            "cab-social-title": "Social Accounts",
+            "cab-social-desc": "Connect your social media accounts for faster and safer sign-in.",
+            "cab-unlinked": "Not connected",
+            "cab-link": "Connect",
+            "cab-billing": "Packages and Payments",
+            "cab-curr-pkg": "Current Package",
+            "cab-no-pkg": "There is no active package.",
+            "cab-pay-hist": "Payment History",
+            "cab-no-trans": "No transactions found.",
+            "mon-referral-title": "Invite a friend, earn 5 AZN!",
+            "mon-referral-desc": "You will receive 5 AZN to your balance for every friend you invite who registers.",
+            "mon-referral-credit": "Referral balance",
+            "mon-copy-link": "Copy",
+            "mon-promote-ad": "Promote",
+            "mon-bump": "Bump Up",
+            "mon-vip": "VIP",
+            "mon-pro": "PRO",
+            "mon-duration": "Duration:",
+            "mon-use-credit": "Use referral credit (max 50%)",
+            "mon-total": "Total:",
+            "mon-pay-btn": "Pay",
             // Rules page
             "rules-page-h1": "Rules & Safety",
             "rules-page-sub": "Read these rules to use our platform safely and comfortably.",
@@ -865,40 +634,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "rules-tab-posting": "Ad Posting",
             "rules-tab-safety": "Safety",
             "rules-tab-prohibited": "Prohibited",
-            "rules-h2-general": "General Terms of Use",
-            "rules-g1": "The platform is intended only for buying and selling mobile phones, tablets, headphones, and phone accessories.",
-            "rules-g2": "To register, you must enter real personal information (name, surname, phone number).",
-            "rules-g3": "Each user can have only one account. Multiple accounts will be blocked.",
-            "rules-g4": "All ads placed on the platform go through moderation. Inappropriate ads will be deleted.",
-            "rules-g5": "The ad duration is 30 days. Expired ads are automatically archived.",
-            "rules-g6": "It is strictly forbidden to post the same ad multiple times. Such ads will be systematically deleted.",
-            "rules-h2-posting": "Ad Posting Rules",
-            "rules-p1": "Place the ad in the correct category: Phones, Tablets, Headphones, or Accessories.",
-            "rules-p2": "Don't write prices in the title — there's a price field for that. These types of posts should be edited.",
-            "rules-p3": "State the actual condition of the product: New, Used, etc. Misleading information is prohibited.",
-            "rules-p4": "Add at least 1, max 10 high-quality photos. The size of each photo should not exceed 5MB.",
-            "rules-p5": "Do not include phone numbers, email addresses, or website links in photos, titles, or descriptions.",
-            "rules-p6": "Honestly state the technical features of the product (memory, color, NFC, water resistance, etc.).",
-            "rules-p7": "For products with a warranty, the warranty period must be specified.",
-            "rules-p8": "Prices must be shown in AZN (Azerbaijani Manat). Indicating prices in other currencies is forbidden.",
-            "rules-p9": "There is an active ad limit for each category. Premium packages increase this limit.",
-            "rules-p10": "All notifications regarding your ad will be sent to the email address you used during registration.",
-            "rules-h2-safety": "Safety Recommendations",
-            "safety-c1-h": "Meet in person",
-            "safety-c1-p": "Whenever possible, meet the buyer/seller in a public place during the day. Avoid meeting in dark or secluded areas.",
-            "safety-c2-h": "Check the product",
-            "safety-c2-p": "Before buying, check the phone's IMEI code, battery health, screen, and all available features.",
-            "safety-c3-h": "Payment",
-            "safety-c3-p": "Make payment only after receiving the product and in person. Avoid making advance payments.",
-            "safety-c4-h": "Report suspicious ads",
-            "safety-c4-p": "Immediately report any suspicious or misleading ad to moderators using the 'Report' button.",
-            "safety-warning": "Warning: Mobil.az never requests your password or bank card information via SMS, email, or a phone call. Reject such requests immediately.",
-            "rules-h2-prohibited": "Prohibited Activities",
-            "rules-pr1": "Selling stolen, fake, or undocumented products is prohibited. Such ads will be removed, accounts blocked, and law enforcement notified.",
-            "rules-pr2": "Posting ads using pictures, names, or brand logos of others without permission is prohibited.",
-            "rules-pr3": "The use of misleading prices, fake technical specifications, and false photos is prohibited.",
-            "rules-pr4": "Abusive, discriminatory, or aggressive communication towards other users is strictly prohibited.",
-            "rules-pr5": "Spam ads and the systematic reposting of the same ad are prohibited.",
             // Privacy page
             "privacy-page-h1": "Privacy Policy",
             "privacy-page-sub": "Mobil.az considers protecting the privacy of our users as a principle.",
@@ -910,291 +645,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "privacy-h2-rights": "User Rights",
             "privacy-h2-security": "Data Security",
             "privacy-h2-changes": "Changes to Policy",
-            "privacy-h2-contact": "Contact Us",
-            "privacy-p-collect": "When registering on Mobil.az, we need to collect the following information:",
-            "privacy-collect-1": "Name, surname — to personalize and identify your account.",
-            "privacy-collect-2": "Phone number — for contacting regarding ads and account verification.",
-            "privacy-collect-3": "E-mail address — to send notifications, password resets, and system information.",
-            "privacy-collect-4": "Ad data you post (pictures, description, price, product specifications).",
-            "privacy-collect-5": "Technical info: IP address, browser type, platform activity logs.",
-            "privacy-p-use": "The information we collect is used for the following purposes:",
-            "privacy-use-1": "To create, manage and protect your account.",
-            "privacy-use-2": "To place and display your ads on the platform.",
-            "privacy-use-3": "To facilitate communication between buyer and seller.",
-            "privacy-use-4": "To detect suspicious activities and ensure platform security.",
-            "privacy-use-5": "To send notifications about your ads and account status.",
-            "privacy-use-6": "To conduct statistical analysis to improve our service (personal data anonymously).",
-            "privacy-p-share1": "Mobil.az does not sell your personal information to third parties. Information may only be shared in the following cases:",
-            "privacy-share-1": "When required by law (court order, law enforcement request).",
-            "privacy-share-2": "With service providers (hosting, e-mail delivery) — only within the scope of service.",
-            "privacy-share-3": "With our business partners to protect the platform in case of fraud.",
-            "privacy-note-share": "The phone number you provide in your ad can be seen by all users viewing the ad. You choose whether to display your phone number in the ad or not.",
-            "privacy-p-cookies1": "Mobil.az uses cookies for our website to function properly. Cookies are small data files stored on your browser.",
-            "privacy-p-cookies2": "The cookies we use:",
-            "privacy-cookie-1": "<strong>Session cookies:</strong> Deleted after you close the site. Used to maintain login status.",
-            "privacy-cookie-2": "<strong>Persistent cookies:</strong> Used to remember your preferences like language choice and dark mode.",
-            "privacy-p-cookies3": "You can refuse to accept cookies by changing your browser settings, but in this case, some functions may not work properly.",
-            "privacy-p-rights": "You have the following rights regarding your data:",
-            "privacy-right-1": "The right to view and update your personal information in your account.",
-            "privacy-right-2": "The right to completely delete your account — in this case, all your data is deleted from the system.",
-            "privacy-right-3": "The right to opt-out of marketing notifications.",
-            "privacy-right-4": "The right to object to the processing of your data (within legal grounds).",
-            "privacy-rights-note": "To exercise these rights, you can contact us via the e-mail address below.",
-            "privacy-p-security1": "The security of your data is our top priority. Mobil.az takes necessary security measures to protect users' data. Passwords are stored securely using cryptographic methods.",
-            "privacy-p-security2": "However, no internet platform can guarantee 100% security. Do not share your password with anyone and use a strong, unique password.",
-            "privacy-p-changes": "This privacy policy may be updated from time to time. You will be notified via e-mail when there are significant changes. For maximum transparency, we recommend checking this page regularly.",
-            "privacy-p-contact": "If you have any questions about our privacy policy, please contact us:",
-            "privacy-contact-email-h": "E-mail",
-            "privacy-contact-phone-h": "Phone",
-            "stores-h1": "Discover your favorite stores",
-            "stores-p": "We have gathered the best stores for you",
-            "stores-search-placeholder": "Search store...",
-            "stores-search-btn": "Search",
-            "stores-add-btn": "Open a store",
-            "stores-view-btn": "View store",
-            "stores-contact-btn": "Contact",
-            // Create Shop page
-            "cs-hero-h1": "Open Your Own Store",
-            "cs-hero-p": "Leverage the power of Mobil.az — reach thousands of buyers, manage your listings, and grow your business.",
-            "cs-badge-fast": "Quick Registration",
-            "cs-badge-users": "Daily Growing User Base",
-            "cs-badge-safe": "Secure & Official",
-            "cs-pkg-chip": "Packages",
-            "cs-pkg-h2": "Choose the Right Package for Your Business",
-            "cs-pkg-sub": "All packages start with a 30-day free trial. Change anytime.",
-            "cs-pkg-select": "Choose Plan",
-            "cs-popular-badge": "Most Popular",
-            "cs-starter-name": "Starter",
-            "cs-starter-tag": "Ideal for small sellers",
-            "cs-starter-price": "Free",
-            "cs-starter-period": "For beginners · No charge",
-            "cs-starter-f1": "5 active listings",
-            "cs-starter-f2": "Basic store profile",
-            "cs-starter-f3": "Listed on Mobil.az",
-            "cs-starter-f4": "No official store badge",
-            "cs-starter-f5": "No featured ad support",
-            "cs-starter-f6": "No analytics panel",
-            "cs-pro-name": "Pro Store",
-            "cs-pro-tag": "For active businesses",
-            "cs-monthly": "/ mo · monthly billing",
-            "cs-pro-f1": "50 active listings",
-            "cs-pro-f2": "Official store badge",
-            "cs-pro-f3": "5 featured ads per month",
-            "cs-pro-f4": "Priority search ranking",
-            "cs-pro-f5": "Analytics panel",
-            "cs-pro-f6": "WhatsApp integration",
-            "cs-elite-tag": "Large stores & distributors",
-            "cs-elite-f1": "Unlimited listings",
-            "cs-elite-f2": "Premium gold badge 👑",
-            "cs-elite-f3": "Unlimited featured ads",
-            "cs-elite-f4": "Homepage banner ad",
-            "cs-elite-f5": "Detailed analytics & reports",
-            "cs-elite-f6": "Dedicated support (7/24)",
-            "cs-form-chip": "Registration",
-            "cs-form-h2": "Enter Your Store Details",
-            "cs-form-sub": "Fill in the form below and our team will contact you.",
-            "cs-form-pkg-default": "Pro Store plan selected",
-            "cs-form-pkg-hint": "Select a package above to change",
-            "cs-lbl-store-name": "Store Name *",
-            "cs-ph-store-name": "E.g.: LeadTech Mobile",
-            "cs-lbl-owner": "Owner's Full Name *",
-            "cs-ph-owner": "E.g.: Ali Mammadov",
-            "cs-lbl-phone": "Contact Number *",
-            "cs-lbl-email": "Email *",
-            "cs-ph-email": "store@example.com",
-            "cs-lbl-category": "Store Category *",
-            "cs-ph-category": "Select category",
-            "cs-cat-phones": "Smartphones",
-            "cs-cat-accessories": "Accessories",
-            "cs-cat-tablets": "Tablets",
-            "cs-cat-repair": "Repair & Service",
-            "cs-lbl-address": "Address *",
-            "cs-ph-address": "Street, building, store number...",
-            "cs-lbl-desc": "About the Store *",
-            "cs-ph-desc": "Brief info about your store, products, and warranty terms...",
-            "cs-lbl-logo": "Store Logo",
-            "cs-logo-click": "Click to upload image",
-            "cs-logo-drag": "or drag & drop",
-            "cs-logo-max": "Max. 5 MB",
-            "cs-lbl-whatsapp": "WhatsApp Number",
-            "cs-lbl-instagram": "Instagram Link",
-            "cs-ph-instagram": "https://instagram.com/store",
-            "cs-optional": "(Optional)",
-            "cs-submit": "Open My Store",
-            "cs-form-note": "By submitting the form, you agree to our <a href='rules.html'>Rules</a> and <a href='privacy.html'>Privacy Policy</a>.",
-            "cs-lbl-city": "City *",
-            "cs-ph-city": "Select city",
-            "cs-ben-chip": "Benefits",
-            "cs-ben-h2": "Why Mobil.az?",
-            "cs-ben1-h": "Growing Buyer Base",
-            "cs-ben1-p": "Introduce your store to active buyers who visit our platform every day.",
-            "cs-ben2-h": "Track Your Sales",
-            "cs-ben2-p": "Monitor views, clicks, and customer behavior with the analytics panel.",
-            "cs-ben3-h": "Fully Mobile-Friendly",
-            "cs-ben3-p": "Your customers can easily access your store from any device.",
-            "cs-ben4-h": "Support Team",
-            "cs-ben4-p": "Our professional support team is always here for any questions you have.",
-            "cs-elite-name": "Premium",
-            "elan-badge": "Active",
-            "elan-subtitle": "Deliver your phone, tablet, headphones and accessories quickly to the right buyer",
-            "elan-stat-safe": "Safe platform",
-            "elan-stat-free": "Free ad",
-            "elan-stat-days": "30 days active",
-            "elan-step1": "Details",
-            "elan-step2": "Photos",
-            "elan-step3": "Publish",
-            "elan-section1": "Basic info",
-            "elan-region": "Region *",
-            "elan-section2": "Technical Specs",
-            "elan-features-label": "Features",
-            "elan-chip-nfc": "NFC",
-            "elan-chip-fingerprint": "Fingerprint",
-            "elan-chip-waterproof": "Waterproof",
-            "elan-chip-expandable": "Extra memory",
-            "elan-chip-delivery": "Delivery",
-            "elan-section3": "Description & Photos",
-            "elan-upload-text": "Drag photos here or",
-            "elan-upload-span": "select",
-            "elan-section4": "Contact Info",
-            "elan-submit-note": "Your ad will be moderated before publishing.",
-            "elan-tip-title": "Tip",
-            "elan-tip-text": "High-quality photos help sell your item 3x faster. Add at least 4-6 photos.",
-            "filter-memory-label": "Storage (ROM)",
-            "filter-ram-label": "RAM",
-            "ram-2gb": "2 GB",
-            "ram-4gb": "4 GB",
-            "ram-6gb": "6 GB",
-            "ram-8gb": "8 GB",
-            "ram-12gb": "12 GB",
-            "ram-16gb": "16 GB+",
-            "filter-screen-label": "Screen size",
-            "screen-small": "<5.5\"",
-            "screen-medium": "5.5–6.1\"",
-            "screen-large": "6.1–6.7\"",
-            "screen-xlarge": ">6.7\"",
-            "filter-battery-label": "Battery",
-            "battery-low": "<3000 mAh",
-            "battery-mid": "3000–4500 mAh",
-            "battery-high": ">4500 mAh",
-            "filter-seller-label": "Seller type",
-            "seller-private": "Private",
-            "seller-store": "Store",
-            "filter-category-label": "Category",
-            "filter-cat-all": "All",
-            "filter-cat-phone": "Phones",
-            "filter-cat-tablet": "Tablets",
-            "filter-cat-headphone": "Headphones",
-            "filter-cat-accessory": "Accessories",
-            "cabinet-title": "Personal Cabinet",
-            "cab-profile": "Profile",
-            "cab-my-ads": "My Ads",
-            "cab-messages": "Messages",
-            "cab-settings": "Settings",
-            "cab-logout": "Logout",
-            "cab-welcome": "Welcome,",
-            "cab-active-ads": "Active ads",
-            "cab-total-views": "Total views",
-            "cab-favorites": "Favorites",
-            "cab-personal-info": "Personal Info",
-            "cab-edit-btn": "Edit",
-            "cab-name-lbl": "Name:",
-            "cab-surname-lbl": "Surname:",
-            "cab-phone-lbl": "Phone:",
-            "cab-email-lbl": "Email:",
-            "fav-empty-desc": "No ads have been added to favorites yet.",
-            "fav-empty-link": "View ads",
-            "fav-count-text": "ads added to favorites",
-            "fav-select-all": "Select All",
-            "fav-delete-selected": "Delete Selected",
-            "fav-delete-all": "Delete All",
-            "fav-delete-confirm": "Are you sure you want to delete all favorite ads?",
-            "cs-lbl-payment": "Payment Method *",
-            "cs-pay-card": "Bank Card",
-            "cs-pay-card-sub": "Online payment (Visa/MasterCard)",
-            "cs-pay-transfer": "Bank Transfer",
-            "cs-pay-transfer-sub": "Payment to company account",
-            "cs-pay-terminal": "Terminal",
-            "cs-pay-terminal-sub": "eManat / MilliÖn",
-            "cs-pay-card-details": "Card Details",
-            "cs-lbl-card-num": "Card Number",
-            "cs-lbl-card-exp": "Expiration Date",
-            "cs-lbl-card-cvv": "CVV",
-            "cs-pay-transfer-details": "Transfer Details",
-            "cs-pay-transfer-info": "Please make the payment to the following account and enter your TIN:",
-            "cs-lbl-voen": "Your TIN / Invoice",
-            "cs-pay-terminal-details": "Terminal (MilliÖn / eManat)",
-            "cs-pay-terminal-info": "After making the payment via terminal, enter the receipt number.",
-            "cs-lbl-receipt": "Receipt Number",
-            // Ad Detail page
-            "det-badge-new": "New",
-            "det-condition-label": "Condition:",
-            "det-city-label": "City:",
-            "det-delivery-label": "Delivery:",
-            "det-delivery-yes": "Available",
-            "det-delivery-no": "Not available",
-            "det-price-note": "Fixed price · Barter available",
-            "det-spec-storage": "Storage",
-            "det-spec-screen": "Screen size",
-            "det-spec-refresh": "Refresh rate",
-            "det-spec-battery": "Battery",
-            "det-spec-processor": "Processor",
-            "det-spec-cam-rear": "Camera (rear)",
-            "det-spec-cam-front": "Camera (front)",
-            "det-spec-color": "Color",
-            "det-spec-condition": "Condition",
-            "det-spec-waterproof": "Water resistance",
-            "det-feat-fingerprint": "Fingerprint",
-            "det-feat-waterproof-chip": "IP68 Waterproof",
-            "det-feat-no-expandable": "No expandable storage",
-            "det-spec-included": "✓ Included",
-            "det-spec-available": "✓ Available",
-            "det-specs-title": "Technical Specifications",
-            "det-desc-title": "Seller's Description",
-            "det-reviews-title": "Seller Reviews",
-            "det-reviews-based": "reviews",
-            "det-write-review-title": "Write Your Review",
-            "det-review-name-ph": "Your name (e.g. Ali M.)",
-            "det-review-text-ph": "Share your experience with the seller...",
-            "det-review-submit": "Submit Review",
-            "det-ad-no": "Ad No:",
-            "det-posted": "Posted:",
-            "det-updated": "Updated:",
-            "det-seller-personal": "Personal account",
-            "det-seller-since": "Member since:",
-            "det-ads-shared": "Ads shared",
-            "det-rating": "★ Rating",
-            "det-positive": "Positive reviews",
-            "det-btn-call": "Show Number",
-            "det-btn-whatsapp": "Message on WhatsApp",
-            "det-btn-message": "Send Message",
-            "det-sidebar-review-title": "Write a positive review",
-            "det-sidebar-review-ph": "Your review about this seller...",
-            "det-safety-title": "Safe Purchase",
-            "det-safety-1": "Meet in a public place if possible",
-            "det-safety-2": "Check the IMEI code before buying",
-            "det-safety-3": "Avoid advance payments",
-            "det-safety-4": "Report suspicious ads",
-            "det-btn-share": "Share",
-            "det-btn-report": "Report",
-            "det-related-title": "Similar Ads",
-            "det-breadcrumb-home": "Home",
-            "det-breadcrumb-phones": "Phones",
-            // Monetization
-            "mon-bump": "Bump Up",
-            "mon-vip": "VIP",
-            "mon-pro": "PRO",
-            "mon-1day": "1 Day",
-            "mon-3day": "3 Days",
-            "mon-referral-title": "Refer a friend, get 5 AZN!",
-            "mon-referral-desc": "For each friend who registers, you'll receive 5 AZN credit.",
-            "mon-copy-link": "Copy link",
-            "mon-referral-credit": "Referral balance",
-            "mon-promote-ad": "Promote Ad",
-            "mon-package": "Package",
-            "mon-duration": "Duration",
-            "mon-total": "Total",
-            "mon-use-credit": "Use referral credit (max 50%)",
-            "mon-pay-btn": "Pay now"
+            "privacy-h2-contact": "Contact Us"
         },
         RUS: {
             Contact: "Контакт",
@@ -1216,8 +667,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "all-brand": "Все марки",
             other: "Другие",
             "select-brand": "Сначала выберите марку",
-            "all-models": "Все модели",
-            "other-model": "Другая модель",
             "price-range": "Диапазон цен",
             city: "Город",
             "all-city": "Все города",
@@ -1375,9 +824,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "elan-price": "Цена (AZN)",
             "elan-condition": "Состояние",
             "elan-memory": "Память (ГБ)",
-            "elan-ram": "ОЗУ (ГБ)",
-            "elan-screen": "Размер экрана",
-            "elan-battery": "Батарея (mAh)",
             "elan-color": "Цвет",
             "elan-fingerprint": "Датчик отпечатка пальца",
             "elan-nfc": "NFC",
@@ -1423,6 +869,87 @@ document.addEventListener("DOMContentLoaded", function () {
             "cab-phone-lbl": "Телефон:",
             "cab-email-lbl": "Эл. почта:",
             "cab-edit-btn": "Редактировать",
+            "cab-standard-acc": "Стандартный аккаунт",
+            "cab-dashboard": "Панель управления",
+            "cab-dashboard-desc": "Добро пожаловать. Ознакомьтесь с вашей статистикой за сегодня.",
+            "cab-new-ad": "Новое объявление",
+            "cab-balance": "Ваш баланс",
+            "cab-increase": "Пополнить",
+            "cab-buy-package": "Купить пакет",
+            "cab-total-views-month": "Всего просмотров (за месяц)",
+            "cab-wa-clicks": "Переходы в WhatsApp",
+            "cab-recent-activity": "Последняя активность",
+            "cab-ref-bonus": "Реферальный бонус",
+            "cab-ref-bonus-desc": "Вы получили 5 AZN, потому что ваш друг \"Гасан А.\" зарегистрировался.",
+            "cab-sys-login": "Вход в систему",
+            "cab-sys-login-desc": "Обнаружен новый вход в ваш аккаунт (Баку, 192.168.1.1)",
+            "cab-my-ads-desc": "Управляйте всеми вашими активными и неактивными объявлениями.",
+            "cab-filter-all": "Все объявления",
+            "cab-filter-active": "Активные",
+            "cab-filter-pending": "На проверке",
+            "cab-filter-expired": "Истекшие",
+            "cab-messages-desc": "Связь с покупателями и продавцами",
+            "cab-search-msg": "Поиск сообщений...",
+            "cab-msg-empty": "Ваш почтовый ящик пуст.",
+            "cab-no-user": "Пользователь не выбран",
+            "cab-select-msg": "Выберите сообщение слева, чтобы начать чат",
+            "cab-write-msg": "Напишите сообщение...",
+            "cab-settings-desc": "Управляйте информацией своего аккаунта",
+            "cab-notifications": "Уведомления",
+            "cab-security": "Безопасность",
+            "cab-privacy": "Конфиденциальность",
+            "cab-name": "Имя",
+            "cab-surname": "Фамилия",
+            "cab-email": "Email",
+            "cab-phone": "Телефон",
+            "cab-save": "Сохранить",
+            "cab-notif-desc": "Выберите, какую информацию и каким способом вы хотите получать от платформы.",
+            "cab-email-notifs": "Email-уведомления",
+            "cab-new-msgs": "Новые сообщения",
+            "cab-new-msgs-desc": "Сразу получайте email, когда кто-то пишет вам как покупатель или продавец",
+            "cab-ad-status": "Статус объявления",
+            "cab-ad-status-desc": "Когда ваше объявление одобрено, отклонено или срок его действия истек",
+            "cab-news-camp": "Новости и кампании",
+            "cab-news-camp-desc": "Новости, скидки и специальные предложения от Mobil.az",
+            "cab-curr-pass": "Текущий пароль",
+            "cab-new-pass": "Новый пароль",
+            "cab-2fa": "Включить двухфакторную аутентификацию (2FA)",
+            "cab-update": "Обновить",
+            "cab-acc-manage": "Управление аккаунтом",
+            "cab-freeze-acc": "Заморозить аккаунт",
+            "cab-freeze-desc": "Ваш аккаунт и все активные объявления будут временно скрыты.",
+            "cab-freeze-btn": "Заморозить",
+            "cab-del-acc": "Удалить аккаунт",
+            "cab-del-desc": "Все ваши данные и объявления будут удалены навсегда. Это действие нельзя отменить.",
+            "cab-del-btn": "Удалить аккаунт",
+            "cab-priv-desc": "Управляйте тем, как ваша информация отображается на платформе.",
+            "cab-show-num": "Показывать номер",
+            "cab-show-num-desc": "Показывать ваш контактный номер во всех объявлениях",
+            "cab-allow-msg": "Разрешить сообщения",
+            "cab-allow-msg-desc": "Разрешить другим пользователям писать вам через внутреннюю систему",
+            "cab-online-status": "Онлайн-статус",
+            "cab-online-desc": "Показывать, когда вы были в сети, в вашем профиле",
+            "cab-social-title": "Социальные аккаунты",
+            "cab-social-desc": "Подключите свои аккаунты соцсетей для более быстрого и безопасного входа.",
+            "cab-unlinked": "Не подключено",
+            "cab-link": "Подключить",
+            "cab-billing": "Пакеты и платежи",
+            "cab-curr-pkg": "Текущий пакет",
+            "cab-no-pkg": "Активных пакетов нет.",
+            "cab-pay-hist": "История платежей",
+            "cab-no-trans": "Операции не найдены.",
+            "mon-referral-title": "Пригласи друга и заработай 5 AZN!",
+            "mon-referral-desc": "За каждого приглашенного друга, который зарегистрируется, на ваш баланс будет начислено 5 AZN.",
+            "mon-referral-credit": "Реферальный баланс",
+            "mon-copy-link": "Копировать",
+            "mon-promote-ad": "Продвигать",
+            "mon-bump": "Поднять вверх",
+            "mon-vip": "VIP",
+            "mon-pro": "PRO",
+            "mon-duration": "Срок:",
+            "mon-use-credit": "Использовать реферальный кредит (макс. 50%)",
+            "mon-total": "Итого:",
+            "mon-pay-btn": "Оплатить",
             // Rules page
             "rules-page-h1": "Правила и безопасность",
             "rules-page-sub": "Прочитайте эти правила, чтобы безопасно и удобно пользоваться нашей платформой.",
@@ -1430,40 +957,6 @@ document.addEventListener("DOMContentLoaded", function () {
             "rules-tab-posting": "Размещение объявлений",
             "rules-tab-safety": "Безопасность",
             "rules-tab-prohibited": "Запрещено",
-            "rules-h2-general": "Общие правила использования",
-            "rules-g1": "Платформа предназначена исключительно для купли-продажи мобильных телефонов, планшетов, наушников и аксессуаров.",
-            "rules-g2": "Для регистрации необходимо указать реальные личные данные (имя, фамилию, номер телефона).",
-            "rules-g3": "У каждого пользователя может быть только одна учетная запись. Множественные аккаунты будут заблокированы.",
-            "rules-g4": "Все размещаемые на платформе объявления проходят модерацию. Несоответствующие правила объявления удаляются.",
-            "rules-g5": "Срок действия объявления составляет 30 дней. По истечении этого срока объявления автоматически архивируются.",
-            "rules-g6": "Строго запрещено многократное размещение одного и того же объявления. Подобные объявления будут систематически удаляться.",
-            "rules-h2-posting": "Правила размещения объявлений",
-            "rules-p1": "Размещайте объявление в правильной категории: Телефоны, Планшеты, Наушники или Аксессуары.",
-            "rules-p2": "Не пишите цену в заголовке — для этого есть отдельное поле. Такие объявления должны быть отредактированы.",
-            "rules-p3": "Укажите реальное состояние товара: Новый, Б/у и т.д. Предоставление ложной информации запрещено.",
-            "rules-p4": "Добавьте как минимум 1, максимум 10 качественных фотографий. Размер каждой фотографии не должен превышать 5 МБ.",
-            "rules-p5": "Не указывайте номера телефонов, адреса электронной почты или ссылки на сайты на фотографиях, в заголовках или описаниях.",
-            "rules-p6": "Честно указывайте технические характеристики продукта (память, цвет, NFC, водонепроницаемость и т.д.).",
-            "rules-p7": "Для товаров на гарантии обязательно должен быть указан гарантийный срок.",
-            "rules-p8": "Цена должна быть указана в азн (азербайджанских манатах). Размещение цен в другой валюте запрещено.",
-            "rules-p9": "Для каждой категории существует ограничение на количество активных объявлений. Премиум-пакеты увеличивают этот лимит.",
-            "rules-p10": "Все уведомления, касающиеся вашего объявления, будут отправляться на адрес электронной почты, указанный при регистрации.",
-            "rules-h2-safety": "Рекомендации по безопасности",
-            "safety-c1-h": "Личные встречи",
-            "safety-c1-p": "По возможности встречайтесь с покупателем/продавцом в общественном месте в дневное время. Избегайте встреч в темных или безлюдных местах.",
-            "safety-c2-h": "Проверяйте товар",
-            "safety-c2-p": "Перед покупкой проверьте IMEI код телефона, состояние батареи, экран и все доступные функции.",
-            "safety-c3-h": "Оплата",
-            "safety-c3-p": "Осуществляйте оплату только после получения товара лично. Избегайте предоплат.",
-            "safety-c4-h": "Сообщайте о подозрительных объявлениях",
-            "safety-c4-p": "Немедленно сообщайте о любых подозрительных или вводящих в заблуждение объявлениях модераторам с помощью кнопки «Пожаловаться».",
-            "safety-warning": "Внимание: Mobil.az никогда не запрашивает ваш пароль или данные банковской карты через SMS, e-mail или звонки. Немедленно отклоняйте такие запросы.",
-            "rules-h2-prohibited": "Запрещенные действия",
-            "rules-pr1": "Продажа украденных, поддельных или нелегальных товаров запрещена. Такие объявления удаляются, аккаунт блокируется, а правоохранительные органы уведомляются.",
-            "rules-pr2": "Размещение объявлений с использованием чужих фотографий, имен или логотипов брендов без разрешения запрещено.",
-            "rules-pr3": "Использование вводящих в заблуждение цен, ложных технических характеристик и несоответствующих фотографий строго запрещено.",
-            "rules-pr4": "Оскорбительное, дискриминационное или агрессивное общение по отношению к другим пользователям запрещено.",
-            "rules-pr5": "Спам-объявления и систематическое повторное размещение одного и того же объявления запрещены.",
             // Privacy page
             "privacy-page-h1": "Политика конфиденциальности",
             "privacy-page-sub": "Mobil.az считает защиту конфиденциальности пользователей принципом.",
@@ -1475,306 +968,234 @@ document.addEventListener("DOMContentLoaded", function () {
             "privacy-h2-rights": "Права пользователя",
             "privacy-h2-security": "Безопасность данных",
             "privacy-h2-changes": "Изменения в политике",
-            "privacy-h2-contact": "Свяжитесь с нами",
-            "privacy-p-collect": "При регистрации на Mobil.az нам необходимо собирать следующую информацию:",
-            "privacy-collect-1": "Имя, фамилия — для персонализации и идентификации вашей учетной записи.",
-            "privacy-collect-2": "Номер телефона — для связи по объявлениям и проверки учетной записи.",
-            "privacy-collect-3": "E-mail адрес — для отправки уведомлений, сброса пароля и информации от системы.",
-            "privacy-collect-4": "Данные объявлений, которые вы размещаете (фотографии, описание, цена, характеристики товара).",
-            "privacy-collect-5": "Техническая информация: IP-адрес, тип браузера, журналы активности платформы.",
-            "privacy-p-use": "Собранная нами информация используется в следующих целях:",
-            "privacy-use-1": "Для создания, управления и защиты вашей учетной записи.",
-            "privacy-use-2": "Для размещения и отображения ваших объявлений на платформе.",
-            "privacy-use-3": "Для облегчения общения между покупателем и продавцом.",
-            "privacy-use-4": "Для обнаружения подозрительных действий и обеспечения безопасности платформы.",
-            "privacy-use-5": "Для отправки уведомлений о статусе ваших объявлений и учетной записи.",
-            "privacy-use-6": "Для проведения статистического анализа с целью улучшения нашего сервиса (личные данные используются анонимно).",
-            "privacy-p-share1": "Mobil.az не продает вашу личную информацию третьим лицам. Информация может быть передана только в следующих случаях:",
-            "privacy-share-1": "По требованию законодательства (решение суда, запрос правоохранительных органов).",
-            "privacy-share-2": "Поставщикам услуг (хостинг, рассылка электронной почты) — только в рамках оказания услуг.",
-            "privacy-share-3": "Нашим деловым партнерам для защиты платформы от мошенничества.",
-            "privacy-note-share": "Номер телефона, указанный в вашем объявлении, могут видеть все пользователи, просматривающие это объявление. Вы сами выбираете, показывать номер телефона в объявлении или нет.",
-            "privacy-p-cookies1": "Mobil.az использует файлы cookie для правильной работы веб-сайта. Файлы cookie — это небольшие файлы данных, которые хранятся в вашем браузере.",
-            "privacy-p-cookies2": "Файлы cookie, которые мы используем:",
-            "privacy-cookie-1": "<strong>Сессионные файлы cookie:</strong> Удаляются после закрытия сайта. Используются для сохранения статуса входа.",
-            "privacy-cookie-2": "<strong>Постоянные файлы cookie:</strong> Используются для запоминания ваших предпочтений, таких как выбор языка и темный режим.",
-            "privacy-p-cookies3": "Вы можете отказаться от использования файлов cookie, изменив настройки своего браузера, но в этом случае некоторые функции могут работать некорректно.",
-            "privacy-p-rights": "Вы имеете следующие права в отношении ваших данных:",
-            "privacy-right-1": "Право просматривать и обновлять свою личную информацию в своей учетной записи.",
-            "privacy-right-2": "Право полностью удалить свою учетную запись — в этом случае все ваши данные удаляются из системы.",
-            "privacy-right-3": "Право отказаться от получения маркетинговых уведомлений.",
-            "privacy-right-4": "Право возражать против обработки ваших данных (на законных основаниях).",
-            "privacy-rights-note": "Чтобы воспользоваться этими правами, вы можете связаться с нами по указанному ниже адресу электронной почты.",
-            "privacy-p-security1": "Безопасность ваших данных является нашим главным приоритетом. Mobil.az принимает необходимые меры безопасности для защиты данных пользователей. Пароли надежно хранятся с использованием криптографических методов.",
-            "privacy-p-security2": "Однако ни одна интернет-платформа не может гарантировать 100% безопасность. Никому не сообщайте свой пароль и используйте надежный, уникальный пароль.",
-            "privacy-p-changes": "Эта политика конфиденциальности может время от времени обновляться. При существенных изменениях вы будете уведомлены по электронной почте. Для обеспечения максимальной прозрачности мы рекомендуем регулярно проверять эту страницу.",
-            "privacy-p-contact": "Если у вас есть какие-либо вопросы о нашей политике конфиденциальности, пожалуйста, свяжитесь с нами:",
-            "privacy-contact-email-h": "E-mail",
-            "privacy-contact-phone-h": "Телефон",
-            "stores-h1": "Откройте для себя любимые магазины",
-            "stores-p": "Мы собрали для вас лучшие магазины",
-            "stores-search-placeholder": "Поиск магазина...",
-            "stores-search-btn": "Поиск",
-            "stores-add-btn": "Открыть магазин",
-            "stores-view-btn": "Посмотреть магазин",
-            "stores-contact-btn": "Контакт",
-            "stores-active-ads": "Активных объявлений",
-            "stores-review": "отзывов",
-            "stores-nationwide-delivery": "Доставка по стране",
-            "stores-barter": "Бартер возможен",
-            "stores-warranty": "год Официальная Гарантия",
-            // Create Shop page
-            "cs-hero-h1": "Откройте свой магазин",
-            "cs-hero-p": "Используйте возможности Mobil.az — охватывайте тысячи покупателей, управляйте объявлениями и развивайте бизнес.",
-            "cs-badge-fast": "Быстрая регистрация",
-            "cs-badge-users": "Ежедневно растущая база",
-            "cs-badge-safe": "Безопасно & Официально",
-            "cs-pkg-chip": "Пакеты",
-            "cs-pkg-h2": "Выберите подходящий пакет",
-            "cs-pkg-sub": "Все пакеты начинаются с 30-дневного бесплатного периода. Меняйте в любое время.",
-            "cs-pkg-select": "Выбрать план",
-            "cs-popular-badge": "Самый популярный",
-            "cs-starter-name": "Стартовый",
-            "cs-starter-tag": "Идеально для малого бизнеса",
-            "cs-starter-price": "Бесплатно",
-            "cs-starter-period": "Для начинающих · Без оплаты",
-            "cs-starter-f1": "5 активных объявлений",
-            "cs-starter-f2": "Базовый профиль магазина",
-            "cs-starter-f3": "Отображение на Mobil.az",
-            "cs-starter-f4": "Нет официального значка",
-            "cs-starter-f5": "Нет поддержки рекламных объявлений",
-            "cs-starter-f6": "Нет панели аналитики",
-            "cs-pro-name": "Про-магазин",
-            "cs-pro-tag": "Для активного бизнеса",
-            "cs-monthly": "/ мес · ежемесячная оплата",
-            "cs-pro-f1": "50 активных объявлений",
-            "cs-pro-f2": "Официальный значок магазина",
-            "cs-pro-f3": "5 продвинутых объявлений в месяц",
-            "cs-pro-f4": "Приоритет в поиске",
-            "cs-pro-f5": "Панель аналитики",
-            "cs-pro-f6": "Интеграция WhatsApp",
-            "cs-elite-tag": "Крупные магазины & дистрибьюторы",
-            "cs-elite-f1": "Неограниченные объявления",
-            "cs-elite-f2": "Премиум золотой значок 👑",
-            "cs-elite-f3": "Неограниченные продвинутые объявления",
-            "cs-elite-f4": "Баннерная реклама на главной",
-            "cs-elite-f5": "Подробная аналитика и отчёты",
-            "cs-elite-f6": "Выделенная поддержка (7/24)",
-            "cs-form-chip": "Регистрация",
-            "cs-form-h2": "Введите данные магазина",
-            "cs-form-sub": "Заполните форму ниже, и наша команда свяжется с вами.",
-            "cs-form-pkg-default": "Выбран план Про-магазин",
-            "cs-form-pkg-hint": "Выберите пакет выше для изменения",
-            "cs-lbl-store-name": "Название магазина *",
-            "cs-ph-store-name": "Напр.: LeadTech Mobile",
-            "cs-lbl-owner": "Имя и фамилия владельца *",
-            "cs-ph-owner": "Напр.: Али Мамедов",
-            "cs-lbl-phone": "Контактный номер *",
-            "cs-lbl-email": "E-mail *",
-            "cs-ph-email": "magazin@example.com",
-            "cs-lbl-category": "Категория магазина *",
-            "cs-ph-category": "Выберите категорию",
-            "cs-cat-phones": "Смартфоны",
-            "cs-cat-accessories": "Аксессуары",
-            "cs-cat-tablets": "Планшеты",
-            "cs-cat-repair": "Ремонт & Сервис",
-            "cs-lbl-address": "Адрес *",
-            "cs-ph-address": "Улица, здание, номер магазина...",
-            "cs-lbl-desc": "О магазине *",
-            "cs-ph-desc": "Краткое описание магазина, продуктов, условий гарантии...",
-            "cs-lbl-logo": "Логотип магазина",
-            "cs-logo-click": "Нажмите, чтобы загрузить изображение",
-            "cs-logo-drag": "или перетащите",
-            "cs-logo-max": "Макс. 5 МБ",
-            "cs-lbl-whatsapp": "Номер WhatsApp",
-            "cs-lbl-instagram": "Ссылка Instagram",
-            "cs-ph-instagram": "https://instagram.com/magazin",
-            "cs-optional": "(Необязательно)",
-            "cs-submit": "Открыть мой магазин",
-            "cs-form-note": "Отправляя форму, вы соглашаетесь с <a href='rules.html'>Правилами</a> и <a href='privacy.html'>Политикой конфиденциальности</a>.",
-            "cs-lbl-city": "Город *",
-            "cs-ph-city": "Выберите город",
-            "cs-ben-chip": "Преимущества",
-            "cs-ben-h2": "Почему Mobil.az?",
-            "cs-ben1-h": "Растущая база покупателей",
-            "cs-ben1-p": "Представьте свой магазин активным покупателям, посещающим наш сайт каждый день.",
-            "cs-ben2-h": "Отслеживайте продажи",
-            "cs-ben2-p": "Следите за просмотрами, кликами и поведением клиентов через панель аналитики.",
-            "cs-ben3-h": "Полная мобильность",
-            "cs-ben3-p": "Ваши клиенты могут легко зайти в ваш магазин с любого устройства.",
-            "cs-ben4-h": "Команда поддержки",
-            "cs-ben4-p": "Наша профессиональная команда поддержки всегда готова ответить на ваши вопросы.",
-            "cs-elite-name": "Premium",
-            "elan-badge": "Активно",
-            "elan-subtitle": "Быстро доставляйте телефон, планшет, наушники и аксессуары нужному покупателю",
-            "elan-stat-safe": "Безопасная платформа",
-            "elan-stat-free": "Бесплатное объявление",
-            "elan-stat-days": "Активно 30 дней",
-            "elan-step1": "Детали",
-            "elan-step2": "Фотографии",
-            "elan-step3": "Опубликовать",
-            "elan-section1": "Основная информация",
-            "elan-region": "Регион *",
-            "elan-section2": "Технические характеристики",
-            "elan-features-label": "Особенности",
-            "elan-chip-nfc": "NFC",
-            "elan-chip-fingerprint": "Отпечаток пальца",
-            "elan-chip-waterproof": "Водонепроницаемый",
-            "elan-chip-expandable": "Доп. память",
-            "elan-chip-delivery": "Доставка",
-            "elan-section3": "Описание и фотографии",
-            "elan-upload-text": "Перетащите фотографии сюда или",
-            "elan-upload-span": "выберите",
-            "elan-section4": "Контактная информация",
-            "elan-submit-note": "Ваше объявление пройдет модерацию перед публикацией.",
-            "elan-tip-title": "Совет",
-            "elan-tip-text": "Качественные фотографии помогают продать в 3 раза быстрее. Добавьте как минимум 4-6 фото.",
-            "filter-memory-label": "Память (ROM)",
-            "filter-ram-label": "RAM",
-            "ram-2gb": "2 ГБ",
-            "ram-4gb": "4 ГБ",
-            "ram-6gb": "6 ГБ",
-            "ram-8gb": "8 ГБ",
-            "ram-12gb": "12 ГБ",
-            "ram-16gb": "16 ГБ+",
-            "filter-screen-label": "Размер экрана",
-            "screen-small": "<5.5\"",
-            "screen-medium": "5.5–6.1\"",
-            "screen-large": "6.1–6.7\"",
-            "screen-xlarge": ">6.7\"",
-            "filter-battery-label": "Батарея",
-            "battery-low": "<3000 мАч",
-            "battery-mid": "3000–4500 мАч",
-            "battery-high": ">4500 мАч",
-            "filter-seller-label": "Тип продавца",
-            "seller-private": "Частное",
-            "seller-store": "Магазин",
-            "filter-category-label": "Категория",
-            "filter-cat-all": "Все",
-            "filter-cat-phone": "Телефоны",
-            "filter-cat-tablet": "Планшеты",
-            "filter-cat-headphone": "Наушники",
-            "filter-cat-accessory": "Аксессуары",
-            "cabinet-title": "Личный кабинет",
-            "cab-profile": "Профиль",
-            "cab-my-ads": "Мои объявления",
-            "cab-messages": "Сообщения",
-            "cab-settings": "Настройки",
-            "cab-logout": "Выйти",
-            "cab-welcome": "Добро пожаловать,",
-            "cab-active-ads": "Активные объявления",
-            "cab-total-views": "Всего просмотров",
-            "cab-favorites": "Избранное",
-            "cab-personal-info": "Личная информация",
-            "cab-edit-btn": "Редактировать",
-            "cab-name-lbl": "Имя:",
-            "cab-surname-lbl": "Фамилия:",
-            "cab-phone-lbl": "Телефон:",
-            "cab-email-lbl": "Эл. почта:",
-            "fav-empty-desc": "Пока нет объявлений, добавленных в избранное.",
-            "fav-empty-link": "Посмотреть объявления",
-            "fav-count-text": "объявлений добавлено в избранное",
-            "fav-select-all": "Выбрать все",
-            "fav-delete-selected": "Удалить выбранные",
-            "fav-delete-all": "Удалить все",
-            "fav-delete-confirm": "Вы уверены, что хотите удалить все избранные объявления?",
-            "cs-lbl-payment": "Способ оплаты *",
-            "cs-pay-card": "Банковская Карта",
-            "cs-pay-card-sub": "Онлайн оплата (Visa/MasterCard)",
-            "cs-pay-transfer": "Банковский Перевод",
-            "cs-pay-transfer-sub": "Оплата на счет компании",
-            "cs-pay-terminal": "Терминал",
-            "cs-pay-terminal-sub": "eManat / MilliÖn",
-            "cs-pay-card-details": "Реквизиты карты",
-            "cs-lbl-card-num": "Номер Карты",
-            "cs-lbl-card-exp": "Срок Действия",
-            "cs-lbl-card-cvv": "CVV",
-            "cs-pay-transfer-details": "Данные Перевода",
-            "cs-pay-transfer-info": "Пожалуйста, произведите оплату на следующий счет и введите ваш ИНН:",
-            "cs-lbl-voen": "Ваш ИНН",
-            "cs-pay-terminal-details": "Терминал (MilliÖn / eManat)",
-            "cs-pay-terminal-info": "После оплаты через терминал введите номер квитанции.",
-            "cs-lbl-receipt": "Номер Квитанции",
-            "opt-telefon": "Телефон",
-            "opt-planshet": "Планшет",
-            "opt-aksesuar": "Аксессуар",
-            "opt-headphone": "Наушники",
-            "opt-yeni": "Новый",
-            "opt-islenmiş": "Б/У",
-            "opt-64-az": "Менее 64 ГБ",
-            "opt-64": "64 ГБ",
-            "opt-128": "128 ГБ",
-            "opt-256": "256 ГБ",
-            "opt-512": "512 ГБ",
-            "opt-512-cox": "Более 512 ГБ",
-            "opt-qara": "Чёрный",
-            "opt-ag": "Белый",
-            "opt-qizili": "Золотой",
-            "opt-gumushu": "Серебристый",
-            "opt-boz": "Серый",
-            "opt-mavi": "Голубой",
-            "opt-diger": "Другой",
-            "opt-brand-placeholder": "Сначала выберите категорию",
-            "opt-model-placeholder-cat": "Сначала выберите категорию",
-            "opt-model-placeholder-brand": "Выберите модель",
-            "opt-diger-brand": "Другой",
-            "opt-diger-model": "Другая модель",
-            // Ad Detail page
-            "det-badge-new": "Новый",
-            "det-condition-label": "Состояние:",
-            "det-city-label": "Город:",
-            "det-delivery-label": "Доставка:",
-            "det-delivery-yes": "Есть",
-            "det-delivery-no": "Нет",
-            "det-price-note": "Цена фиксированная · Обмен возможен",
-            "det-spec-storage": "Память",
-            "det-spec-screen": "Размер экрана",
-            "det-spec-refresh": "Частота обновления экрана",
-            "det-spec-battery": "Батарея",
-            "det-spec-processor": "Процессор",
-            "det-spec-cam-rear": "Камера (задняя)",
-            "det-spec-cam-front": "Камера (передняя)",
-            "det-spec-color": "Цвет",
-            "det-spec-condition": "Состояние",
-            "det-spec-waterproof": "Водостойкость",
-            "det-feat-fingerprint": "Отпечаток пальца",
-            "det-feat-waterproof-chip": "IP68 Водостойкий",
-            "det-feat-no-expandable": "Нет доп. памяти",
-            "det-spec-included": "✓ Включено",
-            "det-spec-available": "✓ Есть",
-            "det-specs-title": "Технические Характеристики",
-            "det-desc-title": "Описание продавца",
-            "det-reviews-title": "Отзывы о продавце",
-            "det-reviews-based": "отзывов",
-            "det-write-review-title": "Написать отзыв",
-            "det-review-name-ph": "Ваше имя (напр. Али М.)",
-            "det-review-text-ph": "Поделитесь опытом работы с продавцом...",
-            "det-review-submit": "Отправить отзыв",
-            "det-ad-no": "Объявление №:",
-            "det-posted": "Опубликовано:",
-            "det-updated": "Обновлено:",
-            "det-seller-personal": "Личный аккаунт",
-            "det-seller-since": "Участник с:",
-            "det-ads-shared": "Объявлений",
-            "det-rating": "★ Рейтинг",
-            "det-positive": "Положительных отзывов",
-            "det-btn-call": "Показать номер",
-            "det-btn-whatsapp": "Написать в WhatsApp",
-            "det-btn-message": "Отправить сообщение",
-            "det-sidebar-review-title": "Написать положительный отзыв",
-            "det-sidebar-review-ph": "Ваш отзыв об этом продавце...",
-            "det-safety-title": "Безопасная Покупка",
-            "det-safety-1": "По возможности встречайтесь в общественном месте",
-            "det-safety-2": "Не покупайте без проверки IMEI кода",
-            "det-safety-3": "Избегайте авансовых платежей",
-            "det-safety-4": "Сообщите о подозрительном объявлении",
-            "det-btn-share": "Поделиться",
-            "det-btn-report": "Пожаловаться",
-            "det-related-title": "Похожие объявления",
-            "det-breadcrumb-home": "Главная",
-            "det-breadcrumb-phones": "Телефоны"
+            "privacy-h2-contact": "Свяжитесь с нами"
         }
     };
+    const authTranslations = {
+        AZ: {
+            "login-btn": "Giri\u015f",
+            "register-btn": "Qeydiyyat",
+            "auth-login-page-title": "Giri\u015f - Mobil.az",
+            "auth-signup-page-title": "Qeydiyyat - Mobil.az",
+            "auth-welcome": "Xo\u015f g\u0259ldiniz!",
+            "auth-brand-sub": "Az\u0259rbaycan\u0131n \u0259n b\u00f6y\u00fck telefon bazar\u0131na daxil olun.",
+            "auth-feat-1": "SSL il\u0259 qorunan giri\u015f",
+            "auth-feat-2": "S\u00fcr\u0259tli v\u0259 etibarl\u0131",
+            "auth-feat-3": "50,000+ telefon elan\u0131",
+            "auth-feat-4": "24/7 d\u0259st\u0259k xidm\u0259ti",
+            "auth-tab-login": "Giri\u015f",
+            "auth-tab-signup": "Qeydiyyat",
+            "auth-heading-login": "Hesaba giri\u015f",
+            "auth-subheading-login": "Hesab\u0131n\u0131za daxil olmaq \u00fc\u00e7\u00fcn \u00fcsul se\u00e7in",
+            "auth-method-label": "Giri\u015f \u00fcsulu",
+            "auth-method-pwd": "\u015eifr\u0259",
+            "auth-method-sms": "SMS kodu",
+            "auth-method-email": "Email kodu",
+            "auth-or": "v\u0259 ya",
+            "auth-login-id": "Email v\u0259 ya istifad\u0259\u00e7i ad\u0131",
+            "auth-pwd": "\u015eifr\u0259",
+            "auth-remember": "M\u0259ni xat\u0131rla",
+            "auth-forgot": "\u015eifr\u0259ni unutmusunuz?",
+            "auth-btn-login": "Daxil ol",
+            "auth-phone": "Telefon n\u00f6mr\u0259si",
+            "auth-email": "Email \u00fcnvan\u0131",
+            "auth-btn-send-sms": "SMS kodu g\u00f6nd\u0259r",
+            "auth-btn-send-email": "Email kodu g\u00f6nd\u0259r",
+            "auth-btn-verify": "Kodu t\u0259sdiql\u0259",
+            "auth-no-code": "Kodu almad\u0131n\u0131z?",
+            "auth-resend": "Yenid\u0259n g\u00f6nd\u0259r",
+            "auth-change-num": "\u2190 N\u00f6mr\u0259ni d\u0259yi\u015f",
+            "auth-change-email": "\u2190 Email-i d\u0259yi\u015f",
+            "auth-no-account": "Hesab\u0131n\u0131z yoxdur?",
+            "auth-go-signup": "Qeydiyyatdan ke\u00e7in",
+            "auth-sms-sent-1": "SMS kodu",
+            "auth-sms-sent-2": "n\u00f6mr\u0259sin\u0259 g\u00f6nd\u0259rildi.",
+            "auth-email-sent-1": "6 r\u0259q\u0259mli kod",
+            "auth-email-sent-2": "\u00fcnvan\u0131na g\u00f6nd\u0259rildi.",
+            "auth-ph-email": "example@email.com",
+            "auth-ph-phone": "55 123 45 67",
+            "auth-signup-welcome": "Qeydiyyatdan ke\u00e7in!",
+            "auth-signup-brand-sub": "Pulsuz hesab yarad\u0131n, elanlar\u0131n\u0131z\u0131 d\u0259rhal d\u0259rc edin.",
+            "auth-signup-feat-1": "Pulsuz elan yerl\u0259\u015fdirin",
+            "auth-signup-feat-2": "Sat\u0131c\u0131larla birba\u015fa \u0259laq\u0259",
+            "auth-signup-feat-3": "Se\u00e7ilmi\u015fl\u0259r\u0259 \u0259lav\u0259 edin",
+            "auth-signup-feat-4": "Yeni elanlarda bildiri\u015f al\u0131n",
+            "auth-heading-signup": "Hesab yarat",
+            "auth-subheading-signup": "Do\u011frulama \u00fcsulunuzu se\u00e7in",
+            "auth-signup-method-label": "Qeydiyyat \u00fcsulu",
+            "auth-signup-method-sms": "SMS il\u0259",
+            "auth-signup-method-email": "Email il\u0259",
+            "auth-first-name": "Ad",
+            "auth-last-name": "Soyad",
+            "auth-ph-name": "\u018fli",
+            "auth-ph-surname-signup": "H\u0259s\u0259nov",
+            "auth-btn-verify-phone": "N\u00f6mr\u0259ni t\u0259sdiql\u0259",
+            "auth-phone-verified": "N\u00f6mr\u0259niz t\u0259sdiql\u0259ndi!",
+            "auth-email-optional": "Email (ist\u0259y\u0259 ba\u011fl\u0131)",
+            "auth-pwd-confirm": "\u015eifr\u0259ni t\u0259sdiql\u0259",
+            "auth-terms-consent": "<a href=\"#\">\u0130stifad\u0259 \u015f\u0259rtl\u0259ri</a> v\u0259 <a href=\"#\">Gizlilik siyas\u0259ti</a> il\u0259 raz\u0131yam",
+            "auth-btn-create-account": "Hesab yarat",
+            "auth-has-account": "Art\u0131q hesab\u0131n\u0131z var?",
+            "auth-go-login": "Daxil olun",
+            "auth-btn-verify-email": "Email-i t\u0259sdiql\u0259",
+            "auth-email-verified": "Email-iniz t\u0259sdiql\u0259ndi!",
+            "auth-phone-optional": "Telefon (ist\u0259y\u0259 ba\u011fl\u0131)",
+            "auth-strength-weak": "Z\u0259if",
+            "auth-strength-fair": "Orta",
+            "auth-strength-good": "Yax\u015f\u0131",
+            "auth-strength-strong": "G\u00fccl\u00fc"
+        },
+        ENG: {
+            "login-btn": "Log In",
+            "register-btn": "Sign Up",
+            "auth-login-page-title": "Log In - Mobil.az",
+            "auth-signup-page-title": "Sign Up - Mobil.az",
+            "auth-welcome": "Welcome!",
+            "auth-brand-sub": "Join Azerbaijan's largest phone marketplace.",
+            "auth-feat-1": "SSL-secured login",
+            "auth-feat-2": "Fast and reliable",
+            "auth-feat-3": "50,000+ phone listings",
+            "auth-feat-4": "24/7 support",
+            "auth-tab-login": "Log In",
+            "auth-tab-signup": "Sign Up",
+            "auth-heading-login": "Account login",
+            "auth-subheading-login": "Choose a method to sign in to your account",
+            "auth-method-label": "Login method",
+            "auth-method-pwd": "Password",
+            "auth-method-sms": "SMS code",
+            "auth-method-email": "Email code",
+            "auth-or": "or",
+            "auth-login-id": "Email or username",
+            "auth-pwd": "Password",
+            "auth-remember": "Remember me",
+            "auth-forgot": "Forgot your password?",
+            "auth-btn-login": "Log In",
+            "auth-phone": "Phone number",
+            "auth-email": "Email address",
+            "auth-btn-send-sms": "Send SMS code",
+            "auth-btn-send-email": "Send email code",
+            "auth-btn-verify": "Verify code",
+            "auth-no-code": "Didn't receive the code?",
+            "auth-resend": "Resend",
+            "auth-change-num": "\u2190 Change number",
+            "auth-change-email": "\u2190 Change email",
+            "auth-no-account": "Don't have an account?",
+            "auth-go-signup": "Sign up",
+            "auth-sms-sent-1": "An SMS code was sent to",
+            "auth-sms-sent-2": ".",
+            "auth-email-sent-1": "A 6-digit code was sent to",
+            "auth-email-sent-2": ".",
+            "auth-ph-email": "example@email.com",
+            "auth-ph-phone": "55 123 45 67",
+            "auth-signup-welcome": "Create your account!",
+            "auth-signup-brand-sub": "Create a free account and publish your listings instantly.",
+            "auth-signup-feat-1": "Post listings for free",
+            "auth-signup-feat-2": "Contact sellers directly",
+            "auth-signup-feat-3": "Add to favorites",
+            "auth-signup-feat-4": "Get alerts for new listings",
+            "auth-heading-signup": "Create account",
+            "auth-subheading-signup": "Choose your verification method",
+            "auth-signup-method-label": "Registration method",
+            "auth-signup-method-sms": "By SMS",
+            "auth-signup-method-email": "By email",
+            "auth-first-name": "First name",
+            "auth-last-name": "Last name",
+            "auth-ph-name": "Ali",
+            "auth-ph-surname-signup": "Hasanov",
+            "auth-btn-verify-phone": "Verify phone number",
+            "auth-phone-verified": "Your phone number is verified!",
+            "auth-email-optional": "Email (optional)",
+            "auth-pwd-confirm": "Confirm password",
+            "auth-terms-consent": "I agree to the <a href=\"#\">Terms of Use</a> and <a href=\"#\">Privacy Policy</a>",
+            "auth-btn-create-account": "Create account",
+            "auth-has-account": "Already have an account?",
+            "auth-go-login": "Log in",
+            "auth-btn-verify-email": "Verify email",
+            "auth-email-verified": "Your email is verified!",
+            "auth-phone-optional": "Phone (optional)",
+            "auth-strength-weak": "Weak",
+            "auth-strength-fair": "Fair",
+            "auth-strength-good": "Good",
+            "auth-strength-strong": "Strong"
+        },
+        RUS: {
+            "login-btn": "\u0412\u043e\u0439\u0442\u0438",
+            "register-btn": "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f",
+            "auth-login-page-title": "\u0412\u0445\u043e\u0434 - Mobil.az",
+            "auth-signup-page-title": "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f - Mobil.az",
+            "auth-welcome": "\u0414\u043e\u0431\u0440\u043e \u043f\u043e\u0436\u0430\u043b\u043e\u0432\u0430\u0442\u044c!",
+            "auth-brand-sub": "\u0412\u043e\u0439\u0434\u0438\u0442\u0435 \u043d\u0430 \u043a\u0440\u0443\u043f\u043d\u0435\u0439\u0448\u0438\u0439 \u0440\u044b\u043d\u043e\u043a \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u043e\u0432 \u0410\u0437\u0435\u0440\u0431\u0430\u0439\u0434\u0436\u0430\u043d\u0430.",
+            "auth-feat-1": "\u0412\u0445\u043e\u0434 \u0441 \u0437\u0430\u0449\u0438\u0442\u043e\u0439 SSL",
+            "auth-feat-2": "\u0411\u044b\u0441\u0442\u0440\u043e \u0438 \u043d\u0430\u0434\u0435\u0436\u043d\u043e",
+            "auth-feat-3": "50,000+ \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0438\u0439 \u043e \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430\u0445",
+            "auth-feat-4": "\u041f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0430 24/7",
+            "auth-tab-login": "\u0412\u0445\u043e\u0434",
+            "auth-tab-signup": "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f",
+            "auth-heading-login": "\u0412\u0445\u043e\u0434 \u0432 \u0430\u043a\u043a\u0430\u0443\u043d\u0442",
+            "auth-subheading-login": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u0432\u0445\u043e\u0434\u0430 \u0432 \u0430\u043a\u043a\u0430\u0443\u043d\u0442",
+            "auth-method-label": "\u0421\u043f\u043e\u0441\u043e\u0431 \u0432\u0445\u043e\u0434\u0430",
+            "auth-method-pwd": "\u041f\u0430\u0440\u043e\u043b\u044c",
+            "auth-method-sms": "SMS-\u043a\u043e\u0434",
+            "auth-method-email": "Email-\u043a\u043e\u0434",
+            "auth-or": "\u0438\u043b\u0438",
+            "auth-login-id": "Email \u0438\u043b\u0438 \u0438\u043c\u044f \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044f",
+            "auth-pwd": "\u041f\u0430\u0440\u043e\u043b\u044c",
+            "auth-remember": "\u0417\u0430\u043f\u043e\u043c\u043d\u0438\u0442\u044c \u043c\u0435\u043d\u044f",
+            "auth-forgot": "\u0417\u0430\u0431\u044b\u043b\u0438 \u043f\u0430\u0440\u043e\u043b\u044c?",
+            "auth-btn-login": "\u0412\u043e\u0439\u0442\u0438",
+            "auth-phone": "\u041d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430",
+            "auth-email": "Email-\u0430\u0434\u0440\u0435\u0441",
+            "auth-btn-send-sms": "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c SMS-\u043a\u043e\u0434",
+            "auth-btn-send-email": "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c email-\u043a\u043e\u0434",
+            "auth-btn-verify": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u043a\u043e\u0434",
+            "auth-no-code": "\u041d\u0435 \u043f\u043e\u043b\u0443\u0447\u0438\u043b\u0438 \u043a\u043e\u0434?",
+            "auth-resend": "\u041e\u0442\u043f\u0440\u0430\u0432\u0438\u0442\u044c \u0435\u0449\u0435 \u0440\u0430\u0437",
+            "auth-change-num": "\u2190 \u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c \u043d\u043e\u043c\u0435\u0440",
+            "auth-change-email": "\u2190 \u0418\u0437\u043c\u0435\u043d\u0438\u0442\u044c email",
+            "auth-no-account": "\u041d\u0435\u0442 \u0430\u043a\u043a\u0430\u0443\u043d\u0442\u0430?",
+            "auth-go-signup": "\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u0443\u0439\u0442\u0435\u0441\u044c",
+            "auth-sms-sent-1": "SMS-\u043a\u043e\u0434 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d \u043d\u0430",
+            "auth-sms-sent-2": ".",
+            "auth-email-sent-1": "6-\u0437\u043d\u0430\u0447\u043d\u044b\u0439 \u043a\u043e\u0434 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u0435\u043d \u043d\u0430",
+            "auth-email-sent-2": ".",
+            "auth-ph-email": "example@email.com",
+            "auth-ph-phone": "55 123 45 67",
+            "auth-signup-welcome": "\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u0443\u0439\u0442\u0435\u0441\u044c!",
+            "auth-signup-brand-sub": "\u0421\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u044b\u0439 \u0430\u043a\u043a\u0430\u0443\u043d\u0442 \u0438 \u0441\u0440\u0430\u0437\u0443 \u043f\u0443\u0431\u043b\u0438\u043a\u0443\u0439\u0442\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0438\u044f.",
+            "auth-signup-feat-1": "\u0420\u0430\u0437\u043c\u0435\u0449\u0430\u0439\u0442\u0435 \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0438\u044f \u0431\u0435\u0441\u043f\u043b\u0430\u0442\u043d\u043e",
+            "auth-signup-feat-2": "\u0421\u0432\u044f\u0437\u044c \u0441 \u043f\u0440\u043e\u0434\u0430\u0432\u0446\u0430\u043c\u0438 \u043d\u0430\u043f\u0440\u044f\u043c\u0443\u044e",
+            "auth-signup-feat-3": "\u0414\u043e\u0431\u0430\u0432\u043b\u044f\u0439\u0442\u0435 \u0432 \u0438\u0437\u0431\u0440\u0430\u043d\u043d\u043e\u0435",
+            "auth-signup-feat-4": "\u041f\u043e\u043b\u0443\u0447\u0430\u0439\u0442\u0435 \u0443\u0432\u0435\u0434\u043e\u043c\u043b\u0435\u043d\u0438\u044f \u043e \u043d\u043e\u0432\u044b\u0445 \u043e\u0431\u044a\u044f\u0432\u043b\u0435\u043d\u0438\u044f\u0445",
+            "auth-heading-signup": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442",
+            "auth-subheading-signup": "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0441\u043f\u043e\u0441\u043e\u0431 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d\u0438\u044f",
+            "auth-signup-method-label": "\u0421\u043f\u043e\u0441\u043e\u0431 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438",
+            "auth-signup-method-sms": "\u041f\u043e SMS",
+            "auth-signup-method-email": "\u041f\u043e email",
+            "auth-first-name": "\u0418\u043c\u044f",
+            "auth-last-name": "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
+            "auth-ph-name": "\u0410\u043b\u0438",
+            "auth-ph-surname-signup": "\u0413\u0430\u0441\u0430\u043d\u043e\u0432",
+            "auth-btn-verify-phone": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c \u043d\u043e\u043c\u0435\u0440",
+            "auth-phone-verified": "\u041d\u043e\u043c\u0435\u0440 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0430 \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d!",
+            "auth-email-optional": "Email (\u043f\u043e \u0436\u0435\u043b\u0430\u043d\u0438\u044e)",
+            "auth-pwd-confirm": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c",
+            "auth-terms-consent": "\u042f \u0441\u043e\u0433\u043b\u0430\u0441\u0435\u043d \u0441 <a href=\"#\">\u0423\u0441\u043b\u043e\u0432\u0438\u044f\u043c\u0438 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u044f</a> \u0438 <a href=\"#\">\u041f\u043e\u043b\u0438\u0442\u0438\u043a\u043e\u0439 \u043a\u043e\u043d\u0444\u0438\u0434\u0435\u043d\u0446\u0438\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u0438</a>",
+            "auth-btn-create-account": "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442",
+            "auth-has-account": "\u0423\u0436\u0435 \u0435\u0441\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442?",
+            "auth-go-login": "\u0412\u043e\u0439\u0442\u0438",
+            "auth-btn-verify-email": "\u041f\u043e\u0434\u0442\u0432\u0435\u0440\u0434\u0438\u0442\u044c email",
+            "auth-email-verified": "Email \u043f\u043e\u0434\u0442\u0432\u0435\u0440\u0436\u0434\u0435\u043d!",
+            "auth-phone-optional": "\u0422\u0435\u043b\u0435\u0444\u043e\u043d (\u043f\u043e \u0436\u0435\u043b\u0430\u043d\u0438\u044e)",
+            "auth-strength-weak": "\u0421\u043b\u0430\u0431\u044b\u0439",
+            "auth-strength-fair": "\u0421\u0440\u0435\u0434\u043d\u0438\u0439",
+            "auth-strength-good": "\u0425\u043e\u0440\u043e\u0448\u0438\u0439",
+            "auth-strength-strong": "\u041d\u0430\u0434\u0435\u0436\u043d\u044b\u0439"
+        }
+    };
+    for (const lang of Object.keys(authTranslations)) {
+        Object.assign(translations[lang], authTranslations[lang]);
+    }
+    window.translations = translations;
     // ─── LANGUAGE SWITCHER ────────────────────────────────────────────────────
     const langSwitcher = document.querySelector(".language-selector");
     const currentLangElement = document.getElementById("current-lang");
@@ -1788,6 +1209,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
         currentLangElement.innerText = translations[newLang]["language-selector"];
         localStorage.setItem("lang", newLang);
+        document.documentElement.lang = newLang === "ENG" ? "en" : newLang === "RUS" ? "ru" : "az";
         document.querySelectorAll("[data-translate]").forEach((element) => {
             let key = element.getAttribute("data-translate");
             if (!key || !translations[newLang][key])
@@ -1841,13 +1263,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         });
-        // Translate <option data-translate-option="key"> elements
-        document.querySelectorAll("option[data-translate-option]").forEach((opt) => {
-            const key = opt.getAttribute("data-translate-option");
-            if (key && translations[newLang][key]) {
-                opt.textContent = translations[newLang][key];
-            }
-        });
         // Also update document.title
         const titleElements = document.querySelectorAll("[data-translate-title]");
         titleElements.forEach(el => {
@@ -1856,8 +1271,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.title = translations[newLang][key];
             }
         });
-        // Notify other scripts (e.g. elan-yerlesdir.js) about the language change
-        document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: newLang, t: translations[newLang] } }));
+        document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
     }
     // Restore saved language on page load
     const savedLang = localStorage.getItem("lang");
@@ -1887,278 +1301,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
     // ─── FILTER BUTTON GROUPS ─────────────────────────────────────────────────
-    // Note: click logic is now handled in JS/filters.js to avoid double toggling.
-
-    // ─── BRAND & MODEL SELECT ─────────────────────────────────────────────────
-    const filterBrandSelect = document.getElementById("brandSelect");
-    const filterModelSelect = document.getElementById("modelSelect");
-
-    if (filterBrandSelect && filterModelSelect) {
-        const CATEGORY_BRANDS = {
-            phone: ["Apple", "Samsung", "Xiaomi", "Huawei", "OPPO", "Vivo", "Honor", "Realme", "Nokia"],
-            tablet: ["Apple", "Samsung", "Lenovo", "Xiaomi", "Huawei", "Honor", "Microsoft"],
-            headphone: ["Apple", "Samsung", "Sony", "JBL", "Marshall", "Beats", "Bose", "Xiaomi", "Huawei", "Sennheiser"],
-            accessory: ["Baseus", "Anker", "Ugreen", "Spigen", "Apple", "Samsung", "Hoco", "Borofone", "Joyroom"]
-        };
-
-        const PHONE_MODELS = {
-            Apple: [
-                'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
-                'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
-                'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
-                'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13 mini', 'iPhone 13',
-                'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12 mini', 'iPhone 12',
-                'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
-                'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X',
-                'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)',
-                'iPhone 8 Plus', 'iPhone 8', 'iPhone 7 Plus', 'iPhone 7',
-            ],
-            Samsung: [
-                'Galaxy S25 Ultra', 'Galaxy S25+', 'Galaxy S25',
-                'Galaxy S24 Ultra', 'Galaxy S24+', 'Galaxy S24', 'Galaxy S24 FE',
-                'Galaxy S23 Ultra', 'Galaxy S23+', 'Galaxy S23', 'Galaxy S23 FE',
-                'Galaxy S22 Ultra', 'Galaxy S22+', 'Galaxy S22',
-                'Galaxy S21 Ultra', 'Galaxy S21+', 'Galaxy S21',
-                'Galaxy Z Fold 6', 'Galaxy Z Fold 5', 'Galaxy Z Fold 4',
-                'Galaxy Z Flip 6', 'Galaxy Z Flip 5', 'Galaxy Z Flip 4',
-                'Galaxy A55', 'Galaxy A54', 'Galaxy A53', 'Galaxy A52',
-                'Galaxy A35', 'Galaxy A34', 'Galaxy A33',
-                'Galaxy A15', 'Galaxy A14', 'Galaxy A13',
-                'Galaxy M55', 'Galaxy M54', 'Galaxy M34',
-                'Galaxy Note 20 Ultra', 'Galaxy Note 20',
-            ],
-            Xiaomi: [
-                'Xiaomi 14 Ultra', 'Xiaomi 14 Pro', 'Xiaomi 14',
-                'Xiaomi 13 Ultra', 'Xiaomi 13 Pro', 'Xiaomi 13',
-                'Xiaomi 12 Pro', 'Xiaomi 12', 'Xiaomi 12 Lite',
-                'Redmi Note 13 Pro+', 'Redmi Note 13 Pro', 'Redmi Note 13',
-                'Redmi Note 12 Pro+', 'Redmi Note 12 Pro', 'Redmi Note 12',
-                'Redmi 13C', 'Redmi 12', 'Redmi 10C',
-                'POCO X6 Pro', 'POCO X6', 'POCO X5 Pro', 'POCO X5',
-                'POCO M6 Pro', 'POCO M5', 'POCO F5 Pro', 'POCO F5',
-            ],
-            Huawei: [
-                'Pura 70 Ultra', 'Pura 70 Pro+', 'Pura 70 Pro', 'Pura 70',
-                'Mate 60 Pro+', 'Mate 60 Pro', 'Mate 60',
-                'P60 Pro', 'P60 Art', 'P60', 'P50 Pro', 'P50',
-                'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12',
-                'Nova 11 Pro', 'Nova 11 Ultra', 'Nova 11',
-                'Nova 10 Pro', 'Nova 10 SE', 'Y90', 'Y72', 'Y62',
-            ],
-            OPPO: [
-                'Find X8 Pro', 'Find X8', 'Find X7 Ultra', 'Find X7',
-                'Find X6 Pro', 'Find X6',
-                'Reno 12 Pro', 'Reno 12 F', 'Reno 12',
-                'Reno 11 Pro', 'Reno 11 F', 'Reno 11',
-                'Reno 10 Pro+', 'Reno 10 Pro', 'Reno 10',
-                'A3 Pro', 'A3', 'A78', 'A77', 'A55',
-            ],
-            Vivo: [
-                'X100 Ultra', 'X100 Pro', 'X100',
-                'X90 Pro', 'X90',
-                'V30 Pro', 'V30 Lite', 'V30',
-                'V29 Pro', 'V29 Lite', 'V29',
-                'V27 Pro', 'V27 Lite', 'V27',
-                'Y200 Pro', 'Y200', 'Y100', 'Y78', 'Y55', 'Y36',
-            ],
-            Honor: [
-                'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6',
-                'Magic 5 Pro', 'Magic 5 Ultimate', 'Magic 5',
-                '90 Smart', '90', '90 Pro',
-                'X9b', 'X8b', 'X7b',
-                'Play 8T', 'Play 7T', 'Play 6T',
-            ],
-            Realme: [
-                'GT 6T', 'GT 6', 'GT 5 Pro', 'GT 5',
-                '12 Pro+ 5G', '12 Pro 5G', '12 5G',
-                '11 Pro+ 5G', '11 Pro 5G', '11 5G',
-                'C67', 'C55', 'C53', 'C35', 'C33',
-                'Narzo 70 Pro', 'Narzo 60 Pro', 'Narzo 50',
-            ],
-            Nokia: [
-                'Nokia G42', 'Nokia G22', 'Nokia G21', 'Nokia G11',
-                'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
-                'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio',
-            ]
-        };
-
-        const TABLET_MODELS = {
-            Apple: ['iPad Pro 13 (M4)', 'iPad Pro 11 (M4)', 'iPad Air 13 (M2)', 'iPad Air 11 (M2)', 'iPad (10th gen)', 'iPad mini (6th gen)', 'iPad Pro 12.9 (M2)', 'iPad Pro 11 (M2)'],
-            Samsung: ['Galaxy Tab S9 Ultra', 'Galaxy Tab S9+', 'Galaxy Tab S9', 'Galaxy Tab S9 FE+', 'Galaxy Tab S9 FE', 'Galaxy Tab A9+', 'Galaxy Tab A9', 'Galaxy Tab S8 Ultra', 'Galaxy Tab S8+', 'Galaxy Tab S8'],
-            Lenovo: ['Tab P12 Pro', 'Tab P12', 'Tab P11 Pro', 'Tab P11', 'Tab M11', 'Tab M10 Plus', 'Tab M9', 'Tab M8'],
-            Xiaomi: ['Xiaomi Pad 6S Pro', 'Xiaomi Pad 6 Max', 'Xiaomi Pad 6 Pro', 'Xiaomi Pad 6', 'Redmi Pad SE', 'Redmi Pad'],
-            Huawei: ['MatePad Pro 13.2', 'MatePad Pro 11', 'MatePad 11.5', 'MatePad 11', 'MatePad SE'],
-            Honor: ['Pad 9', 'Pad X9', 'Pad 8', 'Pad X8'],
-            Microsoft: ['Surface Pro 9', 'Surface Pro 8', 'Surface Go 3']
-        };
-
-        const HEADPHONE_MODELS = {
-            Apple: ['AirPods Pro (2nd gen)', 'AirPods (3rd gen)', 'AirPods (2nd gen)', 'AirPods Max'],
-            Samsung: ['Galaxy Buds2 Pro', 'Galaxy Buds FE', 'Galaxy Buds2', 'Galaxy Buds Pro', 'Galaxy Buds Live'],
-            Sony: ['WH-1000XM5', 'WF-1000XM5', 'WH-1000XM4', 'WF-1000XM4', 'LinkBuds S', 'WH-CH720N'],
-            JBL: ['Tour One M2', 'Tour Pro 2', 'Live Pro 2', 'Tune 770NC', 'Tune 720BT', 'Wave Buds', 'Wave Beam'],
-            Marshall: ['Major V', 'Major IV', 'Minor III', 'Motif II A.N.C.', 'Monitor II A.N.C.'],
-            Beats: ['Beats Studio Pro', 'Beats Fit Pro', 'Beats Studio Buds+', 'Beats Studio Buds', 'Beats Flex'],
-            Bose: ['QuietComfort Ultra', 'QuietComfort Earbuds II', 'QuietComfort Headphones'],
-            Xiaomi: ['Xiaomi Buds 4 Pro', 'Xiaomi Buds 4', 'Redmi Buds 5 Pro', 'Redmi Buds 5', 'Redmi Buds 4 Active'],
-            Huawei: ['FreeBuds Pro 3', 'FreeBuds 5', 'FreeBuds 5i', 'FreeBuds SE 2'],
-            Sennheiser: ['MOMENTUM 4', 'MOMENTUM True Wireless 3', 'ACCENTUM', 'CX Plus']
-        };
-
-        const ACCESSORY_TYPES = ['Adapter', 'Kabel', 'Powerbank', 'Qab (Case)', 'Qoruyucu şüşə', 'Avtomobil tutacağı', 'Qulaqlıq adapteri', 'Hub/Dock', 'Digər'];
-        
-        // Listen to category changes to update brand dropdown
-        const categoryButtons = document.querySelectorAll('.filter-btn-group[data-group="category"] .category-button');
-        
-        categoryButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Determine active category value (if "Hamısı" is clicked it might have empty string)
-                // Use setTimeout to ensure this runs after filters.js updates the active class
-                setTimeout(() => {
-                    const activeCatBtn = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active');
-                    const category = activeCatBtn ? activeCatBtn.getAttribute('data-value') : '';
-                    
-                    updateBrandDropdown(category);
-                }, 50);
+    const buttonGroups = document.querySelectorAll(".memory-buttons, .fingerprint-buttons, .nfc-buttons, .waterproof-buttons, .expandable-buttons, .delivery-buttons, .condition-buttons, .color-buttons");
+    buttonGroups.forEach((group) => {
+        const buttons = group.querySelectorAll("button");
+        buttons.forEach((button) => {
+            button.addEventListener("click", function () {
+                buttons.forEach((btn) => btn.classList.remove("active"));
+                this.classList.add("active");
             });
         });
-
-        function updateBrandDropdown(category) {
-            const currentLangElement = document.getElementById("current-lang");
-            let lang = currentLangElement ? currentLangElement.innerText.trim() : "AZ";
-            if (lang === "РУС") lang = "RUS";
-            
-            const allBrandsText = translations[lang] && translations[lang]["all-brand"] ? translations[lang]["all-brand"] : "Bütün markalar";
-            const otherText = translations[lang] && translations[lang]["other"] ? translations[lang]["other"] : "Digər";
-            
-            const brandLabelSpan = document.querySelector('.filter-group .brand');
-            const modelGroup = filterModelSelect.closest('.filter-group');
-            
-            if (category === 'accessory') {
-                if (brandLabelSpan) brandLabelSpan.textContent = lang === 'ENG' ? 'Accessory Type' : (lang === 'RUS' ? 'Тип аксессуара' : 'Aksesuar növü');
-                if (modelGroup) modelGroup.style.display = 'none';
-                
-                filterBrandSelect.innerHTML = `<option value="" class="all-brand" data-translate="all-brand">${lang === 'ENG' ? 'All Types' : (lang === 'RUS' ? 'Все типы' : 'Bütün növlər')}</option>`;
-                ACCESSORY_TYPES.forEach(type => {
-                    const opt = document.createElement('option');
-                    opt.value = type;
-                    opt.textContent = type;
-                    filterBrandSelect.appendChild(opt);
-                });
-            } else {
-                if (brandLabelSpan) brandLabelSpan.textContent = translations[lang] && translations[lang]["brand"] ? translations[lang]["brand"] : "Marka";
-                if (modelGroup) modelGroup.style.display = 'block';
-                
-                const brandsToLoad = CATEGORY_BRANDS[category] || CATEGORY_BRANDS['phone'];
-                filterBrandSelect.innerHTML = `<option value="" class="all-brand" data-translate="all-brand">${allBrandsText}</option>`;
-                brandsToLoad.forEach(brand => {
-                    const opt = document.createElement('option');
-                    opt.value = brand;
-                    opt.textContent = brand;
-                    filterBrandSelect.appendChild(opt);
-                });
-                
-                const otherOpt = document.createElement('option');
-                otherOpt.value = "other";
-                otherOpt.innerHTML = `<span class="other" data-translate="other">${otherText}</span>`;
-                filterBrandSelect.appendChild(otherOpt);
-            }
-            
-            filterBrandSelect.value = '';
-            filterBrandSelect.dispatchEvent(new Event('change'));
-        }
-
-        filterBrandSelect.addEventListener("change", function () {
-            const selectedBrand = this.value;
-            const currentLangElement = document.getElementById("current-lang");
-            let lang = currentLangElement ? currentLangElement.innerText.trim() : "AZ";
-            if (lang === "РУС") lang = "RUS";
-            
-            const firstOptText = translations[lang] && translations[lang]["select-brand"] ? translations[lang]["select-brand"] : "Əvvəlcə marka seçin";
-            
-            filterModelSelect.innerHTML = `<option value=""><span class="select-brand" data-translate="select-brand">${firstOptText}</span></option>`;
-            
-            // Figure out the active category dictionary
-            const activeCatBtn = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active');
-            const category = activeCatBtn ? activeCatBtn.getAttribute('data-value') : '';
-            
-            let currentModelDict = PHONE_MODELS;
-            if (category === 'tablet') currentModelDict = TABLET_MODELS;
-            else if (category === 'headphone') currentModelDict = HEADPHONE_MODELS;
-            // accessory uses no models
-            
-            if (category !== 'accessory') {
-                if (selectedBrand && currentModelDict[selectedBrand]) {
-                    const allModelsText = translations[lang] && translations[lang]["all-models"] ? translations[lang]["all-models"] : "Bütün modellər";
-                    filterModelSelect.innerHTML = `<option value="" class="all-models" data-translate="all-models">${allModelsText}</option>`;
-                    currentModelDict[selectedBrand].forEach(model => {
-                        const opt = document.createElement("option");
-                        opt.value = model;
-                        opt.textContent = model;
-                        filterModelSelect.appendChild(opt);
-                    });
-                    
-                    const otherModelText = translations[lang] && translations[lang]["other-model"] ? translations[lang]["other-model"] : "Digər model";
-                    const otherOpt = document.createElement("option");
-                    otherOpt.value = "other";
-                    otherOpt.textContent = otherModelText;
-                    otherOpt.setAttribute("data-translate", "other-model");
-                    filterModelSelect.appendChild(otherOpt);
-                } else if (selectedBrand === 'other') {
-                const allModelsText = translations[lang] && translations[lang]["all-models"] ? translations[lang]["all-models"] : "Bütün modellər";
-                filterModelSelect.innerHTML = `<option value="" class="all-models" data-translate="all-models">${allModelsText}</option>`;
-                const otherModelText = translations[lang] && translations[lang]["other-model"] ? translations[lang]["other-model"] : "Digər model";
-                const opt = document.createElement("option");
-                opt.value = "other";
-                opt.textContent = otherModelText;
-                    opt.setAttribute("data-translate", "other-model");
-                    filterModelSelect.appendChild(opt);
-                }
-            }
-        });
-    }
-
-    // ─── RESET FILTERS ────────────────────────────────────────────────────────
-    const btnReset = document.querySelector(".btn-reset");
-    if (btnReset) {
-        btnReset.addEventListener("click", function () {
-            // Reset selects
-            document.querySelectorAll(".filter-select").forEach(select => {
-                select.selectedIndex = 0;
-                select.dispatchEvent(new Event("change"));
-            });
-            // Reset price inputs
-            document.querySelectorAll(".price-input").forEach(input => {
-                input.value = "";
-            });
-            // Reset button groups
-            document.querySelectorAll(".filter-btn-group").forEach(group => {
-                const buttons = group.querySelectorAll("button");
-                buttons.forEach(btn => btn.classList.remove("active"));
-                // Add default active state to the first button for specific groups
-                if (group.classList.contains("fingerprint-buttons") ||
-                    group.classList.contains("nfc-buttons") ||
-                    group.classList.contains("waterproof-buttons") ||
-                    group.classList.contains("expandable-buttons") ||
-                    group.classList.contains("condition-buttons") ||
-                    group.classList.contains("delivery-buttons") ||
-                    group.classList.contains("seller-buttons")) {
-                    if (buttons.length > 0) buttons[0].classList.add("active");
-                }
-            });
-            // Clean active filter chips
-            const activeFiltersContainer = document.getElementById("activeFiltersContainer");
-            if (activeFiltersContainer) activeFiltersContainer.style.display = "none";
-            const filterChips = document.getElementById("filterChips");
-            if (filterChips) filterChips.innerHTML = "";
-            const filterBadge = document.getElementById("filterBadge");
-            if (filterBadge) {
-                filterBadge.style.display = "none";
-                filterBadge.textContent = "0";
-            }
-        });
-    }
-
+    });
     // ─── SORTING ──────────────────────────────────────────────────────────────
     const sortingSelect = document.getElementById("sortingOptions");
     if (sortingSelect) {
@@ -2289,158 +1441,4 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     initTheme();
-
-    // ─── RANDOMIZE SELLER PROFILE FOR AD DETAIL PAGES ────────────────────────────
-    function randomizeSellerProfile() {
-        const urlParams = new URLSearchParams(window.location.search);
-        let adId = parseInt(urlParams.get('id'));
-        if (!adId || isNaN(adId)) adId = 1;
-
-        const fakeRandom = function(seed) {
-            let x = Math.sin(seed) * 10000;
-            return x - Math.floor(x);
-        };
-
-        const privateNames = [
-            "Elçin Məmmədov", "Əli Qasımov", "Tural Əliyev", "Vüqar Rəhimov", "Samir Həsənov",
-            "Nigar Quliyeva", "Aytən Rəhimova", "Kənan Səfərov", "Rəşad Nəbiyev", "Elnur Qarayev",
-            "Fəridə Abbasova", "Orxan Mürsəlov", "Nurlan Hacıyev", "Rəşid Quliyev"
-        ];
-        
-        const storesData = [
-            { name: "LeadTech Mobile", logo: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=200", badge: "Pro", loc: "Bakı, 28 May m/s", time: "09:00 – 21:00", rating: "4.9", active: "127", sales: "2.4K", follows: "3.1K", desc: "LeadTech Mobile rəsmi mağazamızdan satılır. Bütün məhsullar orijinaldır." },
-            { name: "Kontakt Home", logo: "https://images.unsplash.com/photo-1620288627223-53302f4e8c74?q=80&w=200", badge: "Premium", loc: "Bakı, Gənclik Mall", time: "10:00 – 22:00", rating: "4.8", active: "542", sales: "15K", follows: "52K", desc: "Kontakt Home - Sevindirən şəbəkə. Rəsmi zəmanət və hissə-hissə ödəniş." },
-            { name: "İrşad", logo: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?q=80&w=200", badge: "Pro", loc: "Bakı, Nərimanov", time: "09:00 – 21:00", rating: "4.7", active: "310", sales: "8K", follows: "25K", desc: "İrşad - Yaşa, Yarat, Paylaş! Ən son texnologiya artıq sizə daha yaxındır." },
-            { name: "Baku Electronics", logo: "https://images.unsplash.com/photo-1550005973-587922d326f2?q=80&w=200", badge: "Premium", loc: "Bakı, 20 Yanvar", time: "10:00 – 21:00", rating: "4.8", active: "480", sales: "12K", follows: "40K", desc: "Baku Electronics - hər zaman yenilikçi! Zəmanətli məhsullar ünvanı." },
-            { name: "Maxi.az", logo: "https://images.unsplash.com/photo-1601784551446-20c9e07cd8d3?q=80&w=200", badge: "Pro", loc: "Bakı, Dəniz Mall", time: "10:00 – 22:00", rating: "4.9", active: "215", sales: "5K", follows: "12K", desc: "Maxi.az ilə fərqi hiss et! Təhlükəsiz alış-veriş və rəsmi zəmanət." },
-            { name: "Music Gallery", logo: "https://images.unsplash.com/photo-1525201548942-d8732f6617a0?q=80&w=200", badge: "Standart", loc: "Bakı, Xətai", time: "10:00 – 20:00", rating: "4.6", active: "95", sales: "1.2K", follows: "4K", desc: "Music Gallery - Premium elektronika. Yüksək xidmət səviyyəsi." },
-            { name: "Smart Store", logo: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=200", badge: "Standart", loc: "Sumqayıt, Mərkəz", time: "09:00 – 20:00", rating: "4.5", active: "60", sales: "800", follows: "2.1K", desc: "Smart Store. İkinci əl və yeni cihazlar, barter xidməti aktivdir." },
-            { name: "Alma Store", logo: "https://images.unsplash.com/photo-1611406560410-09b9eb210c4f?q=80&w=200", badge: "Premium", loc: "Bakı, Port Baku", time: "10:00 – 22:00", rating: "5.0", active: "45", sales: "3K", follows: "18K", desc: "Alma Store - Apple Premium Reseller. Rəsmi zəmanət və orijinal mallar." },
-            { name: "World Telecom", logo: "https://images.unsplash.com/photo-1550009158-9ebf6d250400?q=80&w=200", badge: "Pro", loc: "Gəncə, Mall", time: "09:00 – 21:00", rating: "4.7", active: "150", sales: "4K", follows: "8K", desc: "World Telecom! Yeni modellər ən sərfəli qiymətə bizdədir." },
-            { name: "NoteComp", logo: "https://images.unsplash.com/photo-1550005973-587922d326f2?q=80&w=200", badge: "Standart", loc: "Bakı, Elmlər", time: "10:00 – 20:00", rating: "4.6", active: "35", sales: "1.2K", follows: "3K", desc: "NoteComp noutbuk və telefonların satışı və təmiri." },
-            { name: "Galaxy Shop", logo: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=200", badge: "Pro", loc: "Bakı, Neftçilər", time: "09:30 – 21:30", rating: "4.8", active: "250", sales: "6K", follows: "14K", desc: "Galaxy Shop: Bütün Android cihazlarının rəsmi mərkəzi." }
-        ];
-
-        const personalNameEl = document.querySelector('.personal-name');
-        if (personalNameEl) {
-            let nameIndex = Math.floor(fakeRandom(adId * 10) * privateNames.length);
-            let name = privateNames[nameIndex];
-            personalNameEl.textContent = name;
-            
-            let avatarEl = document.querySelector('.personal-avatar');
-            if (avatarEl) {
-                avatarEl.textContent = name.charAt(0);
-                let hue = Math.floor(fakeRandom(adId * 20) * 360);
-                avatarEl.style.background = `linear-gradient(135deg, hsl(${hue}, 70%, 50%), hsl(${(hue+40)%360}, 70%, 50%))`;
-            }
-
-            let statEls = document.querySelectorAll('.personal-stats .val');
-            if (statEls.length >= 3) {
-                statEls[0].textContent = Math.floor(fakeRandom(adId * 30) * 50) + 1; // Ads shared
-                statEls[1].textContent = (4.0 + fakeRandom(adId * 40)).toFixed(1); // Rating
-                statEls[2].textContent = Math.floor(90 + fakeRandom(adId * 50) * 10) + '%'; // Positive
-            }
-        }
-
-        const storeCardEl = document.querySelector('.store-seller-card');
-        if (storeCardEl) {
-            let storeIdx = Math.floor(fakeRandom(adId * 15) * storesData.length);
-            let store = storesData[storeIdx];
-            
-            // Update Logo
-            let logoEl = document.querySelector('.store-logo-circle');
-            if (logoEl) { logoEl.src = store.logo; logoEl.alt = store.name + " Logo"; }
-
-            // Update Name and Badge
-            let nameEl = document.querySelector('.store-card-name');
-            if (nameEl) {
-                let badgeHtml = '';
-                if (store.badge === 'Premium' || store.badge === 'Elite') {
-                    badgeHtml = ' <i class="fas fa-crown" style="color:#ffd700;" title="Premium Mağaza"></i> <span class="store-badge-inline" style="background:linear-gradient(135deg,#c8a600,#ffd700);color:#333;"><i class="fas fa-crown"></i> ' + store.badge + '</span>';
-                } else if (store.badge === 'Pro') {
-                    badgeHtml = ' <i class="fas fa-check-circle s-verified" title="Rəsmi Mağaza"></i> <span class="store-badge-inline"><i class="fas fa-star"></i> Pro</span>';
-                } else {
-                    badgeHtml = ' <span class="store-badge-inline" style="background:#555;"><i class="fas fa-store"></i> Mağaza</span>';
-                }
-                nameEl.innerHTML = store.name + badgeHtml;
-            }
-
-            // Update Sub info (location & time)
-            let subs = document.querySelectorAll('.store-card-sub');
-            if (subs.length >= 2) {
-                subs[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + store.loc;
-                subs[1].innerHTML = '<i class="fas fa-clock"></i> ' + store.time;
-            }
-
-            // Update Stats
-            let statVals = document.querySelectorAll('.store-stats-grid .val');
-            if (statVals.length >= 4) {
-                statVals[0].textContent = store.rating;
-                statVals[1].textContent = Math.floor(fakeRandom(adId * 2) * parseInt(store.active)) + 15;
-                statVals[2].textContent = store.sales;
-                statVals[3].textContent = store.follows;
-            }
-
-            // Update product description prefix
-            let descEl = document.querySelector('.desc-text');
-            if (descEl && !descEl.dataset.updated) {
-                let existingText = descEl.innerHTML;
-                descEl.innerHTML = '<strong>' + store.name + '</strong> — ' + store.desc + '<br><br>' + existingText.replace(/Samsung Galaxy.*?satılır\./, '');
-                descEl.dataset.updated = 'true';
-            }
-
-            // Update View Store Link (so magaza profil has the ID)
-            let viewStoreLink = document.querySelector('.view-store-link');
-            if (viewStoreLink) {
-                viewStoreLink.href = 'magaza-profil.html?id=' + adId;
-            }
-        }
-
-        // Apply to Store Profile Page
-        const magazaProfilEl = document.querySelector('.store-profile-bar');
-        if (magazaProfilEl) {
-            let storeIdx = Math.floor(fakeRandom(adId * 15) * storesData.length);
-            let store = storesData[storeIdx];
-
-            let logoLg = document.querySelector('.store-logo-large');
-            if (logoLg) { logoLg.src = store.logo; logoLg.alt = store.name + " Logo"; }
-
-            let nameEl = document.querySelector('.store-identity-name');
-            if (nameEl) {
-                let badgeHtml = '';
-                if (store.badge === 'Premium' || store.badge === 'Elite') {
-                    badgeHtml = ' <i class="fas fa-crown badge-verified" style="color:#ffd700;" title="Premium Mağaza"></i> <span class="store-pkg-badge premium"><i class="fas fa-crown"></i> ' + store.badge + ' Mağaza</span>';
-                } else if (store.badge === 'Pro') {
-                    badgeHtml = ' <i class="fas fa-check-circle badge-verified" title="Rəsmi Mağaza"></i> <span class="store-pkg-badge pro"><i class="fas fa-star"></i> Pro Mağaza</span>';
-                } else {
-                    badgeHtml = ' <span class="store-pkg-badge" style="background:#555;color:#fff;"><i class="fas fa-store"></i> Mağaza</span>';
-                }
-                nameEl.innerHTML = store.name + badgeHtml;
-            }
-
-            let subs = document.querySelectorAll('.store-sub-line span');
-            if (subs.length >= 2) {
-                subs[0].innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + store.loc;
-                subs[1].innerHTML = '<i class="fas fa-clock"></i> ' + store.time;
-            }
-
-            let statVals = document.querySelectorAll('.store-stats-strip .val');
-            if (statVals.length >= 5) {
-                statVals[0].textContent = store.rating;
-                statVals[1].textContent = store.active;
-                statVals[2].textContent = store.sales;
-                statVals[4].textContent = store.follows;
-            }
-
-            let aboutText = document.querySelector('.about-card p');
-            if (aboutText && !aboutText.dataset.updated) {
-                let existing = aboutText.innerHTML;
-                aboutText.innerHTML = '<strong>' + store.name + '</strong> — ' + store.desc + '<br><br>' + existing.replace(/LeadTech Mobile.*?təklif edirik\./, '');
-                aboutText.dataset.updated = 'true';
-            }
-
-            document.title = store.name + " — Mağaza Profili | Mobil.az";
-        }
-    }
-    randomizeSellerProfile();
 });

@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/cabinet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script>
+        if (localStorage.getItem('mobilaz_theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    </script>
 </head>
 
 <body>
@@ -74,35 +79,40 @@
                     <div class="user-avatar">
                         <i class="fas fa-user"></i>
                     </div>
-                    <h3>Pərvin Qədirov</h3>
-                    <p>pervin@example.com</p>
-                    <span class="user-role-badge">Standart Hesab</span>
+                    <h3 id="sidebarUserName">—</h3>
+                    <p id="sidebarUserEmail">—</p>
+                    <span class="user-role-badge" id="sidebarUserRole" data-translate="cab-standard-acc">Standart Hesab</span>
                 </div>
 
                 <ul class="cabinet-menu">
                     <li>
                         <a href="#" class="tab-link active" data-target="tab-profile">
-                            <span class="menu-left"><i class="fas fa-chart-pie"></i> İdarə Paneli</span>
+                            <span class="menu-left"><i class="fas fa-chart-pie"></i> <span data-translate="cab-dashboard">İdarə Paneli</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-ads">
-                            <span class="menu-left"><i class="fas fa-list-alt"></i> Mənim elanlarım</span>
+                            <span class="menu-left"><i class="fas fa-list-alt"></i> <span data-translate="cab-my-ads">Mənim elanlarım</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-messages">
-                            <span class="menu-left"><i class="fas fa-envelope"></i> Mesajlar</span>
+                            <span class="menu-left"><i class="fas fa-envelope"></i> <span data-translate="cab-messages">Mesajlar</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-settings">
-                            <span class="menu-left"><i class="fas fa-cog"></i> Tənzimləmələr</span>
+                            <span class="menu-left"><i class="fas fa-cog"></i> <span data-translate="cab-settings">Tənzimləmələr</span></span>
+                        </a>
+                    </li>
+                    <li id="adminPanelNav" hidden>
+                        <a href="admin.html">
+                            <span class="menu-left"><i class="fas fa-shield-halved"></i> <span>Adminliyə keç</span></span>
                         </a>
                     </li>
                     <li style="margin-top: 30px;">
                         <a href="index.html" class="logout-link">
-                            <span class="menu-left"><i class="fas fa-sign-out-alt"></i> Çıxış</span>
+                            <span class="menu-left"><i class="fas fa-sign-out-alt"></i> <span data-translate="cab-logout">Çıxış</span></span>
                         </a>
                     </li>
                 </ul>
@@ -114,10 +124,10 @@
                 <div id="tab-profile" class="cabinet-tab active">
                     <div class="cabinet-header cab-glass">
                         <div>
-                            <h1>İdarə Paneli</h1>
-                            <p>Xoş gəldiniz Pərvin. Bugünkü statistikanızla tanış olun.</p>
+                            <h1 data-translate="cab-dashboard">İdarə Paneli</h1>
+                            <p data-translate="cab-dashboard-desc">Xoş gəldiniz. Bugünkü statistikanızla tanış olun.</p>
                         </div>
-                        <a href="elan-yerlesdir.html" class="btn-primary">
+                        <a href="elan-yerlesdir.html" class="btn-primary" data-translate="cab-new-ad">
                             Yeni Elan
                         </a>
                     </div>
@@ -125,11 +135,11 @@
                     <!-- Dashboard Top Grid -->
                     <div class="dashboard-top-grid">
                         <div class="wallet-card cab-glass">
-                            <h3>Balansınız</h3>
-                            <div class="wallet-amount">0.00 <small>AZN</small></div>
+                            <h3 data-translate="cab-balance">Balansınız</h3>
+                            <div class="wallet-amount"><span id="walletAmountValue">0.00</span> <small>AZN</small></div>
                             <div class="wallet-actions">
-                                <button class="btn-wallet">Artır</button>
-                                <button class="btn-wallet">Paket al</button>
+                                <button class="btn-wallet" data-translate="cab-increase">Artır</button>
+                                <button class="btn-wallet" data-translate="cab-buy-package">Paket al</button>
                             </div>
                         </div>
 
@@ -139,7 +149,7 @@
                                     <div class="stat-icon"><i class="fas fa-eye"></i></div>
                                     <div class="stat-value">0</div>
                                 </div>
-                                <span>Ümumi baxış (Bu ay)</span>
+                                <span data-translate="cab-total-views-month">Ümumi baxış (Bu ay)</span>
                                 <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
                             </div>
                             <div class="stat-card cab-glass">
@@ -147,7 +157,7 @@
                                     <div class="stat-icon"><i class="fab fa-whatsapp"></i></div>
                                     <div class="stat-value">0</div>
                                 </div>
-                                <span>WhatsApp keçidləri</span>
+                                <span data-translate="cab-wa-clicks">WhatsApp keçidləri</span>
                                 <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
                             </div>
                         </div>
@@ -167,7 +177,7 @@
                                 <div class="referral-stats">
                                     <div class="ref-stat">
                                         <span class="ref-stat-label" data-translate="mon-referral-credit">Referal balansı</span>
-                                        <span class="ref-stat-value">15.00 <small>AZN</small></span>
+                                        <span class="ref-stat-value"><span id="referralBalanceValue">0.00</span> <small>AZN</small></span>
                                     </div>
                                     <div class="ref-stat">
                                         <span class="ref-stat-label">Dəvətlər</span>
@@ -176,7 +186,7 @@
                                 </div>
 
                                 <div class="copy-link-box">
-                                    <input type="text" value="https://mobil.az/ref/pervin77" readonly id="referralLink">
+                                    <input type="text" value="https://mobil.az/ref/..." readonly id="referralLink">
                                     <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i> <span data-translate="mon-copy-link">Kopyala</span></button>
                                 </div>
                             </div>
@@ -185,22 +195,22 @@
                         <!-- Timeline / Activity Feed -->
                         <div class="dash-panel cab-glass">
                             <div class="panel-header">
-                                <h2>Son Aktivlik</h2>
+                                <h2 data-translate="cab-recent-activity">Son Aktivlik</h2>
                             </div>
                             <div class="timeline">
                                 <div class="timeline-item success">
                                     <div class="timeline-dot"></div>
                                     <div class="timeline-content">
-                                        <h4>Referal Bonusu</h4>
-                                        <p>Dostunuz "Həsən Ə." qeydiyyatdan keçdiyi üçün 5 AZN qazandınız.</p>
+                                        <h4 data-translate="cab-ref-bonus">Referal Bonusu</h4>
+                                        <p data-translate="cab-ref-bonus-desc">Dostunuz "Həsən Ə." qeydiyyatdan keçdiyi üçün 5 AZN qazandınız.</p>
                                         <span class="timeline-time">2 saat əvvəl</span>
                                     </div>
                                 </div>
                                 <div class="timeline-item">
                                     <div class="timeline-dot"></div>
                                     <div class="timeline-content">
-                                        <h4>Sistem Girişi</h4>
-                                        <p>Hesabınıza yeni giriş aşkarlandı (Bakı, 192.168.1.1)</p>
+                                        <h4 data-translate="cab-sys-login">Sistem Girişi</h4>
+                                        <p data-translate="cab-sys-login-desc">Hesabınıza yeni giriş aşkarlandı (Bakı, 192.168.1.1)</p>
                                         <span class="timeline-time">Dünən 14:20</span>
                                     </div>
                                 </div>
@@ -213,20 +223,20 @@
                 <div id="tab-ads" class="cabinet-tab" style="display: none;">
                     <div class="cabinet-header cab-glass">
                         <div>
-                            <h1>Mənim elanlarım</h1>
-                            <p>Bütün aktiv və passiv elanlarınızı idarə edin.</p>
+                            <h1 data-translate="cab-my-ads">Mənim elanlarım</h1>
+                            <p data-translate="cab-my-ads-desc">Bütün aktiv və passiv elanlarınızı idarə edin.</p>
                         </div>
-                        <a href="elan-yerlesdir.html" class="btn-primary">
+                        <a href="elan-yerlesdir.html" class="btn-primary" data-translate="cab-new-ad">
                             Yeni Elan
                         </a>
                     </div>
 
                     <div class="tab-content-box cab-glass">
                         <div class="ad-filters">
-                            <button class="filter-pill active" data-filter="all">Bütün elanlar (0)</button>
-                            <button class="filter-pill" data-filter="active">Aktiv (0)</button>
-                            <button class="filter-pill" data-filter="pending">Yoxlanılır (0)</button>
-                            <button class="filter-pill" data-filter="expired">Müddəti bitmiş (0)</button>
+                            <button class="filter-pill active" data-filter="all"><span data-translate="cab-filter-all">Bütün elanlar</span> (0)</button>
+                            <button class="filter-pill" data-filter="active"><span data-translate="cab-filter-active">Aktiv</span> (0)</button>
+                            <button class="filter-pill" data-filter="pending"><span data-translate="cab-filter-pending">Yoxlanılır</span> (0)</button>
+                            <button class="filter-pill" data-filter="expired"><span data-translate="cab-filter-expired">Müddəti bitmiş</span> (0)</button>
                         </div>
 
                         <div class="my-ads-list">
@@ -285,8 +295,8 @@
                 <div id="tab-messages" class="cabinet-tab" style="display: none;">
                     <div class="cabinet-header cab-glass" style="margin-bottom: 20px;">
                         <div>
-                            <h1>Mesajlar</h1>
-                            <p>Alıcı və satıcılarla əlaqə</p>
+                            <h1 data-translate="cab-messages">Mesajlar</h1>
+                            <p data-translate="cab-messages-desc">Alıcı və satıcılarla əlaqə</p>
                         </div>
                     </div>
                     
@@ -296,12 +306,12 @@
                             <div class="chat-search">
                                 <div class="chat-search-wrap">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Mesaj axtar...">
+                                    <input type="text" placeholder="Mesaj axtar..." data-translate-placeholder="cab-search-msg">
                                 </div>
                             </div>
                             <div class="chat-list">
                                 <div class="empty-state" style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);">
-                                    Mesaj qutunuz boşdur.
+                                    <span data-translate="cab-msg-empty">Mesaj qutunuz boşdur.</span>
                                 </div>
                             </div>
                         </div>
@@ -310,8 +320,8 @@
                         <div class="chat-main">
                             <div class="chat-header">
                                 <div class="chat-header-info">
-                                    <h3>İstifadəçi seçilməyib</h3>
-                                    <p><i class="fas fa-info-circle"></i> Söhbətə başlamaq üçün soldan mesaj seçin</p>
+                                    <h3 data-translate="cab-no-user">İstifadəçi seçilməyib</h3>
+                                    <p><i class="fas fa-info-circle"></i> <span data-translate="cab-select-msg">Söhbətə başlamaq üçün soldan mesaj seçin</span></p>
                                 </div>
                                 <button class="btn-action" style="opacity: 0.5;"><i class="fas fa-ellipsis-v"></i></button>
                             </div>
@@ -322,7 +332,7 @@
                                 </div>
                             </div>
                             <div class="chat-input">
-                                <input type="text" placeholder="Mesajınızı yazın...">
+                                <input type="text" placeholder="Mesajınızı yazın..." data-translate-placeholder="cab-write-msg">
                                 <button class="btn-send"><i class="fas fa-paper-plane"></i></button>
                             </div>
                         </div>
@@ -333,79 +343,79 @@
                 <div id="tab-settings" class="cabinet-tab" style="display: none;">
                     <div class="cabinet-header cab-glass" style="margin-bottom: 20px;">
                         <div>
-                            <h1>Tənzimləmələr</h1>
-                            <p>Hesab məlumatlarınızı idarə edin</p>
+                            <h1 data-translate="cab-settings">Tənzimləmələr</h1>
+                            <p data-translate="cab-settings-desc">Hesab məlumatlarınızı idarə edin</p>
                         </div>
                     </div>
 
                     <div class="settings-grid">
                         <!-- Navigation -->
                         <div class="settings-nav cab-glass" style="padding: 15px;">
-                            <button class="active" onclick="showSettingsPanel('panel-personal', this)"><i class="fas fa-user-edit"></i> Şəxsi Məlumatlar</button>
-                            <button onclick="showSettingsPanel('panel-notifications', this)"><i class="fas fa-bell"></i> Bildirişlər</button>
-                            <button onclick="showSettingsPanel('panel-security', this)"><i class="fas fa-lock"></i> Təhlükəsizlik</button>
-                            <button onclick="showSettingsPanel('panel-privacy', this)"><i class="fas fa-user-shield"></i> Məxfilik</button>
-                            <button onclick="showSettingsPanel('panel-social', this)"><i class="fas fa-link"></i> Sosial Hesablar</button>
-                            <button onclick="showSettingsPanel('panel-billing', this)"><i class="fas fa-credit-card"></i> Paket & Ödənişlər</button>
+                            <button class="active" onclick="showSettingsPanel('panel-personal', this)"><i class="fas fa-user-edit"></i> <span data-translate="cab-personal-info">Şəxsi Məlumatlar</span></button>
+                            <button onclick="showSettingsPanel('panel-notifications', this)"><i class="fas fa-bell"></i> <span data-translate="cab-notifications">Bildirişlər</span></button>
+                            <button onclick="showSettingsPanel('panel-security', this)"><i class="fas fa-lock"></i> <span data-translate="cab-security">Təhlükəsizlik</span></button>
+                            <button onclick="showSettingsPanel('panel-privacy', this)"><i class="fas fa-user-shield"></i> <span data-translate="cab-privacy">Məxfilik</span></button>
+                            <button onclick="showSettingsPanel('panel-social', this)"><i class="fas fa-link"></i> <span data-translate="cab-social-title">Sosial Hesablar</span></button>
+                            <button onclick="showSettingsPanel('panel-billing', this)"><i class="fas fa-credit-card"></i> <span data-translate="cab-billing">Paket & Ödənişlər</span></button>
                         </div>
 
                         <!-- Detail Panels -->
                         <div class="tab-content-box cab-glass" style="padding: 30px;">
                             <!-- Personal Settings -->
                             <div id="panel-personal" class="settings-panel active">
-                                <h3>Şəxsi Məlumatlar</h3>
+                                <h3 data-translate="cab-personal-info">Şəxsi Məlumatlar</h3>
                                 <div class="user-avatar" style="width: 80px; height: 80px; margin-bottom: 20px; font-size: 30px;">
                                     <i class="fas fa-user"></i>
                                 </div>
-                                <form>
+                                <form id="formPersonal">
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label>Ad</label>
-                                            <input type="text" class="form-control" value="Pərvin">
+                                            <label data-translate="cab-name">Ad</label>
+                                            <input type="text" id="profileFirstName" class="form-control" placeholder="Ad">
                                         </div>
                                         <div class="form-group">
-                                            <label>Soyad</label>
-                                            <input type="text" class="form-control" value="Qədirov">
+                                            <label data-translate="cab-surname">Soyad</label>
+                                            <input type="text" id="profileLastName" class="form-control" placeholder="Soyad">
                                         </div>
                                         <div class="form-group">
-                                            <label>Email</label>
-                                            <input type="email" class="form-control" value="pervin@example.com">
+                                            <label data-translate="cab-email">Email</label>
+                                            <input type="email" id="profileEmail" class="form-control" placeholder="example@email.com">
                                         </div>
                                         <div class="form-group">
-                                            <label>Telefon</label>
-                                            <input type="tel" class="form-control" value="+994 70 123 45 67">
+                                            <label data-translate="cab-phone">Telefon</label>
+                                            <input type="tel" id="profilePhone" class="form-control" placeholder="+994 70 000 00 00">
                                         </div>
                                     </div>
-                                    <button type="button" class="btn-primary">Yadda saxla</button>
+                                    <button type="button" id="btnSaveProfile" class="btn-primary" data-translate="cab-save">Yadda saxla</button>
                                 </form>
                             </div>
 
                             <!-- Notifications Settings -->
                             <div id="panel-notifications" class="settings-panel">
-                                <h3>Bildirişlər</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Platformadan hansı məlumatları necə almaq istədiyinizi seçin.</p>
+                                <h3 data-translate="cab-notifications">Bildirişlər</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-notif-desc">Platformadan hansı məlumatları necə almaq istədiyinizi seçin.</p>
                                 
                                 <div class="settings-section">
-                                    <h4 style="margin-bottom: 20px; font-size: 16px; color: var(--text-main);">Email Bildirişləri</h4>
+                                    <h4 style="margin-bottom: 20px; font-size: 16px; color: var(--text-main);" data-translate="cab-email-notifs">Email Bildirişləri</h4>
                                     <div class="toggle-group">
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Yeni Mesajlar</label>
-                                                <span>Kimsə sizə alıcı və ya satıcı kimi mesaj yazdıqda dərhal email alın</span>
+                                                <label data-translate="cab-new-msgs">Yeni Mesajlar</label>
+                                                <span data-translate="cab-new-msgs-desc">Kimsə sizə alıcı və ya satıcı kimi mesaj yazdıqda dərhal email alın</span>
                                             </div>
                                             <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Elan Statusu</label>
-                                                <span>Elanınız təsdiqləndikdə, rədd edildikdə və ya müddəti bitdikdə</span>
+                                                <label data-translate="cab-ad-status">Elan Statusu</label>
+                                                <span data-translate="cab-ad-status-desc">Elanınız təsdiqləndikdə, rədd edildikdə və ya müddəti bitdikdə</span>
                                             </div>
                                             <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Xəbərlər və Kampaniyalar</label>
-                                                <span>Mobil.az-dan yeniliklər, endirimlər və xüsusi təkliflər barədə xəbərlər</span>
+                                                <label data-translate="cab-news-camp">Xəbərlər və Kampaniyalar</label>
+                                                <span data-translate="cab-news-camp-desc">Mobil.az-dan yeniliklər, endirimlər və xüsusi təkliflər barədə xəbərlər</span>
                                             </div>
                                             <label class="switch"><input type="checkbox"><span class="slider round"></span></label>
                                         </div>
@@ -415,95 +425,96 @@
 
                             <!-- Security Settings -->
                             <div id="panel-security" class="settings-panel">
-                                <h3>Təhlükəsizlik</h3>
-                                <form>
+                                <h3 data-translate="cab-security">Təhlükəsizlik</h3>
+                                <form id="formSecurity">
                                     <div class="form-group" style="max-width: 400px;">
-                                        <label>Cari Şifrə</label>
-                                        <input type="password" class="form-control">
+                                        <label data-translate="cab-curr-pass">Cari Şifrə</label>
+                                        <input type="password" id="secOldPassword" class="form-control">
                                     </div>
                                     <div class="form-group" style="max-width: 400px;">
-                                        <label>Yeni Şifrə</label>
-                                        <input type="password" class="form-control">
+                                        <label data-translate="cab-new-pass">Yeni Şifrə</label>
+                                        <input type="password" id="secNewPassword" class="form-control">
                                     </div>
                                     <div class="checkbox-group" style="margin-top: 20px;">
                                         <input type="checkbox" id="two_fa">
-                                        <label for="two_fa">İki mərhələli təsdiqləməni (2FA) aktiv et</label>
+                                        <label for="two_fa" data-translate="cab-2fa">İki mərhələli təsdiqləməni (2FA) aktiv et</label>
                                     </div>
-                                    <button type="button" class="btn-primary" style="margin-top: 15px;">Yenilə</button>
+                                    <button type="button" id="btnSaveSecurity" class="btn-primary" style="margin-top: 15px;" data-translate="cab-update">Yenilə</button>
                                 </form>
 
                                 <hr style="border: 0; height: 1px; background: var(--cab-glass-border); margin: 40px 0;">
                                 
-                                <h4 style="color: var(--danger); margin-bottom: 20px;">Hesabın İdarəedilməsi</h4>
+                                <h4 style="color: var(--danger); margin-bottom: 20px;" data-translate="cab-acc-manage">Hesabın İdarəedilməsi</h4>
                                 <div class="account-danger-zone">
                                     <div class="danger-item">
                                         <div class="danger-info">
-                                            <h5>Hesabı Dondur</h5>
-                                            <p>Hesabınız və bütün aktiv elanlarınız müvəqqəti olaraq gizlədiləcək.</p>
+                                            <h5 data-translate="cab-freeze-acc">Hesabı Dondur</h5>
+                                            <p data-translate="cab-freeze-desc">Hesabınız və bütün aktiv elanlarınız müvəqqəti olaraq gizlədiləcək.</p>
                                         </div>
-                                        <button class="btn-outline-warning">Dondur</button>
+                                        <button class="btn-outline-warning" data-translate="cab-freeze-btn">Dondur</button>
                                     </div>
                                     <div class="danger-item">
                                         <div class="danger-info">
-                                            <h5 style="color: var(--danger);">Hesabı Sil</h5>
-                                            <p>Bütün məlumatlarınız və elanlarınız həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.</p>
+                                            <h5 style="color: var(--danger);" data-translate="cab-del-acc">Hesabı Sil</h5>
+                                            <p data-translate="cab-del-desc">Bütün məlumatlarınız və elanlarınız həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.</p>
                                         </div>
-                                        <button class="btn-outline-danger">Hesabı Sil</button>
+                                        <button class="btn-outline-danger" data-translate="cab-del-btn">Hesabı Sil</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Privacy Settings -->
                             <div id="panel-privacy" class="settings-panel">
-                                <h3>Məxfilik</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Məlumatlarınızın platformada necə görünəcəyini idarə edin.</p>
+                                <h3 data-translate="cab-privacy">Məxfilik</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-priv-desc">Məlumatlarınızın platformada necə görünəcəyini idarə edin.</p>
                                 
                                 <div class="settings-section">
                                     <div class="toggle-group">
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Nömrəni Göstər</label>
-                                                <span>Bütün elanlarınızda əlaqə nömrəniz alıcılara göstərilsin</span>
+                                                <label data-translate="cab-show-num">Nömrəni Göstər</label>
+                                                <span data-translate="cab-show-num-desc">Bütün elanlarınızda əlaqə nömrəniz alıcılara göstərilsin</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyShowPhone" checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Mesajlara İcazə Ver</label>
-                                                <span>Digər istifadəçilər daxili sistem vasitəsilə sizə mesaj yaza bilsin</span>
+                                                <label data-translate="cab-allow-msg">Mesajlara İcazə Ver</label>
+                                                <span data-translate="cab-allow-msg-desc">Digər istifadəçilər daxili sistem vasitəsilə sizə mesaj yaza bilsin</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyAllowMessages" checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
-                                                <label>Onlayn Statusu</label>
-                                                <span>Profilinizdə nə vaxt onlayn olduğunuz görünsün</span>
+                                                <label data-translate="cab-online-status">Onlayn Statusu</label>
+                                                <span data-translate="cab-online-desc">Profilinizdə nə vaxt onlayn olduğunuz görünsün</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyShowOnline" checked><span class="slider round"></span></label>
                                         </div>
                                     </div>
                                 </div>
+                                <button type="button" id="btnSavePrivacy" class="btn-primary" style="margin-top:20px;" data-translate="cab-save">Yadda saxla</button>
                             </div>
 
                             <!-- Social Accounts -->
                             <div id="panel-social" class="settings-panel">
-                                <h3>Sosial Hesablar</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Daha sürətli və təhlükəsiz giriş üçün sosial media hesablarınızı bağlayın.</p>
+                                <h3 data-translate="cab-social-title">Sosial Hesablar</h3>
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-social-desc">Daha sürətli və təhlükəsiz giriş üçün sosial media hesablarınızı bağlayın.</p>
                                 
                                 <div class="social-links-grid">
                                     <div class="social-connect-card">
                                         <div class="social-icon google"><i class="fab fa-google"></i></div>
                                         <div class="social-info">
                                             <h4>Google</h4>
-                                            <span>Bağlanmayıb</span>
+                                            <span data-translate="cab-unlinked">Bağlanmayıb</span>
                                         </div>
-                                        <button class="btn-connect">Bağla</button>
+                                        <button class="btn-connect" data-translate="cab-link">Bağla</button>
                                     </div>
                                     <div class="social-connect-card connected">
                                         <div class="social-icon facebook"><i class="fab fa-facebook-f"></i></div>
                                         <div class="social-info">
                                             <h4>Facebook</h4>
-                                            <span>Pərvin Qədirov</span>
+                                            <span>—</span>
                                         </div>
                                         <button class="btn-disconnect" aria-label="Ayır"><i class="fas fa-times"></i></button>
                                     </div>
@@ -511,27 +522,146 @@
                                         <div class="social-icon apple"><i class="fab fa-apple"></i></div>
                                         <div class="social-info">
                                             <h4>Apple</h4>
-                                            <span>Bağlanmayıb</span>
+                                            <span data-translate="cab-unlinked">Bağlanmayıb</span>
                                         </div>
-                                        <button class="btn-connect">Bağla</button>
+                                        <button class="btn-connect" data-translate="cab-link">Bağla</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Billing Settings -->
                             <div id="panel-billing" class="settings-panel">
-                                <h3>Paket və Ödənişlər</h3>
-                                <div class="wallet-card cab-glass" style="margin-bottom: 25px; box-shadow: none;">
-                                    <h3>Cari Paket</h3>
-                                    <div class="wallet-amount" style="margin-bottom: 5px;">Standart Hesab</div>
-                                    <p style="font-size: 13px; opacity: 0.8; margin-top: 0;">Heç bir fəal paket yoxdur.</p>
+                                <div class="billing-panel-head">
+                                    <div>
+                                        <h3 data-billing-i18n="billingHeading">Paketlər və ödənişlər</h3>
+                                        <p class="billing-subtitle" data-billing-i18n="subtitle">Hesabınıza uyğun paketi seçin, ödənişi tamamlayın və üstünlükləri dərhal aktivləşdirin.</p>
+                                    </div>
+                                    <button type="button" class="btn-primary" id="billingTopUpBtn">
+                                        <i class="fas fa-wallet"></i>
+                                        <span data-billing-i18n="topUpBalance">Balansı artır</span>
+                                    </button>
                                 </div>
-                                <h4 style="margin-bottom: 15px; color: var(--text-main);">Ödəniş Tarixçəsi</h4>
-                                <ul style="list-style:none; padding:0; margin:0;">
-                                    <li style="display:flex; justify-content:center; padding:20px; font-size:14px; color:var(--text-muted);">
-                                        Heç bir əməliyyat tapılmadı.
-                                    </li>
-                                </ul>
+
+                                <div class="billing-overview-grid">
+                                    <section class="billing-card billing-current-card">
+                                        <div class="billing-card-label" data-billing-i18n="currentPackage">Cari paket</div>
+                                        <div class="billing-current-main">
+                                            <div>
+                                                <h4 id="billingCurrentPackageName">Standart</h4>
+                                                <p id="billingCurrentPackageNote">Hazırda standart hesabdan istifadə edirsiniz. Daha çox görünürlük üçün paket seçin.</p>
+                                            </div>
+                                            <span id="billingCurrentPackageBadge" class="billing-status-badge">Daxildir</span>
+                                        </div>
+                                        <div class="billing-meta-grid">
+                                            <div class="billing-meta-item">
+                                                <span data-billing-i18n="walletBalance">Balans</span>
+                                                <strong id="billingWalletBalance">0.00 AZN</strong>
+                                            </div>
+                                            <div class="billing-meta-item">
+                                                <span data-billing-i18n="selectedDuration">Müddət</span>
+                                                <strong id="billingActiveDuration">-</strong>
+                                            </div>
+                                            <div class="billing-meta-item">
+                                                <span data-billing-i18n="nextPayment">Növbəti ödəniş</span>
+                                                <strong id="billingNextPayment">-</strong>
+                                            </div>
+                                        </div>
+                                    </section>
+
+                                    <section class="billing-card billing-highlight-card">
+                                        <div class="billing-card-label" data-billing-i18n="whyUpgrade">Niyə yüksəldəsiniz?</div>
+                                        <h4 data-billing-i18n="highlightTitle">Daha çox görünürlük, daha rahat ödəniş axını</h4>
+                                        <div class="billing-highlight-list">
+                                            <div class="billing-highlight-item">
+                                                <i class="fas fa-bolt"></i>
+                                                <div>
+                                                    <strong data-billing-i18n="highlightFastTitle">Sürətli seçim</strong>
+                                                    <span data-billing-i18n="highlightFastText">Paket, müddət və ödəniş üsulu bir yerdə aydın göstərilir.</span>
+                                                </div>
+                                            </div>
+                                            <div class="billing-highlight-item">
+                                                <i class="fas fa-chart-line"></i>
+                                                <div>
+                                                    <strong data-billing-i18n="highlightGrowthTitle">Aydın üstünlüklər</strong>
+                                                    <span data-billing-i18n="highlightGrowthText">Hər paket üzrə elan limiti və görünürlük fərqi əvvəlcədən görünür.</span>
+                                                </div>
+                                            </div>
+                                            <div class="billing-highlight-item">
+                                                <i class="fas fa-shield-heart"></i>
+                                                <div>
+                                                    <strong data-billing-i18n="highlightTrustTitle">Etibarlı ödəniş</strong>
+                                                    <span data-billing-i18n="highlightTrustText">Ödənişdən əvvəl yekun məbləğ və seçilmiş üsul dəqiq göstərilir.</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </section>
+                                </div>
+
+                                <section class="billing-card">
+                                    <div class="billing-section-top">
+                                        <div>
+                                            <h4 data-billing-i18n="choosePackage">Paket seçin</h4>
+                                            <p data-billing-i18n="choosePackageHint">Elan sayınıza və satış həcminizə uyğun paketi seçin.</p>
+                                        </div>
+                                        <div class="billing-duration-switch" id="billingDurationSwitch">
+                                            <button type="button" class="billing-duration-btn active" data-duration="30" data-billing-i18n="duration30">30 gün</button>
+                                            <button type="button" class="billing-duration-btn" data-duration="90" data-billing-i18n="duration90">90 gün</button>
+                                        </div>
+                                    </div>
+                                    <div id="billingPackageGrid" class="billing-package-grid"></div>
+                                </section>
+
+                                <div class="billing-bottom-grid">
+                                    <section class="billing-card">
+                                        <div class="billing-section-top">
+                                            <div>
+                                                <h4 data-billing-i18n="paymentMethod">Ödəniş üsulu</h4>
+                                                <p data-billing-i18n="paymentMethodHint">Ödənişi tamamlamaq üçün uyğun üsulu seçin.</p>
+                                            </div>
+                                        </div>
+                                        <div id="billingMethodGrid" class="billing-method-grid"></div>
+                                    </section>
+
+                                    <section class="billing-card billing-summary-card">
+                                        <div class="billing-card-label" data-billing-i18n="orderSummary">Sifariş xülasəsi</div>
+                                        <div class="billing-summary-rows">
+                                            <div class="billing-summary-row">
+                                                <span data-billing-i18n="summaryPackage">Paket</span>
+                                                <strong id="billingSummaryPackage">VIP</strong>
+                                            </div>
+                                            <div class="billing-summary-row">
+                                                <span data-billing-i18n="summaryDuration">Müddət</span>
+                                                <strong id="billingSummaryDuration">30 gün</strong>
+                                            </div>
+                                            <div class="billing-summary-row">
+                                                <span data-billing-i18n="summaryMethod">Üsul</span>
+                                                <strong id="billingSummaryMethod">Daxili balans</strong>
+                                            </div>
+                                            <div class="billing-summary-row billing-summary-row-total">
+                                                <span data-billing-i18n="summaryTotal">Yekun</span>
+                                                <strong id="billingSummaryTotal">12.00 AZN</strong>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn-primary w-100" id="billingConfirmBtn">
+                                            <i class="fas fa-check-circle"></i>
+                                            <span data-billing-i18n="confirmPurchase">Paketi aktivləşdir</span>
+                                        </button>
+                                        <button type="button" class="btn-secondary-soft w-100" id="billingGoWalletBtn">
+                                            <i class="fas fa-plus-circle"></i>
+                                            <span data-billing-i18n="needBalance">Balansı artır</span>
+                                        </button>
+                                    </section>
+                                </div>
+
+                                <section class="billing-card">
+                                    <div class="billing-section-top">
+                                        <div>
+                                            <h4 data-billing-i18n="historyTitle">Ödəniş tarixçəsi</h4>
+                                            <p data-billing-i18n="historyHint">Son ödənişlər və aktivləşdirmələr burada görünür.</p>
+                                        </div>
+                                    </div>
+                                    <div id="billingHistoryList" class="billing-history-list"></div>
+                                </section>
                             </div>
                         </div>
                     </div>

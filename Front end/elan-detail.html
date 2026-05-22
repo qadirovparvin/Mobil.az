@@ -836,8 +836,26 @@
 
 
 
+  <!-- Loading Skeleton — shown while JS fetches the real ad -->
+  <div id="adLoadingSkeleton" style="max-width:1200px;margin:40px auto;padding:0 20px;display:flex;gap:32px;animation:pulse 1.5s ease-in-out infinite;">
+    <div style="flex:1.2;display:flex;flex-direction:column;gap:16px;">
+      <div style="height:420px;border-radius:20px;background:var(--bg-secondary);"></div>
+      <div style="display:flex;gap:10px;">
+        <div style="height:80px;flex:1;border-radius:12px;background:var(--bg-secondary);"></div>
+        <div style="height:80px;flex:1;border-radius:12px;background:var(--bg-secondary);"></div>
+        <div style="height:80px;flex:1;border-radius:12px;background:var(--bg-secondary);"></div>
+      </div>
+      <div style="height:200px;border-radius:16px;background:var(--bg-secondary);"></div>
+    </div>
+    <div style="flex:0.7;display:flex;flex-direction:column;gap:16px;">
+      <div style="height:300px;border-radius:20px;background:var(--bg-secondary);"></div>
+      <div style="height:200px;border-radius:20px;background:var(--bg-secondary);"></div>
+    </div>
+  </div>
+  <style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}</style>
+
   <!-- ══════════════════ MAIN CONTENT ══════════════════ -->
-  <div class="detail-wrapper">
+  <div class="detail-wrapper" id="detailWrapper" style="visibility:hidden; min-height:400px;">
 
     <!-- ══ LEFT COLUMN ══ -->
     <div class="detail-left">
@@ -1345,181 +1363,102 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
   <!-- ══════════════════ SCRIPTS ══════════════════ -->
   <script>
-    // ── Image Gallery ──────────────────────────────
-    const thumbs = document.querySelectorAll('.thumb');
-    const mainImg = document.getElementById('mainImage');
-    let currentIdx = 0;
-
-    function setActive(idx) {
-      thumbs.forEach(t => t.classList.remove('active'));
-      thumbs[idx].classList.add('active');
-      mainImg.classList.add('fade');
-      setTimeout(() => {
-        mainImg.src = thumbs[idx].dataset.src;
-        mainImg.classList.remove('fade');
-      }, 200);
-      currentIdx = idx;
-    }
-
-    thumbs.forEach((t, i) => t.addEventListener('click', () => setActive(i)));
-    document.getElementById('prevBtn').addEventListener('click', () =>
-      setActive((currentIdx - 1 + thumbs.length) % thumbs.length));
-    document.getElementById('nextBtn').addEventListener('click', () =>
-      setActive((currentIdx + 1) % thumbs.length));
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'ArrowLeft') setActive((currentIdx - 1 + thumbs.length) % thumbs.length);
-      if (e.key === 'ArrowRight') setActive((currentIdx + 1) % thumbs.length);
-    });
-
-    // ── Favorite Button ────────────────────────────
-    const favBtn = document.getElementById('galleryFavBtn');
-    let isFaved = false;
-    favBtn.addEventListener('click', () => {
-      isFaved = !isFaved;
-      const icon = favBtn.querySelector('i');
-      icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
-      favBtn.classList.toggle('active', isFaved);
-      favBtn.style.transform = 'scale(1.3)';
-      setTimeout(() => favBtn.style.transform = '', 200);
-      showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!');
-    });
-
-    // ── Call Button (Personal) ─────────────────────
-    const callBtn = document.getElementById('callBtn');
-    const phoneText = document.getElementById('phoneText');
-    let revealed = false;
-    callBtn.addEventListener('click', () => {
-      if (!revealed) {
-        phoneText.textContent = '+994 50 123 45 67';
-        callBtn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-        revealed = true;
-      } else {
-        window.location.href = 'tel:+994501234567';
-      }
-    });
-
-    // ── Call Button (Store) ────────────────────────
-    let storeRevealed = false;
-    function revealStorePhone() {
-      const btn = document.getElementById('storeCallBtn');
-      const txt = document.getElementById('storePhoneText');
-      if (!storeRevealed) {
-        txt.textContent = '+994 50 987 65 43';
-        btn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
-        storeRevealed = true;
-      } else {
-        window.location.href = 'tel:+994509876543';
-      }
-    }
-
-
-
-    // ── Star Selectors ─────────────────────────────
-    function initStars(containerId) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      const stars = container.querySelectorAll('.star');
-      let selected = 0;
-
-      stars.forEach((star, i) => {
-        star.addEventListener('mouseover', () => {
-          stars.forEach((s, j) => s.classList.toggle('selected', j <= i));
-        });
-        star.addEventListener('mouseleave', () => {
-          stars.forEach((s, j) => s.classList.toggle('selected', j < selected));
-        });
-        star.addEventListener('click', () => {
-          selected = i + 1;
-          stars.forEach((s, j) => s.classList.toggle('selected', j < selected));
-          container.dataset.rating = selected;
-        });
-      });
-    }
-
-    initStars('mainStarSelect');
-    initStars('sideStarSelect');
-    initStars('storeStarSelect');
-
-    // ── Review Submit ──────────────────────────────
-    function submitReview(type) {
-      let text, name, starsEl;
-      if (type === 'main') {
-        text = document.getElementById('mainReviewText').value.trim();
-        name = document.getElementById('mainReviewName').value.trim();
-        starsEl = document.getElementById('mainStarSelect');
-      } else if (type === 'side') {
-        text = document.getElementById('sideReviewText').value.trim();
-        name = 'Siz';
-        starsEl = document.getElementById('sideStarSelect');
-      } else {
-        text = document.getElementById('storeReviewText').value.trim();
-        name = 'Siz';
-        starsEl = document.getElementById('storeStarSelect');
-      }
-
-      const rating = parseInt(starsEl.dataset.rating || '0');
-
-      if (!rating) { showToast('Zəhmət olmasa ulduz seçin!'); return; }
-      if (!text) { showToast('Rəy mətni daxil edin!'); return; }
-
-      showToast('Rəyiniz göndərildi! Təşəkkür edirik 🎉');
-
-      // Clear fields
-      if (type === 'main') {
-        document.getElementById('mainReviewText').value = '';
-        document.getElementById('mainReviewName').value = '';
-      } else if (type === 'side') {
-        document.getElementById('sideReviewText').value = '';
-      } else {
-        document.getElementById('storeReviewText').value = '';
-      }
-
-      // Reset stars
-      starsEl.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
-      delete starsEl.dataset.rating;
-    }
-
-    // ── Share Button ───────────────────────────────
-    document.getElementById('shareBtn').addEventListener('click', () => {
-      if (navigator.share) {
-        let title = document.querySelector('.ad-main-title')?.textContent || 'Mobil.az';
-        let name = document.querySelector('.personal-name')?.textContent.trim() || 'Satıcı';
-        navigator.share({ title: title + ' — ' + name + ' | Mobil.az', url: window.location.href });
-      } else {
-        navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
-      }
-    });
-
-    // ── Report Button ──────────────────────────────
-    document.getElementById('reportBtn').addEventListener('click', () => {
-      showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
-    });
-
-    // Report store
-    if (document.getElementById('reportBtnStore')) {
-      document.getElementById('reportBtnStore').addEventListener('click', () => {
-        showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
-      });
-    }
-    if (document.getElementById('shareBtnStore')) {
-      document.getElementById('shareBtnStore').addEventListener('click', () => {
-        navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
-      });
-    }
-
     // ── Toast ──────────────────────────────────────
     function showToast(msg) {
       const toast = document.getElementById('toast');
-      document.getElementById('toastMsg').textContent = msg;
+      if (!toast) return;
+      const toastMsg = document.getElementById('toastMsg');
+      if (toastMsg) toastMsg.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+
+    // ── Image Gallery (only if thumbs exist — ad-details.js will handle the real gallery) ──
+    window.addEventListener('DOMContentLoaded', () => {
+      // Favorite Button
+      const favBtn = document.getElementById('galleryFavBtn');
+      if (favBtn) {
+        let isFaved = false;
+        favBtn.addEventListener('click', () => {
+          isFaved = !isFaved;
+          const icon = favBtn.querySelector('i');
+          if (icon) icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
+          favBtn.classList.toggle('active', isFaved);
+          favBtn.style.transform = 'scale(1.3)';
+          setTimeout(() => favBtn.style.transform = '', 200);
+          showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!');
+        });
+      }
+
+      // ── Share Button ───────────────────────────────
+      const shareBtn = document.getElementById('shareBtn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          if (navigator.share) {
+            const title = document.querySelector('.ad-main-title')?.textContent || 'Mobil.az';
+            const name = document.querySelector('.personal-name')?.textContent.trim() || 'Satıcı';
+            navigator.share({ title: title + ' — ' + name + ' | Mobil.az', url: window.location.href });
+          } else {
+            navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
+          }
+        });
+      }
+
+      // ── Report Button ──────────────────────────────
+      const reportBtn = document.getElementById('reportBtn');
+      if (reportBtn) {
+        reportBtn.addEventListener('click', () => {
+          showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
+        });
+      }
+
+      const reportBtnStore = document.getElementById('reportBtnStore');
+      if (reportBtnStore) {
+        reportBtnStore.addEventListener('click', () => {
+          showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
+        });
+      }
+
+      const shareBtnStore = document.getElementById('shareBtnStore');
+      if (shareBtnStore) {
+        shareBtnStore.addEventListener('click', () => {
+          navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
+        });
+      }
+
+      // ── Star Selectors ─────────────────────────────
+      function initStars(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const stars = container.querySelectorAll('.star');
+        let selected = 0;
+        stars.forEach((star, i) => {
+          star.addEventListener('mouseover', () => {
+            stars.forEach((s, j) => s.classList.toggle('selected', j <= i));
+          });
+          star.addEventListener('mouseleave', () => {
+            stars.forEach((s, j) => s.classList.toggle('selected', j < selected));
+          });
+          star.addEventListener('click', () => {
+            selected = i + 1;
+            stars.forEach((s, j) => s.classList.toggle('selected', j < selected));
+            container.dataset.rating = selected;
+          });
+        });
+      }
+
+      initStars('mainStarSelect');
+      initStars('sideStarSelect');
+      initStars('storeStarSelect');
+    });
   </script>
+
+
 
   <script src="JS/auth.js"></script>
   <script src="JS/script.js"></script>
   <script src="JS/favorites.js"></script>
+  <script src="JS/ad-details.js"></script>
 
 </body>
 

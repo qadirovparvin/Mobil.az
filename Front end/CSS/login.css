@@ -905,3 +905,28 @@
     .otp-digit { width: 44px; height: 52px; font-size: 1.25rem; }
     .auth-form-panel { padding: 1.5rem 1rem; }
 }
+
+/* --- Added Dark Mode Overrides to Match Main Site --- */
+[data-theme="dark"],
+[data-theme="dark"] body,
+[data-theme="dark"] body .auth-page {
+    background-color: #000000 !important;
+    color: #f5f5f7 !important;
+}
+
+[data-theme="dark"] .auth-form-panel,
+[data-theme="dark"] body .auth-form-panel,
+[data-theme="dark"] .auth-form-box,
+[data-theme="dark"] .panel,
+[data-theme="dark"] .card {
+    background-color: #1c1c1e !important;
+    color: #f5f5f7 !important;
+}
+
+[data-theme="dark"] .input-group input,
+[data-theme="dark"] .input-group select,
+[data-theme="dark"] textarea {
+    background-color: #2c2c2e !important;
+    color: #f5f5f7 !important;
+    border-color: #3a3a3c !important;
+}

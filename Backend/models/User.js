@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
     // ── Wallet ────────────────────────────────────────────
     walletBalance: { type: Number, default: 0 },
 
+    // ── Reviews ───────────────────────────────────────────
+    rating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+
     // ── Active Promotion Package ──────────────────────────
     activePackage:     { type: String, enum: ['none', 'VIP', 'PRO'], default: 'none' },
     packageExpiresAt:  { type: Date, default: null },
@@ -55,11 +59,10 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Auto-generate a unique referral code before saving a new user
-userSchema.pre('save', function (next) {
+userSchema.pre('save', function () {
     if (!this.referralCode) {
         this.referralCode = 'AP-' + crypto.randomBytes(4).toString('hex').toUpperCase();
     }
-    next();
 });
 
 module.exports = mongoose.model('User', userSchema);

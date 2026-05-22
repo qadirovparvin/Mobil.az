@@ -4,7 +4,23 @@
    auth-otp.js  –  Shared helpers for login & signup OTP flows
    ============================================================ */
 
+window.API_URL = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
 
+function persistSession(data) {
+    if (window.persistAuthSession) {
+        window.persistAuthSession(data, data.token);
+        return;
+    }
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data));
+    localStorage.setItem('mobilaz_current_user', JSON.stringify(data));
+}
+
+function authT(key, fallback = '') {
+    const lang = localStorage.getItem('lang') || 'AZ';
+    return window.translations?.[lang]?.[key] || fallback;
+}
 
 /* ── Toast ─────────────────────────────────────────────────── */
 function showToast(msg, type = 'info') {
@@ -71,7 +87,9 @@ function showToast(msg, type = 'info') {
 
     const lang = localStorage.getItem('lang') || 'AZ';
     let translatedMsg = msg;
-    if (lang !== 'AZ' && toastTranslations[lang] && toastTranslations[lang][msg]) {
+    if (window.translations?.[lang]?.[msg]) {
+        translatedMsg = window.translations[lang][msg];
+    } else if (lang !== 'AZ' && toastTranslations[lang] && toastTranslations[lang][msg]) {
         translatedMsg = toastTranslations[lang][msg];
     }
 
@@ -121,9 +139,15 @@ function checkPasswordStrength(val) {
     if (/[^A-Za-z0-9]/.test(val)) score++;
 
     const levels = ['', 'weak', 'fair', 'good', 'strong'];
-    const labels = ['', 'Zəif', 'Orta', 'Yaxşı', 'Güclü'];
+    const labels = [
+        '',
+        authT('auth-strength-weak', 'Zəif'),
+        authT('auth-strength-fair', 'Orta'),
+        authT('auth-strength-good', 'Yaxşı'),
+        authT('auth-strength-strong', 'Güclü')
+    ];
     fill.className = `strength-fill ${levels[score] || ''}`;
-    text.textContent = val.length ? labels[score] || 'Zəif' : '';
+    text.textContent = val.length ? labels[score] || authT('auth-strength-weak', 'Zəif') : '';
 }
 
 /* ── OTP input wiring ───────────────────────────────────────── */
@@ -174,7 +198,7 @@ function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
     if (!timerEl || !resendEl) return;
     let s = seconds;
     resendEl.disabled = true;
-    resendEl.innerHTML = `Yenidən göndər (<span class="otp-timer" id="${timerSpanId}">${s}</span>s)`;
+    resendEl.innerHTML = `${authT('auth-resend', 'Yenidən göndər')} (<span class="otp-timer" id="${timerSpanId}">${s}</span>s)`;
     const iv = setInterval(() => {
         s--;
         const t = document.getElementById(timerSpanId);
@@ -182,7 +206,7 @@ function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
         if (s <= 0) {
             clearInterval(iv);
             resendEl.disabled = false;
-            resendEl.textContent = 'Yenidən göndər';
+            resendEl.textContent = authT('auth-resend', 'Yenidən göndər');
         }
     }, 1000);
 }
@@ -445,6 +469,50 @@ document.addEventListener('DOMContentLoaded', () => {
         if (document.getElementById(id)) wireOtpInputs(id);
     });
 
+    const passwordLoginForm = document.getElementById('passwordLoginForm');
+    if (passwordLoginForm) {
+        passwordLoginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const identifier = document.getElementById('loginIdentifier')?.value.trim();
+            const password = document.getElementById('loginPassword')?.value || '';
+            if (!identifier || !password) {
+                showToast('Email/istifadəçi adı və şifrəni daxil edin', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('passwordLoginBtn');
+            setLoading(btn, true);
+
+            try {
+                const res = await fetch(`${window.API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: identifier,
+                        password
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.message || 'Email və ya şifrə yanlışdır', 'error');
+                    return;
+                }
+
+                persistSession(data);
+                showToast('Uğurla daxil oldunuz!', 'success');
+                // Redirect admin users to the admin panel, others to cabinet
+                const redirectTarget = data.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                setTimeout(() => window.location.href = redirectTarget, 900);
+            } catch (err) {
+                showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
+        });
+    }
+
     // SMS login form submit (OTP verify)
     const smsForm = document.getElementById('smsLoginForm');
     if (smsForm) {
@@ -452,18 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const otp = getOtpValue('smsOtpInputs');
             if (otp.length < 6) { showToast('6 rəqəmli kodu daxil edin', 'error'); return; }
-            const btn = document.getElementById('verifySmsLoginBtn');
-            setLoading(btn, true);
-            try {
-                const phone = (document.getElementById('loginPhonePrefix')?.value || '+994')
-                            + (document.getElementById('loginPhone')?.value.trim().replace(/\s/g,'') || '');
-                // Production: POST /api/auth/verify-otp { phone, otp }
-                await new Promise(r => setTimeout(r, 1000));
-                showToast('Uğurla daxil oldunuz!', 'success');
-                setTimeout(() => window.location.href = 'cabinet.html', 1200);
-            } catch(err) {
-                showToast('Yanlış kod', 'error');
-            } finally { setLoading(btn, false); }
+            showToast('SMS ilə giriş hələ backend-ə qoşulmayıb. Şifrə ilə giriş edin.', 'info');
         });
     }
 
@@ -474,15 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const otp = getOtpValue('emailOtpInputs');
             if (otp.length < 6) { showToast('6 rəqəmli kodu daxil edin', 'error'); return; }
-            const btn = document.getElementById('verifyEmailLoginBtn');
-            setLoading(btn, true);
-            try {
-                await new Promise(r => setTimeout(r, 1000));
-                showToast('Uğurla daxil oldunuz!', 'success');
-                setTimeout(() => window.location.href = 'cabinet.html', 1200);
-            } catch(err) {
-                showToast('Yanlış kod', 'error');
-            } finally { setLoading(btn, false); }
+            showToast('Email kodu ilə giriş hələ backend-ə qoşulmayıb. Şifrə ilə giriş edin.', 'info');
         });
     }
 
@@ -514,9 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) { showToast(data.message || 'Qeydiyyat xətası', 'error'); return; }
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('mobilaz_current_user', JSON.stringify(data));
-                if (window.updateNavbar) window.updateNavbar();
+                persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
             } catch(err) {
@@ -551,9 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) { showToast(data.message || 'Qeydiyyat xətası', 'error'); return; }
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('mobilaz_current_user', JSON.stringify(data));
-                if (window.updateNavbar) window.updateNavbar();
+                persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
             } catch(err) {

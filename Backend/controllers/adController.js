@@ -306,4 +306,30 @@ const toggleFavorite = async (req, res) => {
     }
 };
 
-module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite };
+// @desc    Get current user's favorite ads
+// @route   GET /api/ads/favorites
+// @access  Private
+const getFavoriteAds = async (req, res) => {
+    try {
+        const favoriteIds = (req.user.favorites || []).map((favoriteId) => favoriteId.toString());
+
+        if (!favoriteIds.length) {
+            return res.json({ ads: [], total: 0 });
+        }
+
+        const ads = await Ad.find({ _id: { $in: favoriteIds } })
+            .populate('author', 'name lastName avatar phone')
+            .populate('store', 'storeName logoUrl isVerified rating');
+
+        const adsById = new Map(ads.map((ad) => [ad._id.toString(), ad]));
+        const orderedAds = favoriteIds
+            .map((favoriteId) => adsById.get(favoriteId))
+            .filter(Boolean);
+
+        res.json({ ads: orderedAds, total: orderedAds.length });
+    } catch (error) {
+        res.status(500).json({ message: 'Server xÉ™tasÄ±', error: error.message });
+    }
+};
+
+module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds };

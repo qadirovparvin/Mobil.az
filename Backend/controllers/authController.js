@@ -25,13 +25,26 @@ const register = async (req, res) => {
     try {
         const { name, lastName, email, password, phone, referralCode } = req.body;
 
-        if (!name || !email || !password) {
-            return res.status(400).json({ message: 'Ad, email və şifrə mütləqdir' });
+        // Require at least name, password, and one of email or phone
+        if (!name || !password) {
+            return res.status(400).json({ message: 'Ad və şifrə mütləqdir' });
+        }
+        if (!email && !phone) {
+            return res.status(400).json({ message: 'Email və ya telefon nömrəsi mütləqdir' });
         }
 
-        const exists = await User.findOne({ email: email.toLowerCase() });
-        if (exists) {
-            return res.status(400).json({ message: 'Bu email artıq qeydiyyatdan keçib' });
+        // Check for duplicate
+        if (email) {
+            const emailExists = await User.findOne({ email: email.toLowerCase() });
+            if (emailExists) {
+                return res.status(400).json({ message: 'Bu email artıq qeydiyyatdan keçib' });
+            }
+        }
+        if (phone) {
+            const phoneExists = await User.findOne({ phone: phone.trim() });
+            if (phoneExists) {
+                return res.status(400).json({ message: 'Bu telefon nömrəsi artıq qeydiyyatdan keçib' });
+            }
         }
 
         // Hash password
@@ -100,7 +113,7 @@ const login = async (req, res) => {
             return res.status(400).json({ message: 'Email və şifrəni daxil edin' });
         }
 
-        const user = await User.findOne({ email: email.toLowerCase() });
+        const user = await User.findOne({ email: email.trim().toLowerCase() });
 
         if (!user) {
             return res.status(401).json({ message: 'Email və ya şifrə yanlışdır' });

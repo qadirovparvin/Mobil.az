@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesajlar - Mobil.az</title>
+  <link rel="stylesheet" href="CSS/general.css">
+  <link rel="stylesheet" href="CSS/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <!-- Socket.io client CDN -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body { background: var(--bg-secondary); }
+    .chat-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      height: 70vh;
+      display: flex;
+      background: var(--bg-primary);
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    .chat-sidebar {
+      width: 300px;
+      border-right: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      font-weight: 700;
+      font-size: 18px;
+    }
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+    }
+    .chat-header {
+      padding: 20px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .chat-header img {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .chat-header .info { flex: 1; }
+    .chat-header .info h4 { margin: 0; font-size: 16px; color: var(--text-primary); }
+    .chat-header .info p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      line-height: 1.4;
+      position: relative;
+    }
+    .message.received {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border-color);
+    }
+    .message.sent {
+      background: var(--airy-primary);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-input-area {
+      padding: 15px 20px;
+      background: var(--bg-primary);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input-area input {
+      flex: 1;
+      padding: 14px 20px;
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      outline: none;
+      font-size: 14px;
+    }
+    .chat-input-area input:focus {
+      border-color: var(--airy-primary);
+    }
+    .send-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--airy-primary);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    .send-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">
+        <span class="mobil-logo">Mobil<span>.az</span></span>
+      </a>
+      <div class="header-right">
+        <div class="button-container">
+          <a href="cabinet.html" class="login-btn"><i class="fas fa-user"></i> Kabinet</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="chat-container">
+      <div class="chat-sidebar" id="conversationsSidebar">
+        <div class="chat-sidebar-header">Söhbətlər</div>
+        <div id="conversationsList" style="overflow-y: auto; flex: 1;">
+          <div style="padding: 20px; text-align: center; color: var(--text-muted);">
+            Seçilmiş söhbət açılır...
+          </div>
+        </div>
+      </div>
+      <div class="chat-main" id="chatMainWindow">
+        <div class="chat-header">
+          <div class="info">
+            <h4 id="chatSellerName">Yüklənir...</h4>
+            <p id="chatAdName">Zəhmət olmasa gözləyin</p>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <!-- Messages dynamically injected here -->
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="messageInput" placeholder="Mesajınızı yazın...">
+          <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="JS/chat.js"></script>
+</body>
+</html>

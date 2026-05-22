@@ -762,11 +762,12 @@
   <script src="JS/script.js"></script>
   <script src="JS/filters.js"></script>
   <script src="JS/favorites.js"></script>
+  <script src="JS/home-ads.js"></script>
 
   <!-- ── Load user-submitted ads from localStorage ── -->
   <script>
   (function loadUserAds() {
-    const ads = JSON.parse(localStorage.getItem('userAds') || '[]');
+    const ads = [];
     if (!ads.length) return;
 
     const container = document.querySelector('.all-ads-container');

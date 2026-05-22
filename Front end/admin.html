@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — AiryPhone</title>
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- ── Instant Admin Guard (runs before HTML paints) ──────────── -->
+    <script>
+        window.API_URL = window.API_URL || 'http://localhost:5000/api';
+        (function guardAdminPage() {
+            var token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            if (!token) { window.location.replace('login.html'); return; }
+            var user = null;
+            try {
+                user = JSON.parse(localStorage.getItem('adminUser'))
+                    || JSON.parse(localStorage.getItem('user'))
+                    || JSON.parse(localStorage.getItem('mobilaz_current_user'));
+            } catch (e) {}
+            if (!user || user.role !== 'admin') {
+                window.location.replace(token ? 'index.html' : 'login.html');
+            }
+        })();
+    </script>
+    <style> body { visibility: hidden; } body.admin-ready { visibility: visible; } </style>
+
+    <link rel="stylesheet" href="CSS/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<noscript><meta http-equiv="refresh" content="0;url=login.html"></noscript>
+
+<!-- ── ACCESS CHECK SPLASH ───────────────────────────────────────── -->
+<div id="admin-access-check" class="login-wrapper">
+    <div class="login-card">
+        <div class="login-logo">
+            <i class="fas fa-shield-halved" style="color:#0D8ABC;font-size:2rem;"></i>
+            <h2 style="margin-left:0.5rem;">Admin Yoxlama</h2>
+        </div>
+        <p class="login-subtitle">Administrator sessiyası təsdiqlənir…</p>
+        <div class="access-spinner"></div>
+    </div>
+</div>
+
+<!-- ── DASHBOARD ─────────────────────────────────────────────────── -->
+<div id="admin-dashboard-screen" class="dashboard-wrapper hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="adminSidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-mobile-screen-button"></i>
+                <span>AiryPhone</span>
+            </div>
+            <span class="badge badge-admin">ADMIN</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-target="dashboard-view" id="navDashboard">
+                <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-target="users-view" id="navUsers">
+                <i class="fas fa-users"></i><span>İstifadəçilər</span>
+                <span class="nav-count" id="navCountUsers">0</span>
+            </a>
+            <a href="#" class="nav-item" data-target="ads-view" id="navAds">
+                <i class="fas fa-rectangle-ad"></i><span>Elanlar</span>
+                <span class="nav-count" id="navCountAds">0</span>
+            </a>
+            <a href="#" class="nav-item" data-target="transactions-view" id="navTx">
+                <i class="fas fa-money-bill-transfer"></i><span>Əməliyyatlar</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <!-- 🌐 Return to Main Site -->
+            <a href="index.html" class="nav-item return-site-btn" id="returnToSiteBtn">
+                <i class="fas fa-globe"></i><span>Sayta Qayıt</span>
+            </a>
+            <a href="#" class="nav-item logout-btn" id="logoutBtn">
+                <i class="fas fa-right-from-bracket"></i><span>Çıxış</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+        <!-- TOP HEADER -->
+        <header class="top-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <!-- 🌐 Return button also visible in header on mobile -->
+                <a href="index.html" class="return-site-header-btn" title="Sayta Qayıt">
+                    <i class="fas fa-globe"></i>
+                    <span>🌐 Sayta Qayıt</span>
+                </a>
+                <div class="admin-profile">
+                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=A&background=0D8ABC&color=fff" alt="Admin">
+                    <div class="profile-info">
+                        <span class="name" id="adminName">Admin</span>
+                        <span class="role">Administrator</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- VIEWS CONTAINER -->
+        <div class="views-container">
+
+            <!-- ══ DASHBOARD VIEW ═══════════════════════════════════════ -->
+            <section id="dashboard-view" class="view-section active">
+
+                <!-- Stat cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary-light">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
+                        <div class="stat-info">
+                            <p>Ümumi İstifadəçi</p>
+                            <h2 id="statUsers">—</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success-light">
+                            <i class="fas fa-rectangle-ad text-success"></i>
+                        </div>
+                        <div class="stat-info">
+                            <p>Ümumi Elan</p>
+                            <h2 id="statAds">—</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-warning-light">
+                            <i class="fas fa-store text-warning"></i>
+                        </div>
+                        <div class="stat-info">
+                            <p>Mağazalar</p>
+                            <h2 id="statStores">—</h2>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon bg-danger-light">
+                            <i class="fas fa-wallet text-danger"></i>
+                        </div>
+                        <div class="stat-info">
+                            <p>Gəlir</p>
+                            <h2 id="statRevenue">—</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent users widget -->
+                <div class="widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-clock"></i> Son Qeydiyyatlar</h3>
+                        <button class="btn-sm" onclick="window.switchTab('users-view')">Hamısı →</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Ad</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Tarix</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentUsersTable"><tr><td colspan="4" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ══ USERS VIEW ════════════════════════════════════════════ -->
+            <section id="users-view" class="view-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-users"></i> İstifadəçi İdarəetməsi</h2>
+                        <div class="card-header-actions">
+                            <div class="search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="userSearch" placeholder="Ad, email axtar…" oninput="filterUsers()">
+                            </div>
+                            <button class="btn-export" id="exportUsersBtn" onclick="exportUsersCSV()" title="CSV ixrac et">
+                                <i class="fas fa-file-csv"></i>
+                                <span>CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>İstifadəçi</th>
+                                    <th>Email</th>
+                                    <th>Telefon</th>
+                                    <th>Rol</th>
+                                    <th>Status</th>
+                                    <th>Tarix</th>
+                                    <th>Əməliyyatlar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allUsersTable"><tr><td colspan="7" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar" id="usersPagination"></div>
+                </div>
+            </section>
+
+            <!-- ══ ADS VIEW ══════════════════════════════════════════════ -->
+            <section id="ads-view" class="view-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-rectangle-ad"></i> Elan İdarəetməsi</h2>
+                        <div class="card-header-actions">
+                            <div class="search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="adSearch" placeholder="Başlıq, marka axtar…" oninput="filterAds()">
+                            </div>
+                            <button class="btn-export" id="exportAdsBtn" onclick="exportAdsCSV()" title="CSV ixrac et">
+                                <i class="fas fa-file-csv"></i>
+                                <span>CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Məhsul</th>
+                                    <th>Qiymət</th>
+                                    <th>Müəllif</th>
+                                    <th>Status</th>
+                                    <th>Promo</th>
+                                    <th>Tarix</th>
+                                    <th>Əməliyyatlar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allAdsTable"><tr><td colspan="7" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar" id="adsPagination"></div>
+                </div>
+            </section>
+
+            <!-- ══ TRANSACTIONS VIEW ═════════════════════════════════════ -->
+            <section id="transactions-view" class="view-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-money-bill-transfer"></i> Əməliyyat Tarixi</h2>
+                        <div class="card-header-actions">
+                            <button class="btn-export" id="exportTxBtn" onclick="exportTransactionsCSV()" title="CSV ixrac et">
+                                <i class="fas fa-file-csv"></i>
+                                <span>CSV</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>İstifadəçi</th>
+                                    <th>Növ</th>
+                                    <th>Məbləğ</th>
+                                    <th>Açıqlama</th>
+                                    <th>Tarix</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allTransactionsTable"><tr><td colspan="5" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div><!-- /views-container -->
+    </main>
+</div>
+
+<!-- ── TOAST NOTIFICATION ─────────────────────────────────────────── -->
+<div id="adminToast" class="admin-toast" role="alert" aria-live="polite">
+    <i id="toastIcon" class="fas fa-circle-check"></i>
+    <span id="toastMsg"></span>
+</div>
+
+<!-- ── CONFIRM MODAL ─────────────────────────────────────────────── -->
+<div id="confirmModal" class="modal-overlay hidden">
+    <div class="modal-card">
+        <div class="modal-icon"><i class="fas fa-triangle-exclamation"></i></div>
+        <h3 id="modalTitle">Silmək istəyirsiniz?</h3>
+        <p id="modalBody">Bu əməliyyat geri alına bilməz.</p>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="modalCancel">Ləğv et</button>
+            <button class="btn-confirm" id="modalConfirm">Təsdiqlə</button>
+        </div>
+    </div>
+</div>
+
+<script src="JS/admin.js"></script>
+</body>
+</html>

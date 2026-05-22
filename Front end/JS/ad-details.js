@@ -1,0 +1,478 @@
+/* ================================================================
+   ad-details.js  —  Mobil.az Ad Detail Page
+   - Fetches real ad data from the backend API
+   - Populates all DOM elements with real data
+   - ALWAYS reveals the page in finally{} — never stays blank
+   ================================================================ */
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    // ── Helpers (defined first so they're always available) ────────
+
+    const API_BASE = window.API_URL || 'http://localhost:5000/api';
+    const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
+
+    function getImageUrl(image) {
+        if (!image) return '';
+        if (image.startsWith('http://') || image.startsWith('https://')) return image;
+        return API_ORIGIN + image;
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        const msgEl = document.getElementById('toastMsg');
+        if (msgEl) msgEl.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function getStarsHtml(rating) {
+        let h = '';
+        for (let i = 1; i <= 5; i++) {
+            h += i <= rating ? '★' : '<span style="color:var(--border-color)">★</span>';
+        }
+        return h;
+    }
+
+    // ── Always-reveal function (called in finally) ─────────────────
+    function revealPage() {
+        const skeleton = document.getElementById('adLoadingSkeleton');
+        const wrapper  = document.getElementById('detailWrapper');
+        if (skeleton) skeleton.style.display = 'none';
+        if (wrapper)  wrapper.style.visibility = 'visible';
+    }
+
+    // ── Show visible error on screen ───────────────────────────────
+    function showPageError(msg) {
+        revealPage();
+        const wrapper = document.getElementById('detailWrapper');
+        if (wrapper) {
+            wrapper.innerHTML = `
+                <div style="text-align:center;padding:80px 20px;font-size:17px;color:var(--text-secondary,#888);max-width:500px;margin:0 auto;">
+                    <i class="fas fa-exclamation-triangle" style="font-size:52px;color:#dc3545;display:block;margin-bottom:18px;"></i>
+                    <strong style="color:var(--text-primary,#111);font-size:20px;display:block;margin-bottom:10px;">Xəta baş verdi</strong>
+                    <p style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;text-align:left;word-break:break-word;">${msg}</p>
+                    <a href="index.html" style="display:inline-block;margin-top:20px;padding:12px 28px;background:var(--airy-primary,#5e5ce6);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">← Ana Səhifəyə Qayıt</a>
+                </div>`;
+        }
+    }
+
+    // ── Read ad ID from URL ─────────────────────────────────────────
+    const params = new URLSearchParams(window.location.search);
+    const adId   = params.get('id');
+
+    if (!adId) {
+        showPageError('URL-də elan ID-si tapılmadı. Ana səhifəyə qayıdıb bir elana klikləyin.');
+        return;
+    }
+
+    // ── Main try/catch/finally ─────────────────────────────────────
+    try {
+
+        // ── Fetch the ad ───────────────────────────────────────────
+        const res = await fetch(`${API_BASE}/ads/${adId}`);
+        let ad;
+        try {
+            ad = await res.json();
+        } catch {
+            throw new Error(`Server JSON cavabı parse edilmədi (HTTP ${res.status})`);
+        }
+
+        if (!res.ok) {
+            throw new Error(ad?.message || `Elan tapılmadı (HTTP ${res.status})`);
+        }
+
+        // ── 1. Page title & breadcrumb ─────────────────────────────
+        const adTitle = `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
+        document.title = `${adTitle} — Mobil.az`;
+
+        const titleEl = document.querySelector('.ad-main-title');
+        if (titleEl) titleEl.textContent = adTitle;
+
+        const currentBreadcrumb = document.querySelector('.breadcrumb .current');
+        if (currentBreadcrumb) currentBreadcrumb.textContent = adTitle;
+
+        const brandBreadcrumb = document.querySelectorAll('.breadcrumb a')[2];
+        if (brandBreadcrumb) brandBreadcrumb.textContent = ad.brand || '';
+
+        // ── 2. Price ───────────────────────────────────────────────
+        const priceEl = document.querySelector('.ad-main-price');
+        if (priceEl) priceEl.innerHTML = `${Number(ad.price || 0).toLocaleString('az-AZ')} <span class="ad-currency">AZN</span>`;
+
+        // ── 3. Description ─────────────────────────────────────────
+        const descEl = document.querySelector('.desc-text');
+        if (descEl) descEl.textContent = ad.description || 'Açıqlama yoxdur.';
+
+        // ── 4. Date & Views ────────────────────────────────────────
+        const dateEl  = document.querySelector('.ad-date-views span:nth-child(1)');
+        const viewsEl = document.querySelector('.ad-date-views span:nth-child(2)');
+        if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${new Date(ad.createdAt).toLocaleDateString('az-AZ')}`;
+        if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} baxış`;
+
+        // ── 5. Image Gallery ───────────────────────────────────────
+        const mainImg        = document.getElementById('mainImage');
+        const thumbsContainer= document.getElementById('galleryThumbs');
+        const prevBtn        = document.getElementById('prevBtn');
+        const nextBtn        = document.getElementById('nextBtn');
+        const galleryMain    = document.getElementById('galleryMain');
+
+        const images = Array.isArray(ad.images) ? ad.images.filter(Boolean) : [];
+
+        if (images.length > 0) {
+            if (mainImg) {
+                mainImg.src = getImageUrl(images[0]);
+                mainImg.alt = adTitle;
+            }
+
+            if (images.length === 1) {
+                // Single image — hide nav elements
+                if (thumbsContainer) thumbsContainer.style.display = 'none';
+                if (prevBtn)         prevBtn.style.display = 'none';
+                if (nextBtn)         nextBtn.style.display = 'none';
+            } else {
+                // Multiple images — build thumbs + arrow nav
+                if (thumbsContainer) {
+                    thumbsContainer.style.display = '';
+                    thumbsContainer.innerHTML = '';
+                    images.forEach((img, idx) => {
+                        const thumb = document.createElement('div');
+                        thumb.className = `thumb${idx === 0 ? ' active' : ''}`;
+                        thumb.dataset.src = getImageUrl(img);
+                        thumb.innerHTML = `<img src="${getImageUrl(img)}" alt="Şəkil ${idx + 1}" loading="lazy">`;
+                        thumb.addEventListener('click', () => {
+                            thumbsContainer.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                            thumb.classList.add('active');
+                            if (mainImg) mainImg.src = thumb.dataset.src;
+                        });
+                        thumbsContainer.appendChild(thumb);
+                    });
+                }
+
+                // Arrow navigation
+                let currentIdx = 0;
+                const allUrls = images.map(getImageUrl);
+                const goTo = (idx) => {
+                    currentIdx = (idx + allUrls.length) % allUrls.length;
+                    if (mainImg) mainImg.src = allUrls[currentIdx];
+                    if (thumbsContainer) {
+                        thumbsContainer.querySelectorAll('.thumb').forEach((t, i) =>
+                            t.classList.toggle('active', i === currentIdx));
+                    }
+                };
+                if (prevBtn) { prevBtn.style.display = ''; prevBtn.onclick = () => goTo(currentIdx - 1); }
+                if (nextBtn) { nextBtn.style.display = ''; nextBtn.onclick = () => goTo(currentIdx + 1); }
+            }
+        } else {
+            // No images — show placeholder
+            if (mainImg) {
+                mainImg.removeAttribute('src');
+                mainImg.alt = 'Şəkil yoxdur';
+                mainImg.style.display = 'none';
+            }
+            if (galleryMain) {
+                const placeholder = document.createElement('div');
+                placeholder.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text-secondary);background:var(--bg-primary);';
+                placeholder.innerHTML = '<i class="fas fa-image" style="font-size:52px;opacity:0.25;"></i><span style="font-size:14px;font-weight:600;">Şəkil yoxdur</span>';
+                galleryMain.appendChild(placeholder);
+            }
+            if (thumbsContainer) thumbsContainer.style.display = 'none';
+            if (prevBtn)         prevBtn.style.display = 'none';
+            if (nextBtn)         nextBtn.style.display = 'none';
+        }
+
+        // ── 6. Quick Spec Chips ────────────────────────────────────
+        const quickSpecsEl = document.querySelector('.quick-specs');
+        if (quickSpecsEl) {
+            quickSpecsEl.innerHTML = '';
+            if (ad.specs?.memory)   quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-memory"></i> ${ad.specs.memory} Yaddaş</span>`;
+            if (ad.specs?.ram)      quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-microchip"></i> ${ad.specs.ram} RAM</span>`;
+            if (ad.specs?.color)    quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-palette"></i> ${ad.specs.color}</span>`;
+            if (ad.specs?.screenSize) quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-expand-arrows-alt"></i> ${ad.specs.screenSize}"</span>`;
+            if (ad.condition)       quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-box-open"></i> ${ad.condition}</span>`;
+        }
+
+        // ── 7. Full Specs Grid ─────────────────────────────────────
+        const specsGrid = document.querySelector('.specs-grid');
+        if (specsGrid) {
+            specsGrid.innerHTML = `
+                <div class="spec-row"><span class="spec-label">Marka</span><span class="spec-value">${ad.brand || '-'}</span></div>
+                <div class="spec-row"><span class="spec-label">Model</span><span class="spec-value">${ad.modelName || '-'}</span></div>
+                <div class="spec-row"><span class="spec-label">Yaddaş</span><span class="spec-value">${ad.specs?.memory || '-'}</span></div>
+                <div class="spec-row"><span class="spec-label">RAM</span><span class="spec-value">${ad.specs?.ram || '-'}</span></div>
+                <div class="spec-row"><span class="spec-label">Rəng</span><span class="spec-value">${ad.specs?.color || '-'}</span></div>
+                <div class="spec-row"><span class="spec-label">Vəziyyəti</span><span class="spec-value">${ad.condition || '-'}</span></div>
+            `;
+            if (ad.specs?.features?.nfc)         specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">NFC</span><span class="spec-value">✓ Var</span></div>`;
+            if (ad.specs?.features?.waterproof)  specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">Suya davamlılıq</span><span class="spec-value">✓ Var</span></div>`;
+            if (ad.specs?.features?.fingerprint) specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">Barmaq izi</span><span class="spec-value">✓ Var</span></div>`;
+        }
+
+        // ── 8. Location & Condition rows ───────────────────────────
+        const locationRows = document.querySelectorAll('.location-item strong');
+        if (locationRows[0]) locationRows[0].textContent = ad.city || 'Bakı';
+        if (locationRows[1]) locationRows[1].textContent = ad.condition || 'Yeni';
+        if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? 'Var' : 'Yoxdur';
+
+        // ── 9. Category tag ────────────────────────────────────────
+        const catTag = document.querySelector('.ad-category-tag');
+        if (catTag) catTag.innerHTML = `<i class="fas fa-mobile-alt"></i> ${ad.category || 'Telefon'} · ${ad.brand || ''}`;
+
+        // ── 10. Seller Info ────────────────────────────────────────
+        const sellerNameEl = document.querySelector('.personal-name');
+        if (sellerNameEl) sellerNameEl.textContent = ad.author?.name || ad.author?.email || 'Satıcı';
+
+        const avatarEl = document.querySelector('.personal-avatar');
+        if (avatarEl && ad.author?.name) avatarEl.textContent = ad.author.name.charAt(0).toUpperCase();
+
+        // ── 11. Ad ID bar (footer) ─────────────────────────────────
+        const adIdSpan     = document.querySelector('.ad-id-bar span:nth-child(1) span:nth-child(2)');
+        const postedSpan   = document.querySelector('.ad-id-bar span:nth-child(2) span:nth-child(2)');
+        const updatedSpan  = document.querySelector('.ad-id-bar span:nth-child(3) span:nth-child(2)');
+        if (adIdSpan)    adIdSpan.textContent   = ad._id;
+        if (postedSpan)  postedSpan.textContent  = new Date(ad.createdAt).toLocaleDateString('az-AZ');
+        if (updatedSpan) updatedSpan.textContent = new Date(ad.updatedAt || ad.createdAt).toLocaleDateString('az-AZ');
+
+        // ── 12. Author: Edit/Delete buttons ───────────────────────
+        let isAuthor = false;
+        try {
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+            isAuthor = !!(user && ad.author && (user.id === ad.author._id || user._id === ad.author._id));
+        } catch { /* ignore parse errors */ }
+
+        if (isAuthor) {
+            const contactBtnGroup = document.querySelector('.contact-btn-group');
+            if (contactBtnGroup) {
+                contactBtnGroup.innerHTML = `
+                    <button class="btn-call-reveal" style="background:var(--airy-primary);margin-bottom:10px;" id="editAdBtn">
+                        <i class="fas fa-edit"></i> Düzəliş Et
+                    </button>
+                    <button class="btn-message" style="color:#dc3545;border-color:#dc3545;" id="deleteAdBtn">
+                        <i class="fas fa-trash-alt"></i> Elanı Sil
+                    </button>`;
+
+                document.getElementById('editAdBtn')?.addEventListener('click', () => {
+                    window.location.href = `elan-yerlesdir.html?edit=${ad._id}`;
+                });
+
+                document.getElementById('deleteAdBtn')?.addEventListener('click', async () => {
+                    if (!confirm('Bu elanı silmək istədiyinizə əminsiniz?')) return;
+                    try {
+                        const token = localStorage.getItem('token');
+                        const delRes = await fetch(`${API_BASE}/ads/${ad._id}`, {
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        if (delRes.ok) {
+                            showToast('Elan silindi!');
+                            setTimeout(() => window.location.href = 'cabinet.html', 1500);
+                        } else {
+                            const errData = await delRes.json().catch(() => ({}));
+                            showToast(errData.message || 'Silinmə zamanı xəta oldu.');
+                        }
+                    } catch (e) {
+                        showToast('Şəbəkə xətası baş verdi.');
+                    }
+                });
+            }
+            // Hide review forms for own ad
+            document.querySelectorAll('.write-review-main, .write-review-card')
+                .forEach(c => c.style.display = 'none');
+        } else {
+            // ── 13. Phone / WhatsApp / Message buttons ─────────────
+            const callBtn  = document.getElementById('callBtn');
+            const phoneText= document.getElementById('phoneText');
+            if (callBtn && phoneText && ad.contactPhone) {
+                let revealed = false;
+                callBtn.addEventListener('click', () => {
+                    if (!revealed) {
+                        phoneText.textContent = ad.contactPhone;
+                        callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+                        revealed = true;
+                    } else {
+                        window.location.href = `tel:${ad.contactPhone.replace(/\s+/g, '')}`;
+                    }
+                });
+            }
+
+            const waBtn = document.querySelector('.btn-whatsapp');
+            if (waBtn && ad.contactPhone) {
+                const clean = ad.contactPhone.replace(/\+/g, '').replace(/\s+/g, '');
+                waBtn.href = `https://wa.me/${clean}`;
+            }
+
+            const msgBtn = document.querySelector('.btn-message');
+            if (msgBtn && ad.author?._id) {
+                const newMsgBtn = msgBtn.cloneNode(true);
+                msgBtn.parentNode.replaceChild(newMsgBtn, msgBtn);
+                newMsgBtn.addEventListener('click', () => {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                        showToast('Mesaj yazmaq üçün sistemə daxil olun!');
+                        setTimeout(() => window.location.href = 'login.html', 1500);
+                        return;
+                    }
+                    window.location.href = `chat.html?sellerId=${ad.author._id}&adId=${ad._id}`;
+                });
+            }
+        }
+
+        // ── 14. Reviews (non-blocking) ─────────────────────────────
+        if (ad.author?._id) {
+            const fetchAndRenderReviews = async () => {
+                try {
+                    const revRes  = await fetch(`${API_BASE}/reviews/${ad.author._id}`);
+                    const revData = await revRes.json();
+                    if (revRes.ok) renderReviews(revData.reviews || []);
+                } catch (e) {
+                    console.warn('Reviews fetch failed:', e.message);
+                }
+            };
+
+            fetchAndRenderReviews();
+
+            if (!isAuthor) {
+                ['main', 'side'].forEach(type => {
+                    const selectorId = type === 'main' ? 'mainStarSelect' : 'sideStarSelect';
+                    const selector   = document.getElementById(selectorId);
+                    if (!selector) return;
+
+                    const stars = selector.querySelectorAll('.star');
+                    let currentRating = 0;
+
+                    stars.forEach(s => {
+                        s.addEventListener('click', () => {
+                            currentRating = parseInt(s.dataset.val) || 0;
+                            stars.forEach((st, idx) => {
+                                st.style.color = idx < currentRating ? '#ffc107' : 'var(--border-color)';
+                            });
+                        });
+                    });
+
+                    const submitBtn = selector.parentElement?.querySelector('.btn-submit-review');
+                    if (!submitBtn) return;
+
+                    const newBtn = submitBtn.cloneNode(true);
+                    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
+                    newBtn.removeAttribute('onclick');
+
+                    newBtn.addEventListener('click', async () => {
+                        const token = localStorage.getItem('token');
+                        if (!token) { showToast('Rəy yazmaq üçün daxil olun!'); return; }
+                        if (!currentRating) { showToast('Zəhmət olmasa reytinq seçin (ulduz)'); return; }
+
+                        const textElId = type === 'main' ? 'mainReviewText' : 'sideReviewText';
+                        const textEl   = document.getElementById(textElId);
+                        const text     = textEl?.value.trim() || '';
+
+                        const btnText  = newBtn.innerHTML;
+                        newBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göndərilir...';
+
+                        try {
+                            const postRes = await fetch(`${API_BASE}/reviews`, {
+                                method: 'POST',
+                                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ targetUserId: ad.author._id, rating: currentRating, comment: text })
+                            });
+                            const data = await postRes.json();
+                            if (postRes.ok) {
+                                showToast('Rəy uğurla əlavə edildi!');
+                                if (textEl) textEl.value = '';
+                                fetchAndRenderReviews();
+                            } else {
+                                showToast(data.message || 'Xəta baş verdi');
+                            }
+                        } catch (e) {
+                            showToast('Şəbəkə xətası baş verdi.');
+                        } finally {
+                            newBtn.innerHTML = btnText;
+                        }
+                    });
+                });
+            }
+        }
+
+    } catch (err) {
+        console.error('[ad-details] Error:', err);
+        showPageError(err.message || 'Naməlum xəta baş verdi.');
+        return; // revealPage() called inside showPageError
+    } finally {
+        // ✅ ALWAYS reveal — no matter what happened above
+        revealPage();
+    }
+
+    // ── renderReviews helper ────────────────────────────────────────
+    function renderReviews(reviews) {
+        let total = 0;
+        const counts = [0, 0, 0, 0, 0];
+        reviews.forEach(r => {
+            total += r.rating;
+            if (r.rating >= 1 && r.rating <= 5) counts[5 - r.rating]++;
+        });
+        const avg = reviews.length ? (total / reviews.length).toFixed(1) : '0.0';
+
+        const summaryEl = document.querySelector('.review-rating-summary');
+        if (summaryEl) {
+            summaryEl.innerHTML = `
+                <div>
+                    <div class="rating-big">${avg}</div>
+                    <div class="rating-stars-lg">${getStarsHtml(Math.round(avg))}</div>
+                    <div class="rating-count">${reviews.length} rəy əsasında</div>
+                </div>
+                <div class="rating-bars" style="flex:1">
+                    ${[5,4,3,2,1].map((star, idx) => {
+                        const pct = reviews.length ? Math.round((counts[idx] / reviews.length) * 100) : 0;
+                        return `<div class="rbar" style="display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px;">
+                            <span class="rbar-label" style="color:var(--text-secondary);width:28px;text-align:right;">${star}★</span>
+                            <div class="rbar-track" style="flex:1;height:6px;background:var(--border-color);border-radius:4px;overflow:hidden;">
+                                <div style="height:100%;border-radius:4px;background:#ffc107;width:${pct}%"></div>
+                            </div>
+                            <span class="rbar-count" style="color:var(--text-secondary);width:20px;text-align:right;">${counts[idx]}</span>
+                        </div>`;
+                    }).join('')}
+                </div>`;
+        }
+
+        const section = document.querySelector('.reviews-section');
+        if (section) {
+            section.querySelectorAll('.review-card-full').forEach(e => e.remove());
+            const writeBlock = section.querySelector('.write-review-main');
+            reviews.slice(0, 10).forEach(r => {
+                const div  = document.createElement('div');
+                div.className = 'review-card-full';
+                const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
+                const date = new Date(r.createdAt).toLocaleDateString('az-AZ');
+                div.innerHTML = `
+                    <div class="rc-header">
+                        <div class="rc-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">${char}</div>
+                        <div>
+                            <div class="rc-name">${r.author?.name || r.author?.email || 'İstifadəçi'}</div>
+                            <div class="rc-date">${date}</div>
+                        </div>
+                        <div class="rc-stars">${getStarsHtml(r.rating)}</div>
+                    </div>
+                    <p class="rc-text">${r.comment || ''}</p>`;
+                section.insertBefore(div, writeBlock || null);
+            });
+        }
+
+        const miniContainer = document.querySelector('.mini-reviews');
+        if (miniContainer) {
+            miniContainer.innerHTML = '';
+            reviews.slice(0, 3).forEach(r => {
+                const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
+                miniContainer.innerHTML += `
+                    <div class="mini-review-item">
+                        <div class="mini-review-top">
+                            <div class="mini-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">${char}</div>
+                            <div class="mini-name">${r.author?.name || 'İstifadəçi'}</div>
+                            <div class="mini-stars">${getStarsHtml(r.rating)}</div>
+                        </div>
+                        <div class="mini-text">${r.comment || ''}</div>
+                    </div>`;
+            });
+        }
+    }
+
+}); // end DOMContentLoaded
