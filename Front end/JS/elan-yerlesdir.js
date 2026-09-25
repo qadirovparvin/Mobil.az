@@ -2,6 +2,12 @@
    CATEGORY → BRAND → MODEL DATA
    ========================================================= */
 
+function isValidAzPhone(phone) {
+  if (!phone) return false;
+  const cleaned = String(phone).replace(/[\s\-\(\)\.]/g, '');
+  return /^(\+994|0)?(50|51|55|70|71|77|99|10|60)\d{7}$/.test(cleaned);
+}
+
 const CATALOG = {
   Telefon: {
     Apple: [
@@ -82,7 +88,7 @@ const CATALOG = {
       'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
       'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio', 'Digər model',
     ],
-    Diger: ['Digər model'],
+    'Digər': ['Digər model'],
   },
 
   Planşet: {
@@ -119,7 +125,7 @@ const CATALOG = {
     OPPO: [
       'Pad 2', 'Pad Air 2', 'Pad Air', 'Digər model',
     ],
-    Diger: ['Digər model'],
+    'Digər': ['Digər model'],
   },
 
   Aksesuar: {
@@ -193,6 +199,19 @@ const CATALOG = {
   },
 };
 
+const API_BASE = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+
+const urlParams = typeof window !== 'undefined' && window.location && window.location.search
+  ? new URLSearchParams(window.location.search)
+  : new URLSearchParams('');
+
+const editAdId = urlParams.get('edit') ? urlParams.get('edit').trim() : null;
+const isEditMode = !!editAdId;
+const isEdit = isEditMode;
+let isEditLoading = false;
+let isEditLoaded = false;
+let existingAd = null;
+
 /* =========================================================
    BRAND SELECT — update on category change
    ========================================================= */
@@ -208,6 +227,25 @@ function clearSelect(sel, placeholder) {
   opt.value = '';
   opt.textContent = placeholder;
   sel.appendChild(opt);
+}
+
+function normalizeBrandKey(brand) {
+  if (brand === 'Diger' || brand === 'Digər') {
+    return 'Digər';
+  }
+  return brand;
+}
+
+function getCatalogModels(category, brand) {
+  if (!category || !brand || !CATALOG[category]) return null;
+  const canonicalBrand = normalizeBrandKey(brand);
+  if (Array.isArray(CATALOG[category][canonicalBrand])) {
+    return CATALOG[category][canonicalBrand];
+  }
+  if (Array.isArray(CATALOG[category][brand])) {
+    return CATALOG[category][brand];
+  }
+  return null;
 }
 
 function populateBrands(category) {
@@ -228,9 +266,10 @@ function populateBrands(category) {
 
 function populateModels(category, brand) {
   clearSelect(modelSelect, _t.modelPlaceholderBrand);
-  if (!category || !brand || !CATALOG[category] || !CATALOG[category][brand]) return;
+  const models = getCatalogModels(category, brand);
+  if (!models) return;
 
-  CATALOG[category][brand].forEach(m => {
+  models.forEach(m => {
     const opt = document.createElement('option');
     opt.value = m;
     // Translate the generic "other model" sentinel
@@ -277,10 +316,22 @@ document.addEventListener('langchange', (e) => {
   // Re-render current brand list with translated labels if a category is already selected
   if (categorySelect.value) {
     const currentBrand = brandSelect.value;
+    const currentModel = modelSelect.value;
     populateBrands(categorySelect.value);
     if (currentBrand) {
-      brandSelect.value = currentBrand;
-      populateModels(categorySelect.value, currentBrand);
+      const normalizedBrand = normalizeBrandKey(currentBrand) || currentBrand;
+      brandSelect.value = normalizedBrand;
+      populateModels(categorySelect.value, normalizedBrand);
+      if (currentModel) {
+        modelSelect.value = currentModel;
+      }
+    }
+  }
+
+  if (isEditMode) {
+    applyEditModeUI();
+    if (!isEditLoaded || isEditLoading) {
+      setEditFormEnabled(false);
     }
   }
 });
@@ -311,178 +362,912 @@ if (descArea && descCount) {
 }
 
 /* =========================================================
-   DRAG & DROP + IMAGE PREVIEW
+   DRAG & DROP + IMAGE PREVIEW (CREATE & EDIT MODES)
    ========================================================= */
 const fileUploadArea = document.getElementById('fileUploadArea');
 const fileInput = document.getElementById('images');
 const previewGrid = document.getElementById('imagePreviewGrid');
 
-function renderPreviews(files) {
+let existingImages = [];
+
+function getDisplayImageUrl(img) {
+  if (!img) return '';
+  if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) return img;
+  const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return origin + (img.startsWith('/') ? img : '/' + img);
+}
+
+function updateImageRequirement() {
+  if (!fileInput) return;
+  if (existingImages.length > 0) {
+    fileInput.removeAttribute('required');
+  } else if (!isEditMode) {
+    fileInput.setAttribute('required', 'required');
+  }
+}
+
+function renderAllImagePreviews() {
+  if (!previewGrid) return;
   previewGrid.innerHTML = '';
-  const arr = Array.from(files).slice(0, 10);
-  arr.forEach(file => {
-    if (!file.type.startsWith('image/')) return;
+
+  // 1. Existing images from edit mode
+  existingImages.forEach((imgSrc, index) => {
+    const container = document.createElement('div');
+    container.className = 'preview-thumb-container';
+    container.style.cssText = 'position:relative;display:inline-block;margin:4px;';
+
+    const img = document.createElement('img');
+    img.src = getDisplayImageUrl(imgSrc);
+    img.className = 'preview-thumb';
+    img.alt = `Mövcud şəkil ${index + 1}`;
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'preview-remove-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.title = 'Şəkli sil';
+    removeBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);';
+
+    removeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isEditMode && (!isEditLoaded || isEditLoading)) {
+        return;
+      }
+      existingImages.splice(index, 1);
+      renderAllImagePreviews();
+      updateImageRequirement();
+    });
+
+    container.appendChild(img);
+    container.appendChild(removeBtn);
+    previewGrid.appendChild(container);
+  });
+
+  // 2. Newly selected files (already validated and limited)
+  const files = (fileInput && fileInput.files)
+    ? Array.from(fileInput.files)
+    : [];
+
+  files.forEach(file => {
+    if (!file.type || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = e => {
+      const container = document.createElement('div');
+      container.className = 'preview-thumb-container';
+      container.style.cssText = 'position:relative;display:inline-block;margin:4px;';
+
       const img = document.createElement('img');
       img.src = e.target.result;
       img.className = 'preview-thumb';
       img.alt = file.name;
-      previewGrid.appendChild(img);
+
+      container.appendChild(img);
+      previewGrid.appendChild(container);
     };
     reader.readAsDataURL(file);
   });
-  if (arr.length > 0) {
-    const p = fileUploadArea.querySelector('.file-upload-content p');
-    if (p) p.innerHTML = `<strong>${arr.length} şəkil seçildi</strong> — dəyişmək üçün yenidən seçin`;
+
+  const totalCount = existingImages.length + files.length;
+  const p = fileUploadArea ? fileUploadArea.querySelector('.file-upload-content p') : null;
+  if (p) {
+    if (totalCount > 0) {
+      if (existingImages.length > 0) {
+        p.innerHTML = `<strong>${totalCount} şəkil (${existingImages.length} mövcud, ${files.length} yeni)</strong> — dəyişmək üçün yenidən seçin`;
+      } else {
+        p.innerHTML = `<strong>${files.length} şəkil seçildi</strong> — dəyişmək üçün yenidən seçin`;
+      }
+    } else {
+      p.innerHTML = `<span data-translate="elan-upload-text">Şəkilləri buraya sürükleyin və ya</span> <span data-translate="elan-upload-span" style="color:#6a35b5;font-weight:600;text-decoration:underline">seçin</span>`;
+    }
   }
 }
 
-fileInput.addEventListener('change', () => renderPreviews(fileInput.files));
+let isUpdatingFileInput = false;
 
-fileUploadArea.addEventListener('dragover', e => {
-  e.preventDefault();
-  fileUploadArea.classList.add('dragover');
-});
-fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('dragover'));
-fileUploadArea.addEventListener('drop', e => {
-  e.preventDefault();
-  fileUploadArea.classList.remove('dragover');
-  const dt = e.dataTransfer;
-  if (dt.files.length) {
-    const dataTransfer = new DataTransfer();
-    Array.from(dt.files).slice(0, 10).forEach(f => dataTransfer.items.add(f));
-    fileInput.files = dataTransfer.files;
-    renderPreviews(fileInput.files);
+function validateAndSetFiles(sourceFiles) {
+  if (!fileInput || isUpdatingFileInput) return;
+  if (isEditMode && (!isEditLoaded || isEditLoading)) return;
+  isUpdatingFileInput = true;
+  try {
+    const rawFiles = Array.from(sourceFiles || []);
+    if (!rawFiles.length) {
+      try {
+        fileInput.files = new DataTransfer().files;
+      } catch (e) {}
+      renderAllImagePreviews();
+      updateImageRequirement();
+      return;
+    }
+
+    const imageFiles = rawFiles.filter(f => f.type && f.type.startsWith('image/'));
+    const hasNonImages = imageFiles.length < rawFiles.length;
+    const currentExistingCount = Array.isArray(existingImages) ? existingImages.length : 0;
+    const remainingSlots = Math.max(0, 10 - currentExistingCount);
+    const exceedsLimit = imageFiles.length > remainingSlots;
+    const limitedFiles = imageFiles.slice(0, remainingSlots);
+
+    try {
+      const dt = new DataTransfer();
+      limitedFiles.forEach(f => dt.items.add(f));
+      fileInput.files = dt.files;
+    } catch (e) {
+      console.warn('DataTransfer failed to set fileInput.files:', e);
+    }
+
+    renderAllImagePreviews();
+    updateImageRequirement();
+
+    if (currentExistingCount >= 10) {
+      if (hasNonImages) {
+        alert('Yalnız şəkil faylları qəbul olunur. Bu elanda artıq maksimum 10 şəkil var, yeni şəkil əlavə edilə bilməz.');
+      } else {
+        alert('Bu elanda artıq maksimum 10 şəkil var. Yeni şəkil əlavə edə bilməzsiniz.');
+      }
+    } else if (hasNonImages && exceedsLimit) {
+      if (currentExistingCount > 0) {
+        alert(`Yalnız şəkil faylları qəbul olunur və bu elana maksimum 10 şəkil yüklənə bilər (hazırda ${currentExistingCount} mövcuddur). Yalnız daha ${remainingSlots} şəkil əlavə edə bilərsiniz. Qeyri-şəkil faylları ləğv edildi və yalnız ilk ${remainingSlots} şəkil qəbul edildi.`);
+      } else {
+        alert('Yalnız şəkil faylları qəbul olunur və maksimum 10 şəkil yüklənə bilər. Qeyri-şəkil faylları ləğv edildi və yalnız ilk 10 şəkil qəbul edildi.');
+      }
+    } else if (hasNonImages) {
+      alert('Yalnız şəkil faylları qəbul olunur. Qeyri-şəkil faylları ləğv edildi.');
+    } else if (exceedsLimit) {
+      if (currentExistingCount > 0) {
+        alert(`Maksimum 10 şəkil seçə bilərsiniz (hazırda ${currentExistingCount} mövcuddur). Siz yalnız daha ${remainingSlots} şəkil əlavə edə bilərsiniz. Yalnız ilk ${remainingSlots} şəkil qəbul edildi.`);
+      } else {
+        alert('Maksimum 10 şəkil seçə bilərsiniz. Yalnız ilk 10 şəkil qəbul edildi.');
+      }
+    }
+  } finally {
+    isUpdatingFileInput = false;
   }
-});
+}
 
-/* =========================================================
-   FORM SUBMIT — POST to real backend API
-   ========================================================= */
 
-const API_BASE = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+if (fileInput) {
+  fileInput.addEventListener('change', () => {
+    if (isEditMode && (!isEditLoaded || isEditLoading)) {
+      try {
+        fileInput.files = new DataTransfer().files;
+      } catch (e) {
+        fileInput.value = '';
+      }
+      return;
+    }
+    validateAndSetFiles(fileInput.files);
+  });
+}
 
-document.getElementById('adForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+if (fileUploadArea) {
+  fileUploadArea.addEventListener('dragover', e => {
+    e.preventDefault();
+    if (isEditMode && (!isEditLoaded || isEditLoading)) {
+      return;
+    }
+    fileUploadArea.classList.add('dragover');
+  });
+  fileUploadArea.addEventListener('dragleave', () => fileUploadArea.classList.remove('dragover'));
+  fileUploadArea.addEventListener('drop', e => {
+    e.preventDefault();
+    fileUploadArea.classList.remove('dragover');
+    if (isEditMode && (!isEditLoaded || isEditLoading)) {
+      return;
+    }
+    const dt = e.dataTransfer;
+    if (dt && dt.files && fileInput) {
+      validateAndSetFiles(dt.files);
+    }
+  });
+}
 
-  // ── 1. Auth guard ───────────────────────────────────────
-  const token = localStorage.getItem('token');
-  if (!token) {
-    alert('Elan yerləşdirmək üçün hesabınıza daxil olun.');
-    window.location.href = 'login.html';
+
+
+function applyEditModeUI() {
+  const heroTitle = document.querySelector('.ad-hero-title');
+  if (heroTitle) {
+    heroTitle.textContent = 'Elanı Redaktə Et';
+    heroTitle.removeAttribute('data-translate');
+  }
+  const heroSubtitle = document.querySelector('.ad-hero-subtitle');
+  if (heroSubtitle) {
+    heroSubtitle.textContent = 'Elan məlumatlarını yeniləyin və dəyişiklikləri yadda saxlayın';
+    heroSubtitle.removeAttribute('data-translate');
+  }
+  const heroBadge = document.querySelector('.ad-hero-badge span');
+  if (heroBadge) {
+    heroBadge.textContent = 'Redaktə';
+    heroBadge.removeAttribute('data-translate');
+  }
+  if (typeof document !== 'undefined') {
+    document.title = 'Elanı Redaktə Et - Mobil.az';
+  }
+
+  const submitBtn = document.querySelector('.ad-form-btn');
+  if (submitBtn) {
+    const btnSpan = submitBtn.querySelector('span') || submitBtn;
+    btnSpan.textContent = 'Yadda Saxla';
+    submitBtn.removeAttribute('data-translate');
+  }
+
+  const formCard = document.querySelector('.ad-form-card');
+  if (formCard && !document.getElementById('editModeIndicator')) {
+    const indicator = document.createElement('div');
+    indicator.id = 'editModeIndicator';
+    indicator.style.cssText = 'background:rgba(106, 53, 181, 0.08);border:1px solid rgba(106, 53, 181, 0.25);color:var(--primary-color, #6a35b5);padding:12px 18px;border-radius:10px;margin-bottom:24px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;';
+    indicator.innerHTML = '<i class="fas fa-edit"></i> <span>Elanı redaktə edirsiniz</span>';
+    formCard.prepend(indicator);
+  }
+}
+
+function decodeBasicEntities(str) {
+  if (!str || typeof str !== 'string') return str;
+  return str
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
+
+function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = false) {
+  if (!selectEl || value === undefined || value === null) return;
+  const rawStr = String(value).trim();
+  if (!rawStr) {
+    selectEl.value = '';
     return;
   }
 
-  // ── 2. Basic validation ─────────────────────────────────
-  const category = categorySelect.value;
-  const brand    = brandSelect.value;
-  const model    = modelSelect.value;
-  const price    = document.getElementById('price').value;
-  const phone    = document.getElementById('phone').value;
-  const cityEl   = document.getElementById('city');
-  const city     = cityEl.value;
+  const decoded = decodeBasicEntities(rawStr);
 
-  if (!category)           { alert('Zəhmət olmasa kateqoriya seçin.');  return; }
-  if (!brand)              { alert('Zəhmət olmasa marka seçin.');       return; }
-  if (!model)              { alert('Zəhmət olmasa model seçin.');       return; }
-  if (!price || price <= 0){ alert('Düzgün qiymət daxil edin.');        return; }
-  if (!city)               { alert('Zəhmət olmasa region seçin.');      return; }
-  if (!phone)              { alert('Əlaqə nömrəsini daxil edin.');      return; }
+  // Check existing options for decoded or raw matches
+  let matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+    opt.value === decoded || opt.value === rawStr || decodeBasicEntities(opt.value) === decoded
+  );
 
-  const imageFiles = document.getElementById('images')?.files;
-  if (!imageFiles || imageFiles.length === 0) {
-    alert('Ən azı 1 şəkil əlavə edin.');
+  // Backward-compatible alias matching for "Diger" vs "Digər"
+  if (!matchingOpt && (decoded === 'Diger' || decoded === 'Digər')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === 'Digər' || opt.value === 'Diger'
+    );
+  }
+
+  if (matchingOpt) {
+    selectEl.value = matchingOpt.value;
     return;
   }
 
-  // ── 3. UI: show loading state ───────────────────────────
-  const submitBtn  = document.querySelector('.ad-form-btn');
-  const btnSpan    = submitBtn.querySelector('span') || submitBtn;
-  const originalTxt = btnSpan.textContent;
-  submitBtn.disabled = true;
-  btnSpan.textContent = 'Şəkillər yüklənir…';
+  // If dynamic fallback is explicitly allowed (e.g. custom model name), append option
+  if (allowDynamicFallback) {
+    const opt = document.createElement('option');
+    opt.value = decoded;
+    opt.textContent = decoded;
+    selectEl.appendChild(opt);
+    selectEl.value = decoded;
+  } else {
+    // For structured dropdowns, safely reset to unselected placeholder
+    selectEl.value = '';
+  }
+}
+
+
+function populateFormWithAd(ad) {
+  if (!ad) return;
+
+  // 1. Category
+  if (ad.category) {
+    setSelectValueWithFallback(categorySelect, ad.category);
+    populateBrands(ad.category);
+  }
+
+  // 2. Brand
+  if (ad.brand) {
+    setSelectValueWithFallback(brandSelect, ad.brand);
+    populateModels(categorySelect ? categorySelect.value : '', ad.brand);
+  }
+
+  // 3. Model
+  if (ad.modelName) {
+    setSelectValueWithFallback(modelSelect, ad.modelName, true);
+  }
+
+
+  // 4. Price
+  if (ad.price !== undefined && ad.price !== null) {
+    const priceEl = document.getElementById('price');
+    if (priceEl) priceEl.value = ad.price;
+  }
+
+  // 5. Condition
+  if (ad.condition) {
+    const conditionEl = document.getElementById('condition');
+    if (conditionEl) setSelectValueWithFallback(conditionEl, ad.condition);
+  }
+
+  // 6. City / Region
+  if (ad.city) {
+    const cityEl = document.getElementById('city');
+    if (cityEl) setSelectValueWithFallback(cityEl, ad.city);
+  }
+
+  // 7. Contact Phone
+  if (ad.contactPhone) {
+    const phoneEl = document.getElementById('phone');
+    if (phoneEl) phoneEl.value = ad.contactPhone;
+  }
+
+  // 8. Description
+  if (ad.description) {
+    const descEl = document.getElementById('description');
+    if (descEl) {
+      descEl.value = ad.description;
+      const descCount = document.getElementById('descCount');
+      if (descCount) descCount.textContent = descEl.value.length;
+    }
+  }
+
+  // 9. Specs
+  if (ad.specs) {
+    const memoryEl = document.getElementById('memory');
+    if (memoryEl && ad.specs.memory) setSelectValueWithFallback(memoryEl, ad.specs.memory);
+
+    const ramEl = document.getElementById('ram');
+    if (ramEl && ad.specs.ram) setSelectValueWithFallback(ramEl, ad.specs.ram);
+
+    const colorEl = document.getElementById('color');
+    if (colorEl && ad.specs.color) setSelectValueWithFallback(colorEl, ad.specs.color);
+
+    const screenSizeEl = document.getElementById('screen_size');
+    if (screenSizeEl && ad.specs.screenSize) setSelectValueWithFallback(screenSizeEl, ad.specs.screenSize);
+
+    const batteryEl = document.getElementById('battery');
+    if (batteryEl && ad.specs.battery) setSelectValueWithFallback(batteryEl, ad.specs.battery);
+
+    if (ad.specs.features) {
+      const f = ad.specs.features;
+      const nfcEl = document.getElementById('nfc');
+      if (nfcEl) nfcEl.checked = !!f.nfc;
+      const fingerprintEl = document.getElementById('fingerprint');
+      if (fingerprintEl) fingerprintEl.checked = !!f.fingerprint;
+      const waterproofEl = document.getElementById('waterproof');
+      if (waterproofEl) waterproofEl.checked = !!f.waterproof;
+      const expandableEl = document.getElementById('expandable');
+      if (expandableEl) expandableEl.checked = !!f.expandable;
+      const deliveryEl = document.getElementById('delivery');
+      if (deliveryEl) deliveryEl.checked = !!f.delivery;
+    }
+  }
+
+  // 10. Existing Images
+  existingImages = Array.isArray(ad.images) ? [...ad.images] : [];
+  renderAllImagePreviews();
+  updateImageRequirement();
+}
+
+function setEditFormEnabled(enabled) {
+  const form = document.getElementById('adForm');
+  if (!form) return;
+
+  const controls = form.querySelectorAll('input, select, textarea, button');
+  controls.forEach(ctrl => {
+    if ((ctrl.classList && ctrl.classList.contains('edit-retry-btn')) || (ctrl.closest && ctrl.closest('.edit-error-banner'))) {
+      return;
+    }
+    ctrl.disabled = !enabled;
+  });
+
+  const uploadArea = document.getElementById('fileUploadArea');
+  if (uploadArea) {
+    if (!enabled) {
+      uploadArea.classList.add('upload-disabled');
+      uploadArea.style.pointerEvents = 'none';
+      uploadArea.style.opacity = '0.5';
+    } else {
+      uploadArea.classList.remove('upload-disabled');
+      uploadArea.style.pointerEvents = '';
+      uploadArea.style.opacity = '';
+    }
+  }
+
+  const chips = form.querySelectorAll('.chip-toggle');
+  chips.forEach(chip => {
+    if (!enabled) {
+      chip.style.pointerEvents = 'none';
+      chip.style.opacity = '0.5';
+    } else {
+      chip.style.pointerEvents = '';
+      chip.style.opacity = '';
+    }
+  });
+
+  const removeBtns = form.querySelectorAll('.preview-remove-btn');
+  removeBtns.forEach(btn => {
+    btn.disabled = !enabled;
+    if (!enabled) {
+      btn.style.pointerEvents = 'none';
+    } else {
+      btn.style.pointerEvents = '';
+    }
+  });
+
+  const submitBtn = document.querySelector('.ad-form-btn');
+  if (submitBtn) {
+    submitBtn.disabled = !enabled;
+  }
+}
+
+function renderEditErrorBanner(errorMessage) {
+  const formCard = document.querySelector('.ad-form-card');
+  if (!formCard) return;
+
+  const oldBanner = formCard.querySelector('.edit-error-banner');
+  if (oldBanner) oldBanner.remove();
+
+  const errorBanner = document.createElement('div');
+  errorBanner.className = 'edit-error-banner';
+  errorBanner.setAttribute('role', 'alert');
+  errorBanner.style.cssText = 'background:#fee2e2;color:#991b1b;border:1px solid #f87171;padding:18px 20px;border-radius:10px;margin-bottom:24px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.05);';
+
+  const messageDiv = document.createElement('div');
+  messageDiv.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:15px;';
+
+  const icon = document.createElement('i');
+  icon.className = 'fas fa-exclamation-triangle';
+  messageDiv.appendChild(icon);
+
+  const textSpan = document.createElement('span');
+  textSpan.textContent = errorMessage || 'Elan məlumatlarını yükləmək mümkün olmadı.';
+  messageDiv.appendChild(textSpan);
+
+  errorBanner.appendChild(messageDiv);
+
+  const actionsDiv = document.createElement('div');
+  actionsDiv.style.cssText = 'margin-top:14px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;';
+
+  const retryBtn = document.createElement('button');
+  retryBtn.type = 'button';
+  retryBtn.className = 'edit-retry-btn';
+  retryBtn.style.cssText = 'background:#dc2626;color:#ffffff;border:none;border-radius:6px;padding:8px 20px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.15);';
+
+  const retryIcon = document.createElement('i');
+  retryIcon.className = 'fas fa-redo-alt';
+  retryBtn.appendChild(retryIcon);
+
+  const retryText = document.createElement('span');
+  retryText.textContent = 'Yenidən cəhd et';
+  retryBtn.appendChild(retryText);
+
+  retryBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (isEditLoading) return;
+    retryBtn.disabled = true;
+    retryBtn.style.opacity = '0.7';
+    retryBtn.style.cursor = 'not-allowed';
+    const span = retryBtn.querySelector('span');
+    if (span) span.textContent = 'Yüklənir…';
+    initEditMode();
+  });
+
+  const cabinetLink = document.createElement('a');
+  cabinetLink.href = 'cabinet.html';
+  cabinetLink.style.cssText = 'color:#7f1d1d;font-size:13px;text-decoration:underline;font-weight:500;';
+  cabinetLink.textContent = 'Şəxsi kabinetə qayıt';
+
+  actionsDiv.appendChild(retryBtn);
+  actionsDiv.appendChild(cabinetLink);
+  errorBanner.appendChild(actionsDiv);
+
+  formCard.prepend(errorBanner);
+}
+
+async function initEditMode() {
+  if (!isEditMode) return;
+  if (isEditLoading) return;
+
+  applyEditModeUI();
+
+  isEditLoading = true;
+  isEditLoaded = false;
+  setEditFormEnabled(false);
+
+  const submitBtn = document.querySelector('.ad-form-btn');
+  const btnSpan = submitBtn ? (submitBtn.querySelector('span') || submitBtn) : null;
+  if (submitBtn) submitBtn.disabled = true;
+  if (btnSpan) btnSpan.textContent = 'Elan məlumatları yüklənir…';
+
+  const formCard = document.querySelector('.ad-form-card');
+  const existingBanner = formCard ? formCard.querySelector('.edit-error-banner') : null;
+  if (existingBanner) {
+    const retryBtn = existingBanner.querySelector('.edit-retry-btn');
+    if (retryBtn) {
+      retryBtn.disabled = true;
+      retryBtn.style.opacity = '0.7';
+      retryBtn.style.cursor = 'not-allowed';
+      const span = retryBtn.querySelector('span');
+      if (span) span.textContent = 'Yüklənir…';
+    }
+  }
 
   try {
-    // ── 4. Upload images ──────────────────────────────────
-    const formData = new FormData();
-    Array.from(imageFiles).forEach(file => formData.append('images', file));
+    const rawToken = window.getAuthToken ? window.getAuthToken() : (sessionStorage.getItem('token') || '');
+    const token = rawToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '') || '';
+    if (!token) {
+      if (typeof renderEditErrorBanner === 'function') renderEditErrorBanner('Redaktə üçün hesabınıza daxil olmalısınız.');
+      setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href); }, 1500);
+      return;
+    }
+    const headers = { 'Authorization': `Bearer ${token}` };
 
-    const uploadRes = await fetch(`${API_BASE}/upload/multiple`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formData
-    });
-
-    if (!uploadRes.ok) {
-      const err = await uploadRes.json();
-      throw new Error(err.message || 'Şəkil yükləmə xətası');
+    let res;
+    try {
+      res = await fetch(`${API_BASE}/ads/${encodeURIComponent(editAdId)}`, {
+        method: 'GET',
+        headers
+      });
+    } catch (networkErr) {
+      throw new Error('Serverlə əlaqə qurulmadı. Zəhmət olmasa internet bağlantınızı və ya serverin aktivliyini yoxlayın.');
     }
 
-    const uploadData = await uploadRes.json();
-    const imageUrls  = uploadData.urls; // array of "/uploads/filename.jpg"
-
-    // ── 5. Build specs object ─────────────────────────────
-    const specs = {
-      memory:     document.getElementById('memory')?.value      || '',
-      ram:        document.getElementById('ram')?.value         || '',
-      color:      document.getElementById('color')?.value       || '',
-      screenSize: document.getElementById('screen_size')?.value || '',
-      battery:    document.getElementById('battery')?.value     || '',
-      features: {
-        nfc:         document.getElementById('nfc')?.checked         || false,
-        fingerprint: document.getElementById('fingerprint')?.checked || false,
-        waterproof:  document.getElementById('waterproof')?.checked  || false,
-        expandable:  document.getElementById('expandable')?.checked  || false,
-        delivery:    document.getElementById('delivery')?.checked    || false,
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      if (res.status === 400) {
+        throw new Error(errData.message || 'Elan identifikatoru (ID) yalnışdır.');
+      } else if (res.status === 401) {
+        throw new Error(errData.message || 'Bu əməliyyat üçün hesabınıza daxil olmalısınız.');
+      } else if (res.status === 403) {
+        throw new Error(errData.message || 'Bu elana düzəliş etmək hüququnuz yoxdur.');
+      } else if (res.status === 404) {
+        throw new Error(errData.message || 'Elan tapılmadı və ya silinib.');
+      } else {
+        throw new Error(errData.message || 'Elanı yükləmək mümkün olmadı.');
       }
-    };
-
-    // Condition value
-    const conditionEl = document.getElementById('condition');
-    const condition = conditionEl.value ||
-      conditionEl.options[conditionEl.selectedIndex]?.text?.trim() || '';
-
-    // ── 6. Submit ad ──────────────────────────────────────
-    btnSpan.textContent = 'Elan göndərilir…';
-
-    const adPayload = {
-      category,
-      brand,
-      modelName: model,
-      price:        Number(price),
-      condition,
-      description:  document.getElementById('description')?.value || '',
-      images:       imageUrls,
-      city,
-      contactPhone: phone,
-      sellerType:   'personal',
-      specs
-    };
-
-    const adRes = await fetch(`${API_BASE}/ads`, {
-      method:  'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(adPayload)
-    });
-
-    const adData = await adRes.json();
-
-    if (!adRes.ok) {
-      throw new Error(adData.message || 'Elan yerləşdirmə xətası');
     }
 
-    // ── 7. Success ────────────────────────────────────────
-    alert('Elanınız uğurla göndərildi! Moderasiyadan keçdikdən sonra dərc ediləcək. Kabinənizə yönləndirilirsiniz…');
-    window.location.href = 'cabinet.html';
+    const ad = await res.json();
+    if (!ad || !ad._id) {
+      throw new Error('Elan məlumatları tapılmadı.');
+    }
 
-  } catch (error) {
-    console.error('Ad submission error:', error);
-    alert('Xəta: ' + error.message);
-    submitBtn.disabled = false;
-    btnSpan.textContent = originalTxt;
+    existingAd = ad;
+    if (existingAd && existingAd.sellerType === 'store') {
+      const existingStoreId = existingAd.store?._id || existingAd.store || null;
+      if (existingStoreId) {
+        const optDivEdit = document.getElementById('storePostOption');
+        if (optDivEdit) optDivEdit.style.display = 'block';
+        const checkBox = document.getElementById('postAsStore');
+        if (checkBox) checkBox.checked = true;
+        const nameEl = document.getElementById('myStoreName');
+        const sName = existingAd.store?.name || existingAd.store?.storeName || '';
+        if (nameEl && sName) nameEl.textContent = sName;
+      }
+    }
+
+    if (formCard) {
+      const banner = formCard.querySelector('.edit-error-banner');
+      if (banner) banner.remove();
+    }
+
+    populateFormWithAd(ad);
+    isEditLoading = false;
+    isEditLoaded = true;
+    setEditFormEnabled(true);
+    if (submitBtn) submitBtn.disabled = false;
+    if (btnSpan) btnSpan.textContent = 'Yadda Saxla';
+
+  } catch (err) {
+    console.error('Error loading ad for edit:', err);
+    isEditLoading = false;
+    isEditLoaded = false;
+    existingImages = [];
+    renderAllImagePreviews();
+    updateImageRequirement();
+    setEditFormEnabled(false);
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (btnSpan) btnSpan.textContent = 'Xəta baş verdi';
+
+    renderEditErrorBanner(err.message || 'Elan məlumatları yüklənə bilmədi.');
   }
-});
+}
+
+async function initStoreOption(){
+  const storeOptionDiv = document.getElementById('storePostOption');
+  const checkBox = document.getElementById('postAsStore');
+  const nameSpan = document.getElementById('myStoreName');
+  let storeId = null;
+  let storeName = '';
+  // 1. Try localStorage fast path (if future backend adds it)
+  try {
+    const cu = JSON.parse(localStorage.getItem('mobilaz_current_user')||'{}') || JSON.parse(localStorage.getItem('user')||'{}') || {};
+    storeId = cu.storeId || cu.store?._id || cu.store || cu.shopId || cu.shop?._id || null;
+    storeName = cu.storeName || cu.store?.name || '';
+  } catch(e){}
+  // 2. REAL source - fetch from API
+  try {
+    const rawToken = window.getAuthToken? window.getAuthToken() : (sessionStorage.getItem('token')||'');
+    const token = rawToken || localStorage.getItem('token') || '';
+    if (token) {
+      const res = await fetch(`${window.API_URL||'http://localhost:5000/api'}/stores/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      // try alternative endpoints if 404
+      let data = null;
+      if (res.ok) data = await res.json();
+      else {
+        const res2 = await fetch(`${window.API_URL||'http://localhost:5000/api'}/stores/mine`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (res2.ok) data = await res2.json();
+      }
+      // data can be {store: {...}} or {...} or [...]
+      const storeObj = data?.store || data?.data || (Array.isArray(data)? data[0] : data) || null;
+      if (storeObj && (storeObj._id || storeObj.id)) {
+        storeId = storeObj._id || storeObj.id;
+        storeName = storeObj.name || storeName;
+      }
+    }
+  } catch(e){ console.warn('store fetch failed', e.message); }
+  // 3. Show UI
+  if (storeId && storeOptionDiv) {
+    storeOptionDiv.style.display = 'block';
+    if (nameSpan && storeName) nameSpan.textContent = storeName;
+    if (checkBox) checkBox.checked = true;
+    // save for submit handler
+    window._mobilaz_myStoreId = storeId;
+  }
+}
+
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initStoreOption();
+      initEditMode();
+    });
+  } else {
+    (async () => {
+      await initStoreOption();
+      initEditMode();
+    })();
+  }
+}
+
+/* =========================================================
+   FORM SUBMIT — CREATE (POST) / EDIT (PUT)
+   ========================================================= */
+
+const adFormEl = document.getElementById('adForm');
+if (adFormEl) {
+  adFormEl.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    if (isEditMode && (!isEditLoaded || isEditLoading)) {
+      alert('Elan məlumatları yüklənməyib və ya xəta baş verib. Redaktə rejimində yeni elan yaradıla bilməz.');
+      return;
+    }
+
+    // ── 1. Auth guard ───────────────────────────────────────
+    const rawToken = window.getAuthToken
+      ? window.getAuthToken()
+      : (sessionStorage.getItem('token') || '');
+    const token = rawToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '') || '';
+
+    if (!token) {
+      alert('Elan yerləşdirmək üçün hesabınıza daxil olun.');
+      const search = (window.location && window.location.search) ? window.location.search : '';
+      const target = search ? `elan-yerlesdir.html${search}` : 'elan-yerlesdir.html';
+      window.location.href = `login.html?redirect=${encodeURIComponent(target)}`;
+      return;
+    }
+
+    // ── 2. Basic validation ─────────────────────────────────
+    const imgInput = document.getElementById('imageInput') || document.getElementById('images') || fileInput;
+    const files = imgInput?.files;
+    if (files && files.length > 10) {
+      alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
+      return;
+    }
+
+    const category    = categorySelect ? categorySelect.value : '';
+    const brand       = brandSelect ? brandSelect.value : '';
+    const model       = modelSelect ? modelSelect.value : '';
+    const priceRaw    = document.getElementById('price')?.value || '';
+    const priceNum    = Number(priceRaw);
+    if (!priceRaw || Number.isNaN(priceNum) || priceNum <= 0) {
+      alert('Düzgün qiymət daxil edin.');
+      return;
+    }
+    const price       = priceNum;
+    const phone       = document.getElementById('phone') ? document.getElementById('phone').value : '';
+    const cityEl      = document.getElementById('city');
+    const city        = cityEl ? cityEl.value : '';
+    const conditionEl = document.getElementById('condition');
+    const condition   = conditionEl ? conditionEl.value : '';
+
+    if (!category)           { alert('Zəhmət olmasa kateqoriya seçin.');  return; }
+    if (!brand)              { alert('Zəhmət olmasa marka seçin.');       return; }
+    if (!model)              { alert('Zəhmət olmasa model seçin.');       return; }
+    if (!city)               { alert('Zəhmət olmasa region seçin.');      return; }
+    if (!phone)              { alert('Əlaqə nömrəsini daxil edin.');      return; }
+    if (!isValidAzPhone(phone)) {
+      alert('Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67).');
+      return;
+    }
+    if (!condition)          { alert('Zəhmət olmasa məhsulun vəziyyətini seçin.'); return; }
+
+    const currentExistingCount = (isEditMode && Array.isArray(existingImages)) ? existingImages.length : 0;
+    const newFileCount = files ? files.length : 0;
+    const totalImageCount = newFileCount + currentExistingCount;
+
+    if (totalImageCount < 1) {
+      alert('Ən az 1 şəkil seçin.');
+      return;
+    }
+    if (newFileCount > 10 || totalImageCount > 10) {
+      alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
+      return;
+    }
+
+    const rawImageFiles = (files && files.length) ? Array.from(files) : [];
+    const validImageFiles = rawImageFiles.filter(f => f.type && f.type.startsWith('image/'));
+    const hasNewImages = validImageFiles.length > 0;
+    const hasExistingImages = currentExistingCount > 0;
+
+    const oversizedFile = validImageFiles.find(f => f.size > 5 * 1024 * 1024);
+    if (oversizedFile) {
+      alert(`"${oversizedFile.name}" faylının ölçüsü 5MB-dən böyükdür. Zəhmət olmasa hər biri 5MB-dən kiçik şəkillər seçin.`);
+      return;
+    }
+
+    // ── 3. UI: show loading state ───────────────────────────
+    const submitBtn  = document.querySelector('.ad-form-btn');
+    const btnSpan    = submitBtn ? (submitBtn.querySelector('span') || submitBtn) : null;
+    const originalTxt = isEditMode ? 'Yadda Saxla' : (btnSpan ? btnSpan.textContent : 'Elan yerləşdir');
+    if (submitBtn) submitBtn.disabled = true;
+    if (btnSpan) {
+      btnSpan.textContent = hasNewImages
+        ? 'Şəkillər yüklənir…'
+        : (isEditMode ? 'Məlumatlar yenilənir…' : 'Elan göndərilir…');
+    }
+
+    try {
+      // ── 4. Upload images if new ones selected ──────────────
+      let finalImageUrls = [...existingImages];
+
+      if (hasNewImages) {
+        const formData = new FormData();
+        validImageFiles.forEach(file => formData.append('images', file));
+
+        const uploadRes = await fetch(`${API_BASE}/upload/multiple`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json().catch(() => ({}));
+          throw new Error(err.message || 'Şəkil yükləmə xətası');
+        }
+
+        const uploadData = await uploadRes.json();
+        const uploadedUrls = uploadData.urls || [];
+        finalImageUrls = finalImageUrls.concat(uploadedUrls);
+      }
+
+      if (finalImageUrls.length > 10) {
+        alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnSpan) btnSpan.textContent = originalTxt;
+        return;
+      }
+
+
+      // ── 5. Build specs object ─────────────────────────────
+      const specs = {
+        memory:     document.getElementById('memory')?.value      || '',
+        ram:        document.getElementById('ram')?.value         || '',
+        color:      document.getElementById('color')?.value       || '',
+        screenSize: document.getElementById('screen_size')?.value || '',
+        battery:    document.getElementById('battery')?.value     || '',
+        features: {
+          nfc:         document.getElementById('nfc')?.checked         || false,
+          fingerprint: document.getElementById('fingerprint')?.checked || false,
+          waterproof:  document.getElementById('waterproof')?.checked  || false,
+          expandable:  document.getElementById('expandable')?.checked  || false,
+          delivery:    document.getElementById('delivery')?.checked    || false,
+        }
+      };
+
+      // ── 6. Submit ad (PUT for edit mode, POST for create) ──
+      const cuRaw = localStorage.getItem('mobilaz_current_user') || localStorage.getItem('user') || '{}';
+      let cu = {};
+      try { cu = JSON.parse(cuRaw); } catch(e) {}
+      const storeIdFromInit = window._mobilaz_myStoreId || null;
+      const storeId = storeIdFromInit || cu.storeId || cu.store?._id || cu.store || cu.shopId || cu.shop?._id || null;
+      const storeName = cu.storeName || cu.store?.name || cu.shopName || cu.shop?.name || 'Mağazam';
+      const optDiv = document.getElementById('storePostOption');
+      const checkBox = document.getElementById('postAsStore');
+      const nameEl = document.getElementById('myStoreName');
+      if (storeId && optDiv) {
+        optDiv.style.display = 'block';
+        if (nameEl) nameEl.textContent = storeName;
+      }
+      const isStore = !!(storeId && (checkBox ? checkBox.checked : true));
+
+      if (isEditMode) {
+        // In payload for edit, preserve if user was store:
+        if (isEdit && existingAd?.sellerType === 'store' && !isStore) {
+          // if user unchecks store option on edit, keep personal - allow change
+        }
+        if (btnSpan) btnSpan.textContent = 'Məlumatlar yenilənir…';
+
+        const updatePayload = {
+          category,
+          brand,
+          modelName: model,
+          price:        Number(price),
+          condition,
+          description:  document.getElementById('description')?.value || '',
+          images:       finalImageUrls,
+          city,
+          contactPhone: phone,
+          specs
+        };
+
+        const updateRes = await fetch(`${API_BASE}/ads/${encodeURIComponent(editAdId)}`, {
+          method:  'PUT',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updatePayload)
+        });
+
+        const updateData = await updateRes.json().catch(() => ({}));
+
+        if (!updateRes.ok) {
+          throw new Error(updateData.message || 'Elan yenilənmə xətası');
+        }
+
+        alert('Elanınız uğurla yeniləndi! Kabinənizə yönləndirilirsiniz…');
+        window.location.href = 'cabinet.html';
+
+      } else {
+        if (btnSpan) btnSpan.textContent = 'Elan göndərilir…';
+
+        const adPayload = {
+          category,
+          brand,
+          modelName: model,
+          price:        Number(price),
+          condition,
+          description:  document.getElementById('description')?.value || '',
+          images:       finalImageUrls,
+          city,
+          contactPhone: phone,
+          sellerType:   isStore ? 'store' : 'personal',
+          ...(isStore && storeId ? { store: storeId } : {}),
+          specs
+        };
+
+        const adRes = await fetch(`${API_BASE}/ads`, {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(adPayload)
+        });
+
+        const adData = await adRes.json().catch(() => ({}));
+
+        if (!adRes.ok) {
+          throw new Error(adData.message || 'Elan yerləşdirmə xətası');
+        }
+
+        alert('Elanınız uğurla göndərildi! Moderasiyadan keçdikdən sonra dərc ediləcək. Kabinənizə yönləndirilirsiniz…');
+        window.location.href = 'cabinet.html';
+      }
+
+    } catch (error) {
+      console.error('Ad submission error:', error);
+      alert('Xəta: ' + error.message);
+      if (submitBtn) submitBtn.disabled = false;
+      if (btnSpan) btnSpan.textContent = originalTxt;
+    }
+  });
+}
