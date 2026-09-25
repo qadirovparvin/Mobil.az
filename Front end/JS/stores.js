@@ -54,6 +54,7 @@ async function loadStores() {
       const cover = getImageUrl(store.coverUrl || store.cover, 'https://images.unsplash.com/photo-1541560052-5e137f229371?q=80&w=600');
       const logo = getImageUrl(store.logo || store.logoUrl || store.image, 'https://i.pinimg.com/736x/e7/85/29/e78529fcd6194bae5fd828b46a5a501b.jpg');
       const isVerified = Boolean(store.isVerified);
+      const count = store.adCount ?? (store.adCount === 0 ? store.adCount : (store.adsCount ?? (store.ads ? store.ads.length : 0)));
 
       return `
         <div class="list-store-card">
@@ -68,15 +69,19 @@ async function loadStores() {
               </div>
             </div>
             <p class="store-description">${desc}</p>
+            <div class="store-meta">
+              <span class="ad-count">📦 ${store.adCount ?? store.adsCount ?? count} Aktiv Elan</span>
+              ${location ? `<span class="location">📍 ${location}</span>` : ''}
+            </div>
             <div class="store-details-grid">
+              <div class="detail-item">
+                <i class="fas fa-box-open"></i> <span>${count} <span data-translate="stores-active-ads">Aktiv Elan</span></span>
+              </div>
               <div class="detail-item">
                 <i class="fas fa-map-marker-alt"></i> <span>${location}</span>
               </div>
               <div class="detail-item">
                 <i class="fas fa-phone-alt"></i> <span>${phone}</span>
-              </div>
-              <div class="detail-item">
-                <i class="fas fa-shield-alt"></i> <span data-translate="stores-warranty">Rəsmi Zəmanət</span>
               </div>
               <div class="detail-item">
                 <i class="fas fa-truck"></i> <span data-translate="stores-nationwide-delivery">Çatdırılma</span>
