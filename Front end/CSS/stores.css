@@ -113,7 +113,8 @@
 }
 
 
-.stores-grid {
+.stores-grid,
+.stores-list-view {
   display: flex;
   flex-wrap: wrap;
   gap: 25px;
