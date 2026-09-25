@@ -317,7 +317,23 @@
             .store-header-row {
                 flex-direction: column;
                 gap: 10px;
-            }
+        .loading {
+            padding: 40px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-secondary);
+            width: 100%;
+        }
+        #storesEmpty {
+            padding: 40px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+            margin: 20px 0;
+            width: 100%;
         }
     </style>
 </head>
@@ -400,151 +416,16 @@
             </div>
         </div>
 
-        <div id="storesGrid" class="stores-list-view">
-            <!-- Store 1: LeadTech -->
-            <div class="list-store-card">
-                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1541560052-5e137f229371?q=80&w=600');">
-                    <img src="https://i.pinimg.com/736x/e7/85/29/e78529fcd6194bae5fd828b46a5a501b.jpg" alt="LeadTech" class="store-logo-overlay">
-                </div>
-                <div class="list-store-content">
-                    <div class="store-header-row">
-                        <h3 class="store-title">LeadTech Mobile <i class="fas fa-check-circle verified-badge" title="Rəsmi Mağaza"></i></h3>
-                        <div class="store-rating-large">
-                            <i class="fas fa-star"></i> 4.8 <span>(120 <span data-translate="stores-review">rəy</span>)</span>
-                        </div>
-                    </div>
-                    <p class="store-description">
-                        Yeni və işlənmiş Apple, Samsung smartfonlarının keyfiyyətli satışı. Zəmanətli və kreditlə alış imkanı. Sizin üçün ən uyğun elektronika həlləri.
-                    </p>
-                    <div class="store-details-grid">
-                        <div class="detail-item">
-                            <i class="fas fa-box-open"></i> <span>24 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., 28 May m/s yaxınlığı</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-phone-alt"></i> <span>+994 50 123 45 67</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-clock"></i> <span>09:00 - 21:00</span>
-                        </div>
-                    </div>
-                    <div class="store-actions">
-                        <a href="store-detail.html?id=1" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
-                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Store 2: Global -->
-            <div class="list-store-card">
-                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600');">
-                    <img src="https://i.pinimg.com/736x/0b/96/89/0b9689a90971180085bf2c881b0303c1.jpg" alt="Global" class="store-logo-overlay">
-                </div>
-                <div class="list-store-content">
-                    <div class="store-header-row">
-                        <h3 class="store-title">Global Elektronika <i class="fas fa-check-circle verified-badge" title="Təsdiqlənmiş"></i></h3>
-                        <div class="store-rating-large">
-                            <i class="fas fa-star"></i> 4.9 <span>(85 <span data-translate="stores-review">rəy</span>)</span>
-                        </div>
-                    </div>
-                    <p class="store-description">
-                        Bütün növ planşetlər, telefonlar və orijinal aksesuarlar. Sürətli çatdırılma və rəsmi zəmanət. Böyük endirimlər və hər növ təmir xidmətləri.
-                    </p>
-                    <div class="store-details-grid">
-                        <div class="detail-item">
-                            <i class="fas fa-box-open"></i> <span>12 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-map-marker-alt"></i> <span>Sumqayıt, Sülh küçəsi</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-phone-alt"></i> <span>+994 70 888 11 22</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-truck"></i> <span data-translate="stores-nationwide-delivery">Ölkədaxili Çatdırılma</span>
-                        </div>
-                    </div>
-                    <div class="store-actions">
-                        <a href="store-detail.html?id=2" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
-                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Store 3: Easy Shopping -->
-            <div class="list-store-card">
-                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1605170439002-90845e8c0137?q=80&w=600');">
-                    <img src="https://i.pinimg.com/736x/8c/78/e5/8c78e58e61b52cba1fef650e185300e5.jpg" alt="Easy Shopping" class="store-logo-overlay">
-                </div>
-                <div class="list-store-content">
-                    <div class="store-header-row">
-                        <h3 class="store-title">Easy Shopping </h3>
-                        <div class="store-rating-large">
-                            <i class="fas fa-star"></i> 4.7 <span>(210 <span data-translate="stores-review">rəy</span>)</span>
-                        </div>
-                    </div>
-                    <p class="store-description">
-                        Xiaomi və digər münasib büdcəli telefonların satışı. Barter imkanı var, eyni zamanda işlənmiş və yeni kompüter detalları alqı-satqısı.
-                    </p>
-                    <div class="store-details-grid">
-                        <div class="detail-item">
-                            <i class="fas fa-box-open"></i> <span>18 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., Gənclik m/s</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-phone-alt"></i> <span>+994 55 999 44 55</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-sync-alt"></i> <span data-translate="stores-barter">Barter mümkündür</span>
-                        </div>
-                    </div>
-                    <div class="store-actions">
-                        <a href="store-detail.html?id=3" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
-                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
-                    </div>
-                </div>
-            </div>
-            
-             <!-- Store 4: AzPhone -->
-             <div class="list-store-card">
-                <div class="list-store-image" style="background-image: url('https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=600');">
-                    <img src="https://i.pinimg.com/736x/14/1e/e5/141ee57665dbaca61c11d44c2357e35d.jpg" alt="AzPhone" class="store-logo-overlay">
-                </div>
-                <div class="list-store-content">
-                    <div class="store-header-row">
-                        <h3 class="store-title">AzPhone Premium <i class="fas fa-check-circle verified-badge" title="Rəsmi Mağaza"></i></h3>
-                        <div class="store-rating-large">
-                            <i class="fas fa-star"></i> 5.0 <span>(450 <span data-translate="stores-review">rəy</span>)</span>
-                        </div>
-                    </div>
-                    <p class="store-description">
-                        Azərbaycanın ən güvənli Apple reseller mağazası. Yalnız rəsmi mallar, qeydiyyatdan keçmiş və beynəlxalq zəmanət ilə satılan məhsullar.
-                    </p>
-                    <div class="store-details-grid">
-                        <div class="detail-item">
-                            <i class="fas fa-box-open"></i> <span>56 <span data-translate="stores-active-ads">Aktiv Elan</span></span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-map-marker-alt"></i> <span>Bakı ş., Port Baku Mall</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-phone-alt"></i> <span>+994 12 555 10 10</span>
-                        </div>
-                        <div class="detail-item">
-                            <i class="fas fa-shield-alt"></i> <span>1 <span data-translate="stores-warranty">İl Rəsmi Zəmanət</span></span>
-                        </div>
-                    </div>
-                    <div class="store-actions">
-                        <a href="store-detail.html?id=4" style="text-decoration:none"><button class="btn-view-store"><i class="fas fa-store"></i> <span data-translate="stores-view-btn">Mağazaya bax</span></button></a>
-                        <button class="btn-contact-store"><i class="fab fa-whatsapp"></i> <span data-translate="stores-contact-btn">Whatsapp</span></button>
-                    </div>
-                </div>
-            </div>
+        <div id="storesGrid" class="stores-grid">
+            <div id="storesLoading" class="loading">Mağazalar yüklənir...</div>
         </div>
+        <div id="storesEmpty" style="display:none">Hələ mağaza yoxdur</div>
+        <template id="storeCardTemplate">
+            <!-- Dynamic store card template: store-detail.html?id=${store._id} -->
+            <div class="list-store-card">
+                <a href="store-detail.html?id=${store._id}" class="btn">Mağazaya bax</a>
+            </div>
+        </template>
     </div>
 
     <!-- Footer -->
@@ -579,6 +460,7 @@
             <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
         </div>
     </footer>
+    <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js"></script>
     <script src="JS/stores.js"></script>
