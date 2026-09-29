@@ -2086,12 +2086,35 @@ window.confirmPromotion = async function () {
 
     try {
         const base = window.API_URL || window.API_BASE || (typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:5000/api');
+
+        // Retrieve CSRF token from memory or storage
+        let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+        let signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+
+        if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+            try {
+                csrfToken = await window.fetchCsrfToken();
+                signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || '';
+            } catch (e) {
+                console.warn('CSRF token fetch warning:', e);
+            }
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        if (csrfToken) {
+            headers['X-CSRF-Token'] = csrfToken;
+        }
+        if (signedCsrf) {
+            headers['X-CSRF-Signed-Token'] = signedCsrf;
+        }
+
         const response = await fetch(`${base}/ads/${encodeURIComponent(currentPromoAdId)}/boost`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
+            credentials: 'include',
+            headers,
             body: JSON.stringify({ promotionType: selectedPkg })
         });
 

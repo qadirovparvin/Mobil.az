@@ -186,6 +186,13 @@ function handleGenericApiError(status) {
     }
 
     async function getCsrfToken() {
+        if (window.CSRF_TOKEN) return window.CSRF_TOKEN;
+        const stored = localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken');
+        if (stored) {
+            window.CSRF_TOKEN = stored;
+            return stored;
+        }
+
         if (!csrfTokenPromise) {
             csrfTokenPromise = originalFetch(`${window.API_URL}/auth/csrf-token`, {
                 method: 'GET',
@@ -194,7 +201,19 @@ function handleGenericApiError(status) {
                 .then(async (res) => {
                     if (!res.ok) throw new Error('CSRF token request failed');
                     const data = await res.json();
-                    return data.csrfToken;
+                    const token = data.csrfToken || data.token;
+                    const signed = data.signedToken;
+                    if (token) {
+                        window.CSRF_TOKEN = token;
+                        localStorage.setItem('csrfToken', token);
+                        sessionStorage.setItem('csrfToken', token);
+                    }
+                    if (signed) {
+                        window.CSRF_SIGNED_TOKEN = signed;
+                        localStorage.setItem('csrfSignedToken', signed);
+                        sessionStorage.setItem('csrfSignedToken', signed);
+                    }
+                    return token;
                 })
                 .catch((error) => {
                     csrfTokenPromise = null;
@@ -203,6 +222,7 @@ function handleGenericApiError(status) {
         }
         return csrfTokenPromise;
     }
+    window.fetchCsrfToken = getCsrfToken;
 
     window.fetch = async function secureFetch(input, init = {}) {
         if (!isApiRequest(input)) {
@@ -217,18 +237,27 @@ function handleGenericApiError(status) {
 
         if (unsafeMethods.has(method) && !String(input?.url || input).includes('/auth/csrf-token')) {
             const headers = new Headers(init.headers || (typeof input !== 'string' ? input.headers : undefined) || {});
-            if (!headers.has('X-CSRF-Token')) {
-                headers.set('X-CSRF-Token', await getCsrfToken());
+            try {
+                const token = await getCsrfToken();
+                if (token && !headers.has('X-CSRF-Token')) {
+                    headers.set('X-CSRF-Token', token);
+                }
+                const signed = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken');
+                if (signed && !headers.has('X-CSRF-Signed-Token')) {
+                    headers.set('X-CSRF-Signed-Token', signed);
+                }
+            } catch (csrfErr) {
+                console.warn('Could not attach CSRF token:', csrfErr);
             }
             nextInit.headers = headers;
         }
 
         return originalFetch(input, nextInit).then(async (res) => {
             if (!res.ok && !init.silent) {
-                // FIX BUG #2: Prevent duplicate toast - global interceptor should NOT auto-show toast for validation errors
-                // Local handlers (ad-details.js etc) already show toast. Global only for 401/403 auth expiry.
+                // Prevent duplicate toast - caller handles /auth/login and /boost errors
                 const isLoginRequest = String(input?.url || input).includes('/auth/login');
-                if ((res.status === 401 || res.status === 403) && !isLoginRequest) {
+                const isBoostRequest = String(input?.url || input).includes('/boost');
+                if ((res.status === 401 || res.status === 403) && !isLoginRequest && !isBoostRequest) {
                     try {
                         const clone = res.clone();
                         const data = await clone.json();
@@ -241,7 +270,6 @@ function handleGenericApiError(status) {
                         handleGenericApiError(res.status);
                     }
                 }
-                // For other errors, let caller handle toast to avoid duplication
             }
             return res;
         }).catch(err => {
@@ -252,4 +280,5 @@ function handleGenericApiError(status) {
             throw err;
         });
     };
+    window.secureFetch = window.fetch;
 })();
