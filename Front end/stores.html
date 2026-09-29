@@ -471,9 +471,15 @@
         </div>
     </footer>
     <script src="JS/config.js"></script>
-    <script src="JS/stores.js"></script>
     <script src="JS/auth.js"></script>
+    <script src="JS/components.js"></script>
+    <script src="JS/stores.js"></script>
     <script src="JS/script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (typeof updateHeader === "function") updateHeader();
+        });
+    </script>
 </body>
 
 </html>

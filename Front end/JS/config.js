@@ -23,27 +23,93 @@ window.getAuthToken = window.getAuthToken || function getAuthToken() {
     return sessionStorage.getItem('token') || sessionStorage.getItem('adminToken') || '';
 };
 
+window.getToken = window.getToken || function getToken() {
+    return localStorage.getItem('token') ||
+           localStorage.getItem('accessToken') ||
+           localStorage.getItem('authToken') ||
+           sessionStorage.getItem('token') ||
+           sessionStorage.getItem('accessToken') ||
+           sessionStorage.getItem('authToken') ||
+           sessionStorage.getItem('adminToken') ||
+           localStorage.getItem('adminToken') || '';
+};
+window.getAuthToken = window.getToken;
+
+window.getUser = window.getUser || function getUser() {
+    const raw = localStorage.getItem('user') ||
+                localStorage.getItem('mobilaz_current_user') ||
+                localStorage.getItem('mobilaz_user') ||
+                sessionStorage.getItem('user') ||
+                sessionStorage.getItem('mobilaz_current_user') ||
+                localStorage.getItem('adminUser') ||
+                sessionStorage.getItem('adminUser');
+    if (!raw) return null;
+    try { return JSON.parse(raw); } catch (e) { return null; }
+};
+window.getCurrentUser = window.getUser;
+
+window.isLoggedIn = window.isLoggedIn || function isLoggedIn() {
+    return Boolean(window.getToken() && window.getUser());
+};
+window.isAuthenticated = window.isLoggedIn;
+
 window.persistAuthSession = window.persistAuthSession || function persistAuthSession(data, token) {
-    const accessToken = token || data?.accessToken || data?.token || '';
+    const accessToken = token || data?.accessToken || data?.token || data?.authToken || '';
+    const userPayload = data?.user || data || {};
+
+    const tokenKeys = ['token', 'accessToken', 'authToken'];
     if (accessToken) {
-        sessionStorage.setItem('token', accessToken);
-        localStorage.removeItem('token');
+        tokenKeys.forEach((key) => {
+            try { sessionStorage.setItem(key, accessToken); } catch (e) {}
+            try { localStorage.setItem(key, accessToken); } catch (e) {}
+        });
     }
-    localStorage.setItem('user', JSON.stringify(data));
-    localStorage.setItem('mobilaz_current_user', JSON.stringify(data));
-    if (data?.role === 'admin' && accessToken) {
-        sessionStorage.setItem('adminToken', accessToken);
-        localStorage.removeItem('adminToken');
-        localStorage.setItem('adminUser', JSON.stringify(data));
+
+    const userStr = JSON.stringify(userPayload);
+    const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
+    userKeys.forEach((key) => {
+        try { localStorage.setItem(key, userStr); } catch (e) {}
+        try { sessionStorage.setItem(key, userStr); } catch (e) {}
+    });
+
+    if (userPayload?.role) {
+        try { localStorage.setItem('userRole', userPayload.role); } catch (e) {}
+        try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) {}
     }
+    if (userPayload?.email) {
+        try { localStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+        try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+    }
+
+    if (userPayload?.role === 'admin' && accessToken) {
+        try { sessionStorage.setItem('adminToken', accessToken); } catch (e) {}
+        try { localStorage.setItem('adminToken', accessToken); } catch (e) {}
+        try { sessionStorage.setItem('adminUser', userStr); } catch (e) {}
+        try { localStorage.setItem('adminUser', userStr); } catch (e) {}
+    }
+
+    if (typeof window.updateHeader === 'function') {
+        try { window.updateHeader(); } catch (e) {}
+    }
+    if (typeof window.updateAuthUI === 'function') {
+        try { window.updateAuthUI(); } catch (e) {}
+    }
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
 };
 
 window.clearAuthSession = window.clearAuthSession || function clearAuthSession() {
-    ['token', 'adminToken'].forEach((key) => {
-        sessionStorage.removeItem(key);
-        localStorage.removeItem(key);
+    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
+    keys.forEach((key) => {
+        try { sessionStorage.removeItem(key); } catch (e) {}
+        try { localStorage.removeItem(key); } catch (e) {}
     });
-    ['user', 'mobilaz_current_user', 'adminUser'].forEach((key) => localStorage.removeItem(key));
+    if (typeof window.updateHeader === 'function') {
+        try { window.updateHeader(); } catch (e) {}
+    }
+    if (typeof window.updateAuthUI === 'function') {
+        try { window.updateAuthUI(); } catch (e) {}
+    }
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
 };
 
 class ToastNotifier {

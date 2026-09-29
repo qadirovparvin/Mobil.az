@@ -9,9 +9,9 @@ window.API_URL = window.API_URL || 'http://localhost:5000/api';
 const SMS_DEV_MODE = true; // TODO: false when SMS paid
 const SMS_DEV_WARNING = 'SMS xidməti hazırda texniki profilaktikadadır. Zəhmət olmasa şifrə ilə daxil olun.';
 
-// FIX AUTH-006: Dual-write session persistence to prevent redirect loops
+// Dual-write session persistence across all keys to guarantee header and API sync
 function persistSession(data) {
-    const token = data?.token || data?.accessToken;
+    const token = data?.accessToken || data?.token || data?.authToken;
     if (!token) return;
     
     const userPayload = {
@@ -24,49 +24,62 @@ function persistSession(data) {
         avatar: data.avatar || data.user?.avatar || ''
     };
     
-    const isRemember = document.getElementById('rememberMe')?.checked;
-    
-    // Always write to sessionStorage (current tab session, fixes pages that check sessionStorage)
+    const tokenKeys = ['token', 'accessToken', 'authToken'];
+    tokenKeys.forEach((key) => {
+        try { localStorage.setItem(key, token); } catch(e) {}
+        try { sessionStorage.setItem(key, token); } catch(e) {}
+    });
+
+    const userStr = JSON.stringify(userPayload);
+    const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
+    userKeys.forEach((key) => {
+        try { localStorage.setItem(key, userStr); } catch(e) {}
+        try { sessionStorage.setItem(key, userStr); } catch(e) {}
+    });
+
     try {
-        sessionStorage.setItem('token', token);
-        sessionStorage.setItem('user', JSON.stringify(userPayload));
-        sessionStorage.setItem('authToken', token); // compat for old code
+        localStorage.setItem('userRole', userPayload.role);
+        localStorage.setItem('userEmail', userPayload.email);
+        sessionStorage.setItem('userRole', userPayload.role);
+        sessionStorage.setItem('userEmail', userPayload.email);
+        if (userPayload.role === 'admin') {
+            localStorage.setItem('adminToken', token);
+            sessionStorage.setItem('adminToken', token);
+            localStorage.setItem('adminUser', userStr);
+            sessionStorage.setItem('adminUser', userStr);
+        }
     } catch(e) {}
     
-    // Write to localStorage if rememberMe checked or checkbox doesn't exist (default remember per AUTH-004)
-    if (isRemember || isRemember === undefined) {
-        try {
-            localStorage.setItem('token', token);
-            localStorage.setItem('authToken', token); // compat
-            localStorage.setItem('user', JSON.stringify(userPayload));
-            localStorage.setItem('mobilaz_current_user', JSON.stringify(userPayload)); // compat for cabinet.js
-            localStorage.setItem('mobilaz_user', JSON.stringify(userPayload));
-        } catch(e) {}
-    }
-    
-    // Also set via centralized helper if exists
     if (typeof window.setAuthToken === 'function') {
         try { window.setAuthToken(token); } catch(e) {}
     }
+    if (typeof window.updateHeader === 'function') {
+        try { window.updateHeader(); } catch(e) {}
+    }
+    if (typeof window.updateAuthUI === 'function') {
+        try { window.updateAuthUI(); } catch(e) {}
+    }
+    if (typeof window.checkAuth === 'function') {
+        try { window.checkAuth(); } catch(e) {}
+    }
+    try { window.dispatchEvent(new Event('authChanged')); } catch(e) {}
 }
 window.persistSession = persistSession;
 window.persistAuthSession = persistSession;
 
 function clearSession() {
-    try {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
-        sessionStorage.removeItem('authToken');
-        sessionStorage.removeItem('adminToken');
-        sessionStorage.removeItem('adminUser');
-        localStorage.removeItem('token');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        localStorage.removeItem('mobilaz_current_user');
-        localStorage.removeItem('mobilaz_user');
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-    } catch(e) {}
+    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
+    keys.forEach((key) => {
+        try { sessionStorage.removeItem(key); } catch(e) {}
+        try { localStorage.removeItem(key); } catch(e) {}
+    });
+    if (typeof window.updateHeader === 'function') {
+        try { window.updateHeader(); } catch(e) {}
+    }
+    if (typeof window.updateAuthUI === 'function') {
+        try { window.updateAuthUI(); } catch(e) {}
+    }
+    try { window.dispatchEvent(new Event('authChanged')); } catch(e) {}
 }
 window.clearSession = clearSession;
 window.clearAuthSession = clearSession;
