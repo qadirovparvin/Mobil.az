@@ -4,7 +4,7 @@
    auth-otp.js  –  Shared helpers for login & signup OTP flows
    ============================================================ */
 
-window.API_URL = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+window.API_URL = window.API_URL || 'http://localhost:5000/api';
 
 const SMS_DEV_MODE = true; // TODO: false when SMS paid
 const SMS_DEV_WARNING = 'SMS xidməti hazırda texniki profilaktikadadır. Zəhmət olmasa şifrə ilə daxil olun.';

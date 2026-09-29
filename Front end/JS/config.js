@@ -4,22 +4,15 @@
  * This file sets the global API base URL used by all frontend scripts.
  * Update this value when deploying to staging or production.
  */
-window.API_URL = window.API_URL || (
-    ['localhost', '127.0.0.1', ''].includes(window.location.hostname) ||
+const isLocal = ['localhost', '127.0.0.1', '', '0.0.0.0'].includes(window.location.hostname) ||
     window.location.hostname.startsWith('192.168.') ||
     window.location.hostname.startsWith('10.') ||
-    window.location.hostname === '0.0.0.0'
-        ? 'http://localhost:5000/api'
-        : 'https://api.mobil.az/api'
-);
+    Boolean(window.location.port) ||
+    window.location.protocol === 'file:';
 
-// Backward compatibility - legacy code uses API_BASE or API_BASE_URL
+window.API_URL = window.API_URL || (isLocal ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
 window.API_BASE = window.API_URL;
 window.API_BASE_URL = window.API_URL;
-var API_URL = window.API_URL;
-var API_BASE = window.API_URL;
-var API_BASE_URL = window.API_URL;
-
 if (typeof globalThis !== 'undefined') {
     globalThis.API_URL = window.API_URL;
     globalThis.API_BASE = window.API_URL;
@@ -168,7 +161,8 @@ function handleGenericApiError(status) {
             if (!res.ok && !init.silent) {
                 // FIX BUG #2: Prevent duplicate toast - global interceptor should NOT auto-show toast for validation errors
                 // Local handlers (ad-details.js etc) already show toast. Global only for 401/403 auth expiry.
-                if ((res.status === 401 || res.status === 403) && !String(input?.url || input).includes('/auth/login')) {
+                const isLoginRequest = String(input?.url || input).includes('/auth/login');
+                if ((res.status === 401 || res.status === 403) && !isLoginRequest) {
                     try {
                         const clone = res.clone();
                         const data = await clone.json();
@@ -193,22 +187,3 @@ function handleGenericApiError(status) {
         });
     };
 })();
-
-// Auto-check backend availability on page load
-async function ensureBackend() {
-    try {
-        const rootUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-        await fetch(`${rootUrl}/`, { signal: AbortSignal.timeout(1500) });
-    } catch (err) {
-        console.warn('Backend down - istifadəçiyə bildiriş göstər:', err);
-        if (window.toast) {
-            window.toast.show('Backend qoşulur...', 'info');
-        }
-    }
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ensureBackend);
-} else {
-    ensureBackend();
-}
