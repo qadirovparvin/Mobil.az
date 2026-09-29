@@ -6,20 +6,82 @@
 
 window.API_URL = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
 
-function persistSession(data) {
-    if (window.persistAuthSession) {
-        window.persistAuthSession(data, data.token);
-        return;
-    }
+const SMS_DEV_MODE = true; // TODO: false when SMS paid
+const SMS_DEV_WARNING = 'SMS xidməti hazırda texniki profilaktikadadır. Zəhmət olmasa şifrə ilə daxil olun.';
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    localStorage.setItem('mobilaz_current_user', JSON.stringify(data));
+// FIX AUTH-006: Dual-write session persistence to prevent redirect loops
+function persistSession(data) {
+    const token = data?.token || data?.accessToken;
+    if (!token) return;
+    
+    const userPayload = {
+        id: data._id || data.id || data.user?._id || data.user?.id,
+        name: data.name || data.user?.name || '',
+        lastName: data.lastName || data.user?.lastName || '',
+        email: data.email || data.user?.email || '',
+        phone: data.phone || data.user?.phone || '',
+        role: data.role || data.user?.role || 'user',
+        avatar: data.avatar || data.user?.avatar || ''
+    };
+    
+    const isRemember = document.getElementById('rememberMe')?.checked;
+    
+    // Always write to sessionStorage (current tab session, fixes pages that check sessionStorage)
+    try {
+        sessionStorage.setItem('token', token);
+        sessionStorage.setItem('user', JSON.stringify(userPayload));
+        sessionStorage.setItem('authToken', token); // compat for old code
+    } catch(e) {}
+    
+    // Write to localStorage if rememberMe checked or checkbox doesn't exist (default remember per AUTH-004)
+    if (isRemember || isRemember === undefined) {
+        try {
+            localStorage.setItem('token', token);
+            localStorage.setItem('authToken', token); // compat
+            localStorage.setItem('user', JSON.stringify(userPayload));
+            localStorage.setItem('mobilaz_current_user', JSON.stringify(userPayload)); // compat for cabinet.js
+            localStorage.setItem('mobilaz_user', JSON.stringify(userPayload));
+        } catch(e) {}
+    }
+    
+    // Also set via centralized helper if exists
+    if (typeof window.setAuthToken === 'function') {
+        try { window.setAuthToken(token); } catch(e) {}
+    }
 }
+window.persistSession = persistSession;
+window.persistAuthSession = persistSession;
+
+function clearSession() {
+    try {
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('authToken');
+        sessionStorage.removeItem('adminToken');
+        sessionStorage.removeItem('adminUser');
+        localStorage.removeItem('token');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        localStorage.removeItem('mobilaz_current_user');
+        localStorage.removeItem('mobilaz_user');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+    } catch(e) {}
+}
+window.clearSession = clearSession;
+window.clearAuthSession = clearSession;
 
 function authT(key, fallback = '') {
     const lang = localStorage.getItem('lang') || 'AZ';
     return window.translations?.[lang]?.[key] || fallback;
+}
+
+function validateClientPassword(pwd) {
+    if (!pwd || pwd.length < 8) return 'Şifrə ən azı 8 simvoldan ibarət olmalıdır.';
+    if (!/[A-Z]/.test(pwd)) return 'Şifrədə ən azı 1 böyük hərf (A-Z) olmalıdır.';
+    if (!/[a-z]/.test(pwd)) return 'Şifrədə ən azı 1 kiçik hərf (a-z) olmalıdır.';
+    if (!/\d/.test(pwd)) return 'Şifrədə ən azı 1 rəqəm (0-9) olmalıdır.';
+    return null;
 }
 
 /* ── Toast ─────────────────────────────────────────────────── */
@@ -213,6 +275,13 @@ function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
 
 /* ── Login method switcher ──────────────────────────────────── */
 function switchLoginMethod(method) {
+    if (method === 'sms' || method === 'emailOtp' || method === 'email') {
+        showToast(SMS_DEV_WARNING, 'warning');
+        // Keep password tab active, do NOT switch
+        switchLoginMethod('password');
+        return;
+    }
+
     document.querySelectorAll('.login-subform').forEach(f => f.style.display = 'none');
     document.querySelectorAll('.verify-method-btn').forEach(b => b.classList.remove('active'));
 
@@ -304,9 +373,10 @@ function backToEmailStep1() {
 }
 
 /* ── Forgot password flow ───────────────────────────────────── */
+// FIX AUTH-005: Redirect to existing forgot-password.html instead of fake toast
 function openForgotFlow(e) {
-    e.preventDefault();
-    showToast('Şifrə sıfırlama linki email-ə göndəriləcək. Yaxında həyata keçiriləcək.', 'info');
+    if (e && e.preventDefault) e.preventDefault();
+    window.location.href = 'forgot-password.html';
 }
 
 /* ── Signup method switcher ─────────────────────────────────── */
@@ -352,6 +422,28 @@ async function sendSignupSMS() {
     setLoading(btn, true);
 
     try {
+        if (SMS_DEV_MODE) {
+            showToast('Dev rejim: SMS bypass edildi, birbaşa şifrə təyininə keçid edilir', 'info');
+            const s1 = document.getElementById('phoneSignupStep1');
+            if (s1) s1.style.display = 'none';
+            const s2 = document.getElementById('phoneSignupStep2');
+            if (s2) {
+                s2.style.display = 'none';
+                s2.classList.remove('visible');
+            }
+            const s3 = document.getElementById('phoneSignupStep3');
+            if (s3) {
+                s3.style.display = 'block';
+                s3.classList.add('visible');
+            }
+            const pvs = document.getElementById('phoneVerifyStep');
+            if (pvs) pvs.style.display = 'none';
+            const pps = document.getElementById('phonePasswordStep');
+            if (pps) pps.style.display = 'block';
+            updateStepDots(3);
+            return;
+        }
+
         await new Promise(r => setTimeout(r, 1200));
         document.getElementById('signupPhoneDisplay').textContent = phone;
         document.getElementById('phoneSignupStep1').style.display = 'none';
@@ -485,27 +577,97 @@ document.addEventListener('DOMContentLoaded', () => {
             setLoading(btn, true);
 
             try {
+                const loginPayload = { email: identifier, password };
                 const res = await fetch(`${window.API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: identifier,
-                        password
-                    })
+                    body: JSON.stringify(loginPayload)
                 });
 
                 const data = await res.json();
                 if (!res.ok) {
+                    if (data.requiresOtp || data.requiresTwoFactor) {
+                        document.getElementById('twoFactorMessage').textContent = data.message || 'Kodu daxil edin';
+                        document.getElementById('twoFactorModal').style.display = 'flex';
+                        
+                        const twoFactorForm = document.getElementById('twoFactorForm');
+                        twoFactorForm.onsubmit = async (e2) => {
+                            e2.preventDefault();
+                            const otpCode = document.getElementById('twoFactorCode').value.trim();
+                            if (!otpCode) {
+                                showToast('Kodu daxil edin', 'error');
+                                return;
+                            }
+                            const verifyBtn = document.getElementById('twoFactorVerifyBtn');
+                            setLoading(verifyBtn, true);
+                            try {
+                                const secondRes = await fetch(`${window.API_URL}/auth/login`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ...loginPayload, otpCode })
+                                });
+                                const secondData = await secondRes.json();
+                                if (!secondRes.ok) {
+                                    showToast(secondData.message || 'Yanlış kod', 'error');
+                                    return;
+                                }
+                                function getSafeRedirectTarget(fallback = 'cabinet.html') {
+                                    try {
+                                        const redirect = new URLSearchParams(window.location.search).get('redirect');
+                                        if (redirect
+                                            && /^[a-zA-Z0-9_\-\/]+\.html(\?[a-zA-Z0-9_\-=&%~.+]*)*$/.test(redirect)
+                                            && !/^(\/\/|https?:)/i.test(redirect)
+                                            && !/^(javascript|data|vbscript):/i.test(redirect)
+                                            && !/\\/.test(redirect)) {
+                                            return redirect;
+                                        }
+                                    } catch (e) {}
+                                    return fallback;
+                                }
+
+                                document.getElementById('twoFactorModal').style.display = 'none';
+                                persistSession(secondData);
+                                showToast('Uğurla daxil oldunuz!', 'success');
+                                const redirectTarget = secondData.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
+                                setTimeout(() => window.location.href = redirectTarget, 900);
+                            } catch (err) {
+                                console.error('Login 2FA fetch error:', err);
+                                showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
+                            } finally {
+                                setLoading(verifyBtn, false);
+                            }
+                        };
+                        return;
+                    }
+                    if (data.requiresTwoFactorEnrollment) {
+                        showToast(data.message || 'Bu hesab üçün 2FA aktiv edilməlidir', 'error');
+                        return;
+                    }
                     showToast(data.message || 'Email və ya şifrə yanlışdır', 'error');
                     return;
                 }
 
+                function getSafeRedirectTarget(fallback = 'cabinet.html') {
+                    try {
+                        const redirect = new URLSearchParams(window.location.search).get('redirect');
+                        if (redirect
+                            && /^[a-zA-Z0-9_\-\/]+\.html(\?[a-zA-Z0-9_\-=&%~.+]*)*$/.test(redirect)
+                            && !/^(\/\/|https?:)/i.test(redirect)
+                            && !/^(javascript|data|vbscript):/i.test(redirect)
+                            && !/\\/.test(redirect)) {
+                            return redirect;
+                        }
+                    } catch (e) {}
+                    return fallback;
+                }
+
                 persistSession(data);
                 showToast('Uğurla daxil oldunuz!', 'success');
-                // Redirect admin users to the admin panel, others to cabinet
-                const redirectTarget = data.role === 'admin' ? 'admin.html' : 'cabinet.html';
+                // Redirect admin users to the admin panel, others to cabinet or safe redirect target
+                const redirectTarget = data.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
                 setTimeout(() => window.location.href = redirectTarget, 900);
             } catch (err) {
+                console.error('Login fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
             } finally {
                 setLoading(btn, false);
@@ -546,7 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (pwd !== conf)  { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
             if (!terms)        { showToast('Şərtləri qəbul edin', 'error'); return; }
-            if (pwd.length < 6){ showToast('Şifrə ən azı 6 simvol olmalıdır', 'error'); return; }
+            const pwdError = validateClientPassword(pwd);
+            if (pwdError)      { showToast(pwdError, 'error'); return; }
 
             const btn = document.getElementById('finalPhoneSignupBtn');
             setLoading(btn, true);
@@ -562,11 +725,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
-                if (!res.ok) { showToast(data.message || 'Qeydiyyat xətası', 'error'); return; }
+                if (!res.ok) {
+                    const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');
+                    showToast(errorText, 'error');
+                    return;
+                }
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
             } catch(err) {
+                console.error('Phone signup fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı', 'error');
             } finally { setLoading(btn, false); }
         });
@@ -583,7 +751,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (pwd !== conf)  { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
             if (!terms)        { showToast('Şərtləri qəbul edin', 'error'); return; }
-            if (pwd.length < 6){ showToast('Şifrə ən azı 6 simvol olmalıdır', 'error'); return; }
+            const pwdError = validateClientPassword(pwd);
+            if (pwdError)      { showToast(pwdError, 'error'); return; }
 
             const btn = document.getElementById('finalEmailSignupBtn');
             setLoading(btn, true);
@@ -597,13 +766,112 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
-                if (!res.ok) { showToast(data.message || 'Qeydiyyat xətası', 'error'); return; }
+                if (!res.ok) {
+                    const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');
+                    showToast(errorText, 'error');
+                    return;
+                }
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
             } catch(err) {
+                console.error('Email signup fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı', 'error');
             } finally { setLoading(btn, false); }
+        });
+    }
+
+    // Forgot password form submit
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    if (forgotPasswordForm) {
+        forgotPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail')?.value.trim();
+            if (!email || !email.includes('@')) {
+                showToast('Düzgün email daxil edin', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('forgotSubmitBtn');
+            if (!setLoading(btn, true)) return;
+
+            try {
+                const res = await fetch(`${window.API_URL}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.message || 'Xəta baş verdi', 'error');
+                    return;
+                }
+                showToast(data.message || 'Sıfırlama linki göndərildi', 'success');
+                forgotPasswordForm.reset();
+            } catch (err) {
+                console.error('Forgot password fetch error:', err);
+                showToast('Serverlə əlaqə yaradılmadı', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
+        });
+    }
+
+    // Reset password form submit
+    const resetPasswordForm = document.getElementById('resetPasswordForm');
+    if (resetPasswordForm) {
+        resetPasswordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            if (!token) {
+                showToast('Keçərsiz və ya vaxtı keçmiş token', 'error');
+                return;
+            }
+
+            const newPassword = document.getElementById('resetPassword')?.value;
+            const confirmResetPassword = document.getElementById('confirmResetPassword')?.value;
+
+            if (!newPassword || !confirmResetPassword) {
+                showToast('Şifrələri daxil edin', 'error');
+                return;
+            }
+            if (newPassword !== confirmResetPassword) {
+                showToast('Şifrələr uyğun gəlmir!', 'error');
+                return;
+            }
+            const pwdError = validateClientPassword(newPassword);
+            if (pwdError) {
+                showToast(pwdError, 'error');
+                return;
+            }
+
+            const btn = document.getElementById('resetSubmitBtn');
+            if (!setLoading(btn, true)) return;
+
+            try {
+                const res = await fetch(`${window.API_URL}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, newPassword })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Keçərsiz və ya vaxtı keçmiş token');
+                    showToast(errorText, 'error');
+                    return;
+                }
+                showToast(data.message || 'Şifrə uğurla yeniləndi', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+            } catch (err) {
+                console.error('Reset password fetch error:', err);
+                showToast('Serverlə əlaqə yaradılmadı', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
         });
     }
 });

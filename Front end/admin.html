@@ -3,31 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel — AiryPhone</title>
+    <title>Admin Panel — Mobil.az</title>
     <meta name="robots" content="noindex, nofollow">
 
     <!-- ── Instant Admin Guard (runs before HTML paints) ──────────── -->
     <script>
-        window.API_URL = window.API_URL || 'http://localhost:5000/api';
+        window.API_URL = window.API_URL || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
         (function guardAdminPage() {
-            var token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            var token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token');
             if (!token) { window.location.replace('login.html'); return; }
-            var user = null;
-            try {
-                user = JSON.parse(localStorage.getItem('adminUser'))
-                    || JSON.parse(localStorage.getItem('user'))
-                    || JSON.parse(localStorage.getItem('mobilaz_current_user'));
-            } catch (e) {}
-            if (!user || user.role !== 'admin') {
-                window.location.replace(token ? 'index.html' : 'login.html');
-            }
+            
+            fetch(window.API_URL + '/admin/verify', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(function(res) {
+                if (!res.ok) {
+                    window.location.replace('login.html');
+                    return;
+                }
+                return res.json();
+            })
+            .then(function(data) {
+                if (!data || !data.authorized || data.role !== 'admin') {
+                    window.location.replace('login.html');
+                }
+            })
+            .catch(function() {
+                window.location.replace('login.html');
+            });
         })();
     </script>
     <style> body { visibility: hidden; } body.admin-ready { visibility: visible; } </style>
 
     <link rel="stylesheet" href="CSS/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 <body>
 <noscript><meta http-equiv="refresh" content="0;url=login.html"></noscript>
@@ -36,8 +58,8 @@
 <div id="admin-access-check" class="login-wrapper">
     <div class="login-card">
         <div class="login-logo">
-            <i class="fas fa-shield-halved" style="color:#0D8ABC;font-size:2rem;"></i>
-            <h2 style="margin-left:0.5rem;">Admin Yoxlama</h2>
+            <i class="fas fa-shield-halved" style="color:var(--primary);font-size:2.2rem;"></i>
+            <h2>Admin Yoxlama</h2>
         </div>
         <p class="login-subtitle">Administrator sessiyası təsdiqlənir…</p>
         <div class="access-spinner"></div>
@@ -52,34 +74,40 @@
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-mobile-screen-button"></i>
-                <span>AiryPhone</span>
+                <span>Mobil.az</span>
             </div>
-            <span class="badge badge-admin">ADMIN</span>
+            <span class="badge badge-admin">PRO ADMIN</span>
         </div>
 
         <nav class="sidebar-nav">
-            <a href="#" class="nav-item active" data-target="dashboard-view" id="navDashboard">
+            <a href="#" class="nav-item active" data-target="dashboard-view" id="navDashboard" title="Dashboard">
                 <i class="fas fa-chart-pie"></i><span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item" data-target="users-view" id="navUsers">
+            <a href="#" class="nav-item" data-target="users-view" id="navUsers" title="İstifadəçilər">
                 <i class="fas fa-users"></i><span>İstifadəçilər</span>
                 <span class="nav-count" id="navCountUsers">0</span>
             </a>
-            <a href="#" class="nav-item" data-target="ads-view" id="navAds">
+            <a href="#" class="nav-item" data-target="ads-view" id="navAds" title="Elanlar">
                 <i class="fas fa-rectangle-ad"></i><span>Elanlar</span>
                 <span class="nav-count" id="navCountAds">0</span>
             </a>
-            <a href="#" class="nav-item" data-target="transactions-view" id="navTx">
+            <a href="#" class="nav-item" data-target="stores-view" id="navStores" title="Mağazalar">
+                <i class="fas fa-store"></i><span>Mağazalar</span>
+                <span class="nav-count" id="navCountStores">0</span>
+            </a>
+            <a href="#" class="nav-item" data-target="transactions-view" id="navTx" title="Əməliyyatlar">
                 <i class="fas fa-money-bill-transfer"></i><span>Əməliyyatlar</span>
+            </a>
+            <a href="#" class="nav-item" data-target="settings-view" id="navSettings" title="Tənzimləmələr">
+                <i class="fas fa-gear"></i><span>Tənzimləmələr</span>
             </a>
         </nav>
 
         <div class="sidebar-footer">
-            <!-- 🌐 Return to Main Site -->
-            <a href="index.html" class="nav-item return-site-btn" id="returnToSiteBtn">
+            <a href="index.html" class="nav-item return-site-btn" id="returnToSiteBtn" title="Sayta Qayıt">
                 <i class="fas fa-globe"></i><span>Sayta Qayıt</span>
             </a>
-            <a href="#" class="nav-item logout-btn" id="logoutBtn">
+            <a href="#" class="nav-item logout-btn" id="logoutBtn" title="Çıxış">
                 <i class="fas fa-right-from-bracket"></i><span>Çıxış</span>
             </a>
         </div>
@@ -91,22 +119,45 @@
         <!-- TOP HEADER -->
         <header class="top-header">
             <div class="header-left">
-                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+                <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar" title="Menyunu gizlə/göstər">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h1 id="pageTitle">Dashboard</h1>
+                <div class="global-search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="globalAdminSearch" placeholder="Paneldə axtar (elan, istifadəçi, mağaza)..." oninput="handleGlobalSearch(this.value)">
+                </div>
             </div>
             <div class="header-right">
-                <!-- 🌐 Return button also visible in header on mobile -->
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle-btn" id="adminThemeToggle" title="Qaranlıq / İşıqlı rejim">
+                    <i class="fas fa-moon"></i>
+                </button>
+
                 <a href="index.html" class="return-site-header-btn" title="Sayta Qayıt">
                     <i class="fas fa-globe"></i>
-                    <span>🌐 Sayta Qayıt</span>
+                    <span>Sayta Qayıt</span>
                 </a>
-                <div class="admin-profile">
-                    <img id="adminAvatar" src="https://ui-avatars.com/api/?name=A&background=0D8ABC&color=fff" alt="Admin">
-                    <div class="profile-info">
-                        <span class="name" id="adminName">Admin</span>
-                        <span class="role">Administrator</span>
+
+                <!-- Profile Dropdown -->
+                <div class="admin-profile-dropdown" id="profileDropdownTrigger">
+                    <div class="admin-profile">
+                        <img id="adminAvatar" src="https://ui-avatars.com/api/?name=A&background=2563EB&color=fff" alt="Admin Avatar">
+                        <div class="profile-info">
+                            <span class="name" id="adminName">Admin</span>
+                            <span class="role">Super Admin</span>
+                        </div>
+                        <i class="fas fa-chevron-down dropdown-arrow"></i>
+                    </div>
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="menu-header">
+                            <strong id="menuAdminName">Admin User</strong>
+                            <small id="menuAdminEmail">admin@mobil.az</small>
+                        </div>
+                        <hr class="menu-divider">
+                        <a href="#" onclick="window.switchTab('settings-view'); return false;"><i class="fas fa-gear"></i> Tənzimləmələr</a>
+                        <a href="index.html"><i class="fas fa-globe"></i> Əsas Sayta Keç</a>
+                        <hr class="menu-divider">
+                        <a href="#" id="menuLogoutBtn" class="logout-link"><i class="fas fa-right-from-bracket"></i> Çıxış et</a>
                     </div>
                 </div>
             </div>
@@ -118,64 +169,106 @@
             <!-- ══ DASHBOARD VIEW ═══════════════════════════════════════ -->
             <section id="dashboard-view" class="view-section active">
 
-                <!-- Stat cards -->
+                <div class="dashboard-header-bar">
+                    <div>
+                        <h2>İdarəetmə Paneli</h2>
+                        <p class="section-subtitle">Sistem statistikası və son aktivliklər</p>
+                    </div>
+                    <button class="btn-refresh" onclick="window.loadAllData()" title="Yenilə">
+                        <i class="fas fa-rotate"></i> Yenilə
+                    </button>
+                </div>
+
+                <!-- Stat cards (4 Metric Widgets) -->
                 <div class="stats-grid">
-                    <div class="stat-card">
+                    <div class="stat-card" onclick="window.switchTab('users-view')">
                         <div class="stat-icon bg-primary-light">
                             <i class="fas fa-users text-primary"></i>
                         </div>
                         <div class="stat-info">
                             <p>Ümumi İstifadəçi</p>
                             <h2 id="statUsers">—</h2>
+                            <span class="stat-trend positive"><i class="fas fa-arrow-up"></i> Aktiv istifadəçilər</span>
                         </div>
                     </div>
-                    <div class="stat-card">
+
+                    <div class="stat-card" onclick="window.switchTab('ads-view')">
                         <div class="stat-icon bg-success-light">
                             <i class="fas fa-rectangle-ad text-success"></i>
                         </div>
                         <div class="stat-info">
-                            <p>Ümumi Elan</p>
+                            <p>Aktiv Elanlar</p>
                             <h2 id="statAds">—</h2>
+                            <span class="stat-trend positive"><i class="fas fa-check-circle"></i> Dərc edilmiş</span>
                         </div>
                     </div>
-                    <div class="stat-card">
+
+                    <div class="stat-card" onclick="window.switchTab('ads-view')">
                         <div class="stat-icon bg-warning-light">
-                            <i class="fas fa-store text-warning"></i>
+                            <i class="fas fa-clock text-warning"></i>
                         </div>
                         <div class="stat-info">
-                            <p>Mağazalar</p>
-                            <h2 id="statStores">—</h2>
+                            <p>Gözləyən Elanlar</p>
+                            <h2 id="statPending">—</h2>
+                            <span class="stat-trend warning"><i class="fas fa-hourglass-half"></i> Təsdiq gözləyir</span>
                         </div>
                     </div>
-                    <div class="stat-card">
+
+                    <div class="stat-card" onclick="window.switchTab('transactions-view')">
                         <div class="stat-icon bg-danger-light">
                             <i class="fas fa-wallet text-danger"></i>
                         </div>
                         <div class="stat-info">
-                            <p>Gəlir</p>
+                            <p>Ümumi Gəlir</p>
                             <h2 id="statRevenue">—</h2>
+                            <span class="stat-trend positive"><i class="fas fa-chart-line"></i> Balans və Ödənişlər</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent users widget -->
-                <div class="widget">
-                    <div class="widget-header">
-                        <h3><i class="fas fa-clock"></i> Son Qeydiyyatlar</h3>
-                        <button class="btn-sm" onclick="window.switchTab('users-view')">Hamısı →</button>
+                <!-- Recent Activity Tables Grid -->
+                <div class="dashboard-widgets-grid">
+                    <!-- Recent Ads Widget -->
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-bolt text-primary"></i> Son Əlavə Edilən Elanlar</h3>
+                            <button class="btn-sm" onclick="window.switchTab('ads-view')">Bütün Elanlar →</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Elan</th>
+                                        <th>Qiymət</th>
+                                        <th>Status</th>
+                                        <th>Tarix</th>
+                                        <th>Əməliyyat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentAdsTable"><tr><td colspan="5" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Ad</th>
-                                    <th>Email</th>
-                                    <th>Rol</th>
-                                    <th>Tarix</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recentUsersTable"><tr><td colspan="4" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
-                        </table>
+
+                    <!-- Recent Users Widget -->
+                    <div class="widget">
+                        <div class="widget-header">
+                            <h3><i class="fas fa-user-plus text-success"></i> Son Qeydiyyatlar</h3>
+                            <button class="btn-sm" onclick="window.switchTab('users-view')">Hamısı →</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>İstifadəçi</th>
+                                        <th>Email</th>
+                                        <th>Rol</th>
+                                        <th>Tarix</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentUsersTable"><tr><td colspan="4" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -185,15 +278,18 @@
             <section id="users-view" class="view-section">
                 <div class="card">
                     <div class="card-header">
-                        <h2><i class="fas fa-users"></i> İstifadəçi İdarəetməsi</h2>
+                        <div>
+                            <h2><i class="fas fa-users text-primary"></i> İstifadəçi İdarəetməsi</h2>
+                            <p class="card-sub">Qeydiyyatdan keçmiş bütün istifadəçilərin siyahısı</p>
+                        </div>
                         <div class="card-header-actions">
                             <div class="search-wrap">
                                 <i class="fas fa-search"></i>
-                                <input type="text" id="userSearch" placeholder="Ad, email axtar…" oninput="filterUsers()">
+                                <input type="text" id="userSearch" placeholder="Ad, email, nömrə axtar…" oninput="filterUsers()">
                             </div>
                             <button class="btn-export" id="exportUsersBtn" onclick="exportUsersCSV()" title="CSV ixrac et">
                                 <i class="fas fa-file-csv"></i>
-                                <span>CSV</span>
+                                <span>CSV İxrac</span>
                             </button>
                         </div>
                     </div>
@@ -221,7 +317,10 @@
             <section id="ads-view" class="view-section">
                 <div class="card">
                     <div class="card-header">
-                        <h2><i class="fas fa-rectangle-ad"></i> Elan İdarəetməsi</h2>
+                        <div>
+                            <h2><i class="fas fa-rectangle-ad text-primary"></i> Elan İdarəetməsi</h2>
+                            <p class="card-sub">Saytdakı elanların moderasiyası və tənzimlənməsi</p>
+                        </div>
                         <div class="card-header-actions">
                             <div class="search-wrap">
                                 <i class="fas fa-search"></i>
@@ -229,7 +328,7 @@
                             </div>
                             <button class="btn-export" id="exportAdsBtn" onclick="exportAdsCSV()" title="CSV ixrac et">
                                 <i class="fas fa-file-csv"></i>
-                                <span>CSV</span>
+                                <span>CSV İxrac</span>
                             </button>
                         </div>
                     </div>
@@ -253,15 +352,52 @@
                 </div>
             </section>
 
+            <!-- ══ STORES VIEW ══════════════════════════════════════════════ -->
+            <section id="stores-view" class="view-section">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2><i class="fas fa-store text-primary"></i> Mağaza İdarəetməsi</h2>
+                            <p class="card-sub">Rəsmi və pro mağazaların status təsdiqi</p>
+                        </div>
+                        <div class="card-header-actions">
+                            <div class="search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="storeSearch" placeholder="Mağaza adı axtar…" oninput="filterStores()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Mağaza</th>
+                                    <th>Sahib</th>
+                                    <th>Status</th>
+                                    <th>Təsdiq</th>
+                                    <th>Tarix</th>
+                                    <th>Əməliyyatlar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="allStoresTable"><tr><td colspan="6" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-bar" id="storesPagination"></div>
+                </div>
+            </section>
+
             <!-- ══ TRANSACTIONS VIEW ═════════════════════════════════════ -->
             <section id="transactions-view" class="view-section">
                 <div class="card">
                     <div class="card-header">
-                        <h2><i class="fas fa-money-bill-transfer"></i> Əməliyyat Tarixi</h2>
+                        <div>
+                            <h2><i class="fas fa-money-bill-transfer text-primary"></i> Əməliyyat Tarixi</h2>
+                            <p class="card-sub">Balans artırma, VIP/PRO xidmətlər üzrə ödənişlər</p>
+                        </div>
                         <div class="card-header-actions">
                             <button class="btn-export" id="exportTxBtn" onclick="exportTransactionsCSV()" title="CSV ixrac et">
                                 <i class="fas fa-file-csv"></i>
-                                <span>CSV</span>
+                                <span>CSV İxrac</span>
                             </button>
                         </div>
                     </div>
@@ -278,6 +414,43 @@
                             </thead>
                             <tbody id="allTransactionsTable"><tr><td colspan="5" class="text-muted loading-cell">Yüklənir…</td></tr></tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══ SETTINGS VIEW ═════════════════════════════════════════ -->
+            <section id="settings-view" class="view-section">
+                <div class="card p-4">
+                    <div class="card-header border-0 pb-0">
+                        <div>
+                            <h2><i class="fas fa-gear text-primary"></i> Sistem Tənzimləmələri</h2>
+                            <p class="card-sub">Mobil.az platformasının ümumi parametrləri</p>
+                        </div>
+                    </div>
+                    <div class="settings-grid mt-4">
+                        <div class="settings-card">
+                            <h3><i class="fas fa-sliders text-primary"></i> Moderasiya Parametrləri</h3>
+                            <div class="form-check-group mt-3">
+                                <label class="setting-toggle">
+                                    <span>Avtomatik Elan Təsdiqi</span>
+                                    <input type="checkbox" id="autoApproveAds">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <label class="setting-toggle mt-3">
+                                    <span>Mağaza Qeydiyyatı Bildirişləri</span>
+                                    <input type="checkbox" checked id="notifStoreReg">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3><i class="fas fa-shield-halved text-primary"></i> Təhlükəsizlik & Giriş</h3>
+                            <p class="text-muted text-sm mt-1">Cari administrator sessiyanızı və təhlükəsizliyi idarə edin.</p>
+                            <div class="mt-4">
+                                <button class="btn-sm" style="background:var(--primary);color:#fff;" onclick="alert('Sessiya yeniləndi.');">Sessiyanı Yenilə</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -305,6 +478,7 @@
     </div>
 </div>
 
+<script src="JS/config.js"></script>
 <script src="JS/admin.js"></script>
 </body>
 </html>
