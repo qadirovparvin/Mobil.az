@@ -199,7 +199,7 @@ const CATALOG = {
   },
 };
 
-const API_BASE = window.API_URL || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+const API_BASE = window.API_URL || window.API_BASE || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
 
 const urlParams = typeof window !== 'undefined' && window.location && window.location.search
   ? new URLSearchParams(window.location.search)

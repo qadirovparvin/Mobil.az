@@ -13,6 +13,19 @@ window.API_URL = window.API_URL || (
         : 'https://api.mobil.az/api'
 );
 
+// Backward compatibility - legacy code uses API_BASE or API_BASE_URL
+window.API_BASE = window.API_URL;
+window.API_BASE_URL = window.API_URL;
+var API_URL = window.API_URL;
+var API_BASE = window.API_URL;
+var API_BASE_URL = window.API_URL;
+
+if (typeof globalThis !== 'undefined') {
+    globalThis.API_URL = window.API_URL;
+    globalThis.API_BASE = window.API_URL;
+    globalThis.API_BASE_URL = window.API_URL;
+}
+
 window.getAuthToken = window.getAuthToken || function getAuthToken() {
     return sessionStorage.getItem('token') || sessionStorage.getItem('adminToken') || '';
 };
@@ -180,3 +193,22 @@ function handleGenericApiError(status) {
         });
     };
 })();
+
+// Auto-check backend availability on page load
+async function ensureBackend() {
+    try {
+        const rootUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        await fetch(`${rootUrl}/`, { signal: AbortSignal.timeout(1500) });
+    } catch (err) {
+        console.warn('Backend down - istifadəçiyə bildiriş göstər:', err);
+        if (window.toast) {
+            window.toast.show('Backend qoşulur...', 'info');
+        }
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', ensureBackend);
+} else {
+    ensureBackend();
+}

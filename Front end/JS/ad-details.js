@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Helpers (defined first so they're always available) ────────
 
-    const API_BASE = window.API_URL || 'http://localhost:5000/api';
+    const API_BASE = window.API_URL || window.API_BASE || 'http://localhost:5000/api';
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
 
     function getImageUrl(image) {
@@ -116,6 +116,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         const prevBtn        = document.getElementById('prevBtn');
         const nextBtn        = document.getElementById('nextBtn');
         const galleryMain    = document.getElementById('galleryMain');
+        const vipBadge       = document.querySelector('.badge-vip');
+        const newBadge       = document.querySelector('.badge-new');
+
+        const isVip = ad.promotionType === 'VIP';
+        const isNew = ad.condition === 'Yeni';
+
+        if (vipBadge) {
+            vipBadge.classList.toggle('hidden', !isVip);
+            vipBadge.style.display = isVip ? '' : 'none';
+        }
+
+        if (newBadge) {
+            newBadge.classList.toggle('hidden', !isNew);
+            newBadge.style.display = isNew ? '' : 'none';
+        }
 
         const images = Array.isArray(ad.images) ? ad.images.filter(Boolean) : [];
 
@@ -132,26 +147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (nextBtn)         nextBtn.style.display = 'none';
             } else {
                 // Multiple images — build thumbs + arrow nav
-                if (thumbsContainer) {
-                    thumbsContainer.style.display = '';
-                    thumbsContainer.innerHTML = '';
-                    images.forEach((img, idx) => {
-                        const thumb = document.createElement('div');
-                        thumb.className = `thumb${idx === 0 ? ' active' : ''}`;
-                        thumb.dataset.src = getImageUrl(img);
-                        thumb.innerHTML = `<img src="${getImageUrl(img)}" alt="Şəkil ${idx + 1}" loading="lazy">`;
-                        thumb.addEventListener('click', () => {
-                            thumbsContainer.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-                            thumb.classList.add('active');
-                            if (mainImg) mainImg.src = thumb.dataset.src;
-                        });
-                        thumbsContainer.appendChild(thumb);
-                    });
-                }
-
-                // Arrow navigation
                 let currentIdx = 0;
                 const allUrls = images.map(getImageUrl);
+
                 const goTo = (idx) => {
                     currentIdx = (idx + allUrls.length) % allUrls.length;
                     if (mainImg) mainImg.src = allUrls[currentIdx];
@@ -160,6 +158,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                             t.classList.toggle('active', i === currentIdx));
                     }
                 };
+
+                if (thumbsContainer) {
+                    thumbsContainer.style.display = '';
+                    thumbsContainer.replaceChildren();
+                    images.forEach((img, idx) => {
+                        const thumb = document.createElement('div');
+                        thumb.className = `thumb${idx === 0 ? ' active' : ''}`;
+                        thumb.dataset.src = getImageUrl(img);
+                        thumb.innerHTML = `<img src="${getImageUrl(img)}" alt="Şəkil ${idx + 1}" loading="lazy">`;
+                        thumb.addEventListener('click', () => {
+                            goTo(idx);
+                        });
+                        thumbsContainer.appendChild(thumb);
+                    });
+                }
+
                 if (prevBtn) { prevBtn.style.display = ''; prevBtn.onclick = () => goTo(currentIdx - 1); }
                 if (nextBtn) { nextBtn.style.display = ''; nextBtn.onclick = () => goTo(currentIdx + 1); }
             }
@@ -219,11 +233,246 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (catTag) catTag.innerHTML = `<i class="fas fa-mobile-alt"></i> ${ad.category || 'Telefon'} · ${ad.brand || ''}`;
 
         // ── 10. Seller Info ────────────────────────────────────────
-        const sellerNameEl = document.querySelector('.personal-name');
-        if (sellerNameEl) sellerNameEl.textContent = ad.author?.name || ad.author?.email || 'Satıcı';
+        const isStore = ad.sellerType === 'store' && !!ad.store;
+        const sellerNameEl = document.getElementById('sellerName') || document.querySelector('.personal-name');
+        const avatarEl = document.getElementById('sellerAvatar') || document.querySelector('.personal-avatar');
+        const sellerTypeTag = document.getElementById('sellerTypeTag');
+        const sellerLocationTag = document.getElementById('sellerLocationTag');
+        const sellerLocationText = document.getElementById('sellerLocationText');
+        const storeProfileLink = document.getElementById('storeProfileLink');
+        const sellerStats = document.getElementById('sellerStats') || document.querySelector('.personal-stats');
+        const sellerSinceRow = document.getElementById('sellerSinceRow') || document.querySelector('.seller-since-row');
+        const sellerSinceText = document.getElementById('sellerSinceText');
 
-        const avatarEl = document.querySelector('.personal-avatar');
-        if (avatarEl && ad.author?.name) avatarEl.textContent = ad.author.name.charAt(0).toUpperCase();
+        if (isStore) {
+            // Mode A: Store Seller
+            const store = ad.store;
+            const storeName = store.storeName || 'Mağaza';
+
+            // Store Name + Verified Badge
+            if (sellerNameEl) {
+                sellerNameEl.textContent = storeName;
+                if (store.isVerified === true) {
+                    const verifiedBadge = document.createElement('i');
+                    verifiedBadge.className = 'fas fa-check-circle';
+                    verifiedBadge.style.cssText = 'color: #007bff; margin-left: 6px; font-size: 15px;';
+                    verifiedBadge.title = 'Rəsmi Mağaza';
+                    sellerNameEl.appendChild(verifiedBadge);
+                }
+            }
+
+            // Store Logo / Avatar
+            if (avatarEl) {
+                avatarEl.replaceChildren();
+                if (store.logoUrl) {
+                    const img = document.createElement('img');
+                    img.src = getImageUrl(store.logoUrl);
+                    img.alt = storeName;
+                    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+                    avatarEl.appendChild(img);
+                } else {
+                    avatarEl.textContent = (storeName || 'M').charAt(0).toUpperCase();
+                }
+            }
+
+            // Store Tag
+            if (sellerTypeTag) {
+                sellerTypeTag.replaceChildren();
+                const storeIcon = document.createElement('i');
+                storeIcon.className = 'fas fa-store';
+                const storeLabel = document.createElement('span');
+                storeLabel.textContent = ' Mağaza';
+                sellerTypeTag.appendChild(storeIcon);
+                sellerTypeTag.appendChild(storeLabel);
+            }
+
+            // Store Profile Link
+            if (storeProfileLink) {
+                if (store._id) {
+                    storeProfileLink.href = `store-detail.html?id=${encodeURIComponent(store._id)}`;
+                    storeProfileLink.classList.remove('hidden');
+                    storeProfileLink.style.display = 'inline-flex';
+                } else {
+                    storeProfileLink.classList.add('hidden');
+                    storeProfileLink.style.display = 'none';
+                }
+            }
+
+            // Location
+            const storeLoc = (store.city || ad.city || '').trim();
+            if (sellerLocationTag) {
+                if (storeLoc) {
+                    if (sellerLocationText) {
+                        sellerLocationText.textContent = ` ${storeLoc}`;
+                    } else {
+                        sellerLocationTag.replaceChildren();
+                        const locIcon = document.createElement('i');
+                        locIcon.className = 'fas fa-map-marker-alt';
+                        sellerLocationTag.appendChild(locIcon);
+                        sellerLocationTag.appendChild(document.createTextNode(` ${storeLoc}`));
+                    }
+                    sellerLocationTag.classList.remove('hidden');
+                    sellerLocationTag.style.display = 'flex';
+                } else {
+                    sellerLocationTag.classList.add('hidden');
+                    sellerLocationTag.style.display = 'none';
+                }
+            }
+
+            // Stats (Store rating & review count if available)
+            if (sellerStats) {
+                const hasStoreRating = typeof store.rating === 'number' && store.rating > 0;
+                const hasStoreReviews = typeof store.reviewCount === 'number' && store.reviewCount > 0;
+
+                if (hasStoreRating || hasStoreReviews) {
+                    sellerStats.replaceChildren();
+
+                    if (hasStoreRating) {
+                        const statRatingDiv = document.createElement('div');
+                        statRatingDiv.className = 'p-stat';
+                        const rVal = document.createElement('span');
+                        rVal.className = 'val';
+                        rVal.textContent = Number(store.rating).toFixed(1);
+                        const rLbl = document.createElement('span');
+                        rLbl.className = 'lbl';
+                        rLbl.textContent = '★ Reytinq';
+                        statRatingDiv.appendChild(rVal);
+                        statRatingDiv.appendChild(rLbl);
+                        sellerStats.appendChild(statRatingDiv);
+                    }
+
+                    if (hasStoreReviews) {
+                        const statCountDiv = document.createElement('div');
+                        statCountDiv.className = 'p-stat';
+                        const cVal = document.createElement('span');
+                        cVal.className = 'val';
+                        cVal.textContent = String(store.reviewCount);
+                        const cLbl = document.createElement('span');
+                        cLbl.className = 'lbl';
+                        cLbl.textContent = 'Rəy';
+                        statCountDiv.appendChild(cVal);
+                        statCountDiv.appendChild(cLbl);
+                        sellerStats.appendChild(statCountDiv);
+                    }
+
+                    sellerStats.classList.remove('hidden');
+                    sellerStats.style.display = 'grid';
+                } else {
+                    sellerStats.classList.add('hidden');
+                    sellerStats.style.display = 'none';
+                }
+            }
+
+            // Membership / creation date
+            const storeDateVal = store.createdAt || ad.createdAt;
+            if (sellerSinceRow) {
+                if (storeDateVal) {
+                    const d = new Date(storeDateVal);
+                    if (!isNaN(d.getTime())) {
+                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
+                        if (sellerSinceText) {
+                            sellerSinceText.textContent = ` ${monthYear}`;
+                        }
+                        sellerSinceRow.classList.remove('hidden');
+                        sellerSinceRow.style.display = '';
+                    } else {
+                        sellerSinceRow.classList.add('hidden');
+                        sellerSinceRow.style.display = 'none';
+                    }
+                } else {
+                    sellerSinceRow.classList.add('hidden');
+                    sellerSinceRow.style.display = 'none';
+                }
+            }
+
+        } else {
+            // Mode B: Personal Seller
+            const authorName = ad.author?.name || ad.author?.email || 'Satıcı';
+
+            // Seller Name
+            if (sellerNameEl) {
+                sellerNameEl.textContent = authorName;
+            }
+
+            // Avatar
+            if (avatarEl) {
+                avatarEl.replaceChildren();
+                if (ad.author?.avatar) {
+                    const img = document.createElement('img');
+                    img.src = getImageUrl(ad.author.avatar);
+                    img.alt = authorName;
+                    img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+                    avatarEl.appendChild(img);
+                } else {
+                    avatarEl.textContent = (ad.author?.name || authorName).charAt(0).toUpperCase() || 'S';
+                }
+            }
+
+            // Account Tag
+            if (sellerTypeTag) {
+                sellerTypeTag.replaceChildren();
+                const userIcon = document.createElement('i');
+                userIcon.className = 'fas fa-user-circle';
+                const userLabel = document.createElement('span');
+                userLabel.textContent = ' Şəxsi hesab';
+                sellerTypeTag.appendChild(userIcon);
+                sellerTypeTag.appendChild(userLabel);
+            }
+
+            // Store Profile Link (hide)
+            if (storeProfileLink) {
+                storeProfileLink.classList.add('hidden');
+                storeProfileLink.style.display = 'none';
+            }
+
+            // Location
+            const personalLoc = [ad.city, ad.region].filter(Boolean).join(', ').trim();
+            if (sellerLocationTag) {
+                if (personalLoc) {
+                    if (sellerLocationText) {
+                        sellerLocationText.textContent = ` ${personalLoc}`;
+                    } else {
+                        sellerLocationTag.replaceChildren();
+                        const locIcon = document.createElement('i');
+                        locIcon.className = 'fas fa-map-marker-alt';
+                        sellerLocationTag.appendChild(locIcon);
+                        sellerLocationTag.appendChild(document.createTextNode(` ${personalLoc}`));
+                    }
+                    sellerLocationTag.classList.remove('hidden');
+                    sellerLocationTag.style.display = 'flex';
+                } else {
+                    sellerLocationTag.classList.add('hidden');
+                    sellerLocationTag.style.display = 'none';
+                }
+            }
+
+            // Stats (Hide dummy stats for personal seller)
+            if (sellerStats) {
+                sellerStats.classList.add('hidden');
+                sellerStats.style.display = 'none';
+            }
+
+            // Membership date
+            if (sellerSinceRow) {
+                if (ad.author?.createdAt) {
+                    const d = new Date(ad.author.createdAt);
+                    if (!isNaN(d.getTime())) {
+                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
+                        if (sellerSinceText) {
+                            sellerSinceText.textContent = ` ${monthYear}`;
+                        }
+                        sellerSinceRow.classList.remove('hidden');
+                        sellerSinceRow.style.display = '';
+                    } else {
+                        sellerSinceRow.classList.add('hidden');
+                        sellerSinceRow.style.display = 'none';
+                    }
+                } else {
+                    sellerSinceRow.classList.add('hidden');
+                    sellerSinceRow.style.display = 'none';
+                }
+            }
+        }
 
         // ── 11. Ad ID bar (footer) ─────────────────────────────────
         const adIdSpan     = document.querySelector('.ad-id-bar span:nth-child(1) span:nth-child(2)');
@@ -259,7 +508,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('deleteAdBtn')?.addEventListener('click', async () => {
                     if (!confirm('Bu elanı silmək istədiyinizə əminsiniz?')) return;
                     try {
-                        const token = localStorage.getItem('token');
+                        const token = (typeof window !== "undefined" && window.getAuthToken)
+                            ? window.getAuthToken()
+                            : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
                         const delRes = await fetch(`${API_BASE}/ads/${ad._id}`, {
                             method: 'DELETE',
                             headers: { Authorization: `Bearer ${token}` }
@@ -281,25 +532,47 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .forEach(c => c.style.display = 'none');
         } else {
             // ── 13. Phone / WhatsApp / Message buttons ─────────────
+            const rawPhone = (
+                ad.contactPhone ||
+                ad.store?.contactNumber ||
+                ad.author?.phone ||
+                ''
+            ).trim();
+            const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
             const callBtn  = document.getElementById('callBtn');
             const phoneText= document.getElementById('phoneText');
-            if (callBtn && phoneText && ad.contactPhone) {
-                let revealed = false;
-                callBtn.addEventListener('click', () => {
-                    if (!revealed) {
-                        phoneText.textContent = ad.contactPhone;
-                        callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
-                        revealed = true;
-                    } else {
-                        window.location.href = `tel:${ad.contactPhone.replace(/\s+/g, '')}`;
-                    }
-                });
+            if (callBtn && phoneText) {
+                if (rawPhone) {
+                    let revealed = false;
+                    callBtn.addEventListener('click', () => {
+                        if (!revealed) {
+                            phoneText.textContent = rawPhone;
+                            callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+                            revealed = true;
+                        } else {
+                            window.location.href = `tel:${cleanPhone || rawPhone.replace(/\s+/g, '')}`;
+                        }
+                    });
+                    callBtn.classList.remove('hidden');
+                    callBtn.style.display = '';
+                } else {
+                    callBtn.classList.add('hidden');
+                    callBtn.style.display = 'none';
+                }
             }
 
             const waBtn = document.querySelector('.btn-whatsapp');
-            if (waBtn && ad.contactPhone) {
-                const clean = ad.contactPhone.replace(/\+/g, '').replace(/\s+/g, '');
-                waBtn.href = `https://wa.me/${clean}`;
+            if (waBtn) {
+                if (cleanPhone) {
+                    waBtn.href = `https://wa.me/${cleanPhone}`;
+                    waBtn.classList.remove('hidden');
+                    waBtn.style.display = '';
+                } else {
+                    waBtn.href = '#';
+                    waBtn.classList.add('hidden');
+                    waBtn.style.display = 'none';
+                }
             }
 
             const msgBtn = document.querySelector('.btn-message');
@@ -307,7 +580,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const newMsgBtn = msgBtn.cloneNode(true);
                 msgBtn.parentNode.replaceChild(newMsgBtn, msgBtn);
                 newMsgBtn.addEventListener('click', () => {
-                    const token = localStorage.getItem('token');
+                    const token = (typeof window !== "undefined" && window.getAuthToken)
+                        ? window.getAuthToken()
+                        : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
                     if (!token) {
                         showToast('Mesaj yazmaq üçün sistemə daxil olun!');
                         setTimeout(() => window.location.href = 'login.html', 1500);
@@ -353,12 +628,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const submitBtn = selector.parentElement?.querySelector('.btn-submit-review');
                     if (!submitBtn) return;
 
-                    const newBtn = submitBtn.cloneNode(true);
-                    submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-                    newBtn.removeAttribute('onclick');
-
-                    newBtn.addEventListener('click', async () => {
-                        const token = localStorage.getItem('token');
+                    submitBtn.addEventListener('click', async () => {
+                        const token = (typeof window !== "undefined" && window.getAuthToken)
+                            ? window.getAuthToken()
+                            : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
                         if (!token) { showToast('Rəy yazmaq üçün daxil olun!'); return; }
                         if (!currentRating) { showToast('Zəhmət olmasa reytinq seçin (ulduz)'); return; }
 
@@ -366,8 +639,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const textEl   = document.getElementById(textElId);
                         const text     = textEl?.value.trim() || '';
 
-                        const btnText  = newBtn.innerHTML;
-                        newBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göndərilir...';
+                        const btnText  = submitBtn.innerHTML;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göndərilir...';
 
                         try {
                             const postRes = await fetch(`${API_BASE}/reviews`, {
@@ -386,12 +659,145 @@ document.addEventListener('DOMContentLoaded', async () => {
                         } catch (e) {
                             showToast('Şəbəkə xətası baş verdi.');
                         } finally {
-                            newBtn.innerHTML = btnText;
+                            submitBtn.innerHTML = btnText;
                         }
                     });
                 });
             }
         }
+
+        // ── 15. Related Ads (non-blocking) ──────────────────────────
+        const fetchAndRenderRelated = async () => {
+            const relatedSection = document.querySelector('.related-section');
+            const relatedGrid = document.querySelector('.related-grid');
+            if (!relatedGrid) return;
+
+            const hideRelated = () => {
+                if (relatedSection) {
+                    relatedSection.classList.add('hidden');
+                    relatedSection.style.display = 'none';
+                }
+            };
+
+            const showRelated = () => {
+                if (relatedSection) {
+                    relatedSection.classList.remove('hidden');
+                    relatedSection.style.display = '';
+                }
+            };
+
+            const category = ad.category ? String(ad.category).trim() : '';
+            if (!category) {
+                hideRelated();
+                return;
+            }
+
+            try {
+                let queryUrl = `${API_BASE}/ads?category=${encodeURIComponent(category)}&limit=5`;
+                if (ad.brand && String(ad.brand).trim()) {
+                    queryUrl += `&brand=${encodeURIComponent(String(ad.brand).trim())}`;
+                }
+
+                let res = await fetch(queryUrl);
+                let data = res.ok ? await res.json() : null;
+                let adsList = (data && Array.isArray(data.ads)) ? data.ads : [];
+
+                let filtered = adsList.filter(item => item && item._id && item._id !== ad._id);
+                if (filtered.length === 0 && ad.brand && String(ad.brand).trim()) {
+                    const fallbackRes = await fetch(`${API_BASE}/ads?category=${encodeURIComponent(category)}&limit=5`);
+                    const fallbackData = fallbackRes.ok ? await fallbackRes.json() : null;
+                    const fallbackList = (fallbackData && Array.isArray(fallbackData.ads)) ? fallbackData.ads : [];
+                    filtered = fallbackList.filter(item => item && item._id && item._id !== ad._id);
+                }
+
+                const relatedAds = filtered.slice(0, 4);
+
+                if (relatedAds.length === 0) {
+                    hideRelated();
+                    return;
+                }
+
+                relatedGrid.replaceChildren();
+
+                relatedAds.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'ad-card';
+                    card.style.cursor = 'pointer';
+                    card.addEventListener('click', () => {
+                        window.location.href = `elan-detail.html?id=${encodeURIComponent(item._id)}`;
+                    });
+
+                    // Image container
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = 'ad-image';
+
+                    const imgEl = document.createElement('img');
+                    const imgSrc = (Array.isArray(item.images) && item.images.length > 0)
+                        ? getImageUrl(item.images[0])
+                        : '';
+                    imgEl.src = imgSrc || 'Photo/logo.png';
+                    const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
+                    imgEl.alt = itemTitle;
+                    imgEl.loading = 'lazy';
+                    imgContainer.appendChild(imgEl);
+
+                    const badge = document.createElement('span');
+                    badge.className = 'ad-badge';
+                    if (item.sellerType === 'personal') {
+                        badge.style.background = '#e67e22';
+                        badge.textContent = 'Şəxsi';
+                    } else {
+                        badge.textContent = 'Mağaza';
+                    }
+                    imgContainer.appendChild(badge);
+
+                    card.appendChild(imgContainer);
+
+                    // Info container
+                    const infoContainer = document.createElement('div');
+                    infoContainer.className = 'ad-info';
+
+                    const priceEl = document.createElement('div');
+                    priceEl.className = 'ad-price';
+                    priceEl.textContent = `${Number(item.price || 0).toLocaleString('az-AZ')} AZN`;
+                    infoContainer.appendChild(priceEl);
+
+                    const titleEl = document.createElement('div');
+                    titleEl.className = 'ad-title';
+                    titleEl.textContent = itemTitle;
+                    infoContainer.appendChild(titleEl);
+
+                    const locEl = document.createElement('div');
+                    locEl.className = 'ad-location';
+
+                    const citySpan = document.createElement('span');
+                    const cityIcon = document.createElement('i');
+                    cityIcon.className = 'fas fa-map-marker-alt';
+                    citySpan.appendChild(cityIcon);
+                    citySpan.appendChild(document.createTextNode(` ${item.city || 'Bakı'}`));
+                    locEl.appendChild(citySpan);
+
+                    const dateSpan = document.createElement('span');
+                    if (item.createdAt) {
+                        const d = new Date(item.createdAt);
+                        dateSpan.textContent = !isNaN(d.getTime()) ? d.toLocaleDateString('az-AZ') : '';
+                    }
+                    locEl.appendChild(dateSpan);
+
+                    infoContainer.appendChild(locEl);
+                    card.appendChild(infoContainer);
+
+                    relatedGrid.appendChild(card);
+                });
+
+                showRelated();
+            } catch (err) {
+                console.warn('Failed to load related ads:', err);
+                hideRelated();
+            }
+        };
+
+        fetchAndRenderRelated();
 
     } catch (err) {
         console.error('[ad-details] Error:', err);
@@ -472,6 +878,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="mini-text">${r.comment || ''}</div>
                     </div>`;
             });
+        }
+
+        // Dynamically show personal seller rating stat if reviews exist
+        if (!isStore && sellerStats && Array.isArray(reviews) && reviews.length > 0) {
+            sellerStats.replaceChildren();
+
+            const statRatingDiv = document.createElement('div');
+            statRatingDiv.className = 'p-stat';
+            const rVal = document.createElement('span');
+            rVal.className = 'val';
+            rVal.textContent = avg;
+            const rLbl = document.createElement('span');
+            rLbl.className = 'lbl';
+            rLbl.textContent = '★ Reytinq';
+            statRatingDiv.appendChild(rVal);
+            statRatingDiv.appendChild(rLbl);
+            sellerStats.appendChild(statRatingDiv);
+
+            const statCountDiv = document.createElement('div');
+            statCountDiv.className = 'p-stat';
+            const cVal = document.createElement('span');
+            cVal.className = 'val';
+            cVal.textContent = String(reviews.length);
+            const cLbl = document.createElement('span');
+            cLbl.className = 'lbl';
+            cLbl.textContent = 'Rəy';
+            statCountDiv.appendChild(cVal);
+            statCountDiv.appendChild(cLbl);
+            sellerStats.appendChild(statCountDiv);
+
+            sellerStats.classList.remove('hidden');
+            sellerStats.style.display = 'grid';
         }
     }
 

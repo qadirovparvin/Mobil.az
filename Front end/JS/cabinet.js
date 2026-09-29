@@ -1,5 +1,6 @@
+const API_BASE = window.API_URL || window.API_BASE || 'http://localhost:5000/api';
+
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE = window.API_URL || 'http://localhost:5000/api';
     const CABINET_TRANSLATIONS = {
         AZ: {
             userFallback: 'istifadəçi',
@@ -142,7 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = window.toast;
 
     function getToken() {
-        return localStorage.getItem('token') || '';
+        const token = window.getAuthToken ? window.getAuthToken() : (sessionStorage.getItem('token') || '');
+        return token || localStorage.getItem('token') || '';
     }
 
     function getCurrentLang() {
@@ -946,9 +948,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('mobilaz_current_user', JSON.stringify(user));
 
         if (user.role === 'admin') {
-            const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token');
             if (token) {
-                localStorage.setItem('adminToken', token);
+                sessionStorage.setItem('adminToken', token);
             }
             localStorage.setItem('adminUser', JSON.stringify(user));
         }
@@ -1069,6 +1071,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function fetchReferralStats() {
+        const token = getToken();
+        if (!token) return;
+        try {
+            const response = await fetch(`${API_BASE}/referral/stats`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const referralCountEl = document.getElementById('referralCount');
+                if (referralCountEl) {
+                    referralCountEl.textContent = data.totalReferrals;
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to fetch referral stats:', error);
+        }
+    }
+
     async function hydrateCurrentUser() {
         const token = getToken();
         const storedUser = getStoredUser();
@@ -1081,15 +1104,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        fetchReferralStats();
+
         try {
-            const response = await fetch(`${API_BASE}/auth/me`, {
+            const response = await fetch(`${API_BASE}/user/profile`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
 
             if (response.status === 401 || response.status === 403) {
-                ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => localStorage.removeItem(key));
+                ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
                 window.location.href = 'login.html';
                 return;
             }
@@ -1139,13 +1164,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getUiStatus(status) {
-        if (status === 'Active') return 'active';
-        if (status === 'Pending') return 'pending';
+        const s = (status || '').toLowerCase();
+        if (s === 'active') return 'active';
+        if (s === 'pending') return 'pending';
         return 'expired';
     }
 
     function getStatusBadge(status) {
+        const s = (status || '').toLowerCase();
         const labels = {
+            active: t('statusActive', 'Aktiv'),
+            pending: t('statusPending', 'Yoxlanılır'),
+            rejected: t('statusRejected', 'Rədd edildi'),
+            archived: t('statusArchived', 'Arxivdə'),
+            sold: t('statusSold', 'Satılıb'),
             Active: t('statusActive', 'Aktiv'),
             Pending: t('statusPending', 'Yoxlanılır'),
             Rejected: t('statusRejected', 'Rədd edildi'),
@@ -1153,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             Sold: t('statusSold', 'Satılıb')
         };
 
-        return labels[status] || status;
+        return labels[s] || labels[status] || status;
     }
 
     function getMyAdsList() {
@@ -1163,9 +1195,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateFilterCounts(ads) {
         const counts = {
             all: ads.length,
-            active: ads.filter((ad) => ad.status === 'Active').length,
-            pending: ads.filter((ad) => ad.status === 'Pending').length,
-            expired: ads.filter((ad) => !['Active', 'Pending'].includes(ad.status)).length
+            active: ads.filter((ad) => (ad.status || '').toLowerCase() === 'active').length,
+            pending: ads.filter((ad) => (ad.status || '').toLowerCase() === 'pending').length,
+            expired: ads.filter((ad) => !['active', 'pending'].includes((ad.status || '').toLowerCase())).length
         };
 
         document.querySelectorAll('.ad-filters .filter-pill').forEach((pill) => {
@@ -1235,7 +1267,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMyAds() {
         const token = getToken();
         const list = getMyAdsList();
-        if (!token || !list) return;
+        if (!list) return;
+
+        if (!token) {
+            list.innerHTML = `
+                <div class="cab-glass" style="padding:40px 20px;text-align:center;color:var(--cab-text-secondary);">
+                    <i class="fas fa-lock" style="font-size:36px;margin-bottom:12px;display:block;opacity:0.6;"></i>
+                    <p style="margin-bottom:12px;">${escapeHtml(t('authRequired', 'Zəhmət olmasa hesabınıza daxil olun.'))}</p>
+                    <a href="login.html" class="btn-primary" style="display:inline-block;padding:8px 20px;text-decoration:none;">Giriş</a>
+                </div>
+            `;
+            return;
+        }
 
         list.innerHTML = `
             <div class="cab-glass" style="padding:24px;text-align:center;color:var(--cab-text-secondary);">
@@ -1249,6 +1292,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     Authorization: `Bearer ${token}`
                 }
             });
+
+            if (response.status === 401 || response.status === 403) {
+                if (window.clearAuthSession) {
+                    window.clearAuthSession();
+                } else {
+                    ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
+                }
+                list.innerHTML = `
+                    <div class="cab-glass" style="padding:40px 20px;text-align:center;color:var(--cab-danger);">
+                        <p style="margin-bottom:12px;">Sessiyanın vaxtı bitib. Zəhmət olmasa yenidən daxil olun.</p>
+                        <a href="login.html" class="btn-primary" style="display:inline-block;padding:8px 20px;text-decoration:none;">Giriş</a>
+                    </div>
+                `;
+                setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                return;
+            }
 
             const data = await response.json();
             if (!response.ok) {
@@ -1295,14 +1354,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const boostBtn = e.target.closest('.btn-boost');
 
             if (boostBtn) {
-                window.openPromotionModal(boostBtn.getAttribute('data-id'));
+                const adId = boostBtn.getAttribute('data-id') || boostBtn.closest('.my-ad-item')?.getAttribute('data-id');
+                window.openPromotionModal(adId);
                 return;
             }
 
             if (editBtn) {
-                const adId = editBtn.getAttribute('data-id');
+                const adId = editBtn.getAttribute('data-id') || editBtn.closest('.my-ad-item')?.getAttribute('data-id');
                 if (adId) {
-                    window.location.href = `elan-yerlesdir.html?edit=${adId}`;
+                    window.location.href = `elan-yerlesdir.html?edit=${encodeURIComponent(adId)}`;
                 }
                 return;
             }
@@ -1311,7 +1371,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const adId = deleteBtn.getAttribute('data-id');
+            const adId = deleteBtn.getAttribute('data-id') || deleteBtn.closest('.my-ad-item')?.getAttribute('data-id');
             if (!adId) return;
 
             if (!confirm(t('deleteAdConfirm', 'Bu elanı silmək istədiyinizdən əminsiniz?'))) {
@@ -1382,14 +1442,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function setButtonLoading(btn, loading) {
-            if (!btn) return;
+            if (!btn) return false;
             if (loading) {
+                if (btn.disabled) return false;
                 btn.disabled = true;
                 btn._originalText = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                return true;
             } else {
                 btn.disabled = false;
                 btn.innerHTML = btn._originalText || btn.innerHTML;
+                return true;
             }
         }
 
@@ -1404,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!name) { toast.show(t('nameRequired', 'Ad boş ola bilməz.'), 'error'); return; }
 
-                setButtonLoading(btnSaveProfile, true);
+                if (!setButtonLoading(btnSaveProfile, true)) return;
                 try {
                     const updated = await apiPut('user/profile', { name, lastName, email, phone });
                     // Refresh localStorage so navbar updates immediately
@@ -1421,23 +1484,101 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ── Save Security (password + 2FA) → PUT /api/user/security ─
+        // ── 2FA Toggle (Enroll / Disable) → POST /api/auth/2fa/* ─
+        const twoFactorCheckbox = document.getElementById('two_fa');
+        if (twoFactorCheckbox) {
+            twoFactorCheckbox.addEventListener('change', async () => {
+                const isChecking = twoFactorCheckbox.checked;
+                const stored = getStoredUser() || {};
+                const currentStatus = Boolean(stored.twoFactorEnabled);
+
+                if (isChecking === currentStatus) return;
+
+                if (isChecking) {
+                    const currentPassword = window.prompt('2FA-nı aktiv etmək üçün cari şifrənizi daxil edin:');
+                    if (!currentPassword) {
+                        twoFactorCheckbox.checked = false;
+                        return;
+                    }
+
+                    try {
+                        const enrollData = await apiPost('auth/2fa/enroll', { currentPassword });
+                        const secret = enrollData.secret;
+                        const promptMsg = `${enrollData.message || 'Authenticator tətbiqinizə açarı əlavə edin:'}\n\nAçar: ${secret}\n\nAuthenticator-dan aldığınız 6 rəqəmli təsdiq kodunu daxil edin:`;
+                        const code = window.prompt(promptMsg);
+
+                        if (!code) {
+                            twoFactorCheckbox.checked = false;
+                            toast.show('2FA quraşdırması ləğv edildi', 'warning');
+                            return;
+                        }
+
+                        const confirmData = await apiPost('auth/2fa/confirm', { code: code.trim() });
+                        stored.twoFactorEnabled = true;
+                        persistUser(stored);
+                        twoFactorCheckbox.checked = true;
+                        toast.show(confirmData.message || '2FA aktiv edildi!', 'success');
+
+                        if (confirmData.recoveryCodes && confirmData.recoveryCodes.length) {
+                            window.alert('Bərpa kodlarınız (təhlükəsiz yerdə saxlayın):\n\n' + confirmData.recoveryCodes.join('\n'));
+                        }
+                    } catch (err) {
+                        twoFactorCheckbox.checked = false;
+                        toast.show(err.message || '2FA aktivləşdirilə bilmədi', 'error');
+                    }
+                } else {
+                    const currentPassword = window.prompt('2FA-nı söndürmək üçün cari şifrənizi daxil edin:');
+                    if (!currentPassword) {
+                        twoFactorCheckbox.checked = true;
+                        return;
+                    }
+
+                    const otpCode = window.prompt('Authenticator-dan 6 rəqəmli təsdiq kodunu (və ya bərpa kodunu) daxil edin:');
+                    if (!otpCode) {
+                        twoFactorCheckbox.checked = true;
+                        return;
+                    }
+
+                    try {
+                        const disableData = await apiPost('auth/2fa/disable', {
+                            currentPassword,
+                            otpCode: otpCode.trim()
+                        });
+                        stored.twoFactorEnabled = false;
+                        persistUser(stored);
+                        twoFactorCheckbox.checked = false;
+                        toast.show(disableData.message || '2FA söndürüldü', 'info');
+                    } catch (err) {
+                        twoFactorCheckbox.checked = true;
+                        toast.show(err.message || '2FA söndürülə bilmədi', 'error');
+                    }
+                }
+            });
+        }
+
+        // ── Save Password → PUT /api/user/security ────────────
         const btnSaveSecurity = document.getElementById('btnSaveSecurity');
         if (btnSaveSecurity) {
             btnSaveSecurity.addEventListener('click', async () => {
-                const oldPassword      = document.getElementById('secOldPassword')?.value;
-                const newPassword      = document.getElementById('secNewPassword')?.value;
-                const twoFactorEnabled = document.getElementById('two_fa')?.checked;
+                const oldPassword = document.getElementById('secOldPassword')?.value;
+                const newPassword = document.getElementById('secNewPassword')?.value;
 
-                const body = { twoFactorEnabled };
-                if (oldPassword || newPassword) {
-                    if (!oldPassword) { toast.show(t('currentPasswordRequired', 'Cari şifrəni daxil edin.'), 'error'); return; }
-                    if (!newPassword || newPassword.length < 6) { toast.show(t('passwordMin', 'Şifrə ən azı 6 simvol olmalıdır.'), 'error'); return; }
-                    body.oldPassword = oldPassword;
-                    body.newPassword = newPassword;
+                if (!oldPassword && !newPassword) {
+                    return;
                 }
 
-                setButtonLoading(btnSaveSecurity, true);
+                if (!oldPassword) {
+                    toast.show(t('currentPasswordRequired', 'Cari şifrəni daxil edin.'), 'error');
+                    return;
+                }
+                if (!newPassword || newPassword.length < 6) {
+                    toast.show(t('passwordMin', 'Şifrə ən azı 6 simvol olmalıdır.'), 'error');
+                    return;
+                }
+
+                const body = { oldPassword, newPassword };
+
+                if (!setButtonLoading(btnSaveSecurity, true)) return;
                 try {
                     await apiPut('user/security', body);
                     // Clear password fields after success
@@ -1461,7 +1602,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     allowMessages:    document.getElementById('privacyAllowMessages')?.checked    ?? true,
                     showOnlineStatus: document.getElementById('privacyShowOnline')?.checked       ?? true
                 };
-                setButtonLoading(btnSavePrivacy, true);
+                if (!setButtonLoading(btnSavePrivacy, true)) return;
                 try {
                     await apiPut('user/privacy', body);
                     toast.show(t('privacySaved', 'Məxfilik tənzimləmələri yadda saxlanıldı!'), 'success');
@@ -1478,12 +1619,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (freezeBtn) {
             freezeBtn.addEventListener('click', async () => {
                 if (!confirm(t('freezeConfirm', 'Hesabınızı dondurmaq istədiyinizdən əminsiniz? Bütün aktiv elanlarınız gizlədiləcək.'))) return;
-                setButtonLoading(freezeBtn, true);
+                if (!setButtonLoading(freezeBtn, true)) return;
                 try {
                     await apiPost('user/freeze');
                     toast.show(t('accountFrozen', 'Hesabınız donduruldu. Sistemdən çıxış edilir...'), 'warning', 2500);
                     setTimeout(() => {
-                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => localStorage.removeItem(k));
+                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
                         window.location.href = 'login.html';
                     }, 2500);
                 } catch (err) {
@@ -1499,12 +1640,12 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteAccBtn.addEventListener('click', async () => {
                 if (!confirm(t('deleteConfirmOne', 'XƏBƏRDARLIQ: Hesabınız və bütün məlumatlarınız həmişəlik silinəcək. Davam etmək istəyirsiniz?'))) return;
                 if (!confirm(t('deleteConfirmTwo', 'Son təsdiq: Bu əməliyyat GERİ QAYTARILA BİLMƏZ. Silmək istəyirsiniz?'))) return;
-                setButtonLoading(deleteAccBtn, true);
+                if (!setButtonLoading(deleteAccBtn, true)) return;
                 try {
                     await apiDelete('user/delete');
                     toast.show(t('accountDeleted', 'Hesabınız silindi. Yönləndirilirsiniz...'), 'error', 2500);
                     setTimeout(() => {
-                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => localStorage.removeItem(k));
+                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
                         window.location.href = 'index.html';
                     }, 2500);
                 } catch (err) {
@@ -1515,39 +1656,358 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function bindChatMock() {
-        const sendBtn = document.querySelector('.btn-send');
-        const chatInput = document.querySelector('.chat-input input');
-        const chatMessagesContainer = document.querySelector('.chat-messages');
+    let currentConversation = null;
+    let cabinetSocket = null;
+    let allCabinetConversations = [];
 
-        if (!sendBtn || !chatInput || !chatMessagesContainer) {
+    function initCabinetSocket() {
+        if (cabinetSocket) return cabinetSocket;
+        const token = getToken();
+        const storedUser = getStoredUser();
+        const myId = storedUser ? (storedUser.id || storedUser._id) : '';
+        
+        if (typeof io !== 'function' || !token || !myId) return null;
+        
+        const socketUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        try {
+            cabinetSocket = io(socketUrl, {
+                auth: { token }
+            });
+            
+            cabinetSocket.on('connect', () => {
+                cabinetSocket.emit('join_chat', myId);
+            });
+            
+            cabinetSocket.on('receive_message', (msg) => {
+                handleCabinetIncomingMessage(msg, myId);
+            });
+        } catch (err) {
+            console.error('Socket init error in cabinet:', err);
+        }
+        return cabinetSocket;
+    }
+
+    function handleCabinetIncomingMessage(msg, myId) {
+        const msgSenderId = msg.sender?._id || msg.sender;
+        const msgAdId = msg.ad?._id || msg.ad;
+        const isMine = msgSenderId === myId;
+        
+        // If current open conversation matches this message, append it
+        if (currentConversation) {
+            const curAdId = currentConversation._id?.ad || currentConversation.lastMessage?.ad?._id || currentConversation.lastMessage?.ad;
+            const curOtherId = currentConversation._id?.other;
+            
+            if (msgAdId === curAdId && (msgSenderId === curOtherId || isMine)) {
+                appendCabinetMessage(msg, isMine);
+            }
+        }
+        
+        // Update or reload conversations list to reflect last message and unread count
+        loadConversations({ preserveSelection: true });
+    }
+
+    function appendCabinetMessage(msg, isMine) {
+        const messagesArea = document.querySelector('.chat-messages');
+        if (!messagesArea) return;
+        
+        // Clear empty state illustration if present
+        if (messagesArea.querySelector('.fa-comments') || messagesArea.querySelector('.fa-spinner')) {
+            messagesArea.innerHTML = '';
+        }
+        
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${isMine ? 'bubble-sent' : 'bubble-received'}`;
+        
+        let timeStr = '';
+        if (msg.createdAt) {
+            const date = new Date(msg.createdAt);
+            if (!Number.isNaN(date.getTime())) {
+                timeStr = date.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+            }
+        }
+        
+        bubble.innerHTML = `
+            <div>${escapeHtml(msg.text || '')}</div>
+            ${timeStr ? `<span class="bubble-time">${escapeHtml(timeStr)}</span>` : ''}
+        `;
+        
+        messagesArea.appendChild(bubble);
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    async function openConversationInCabinet(conv) {
+        currentConversation = conv;
+        
+        const ad = conv.lastMessage?.ad || {};
+        const other = conv._id?.other;
+        const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
+        const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
+        const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : (conv.adTitle || 'Elan');
+        
+        // Update header info
+        const headerName = document.querySelector('.chat-header-info h3');
+        const headerAd = document.querySelector('.chat-header-info p');
+        if (headerName) headerName.textContent = otherName;
+        if (headerAd) headerAd.innerHTML = `<i class="fas fa-tag"></i> <span>${escapeHtml(adTitle)}</span>`;
+        
+        // Highlight active item in list
+        document.querySelectorAll('.chat-list-item').forEach(el => {
+            el.classList.remove('active');
+            el.style.borderLeft = 'none';
+        });
+        const activeItem = document.querySelector(`.chat-list-item[data-ad-id="${conv._id?.ad}"][data-other-id="${other}"]`);
+        if (activeItem) {
+            activeItem.classList.add('active');
+            activeItem.style.borderLeft = '3px solid var(--airy-primary)';
+            const unreadBadge = activeItem.querySelector('.unread-badge');
+            if (unreadBadge) unreadBadge.remove();
+        }
+        
+        // Load messages history
+        const messagesArea = document.querySelector('.chat-messages');
+        if (messagesArea) {
+            messagesArea.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        }
+        
+        const token = getToken();
+        const storedUser = getStoredUser();
+        const myId = storedUser ? (storedUser.id || storedUser._id) : '';
+        const adId = conv._id?.ad;
+        
+        if (!adId || !other) return;
+        
+        try {
+            const res = await fetch(`${API_BASE}/messages/${adId}?with=${other}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            
+            if (messagesArea) {
+                messagesArea.innerHTML = '';
+                if (res.ok && Array.isArray(data.messages)) {
+                    if (data.messages.length === 0) {
+                        messagesArea.innerHTML = '<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--text-muted); opacity:0.6;"><i class="fas fa-comments" style="font-size:48px; margin-bottom:10px;"></i><span>Hələ mesaj yoxdur. İlk mesajı siz yazın!</span></div>';
+                    } else {
+                        data.messages.forEach(m => {
+                            const senderId = m.sender?._id || m.sender;
+                            const isMine = senderId === myId;
+                            appendCabinetMessage(m, isMine);
+                        });
+                    }
+                } else {
+                    messagesArea.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">Mesajlar yüklənmədi</div>';
+                }
+            }
+        } catch (err) {
+            console.error('Error loading thread:', err);
+            if (messagesArea) {
+                messagesArea.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted);">Tarixçə yüklənərkən xəta baş verdi</div>';
+            }
+        }
+    }
+
+    async function sendCabinetMessage() {
+        const input = document.querySelector('.chat-input input');
+        if (!input) return;
+        const text = input.value.trim();
+        if (!text) return;
+        
+        if (!currentConversation) {
+            toast.show(t('selectConversationFirst', 'Zəhmət olmasa əvvəlcə bir söhbət seçin'), 'warning');
             return;
         }
-
-        function sendMessage() {
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            const time = new Date().toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble bubble-sent';
-            bubble.innerHTML = `${escapeHtml(text)}<span class="bubble-time">${time}</span>`;
-            chatMessagesContainer.appendChild(bubble);
-            chatInput.value = '';
-            chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+        
+        const token = getToken();
+        const storedUser = getStoredUser();
+        const myId = storedUser ? (storedUser.id || storedUser._id) : '';
+        const otherId = currentConversation._id?.other;
+        const adId = currentConversation._id?.ad;
+        
+        if (!otherId || !adId) return;
+        
+        input.value = '';
+        
+        const socket = initCabinetSocket();
+        let sentViaSocket = false;
+        
+        if (socket && socket.connected) {
+            socket.emit('send_message', {
+                sender: myId,
+                recipient: otherId,
+                ad: adId,
+                text
+            });
+            sentViaSocket = true;
+        } else {
+            // HTTP fallback
+            try {
+                const res = await fetch(`${API_BASE}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        recipientId: otherId,
+                        adId,
+                        text
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    appendCabinetMessage(data, true);
+                } else {
+                    toast.show(data.message || 'Mesaj göndərilmədi', 'error');
+                }
+            } catch (err) {
+                console.error('Failed to send message via HTTP:', err);
+                toast.show('Mesaj göndərilmədi', 'error');
+            }
         }
+    }
 
-        sendBtn.addEventListener('click', sendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
+    function setupCabinetChatEvents() {
+        const sendBtn = document.querySelector('.chat-input .btn-send');
+        const chatInput = document.querySelector('.chat-input input');
+        const searchInput = document.querySelector('.chat-search input');
+        
+        if (sendBtn) {
+            sendBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sendCabinetMessage();
+            });
+        }
+        
+        if (chatInput) {
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendCabinetMessage();
+                }
+            });
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.trim().toLowerCase();
+                const items = document.querySelectorAll('.chat-list .chat-list-item');
+                let visibleCount = 0;
+                
+                items.forEach(item => {
+                    const text = (item.textContent || '').toLowerCase();
+                    if (!query || text.includes(query)) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                const noResultMsg = document.getElementById('chat-search-no-result');
+                if (visibleCount === 0 && query) {
+                    if (!noResultMsg) {
+                        const noRes = document.createElement('div');
+                        noRes.id = 'chat-search-no-result';
+                        noRes.style.cssText = 'padding: 20px; font-size: 13px; text-align: center; color: var(--text-muted);';
+                        noRes.textContent = 'Axtarışa uyğun söhbət tapılmadı.';
+                        document.querySelector('.chat-list')?.appendChild(noRes);
+                    }
+                } else if (noResultMsg) {
+                    noResultMsg.remove();
+                }
+            });
+        }
+    }
+
+    async function loadConversations(options = {}) {
+        const chatList = document.querySelector('.chat-list');
+        if (!chatList) return;
+        
+        if (!options.preserveSelection) {
+            chatList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Yüklənir...</div>';
+        }
+        
+        try {
+            const response = await fetch(`${API_BASE}/messages/conversations`, {
+                headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Söhbətlər yüklənmədi');
+            }
+            
+            const conversations = Array.isArray(data.conversations)
+                ? data.conversations
+                : [];
+            allCabinetConversations = conversations;
+            
+            chatList.innerHTML = '';
+            
+            if (conversations.length === 0) {
+                chatList.innerHTML = '<div class="empty-state" style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);"><span data-translate="cab-msg-empty">Mesaj qutunuz boşdur.</span></div>';
+                return;
+            }
+            
+            conversations.forEach(conv => {
+                const ad = conv.lastMessage?.ad || {};
+                const other = conv._id?.other;
+                const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
+                
+                const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
+                const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : 'Elan';
+                
+                const item = document.createElement('div');
+                item.className = 'chat-list-item cab-glass';
+                item.setAttribute('data-ad-id', conv._id?.ad || '');
+                item.setAttribute('data-other-id', other || '');
+                item.style.padding = '15px';
+                item.style.borderBottom = '1px solid var(--border-color)';
+                item.style.cursor = 'pointer';
+                item.style.transition = 'background 0.2s';
+                
+                const isSelected = currentConversation && (currentConversation._id?.ad === conv._id?.ad) && (currentConversation._id?.other === other);
+                if (isSelected) {
+                    item.classList.add('active');
+                    item.style.borderLeft = '3px solid var(--airy-primary)';
+                }
+                
+                item.onmouseover = () => { if (!item.classList.contains('active')) item.style.background = 'var(--bg-secondary)'; };
+                item.onmouseout = () => { if (!item.classList.contains('active')) item.style.background = 'transparent'; };
+                
+                item.innerHTML = `
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <img src="${otherUser?.avatar || 'Photo/avatar.png'}" alt="${escapeHtml(otherName)} profil şəkli" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(otherName)}</div>
+                            <div style="font-size: 12px; color: var(--airy-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${escapeHtml(adTitle)}</div>
+                            <div style="font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(conv.lastMessage?.text || '')}</div>
+                        </div>
+                        ${conv.unread > 0 ? `<div class="unread-badge" style="background: var(--airy-primary); color: white; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">${conv.unread}</div>` : ''}
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    openConversationInCabinet(conv);
+                });
+                
+                chatList.appendChild(item);
+            });
+            
+            initCabinetSocket();
+            
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+            chatList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Xəta baş verdi</div>';
+        }
     }
 
     bindFilterPills();
     bindMyAdActions();
     bindBillingPanel();
     bindStaticButtons();
-    bindChatMock();
+    setupCabinetChatEvents();
+    loadConversations();
     renderBillingPanel(getStoredUser() || {});
     hydrateCurrentUser();
     loadMyAds();
@@ -1564,14 +2024,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let currentPromoAdId = null;
-let selectedPkg = 'bump';
-let selectedDuration = 1;
-let userReferralBalance = 15.0;
+let selectedPkg = 'Urgent';
 
 const prices = {
-    bump: { 1: 1.0 },
-    vip: { 1: 2.0, 3: 4.0 },
-    pro: { 1: 4.0, 3: 8.0 }
+    Urgent: 3.0,
+    VIP: 5.0,
+    Premium: 10.0
 };
 
 window.openPromotionModal = function (adId) {
@@ -1579,7 +2037,7 @@ window.openPromotionModal = function (adId) {
     const modal = document.getElementById('promotionModal');
     if (modal) {
         modal.classList.add('active');
-        selectPackage('bump');
+        selectPackage('Urgent');
     }
 };
 
@@ -1593,50 +2051,93 @@ window.selectPackage = function (pkg) {
 
     document.querySelectorAll('.promo-pkg-card').forEach((card) => {
         const input = card.querySelector('input');
-        if (input.value === pkg) input.checked = true;
+        if (input) input.checked = (input.value === pkg);
     });
 
-    const tierSelector = document.getElementById('tierSelector');
-    if (tierSelector) {
-        if (pkg === 'bump') {
-            tierSelector.style.display = 'none';
-            selectedDuration = 1;
-        } else {
-            tierSelector.style.display = 'block';
-            setDuration(selectedDuration);
-        }
-    }
-
-    updateTotal();
-};
-
-window.setDuration = function (days) {
-    selectedDuration = days;
-    document.querySelectorAll('.btn-tier').forEach((btn) => {
-        btn.classList.toggle('active', parseInt(btn.getAttribute('data-days')) === days);
-    });
     updateTotal();
 };
 
 window.updateTotal = function () {
-    let price = prices[selectedPkg][selectedDuration] || 0;
-    const checkbox = document.getElementById('useReferralCredit');
+    let price = prices[selectedPkg] || 0;
     const finalPriceElem = document.getElementById('finalPrice');
-
-    if (checkbox && checkbox.checked) {
-        const maxDiscount = price * 0.5;
-        const actualDiscount = Math.min(maxDiscount, userReferralBalance);
-        price -= actualDiscount;
-    }
-
     if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
 };
 
-window.confirmPromotion = function () {
-    const t = window.toast || { show: (message) => alert(message) };
-    const translate = window.cabinetT || ((key, fallback) => fallback);
-    t.show(translate('promoNotReady', 'Elan tanıtımı hissəsi hələ backend-ə qoşulmayıb.'), 'info');
-    window.closePromotionModal();
+window.confirmPromotion = async function () {
+    const t = window.toast || { show: (message, type) => alert(message) };
+    if (!currentPromoAdId) {
+        t.show('Xəta: Elan seçilməyib', 'error');
+        return;
+    }
+
+    const token = typeof getAuthToken === 'function'
+        ? getAuthToken()
+        : (window.getAuthToken ? window.getAuthToken() : (typeof getToken === 'function' ? getToken() : (sessionStorage.getItem('token') || localStorage.getItem('token'))));
+    if (!token) {
+        t.show('Lütfən daxil olun', 'error');
+        return;
+    }
+
+    const payBtn = document.getElementById('btnPayPromo');
+    if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> İşlənir...';
+    }
+
+    try {
+        const base = window.API_URL || window.API_BASE || (typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:5000/api');
+        const response = await fetch(`${base}/ads/${encodeURIComponent(currentPromoAdId)}/boost`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ promotionType: selectedPkg })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            let errMsg = data.message || 'Ödəniş uğursuz oldu';
+            if (data.required !== undefined && data.current !== undefined) {
+                errMsg = `Balans kifayət deyil. Lazım olan: ${data.required} AZN, Balansınız: ${data.current} AZN`;
+            }
+            throw new Error(errMsg);
+        }
+
+        t.show(data.message || `${selectedPkg} uğurla aktivləşdirildi!`, 'success');
+        window.closePromotionModal();
+
+        // Update stored user wallet balance
+        if (data.walletBalance !== undefined) {
+            const rawUser = localStorage.getItem('user') || localStorage.getItem('mobilaz_current_user');
+            if (rawUser) {
+                try {
+                    const userObj = JSON.parse(rawUser);
+                    userObj.walletBalance = data.walletBalance;
+                    localStorage.setItem('user', JSON.stringify(userObj));
+                    localStorage.setItem('mobilaz_current_user', JSON.stringify(userObj));
+                } catch (e) {
+                    console.error('Error updating stored user balance:', e);
+                }
+            }
+        }
+
+        // Re-hydrate user profile & reload my ads
+        if (typeof hydrateCurrentUser === 'function') {
+            hydrateCurrentUser();
+        }
+        if (typeof loadMyAds === 'function') {
+            loadMyAds();
+        }
+    } catch (error) {
+        t.show(error.message || 'Ödəniş zamanı xəta baş verdi', 'error');
+    } finally {
+        if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.innerHTML = '<i class="fas fa-check-circle"></i> <span data-translate="mon-pay-btn">Ödəniş et</span>';
+        }
+    }
 };
 
 window.copyReferralLink = function () {

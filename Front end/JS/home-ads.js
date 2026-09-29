@@ -1,7 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", function () {
-    const API_BASE = window.API_URL || "http://localhost:5000/api";
+    const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
 
     const vipContainer = document.querySelector(".vip-ads-container");
@@ -29,7 +29,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return image;
         }
 
-        return `${API_ORIGIN}${image}`;
+        if (image.includes("Front end/") || image.includes("Front-end/")) {
+            return image.replace(/.*?\/Front[- ]end\//gi, "");
+        }
+
+        if (image.includes("Photo/")) {
+            return image.substring(image.indexOf("Photo/"));
+        }
+
+        const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        const cleanPath = image.startsWith('/') ? image : '/' + image;
+        return origin + cleanPath;
     }
 
     function formatPrice(price) {
@@ -46,26 +56,30 @@ document.addEventListener("DOMContentLoaded", function () {
             return "";
         }
 
-        return date.toLocaleDateString("az-AZ", {
+        return date.toLocaleString("az-AZ", {
             day: "2-digit",
-            month: "short",
-            year: "numeric"
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
         });
     }
 
     function mapCardCategory(category) {
         const map = {
-            Telefon: "phone",
-            Planşet: "tablet",
-            Qulaqlıq: "headphone",
-            Aksesuar: "accessory"
+            phone: "Telefon",
+            tablet: "Planşet",
+            headphone: "Qulaqlıq",
+            accessory: "Aksesuar"
         };
 
-        return map[category] || "phone";
+        return map[category] || category || "Telefon";
     }
 
     function mapCondition(condition) {
-        return condition === "Yeni" ? "new" : "used";
+        if (condition === "new") return "Yeni";
+        if (condition === "used") return "İşlənmiş";
+        return condition || "Yeni";
     }
 
     function getBadgeHtml(ad) {
@@ -74,7 +88,22 @@ document.addEventListener("DOMContentLoaded", function () {
             ? ""
             : ' style="background:var(--accent-hover);"';
 
-        return `<span class="ad-badge"${badgeStyle}>${sellerType}</span>`;
+        let badges = `<span class="ad-badge"${badgeStyle}>${sellerType}</span>`;
+
+        const now = new Date();
+        const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
+
+        if (isPromoActive) {
+            if (ad.promotionType === "VIP") {
+                badges += ` <span class="ad-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
+            } else if (ad.promotionType === "Premium" || ad.promotionType === "PRO") {
+                badges += ` <span class="ad-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
+            } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
+                badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
+            }
+        }
+
+        return badges;
     }
 
     function createCardMarkup(ad) {
@@ -87,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
                 <div class="ad-card"
                     data-id="${escapeHtml(ad._id)}"
+                    data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
                     data-category="${mapCardCategory(ad.category)}"
                     data-price="${escapeHtml(ad.price || 0)}"
@@ -130,50 +160,135 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    async function loadAds() {
+    let currentPage = 1;
+    const limit = 20;
+    let currentQuery = '';
+    
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    const loadMoreContainer = document.getElementById('loadMoreContainer');
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', async () => {
+            currentPage++;
+            await fetchAndAppendAds(false);
+        });
+    }
+
+    let isLoadingAds = false;
+
+    async function fetchAndAppendAds(isInitial = true) {
+        if (isLoadingAds) return;
+        isLoadingAds = true;
+        
+        if (isInitial && window.renderSkeletons) {
+            window.renderSkeletons(allAdsContainer, 8);
+            if (vipContainer) window.renderSkeletons(vipContainer, 4);
+        }
+        
         try {
-            const response = await fetch(`${API_BASE}/ads?limit=100&sortBy=newest`);
+            const params = new URLSearchParams(window.location.search);
+            const sellerId = params.get('seller');
+            const searchQ = params.get('q') || params.get('search'); // Fallback if old link
+            
+            let apiUrl = new URL(`${API_BASE}/ads`);
+            apiUrl.searchParams.set('limit', limit);
+            apiUrl.searchParams.set('page', currentPage);
+            apiUrl.searchParams.set('sortBy', 'newest');
+            
+            if (sellerId) apiUrl.searchParams.set('author', sellerId);
+            if (currentQuery || searchQ) apiUrl.searchParams.set('q', currentQuery || searchQ);
+            
+            // Forward existing URL filters to the backend
+            const filterKeys = ['category', 'brand', 'city', 'condition', 'minPrice', 'maxPrice', 'nfc', 'waterproof', 'fingerprint', 'memory', 'ram', 'color'];
+            filterKeys.forEach(key => {
+                const val = params.get(key);
+                if (val && val !== 'any' && val !== 'both') {
+                    apiUrl.searchParams.set(key, val);
+                }
+            });
+            
+            const response = await fetch(apiUrl.toString());
             const data = await response.json();
 
-            if (!response.ok) {
-                throw new Error(data.message || "Elanlar yüklənmədi");
-            }
+            if (!response.ok) throw new Error(data.message || "Elanlar yüklənmədi");
 
             const ads = Array.isArray(data.ads) ? data.ads : [];
-            const vipAds = ads
-                .filter((ad) => ad.promotionType === "VIP" || ad.promotionType === "PRO")
-                .slice(0, 8);
-            const regularAds = ads.slice(0, 24);
-
-            vipContainer.innerHTML = vipAds.length
-                ? vipAds.map(createCardMarkup).join("")
-                : "";
-
-            allAdsContainer.innerHTML = regularAds.length
-                ? regularAds.map(createCardMarkup).join("")
-                : "";
-
-            if (!vipAds.length) {
-                renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.");
+            
+            // Only update VIP on initial load
+            if (isInitial) {
+                if (window.removeSkeletons) window.removeSkeletons(vipContainer);
+                const now = new Date();
+                const vipAds = ads.filter((ad) => 
+                    (ad.promotionType === "VIP" || ad.promotionType === "PRO" || ad.promotionType === "Premium") &&
+                    ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now
+                ).slice(0, 8);
+                vipContainer.innerHTML = vipAds.length ? vipAds.map(createCardMarkup).join("") : "";
+                if (!vipAds.length) renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.");
+                
+                if (window.removeSkeletons) window.removeSkeletons(allAdsContainer);
+                allAdsContainer.innerHTML = "";
             }
 
-            if (!regularAds.length) {
-                renderEmpty(allAdsContainer, "Hazırda aktiv elan yoxdur.");
+            const newAdsHtml = ads.map(createCardMarkup).join("");
+            
+            if (isInitial && ads.length === 0) {
+                renderEmpty(allAdsContainer, currentQuery ? `"${currentQuery}" üçün nəticə tapılmadı.` : "Hazırda aktiv elan yoxdur.");
+            } else {
+                allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
             }
 
-            if (window.initializeFavoriteButtons) {
-                window.initializeFavoriteButtons();
+            // Show/hide load more button
+            if (loadMoreContainer) {
+                if (!data.pagination || data.pagination.hasNextPage === false || ads.length < limit) {
+                    loadMoreContainer.style.display = 'none';
+                } else {
+                    loadMoreContainer.style.display = 'block';
+                }
             }
-        }
-        catch (error) {
-            renderEmpty(vipContainer, "VIP elanlar yüklənmədi.");
-            renderEmpty(allAdsContainer, "Elanlar yüklənmədi.");
+
+            if (window.initializeFavoriteButtons) window.initializeFavoriteButtons();
+
+            if (window.restoreAndApplyFilters) {
+                window.restoreAndApplyFilters();
+            }
+        } catch (error) {
+            if (isInitial) {
+                renderEmpty(vipContainer, "VIP elanlar yüklənmədi.");
+                renderEmpty(allAdsContainer, "Elanlar yüklənmədi.");
+            }
             console.error("Home ads load error:", error);
+        } finally {
+            isLoadingAds = false;
         }
     }
 
+    async function loadAds() {
+        currentPage = 1;
+        currentQuery = '';
+        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+        
+        await fetchAndAppendAds(true);
+    }
+
+    window.searchAdsFromAPI = async function (query) {
+        if (!query || !query.trim()) {
+            loadAds();
+            return;
+        }
+        currentPage = 1;
+        currentQuery = query.trim();
+        if (loadMoreContainer) loadMoreContainer.style.display = 'none';
+        
+        await fetchAndAppendAds(true);
+    };
+
+
+    // Expose reload for reset scenario
+    window.reloadAllAds = loadAds;
+
     // ✅ Immediately wipe hardcoded dummy cards so fake ?id=1 links are never clickable
-    vipContainer.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);font-size:14px;"><i class="fas fa-spinner fa-spin"></i> VIP elanlar yüklənir...</div>`;
-    allAdsContainer.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-secondary);font-size:14px;"><i class="fas fa-spinner fa-spin"></i> Elanlar yüklənir...</div>`;
+    vipContainer.innerHTML = ``;
+    allAdsContainer.innerHTML = ``;
     loadAds();
 });
+

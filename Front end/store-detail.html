@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="az">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mağaza Təfərrüatları - Mobil.az</title>
+  <meta name="description" content="Mobil.az mağaza təfərrüatları səhifəsi.">
+  <link rel="stylesheet" href="CSS/general.css">
+  <link rel="stylesheet" href="CSS/style.css">
+  <link rel="stylesheet" href="CSS/stores.css">
+  <link rel="stylesheet" href="CSS/store-detail.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+</head>
+
+<body>
+
+  <!-- Header Placeholder -->
+  <div id="header-placeholder"></div>
+
+  <main id="main-content" class="store-detail-main" role="main">
+
+    <!-- 1. Breadcrumb -->
+    <nav class="breadcrumb-container" aria-label="Naviqasiya zənciri">
+      <div class="container">
+        <ol class="breadcrumb-list">
+          <li class="breadcrumb-item"><a href="index.html">Ana səhifə</a></li>
+          <li class="breadcrumb-item"><a href="stores.html">Mağazalar</a></li>
+          <li class="breadcrumb-item active" aria-current="page"><span id="breadcrumb-store-name">Mağaza</span></li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- 2. Store Hero -->
+    <section id="store-hero" class="store-hero-section" aria-label="Mağaza örtük şəkli və profil headeri">
+      <!-- 1. Cover Image Container -->
+      <div id="store-cover" class="store-cover">
+        <img id="store-cover-img" class="store-cover-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Mağaza örtük şəkli" data-store-cover loading="eager">
+        <div class="store-cover-fallback"></div>
+        <div class="store-cover-overlay" aria-hidden="true"></div>
+      </div>
+
+      <div class="container">
+        <header class="store-hero-header">
+          
+          <div class="store-hero-profile">
+            <!-- 2. Store Logo Container -->
+            <div id="store-logo-wrapper" class="store-logo-wrapper">
+              <img id="store-logo-img" class="store-logo-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Mağaza logosu" data-store-logo loading="eager">
+              <span id="store-status-badge" class="store-status-badge" data-store-status aria-label="Status"></span>
+            </div>
+
+            <!-- 3. Store Identity -->
+            <div class="store-identity-details">
+              <div class="store-title-group">
+                <h1 id="store-name" class="store-name" data-store-name></h1>
+                
+                <span id="store-verified-badge" class="store-badge verified-badge" data-store-verified aria-label="Təsdiqlənmiş rəsmi mağaza"></span>
+              </div>
+
+              <div class="store-reputation-meta">
+                <div id="store-rating" class="store-rating" role="img" aria-label="Mağaza reytinqi">
+                  <span id="store-rating-score" class="store-rating-score" data-store-rating aria-label="Reytinq"></span>
+                  <span id="store-review-count" class="store-review-count" data-store-reviews-count aria-label="Rəy sayı"></span>
+                </div>
+              </div>
+
+              <!-- 4. Store Meta -->
+              <ul class="store-meta-list" aria-label="Mağaza haqqında köməkçi məlumatlar">
+                <li class="store-meta-item">
+                  <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                  <address id="store-meta-location" class="store-meta-location" data-store-location></address>
+                </li>
+                <li class="store-meta-item">
+                  <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                  <time id="store-meta-joined" class="store-meta-joined" data-store-joined></time>
+                </li>
+                <li class="store-meta-item">
+                  <i class="fas fa-bolt" aria-hidden="true"></i>
+                  <span id="store-meta-response" class="store-meta-response" data-store-response-time></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- 5. Action Buttons Container -->
+          <div id="hero-actions" class="store-hero-actions" role="group" aria-label="Mağaza düymələri">
+            <div id="primary-actions" class="primary-actions">
+              <button id="hero-contact-btn" class="btn btn-contact" type="button" data-action="contact" aria-label="Mağaza ilə əlaqə saxla">
+                <i class="fas fa-phone-alt" aria-hidden="true"></i>
+                <span data-translate="btn-contact">Əlaqə</span>
+              </button>
+            </div>
+
+            <div id="secondary-actions" class="secondary-actions">
+              <button id="hero-share-btn" class="btn btn-share" type="button" data-action="share" aria-label="Mağazanı paylaş">
+                <i class="fas fa-share-alt" aria-hidden="true"></i>
+                <span data-translate="btn-share">Paylaş</span>
+              </button>
+
+              <button id="hero-report-btn" class="btn btn-report" type="button" data-action="report" aria-label="Mağazadan şikayət et">
+                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                <span data-translate="btn-report">Şikayət</span>
+              </button>
+            </div>
+          </div>
+
+        </header>
+      </div>
+    </section>
+
+    <!-- 3. Store Statistics -->
+    <section id="store-stats" class="store-stats-section" aria-label="Mağaza statistikaları">
+      <div class="container">
+        <div id="statistics-grid" class="statistics-grid">
+          <div id="stat-card-rating" class="stat-card" data-stat="rating">
+            <span id="stat-rating-value" class="stat-value" data-store-stat-rating></span>
+            <span class="stat-label" data-translate="label-stat-rating">Reytinq</span>
+          </div>
+          <div id="stat-card-ads" class="stat-card" data-stat="active-ads">
+            <span id="stat-ads-value" class="stat-value" data-store-stat-ads></span>
+            <span class="stat-label" data-translate="label-stat-ads">Aktiv Elan</span>
+          </div>
+          <div id="stat-card-feedback" class="stat-card" data-stat="positive-feedback">
+            <span id="stat-feedback-value" class="stat-value" data-store-stat-feedback></span>
+            <span class="stat-label" data-translate="label-stat-feedback">Müsbət Rəy</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Main Layout -->
+    <div class="container">
+      <div class="store-content-layout">
+
+        <!-- Left Column -->
+        <div class="store-main-column">
+
+          <!-- Products Section -->
+          <section id="products-section" class="store-section" aria-label="Mağaza elanları">
+            <h2 class="section-title">Elanlar</h2>
+            <div id="products-toolbar" class="products-toolbar" role="toolbar" aria-controls="products-grid" aria-label="Elan süzgəcləri və idarəetmə paneli">
+              <!-- 1. Left Section -->
+              <div id="toolbar-left" class="toolbar-left">
+                <div id="results-summary" class="results-summary" aria-live="polite">
+                  <span id="results-count" class="results-count" data-results-count aria-label="Nəticə sayı"></span>
+                  <span id="active-products-count" class="active-products-count" data-active-count aria-label="Aktiv elan sayı"></span>
+                </div>
+              </div>
+
+              <!-- 2. Center Section -->
+              <div id="toolbar-center" class="toolbar-center">
+                <div class="filter-control-group">
+                  <label for="category-filter-select" class="sr-only" data-translate="label-category">Kateqoriya</label>
+                  <select id="category-filter-select" class="select-control" data-filter="category" aria-label="Kateqoriyaya görə süzgəclə">
+                    <option value="" selected data-translate="option-all-categories">Bütün kateqoriyalar</option>
+                  </select>
+                </div>
+
+                <div class="filter-control-group">
+                  <label for="price-filter-select" class="sr-only" data-translate="label-price">Qiymət diapazonu</label>
+                  <select id="price-filter-select" class="select-control" data-filter="price" aria-label="Qiymətə görə süzgəclə">
+                    <option value="" selected data-translate="option-all-prices">Bütün qiymətlər</option>
+                  </select>
+                </div>
+
+                <div class="filter-control-group">
+                  <label for="sort-order-select" class="sr-only" data-translate="label-sort">Sıralama</label>
+                  <select id="sort-order-select" class="select-control" data-filter="sort" aria-label="Sıralama qaydası">
+                    <option value="newest" selected data-translate="option-sort-newest">Ən yenilər</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- 3. Right Section -->
+              <div id="toolbar-right" class="toolbar-right">
+                <button id="clear-filters-btn"
+                        class="btn btn-clear-filters"
+                        type="button"
+                        data-action="clear-filters"
+                        aria-label="Bütün filtrləri təmizlə">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                    <span>Filtrləri təmizlə</span>
+                </button>
+
+                <div class="view-toggle-group" role="group" aria-label="Baxış rejimi">
+                  <button id="grid-view-btn" class="btn btn-view-toggle active" type="button" data-view-mode="grid" aria-pressed="true" aria-controls="products-grid" aria-label="Şəbəkə baxışı">
+                    <i class="fas fa-th-large" aria-hidden="true"></i>
+                  </button>
+                  <button id="list-view-btn" class="btn btn-view-toggle" type="button" data-view-mode="list" aria-pressed="false" aria-controls="products-grid" aria-label="Siyahı baxışı">
+                    <i class="fas fa-list" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <div id="toolbar-actions" class="toolbar-actions">
+                  <button id="toolbar-refresh-btn" class="btn btn-refresh" type="button" data-action="refresh-products" aria-controls="products-grid" aria-describedby="products-loading" aria-label="Elanları yenilə">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="active-filter-chips"></div>
+            <div id="products-loading"></div>
+            <div id="products-empty-state"></div>
+            <div id="products-grid" class="products-grid" aria-live="polite">
+              <!-- Reusable Product Card Template -->
+              <article id="product-card-template" class="ad-card hidden" data-ad-id="" itemscope itemtype="https://schema.org/Product">
+                <div class="ad-image-container">
+                  <img class="ad-image" width="300" height="225" loading="lazy" alt="" data-ad-image itemprop="image">
+                  
+                  <div class="ad-badge-group">
+                    <span class="ad-badge" data-ad-badge aria-label="Elan statusu"></span>
+                    <span class="ad-badge-promo" data-ad-promo-badge aria-label="Promosiya statusu"></span>
+                  </div>
+
+                  <button class="btn-favorite" type="button" data-action="favorite" data-ad-id="" aria-label="Seçilmişlərə əlavə et" aria-pressed="false">
+                    <i class="far fa-heart" aria-hidden="true"></i>
+                  </button>
+                </div>
+
+                <div class="ad-content">
+                  <div class="ad-price-row">
+                    <div class="ad-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                      <span data-ad-price itemprop="price"></span>
+                      <span itemprop="priceCurrency" content="AZN">AZN</span>
+                    </div>
+                    <span class="ad-condition" data-ad-condition aria-label="Məhsulun vəziyyəti"></span>
+                  </div>
+
+                  <h3 class="ad-title" itemprop="name">
+                    <a href="#" data-ad-title-link itemprop="url">
+                      <span data-ad-title></span>
+                    </a>
+                  </h3>
+
+                  <div class="ad-store-info">
+                    <span class="ad-store-name" data-ad-store-name aria-label="Mağaza adı"></span>
+                  </div>
+
+                  <div class="ad-meta">
+                    <span class="ad-location">
+                      <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                      <span data-ad-city></span>
+                    </span>
+                    <time class="ad-date" data-ad-date></time>
+                    <span class="ad-views" data-ad-views aria-label="Baxış sayı">
+                      <i class="fas fa-eye" aria-hidden="true"></i>
+                      <span data-ad-views-count></span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </div>
+            <nav id="pagination" class="pagination-container" aria-label="Səhifələmə"></nav>
+          </section>
+
+          <!-- About Section -->
+          <section id="about-section" class="store-section" aria-label="Mağaza haqqında">
+            <h2 class="section-title" data-translate="heading-about">Haqqında</h2>
+            <article id="about-content" class="about-content">
+              <div id="store-description-placeholder" class="store-description" data-store-description></div>
+              <div id="store-about-contact" class="store-about-contact" data-store-about-contact></div>
+              <div id="store-working-hours-placeholder" class="store-working-hours" data-store-working-hours></div>
+            </article>
+          </section>
+
+          <!-- Reviews Section -->
+          <section id="reviews-section" class="store-section" aria-label="Mağaza rəyləri">
+            <h2 class="section-title" data-translate="heading-reviews">Rəylər</h2>
+            <div id="reviews-summary" class="reviews-summary" aria-live="polite"></div>
+            <div id="reviews-rating-breakdown" class="reviews-rating-breakdown" aria-label="Reytinq paylanması"></div>
+            <div id="review-list" class="review-list" aria-live="polite"></div>
+            <div id="reviews-pagination" class="reviews-pagination"></div>
+          </section>
+
+          <!-- Branches Section -->
+          <section id="branches-section" class="store-section" aria-label="Mağaza filialları">
+            <h2 class="section-title" data-translate="heading-branches">Filiallar</h2>
+            <div id="branches-map-container" class="branches-map-container" aria-label="Xəritə baxışı"></div>
+            <div id="branch-list" class="branch-list">
+              <!-- Reusable Branch Card Template -->
+              <article id="branch-card-template" class="branch-card hidden" data-branch-id="" itemscope itemtype="https://schema.org/LocalBusiness">
+                <h3 class="branch-name" itemprop="name"><span data-branch-name></span></h3>
+                <address class="branch-address" itemprop="address" data-branch-address></address>
+                <div class="branch-phone" data-branch-phone></div>
+                <div class="branch-hours" data-branch-hours></div>
+              </article>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right Sidebar -->
+        <aside class="store-sidebar-column" aria-label="Mağaza yan məlumat paneli">
+
+          <!-- Contact Card -->
+          <div id="contact-card" class="sidebar-card" aria-labelledby="sidebar-contact-title">
+            <h3 id="sidebar-contact-title" class="card-title" data-translate="title-sidebar-contact">Əlaqə</h3>
+            <div id="sidebar-contact-content" class="card-body" data-store-sidebar-contact></div>
+          </div>
+
+          <!-- Business Info Card -->
+          <div id="business-card" class="sidebar-card" aria-labelledby="sidebar-business-title">
+            <h3 id="sidebar-business-title" class="card-title" data-translate="title-sidebar-business">Rəsmi Məlumatlar</h3>
+            <div id="sidebar-business-content" class="card-body" data-store-sidebar-business></div>
+          </div>
+
+          <!-- Working Hours Card -->
+          <div id="working-hours-card" class="sidebar-card" aria-labelledby="sidebar-hours-title">
+            <h3 id="sidebar-hours-title" class="card-title" data-translate="title-sidebar-hours">İş Rejimi</h3>
+            <div id="sidebar-hours-content" class="card-body" data-store-sidebar-hours></div>
+          </div>
+
+          <!-- Social Links Card -->
+          <div id="social-links-card" class="sidebar-card" aria-labelledby="sidebar-social-title">
+            <h3 id="sidebar-social-title" class="card-title" data-translate="title-sidebar-social">Sosial Şəbəkələr</h3>
+            <div id="sidebar-social-content" class="card-body" data-store-sidebar-social></div>
+          </div>
+
+          <!-- Report Card -->
+          <div id="report-card" class="sidebar-card" aria-labelledby="sidebar-report-title">
+            <h3 id="sidebar-report-title" class="card-title" data-translate="title-sidebar-report">Şikayət</h3>
+            <div id="sidebar-report-content" class="card-body" data-store-sidebar-report></div>
+          </div>
+
+        </aside>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer Placeholder -->
+  <div id="footer-placeholder"></div>
+
+  <script src="JS/config.js"></script>
+  <script src="JS/components.js" defer></script>
+  <script src="JS/store-detail.js" defer></script>
+</body>
+
+</html>
