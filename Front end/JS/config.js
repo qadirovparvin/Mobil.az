@@ -31,19 +31,18 @@ if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
 }
 
 
-window.getAuthToken = window.getAuthToken || function getAuthToken() {
-    return sessionStorage.getItem('token') || sessionStorage.getItem('adminToken') || '';
-};
-
-window.getToken = window.getToken || function getToken() {
-    return localStorage.getItem('token') ||
-           localStorage.getItem('accessToken') ||
-           localStorage.getItem('authToken') ||
-           sessionStorage.getItem('token') ||
-           sessionStorage.getItem('accessToken') ||
-           sessionStorage.getItem('authToken') ||
-           sessionStorage.getItem('adminToken') ||
-           localStorage.getItem('adminToken') || '';
+window.getToken = function() {
+    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
+    for (let k of keys) {
+        let t = localStorage.getItem(k) || sessionStorage.getItem(k);
+        if (!t) continue;
+        t = t.trim().replace(/^["']+|["']+$/g, '');
+        if (t.startsWith('{')) {
+            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
+        }
+        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+    }
+    return '';
 };
 window.getAuthToken = window.getToken;
 
@@ -65,16 +64,19 @@ window.isLoggedIn = window.isLoggedIn || function isLoggedIn() {
 };
 window.isAuthenticated = window.isLoggedIn;
 
-window.persistAuthSession = window.persistAuthSession || function persistAuthSession(data, token) {
+window.persistAuthSession = function persistAuthSession(data, token) {
     const accessToken = token || data?.accessToken || data?.token || data?.authToken || '';
     const userPayload = data?.user || data || {};
 
-    const tokenKeys = ['token', 'accessToken', 'authToken'];
+    const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
+    tokenKeys.forEach(k => {
+        try { localStorage.removeItem(k); } catch(e) {}
+        try { sessionStorage.removeItem(k); } catch(e) {}
+    });
+
     if (accessToken) {
-        tokenKeys.forEach((key) => {
-            try { sessionStorage.setItem(key, accessToken); } catch (e) {}
-            try { localStorage.setItem(key, accessToken); } catch (e) {}
-        });
+        try { localStorage.setItem('token', accessToken); } catch(e) {}
+        try { sessionStorage.setItem('token', accessToken); } catch(e) {}
     }
 
     const userStr = JSON.stringify(userPayload);

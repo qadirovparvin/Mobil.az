@@ -1,15 +1,17 @@
 "use strict";
 
-// Universal auth helpers
 function getToken() {
-    return localStorage.getItem('token') ||
-           localStorage.getItem('accessToken') ||
-           localStorage.getItem('authToken') ||
-           sessionStorage.getItem('token') ||
-           sessionStorage.getItem('accessToken') ||
-           sessionStorage.getItem('authToken') ||
-           sessionStorage.getItem('adminToken') ||
-           localStorage.getItem('adminToken') || '';
+    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
+    for (let k of keys) {
+        let t = localStorage.getItem(k) || sessionStorage.getItem(k);
+        if (!t) continue;
+        t = t.trim().replace(/^["']+|["']+$/g, '');
+        if (t.startsWith('{')) {
+            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
+        }
+        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+    }
+    return '';
 }
 window.getToken = getToken;
 window.getAuthToken = getToken;

@@ -1055,7 +1055,15 @@ async function initEditMode() {
       if (res.status === 400) {
         throw new Error(errData.message || 'Elan identifikatoru (ID) yalnışdır.');
       } else if (res.status === 401) {
-        throw new Error(errData.message || 'Bu əməliyyat üçün hesabınıza daxil olmalısınız.');
+        console.warn('Token expired in edit mode, auto clearing...');
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('jwt');
+        sessionStorage.clear();
+        window.location.href = 'login.html?reason=token_expired&redirect=' + encodeURIComponent(window.location.href);
+        return;
       } else if (res.status === 403) {
         throw new Error(errData.message || 'Bu elana düzəliş etmək hüququnuz yoxdur.');
       } else if (res.status === 404) {
@@ -1352,9 +1360,23 @@ if (adFormEl) {
           body: formData
         });
 
-        const updateData = await updateRes.json().catch(() => ({}));
+        if (updateRes.status === 401) {
+          console.warn('Token expired, auto clearing...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('jwt');
+          sessionStorage.clear();
+          window.location.href = 'login.html?reason=token_expired&redirect=' + encodeURIComponent(`elan-yerlesdir.html?edit=${editAdId}`);
+          throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+        }
+
         if (!updateRes.ok) {
-          throw new Error(updateData.message || 'Elan yenilənmə xətası');
+          const txt = await updateRes.text().catch(() => '');
+          let errMsg = txt;
+          try { const d = JSON.parse(txt); errMsg = d.message || txt; } catch (e) {}
+          throw new Error(errMsg.slice(0, 200) || 'Elan yenilənmə xətası');
         }
 
         alert('Elanınız uğurla yeniləndi! Kabinənizə yönləndirilirsiniz…');
@@ -1373,9 +1395,23 @@ if (adFormEl) {
           body: formData
         });
 
-        const adData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          console.warn('Token expired, auto clearing...');
+          localStorage.removeItem('token');
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('jwt');
+          sessionStorage.clear();
+          window.location.href = 'login.html?reason=token_expired&redirect=elan-yerlesdir.html';
+          throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+        }
+
         if (!response.ok) {
-          throw new Error(adData.message || 'Elan yerləşdirmə xətası');
+          const txt = await response.text().catch(() => '');
+          let errMsg = txt;
+          try { const d = JSON.parse(txt); errMsg = d.message || txt; } catch (e) {}
+          throw new Error(errMsg.slice(0, 200) || 'Elan yerləşdirmə xətası');
         }
 
         alert('Elanınız uğurla göndərildi! Moderasiyadan keçdikdən sonra dərc ediləcək. Kabinənizə yönləndirilirsiniz…');
@@ -1384,6 +1420,9 @@ if (adFormEl) {
 
     } catch (err) {
       console.error('Ad create fetch error:', err);
+      if (err && err.message && err.message.includes('login səhifəsinə')) {
+        return;
+      }
       alert('Xəta: Failed to fetch - ' + err.message + ' | base=' + base + ' | token=' + !!token);
       if (submitBtn) submitBtn.disabled = false;
       if (btnSpan) btnSpan.textContent = originalTxt;

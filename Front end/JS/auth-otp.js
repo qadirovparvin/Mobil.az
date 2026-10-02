@@ -24,11 +24,13 @@ function persistSession(data) {
         avatar: data.avatar || data.user?.avatar || ''
     };
     
-    const tokenKeys = ['token', 'accessToken', 'authToken'];
+    const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach((key) => {
-        try { localStorage.setItem(key, token); } catch(e) {}
-        try { sessionStorage.setItem(key, token); } catch(e) {}
+        try { localStorage.removeItem(key); } catch(e) {}
+        try { sessionStorage.removeItem(key); } catch(e) {}
     });
+    try { sessionStorage.clear(); } catch(e) {}
+    try { localStorage.setItem('token', token); } catch(e) {}
 
     const userStr = JSON.stringify(userPayload);
     const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
