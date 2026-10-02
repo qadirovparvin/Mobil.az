@@ -244,7 +244,19 @@ const createAd = async (req, res, next) => {
             return res.status(400).json({ message: 'Məcburi sahələr düzgün deyil' });
         }
 
-        const cleanImages = sanitizeUrlArray(images || []);
+        let rawImages = images;
+        if (typeof rawImages === 'string') {
+            try { rawImages = JSON.parse(rawImages); } catch (e) { rawImages = [rawImages]; }
+        }
+        if (!Array.isArray(rawImages)) rawImages = rawImages ? [rawImages] : [];
+        if (req.files && req.files.length > 0) {
+            const uploadedUrls = req.files.map(f => `/uploads/${f.filename}`);
+            rawImages = rawImages.concat(uploadedUrls);
+        } else if (req.file) {
+            rawImages.push(`/uploads/${req.file.filename}`);
+        }
+
+        const cleanImages = sanitizeUrlArray(rawImages || []);
         if (cleanImages === null) return res.status(400).json({ message: 'Şəkil URL-ləri düzgün deyil' });
 
         let listingSellerType = 'personal';
@@ -267,7 +279,11 @@ const createAd = async (req, res, next) => {
             else if (rawCond !== '') cleanCondition = sanitizePlainText(rawCond, { maxLength: 50 });
         }
 
-        const cleanSpecs = sanitizeSpecs(specs);
+        let parsedSpecs = specs;
+        if (typeof parsedSpecs === 'string') {
+            try { parsedSpecs = JSON.parse(parsedSpecs); } catch (e) {}
+        }
+        const cleanSpecs = sanitizeSpecs(parsedSpecs);
         const cleanYaddas = sanitizePlainText(yaddas || cleanSpecs?.memory || '', { maxLength: 80 }) || null;
         const cleanRam = sanitizePlainText(ram || cleanSpecs?.ram || '', { maxLength: 80 }) || null;
         if (cleanSpecs) {
@@ -307,6 +323,10 @@ const createAd = async (req, res, next) => {
 
         if (ad.promotionType === 'VIP') await invalidateCache('ads:VIP:cache:*');
 
+        if (req.user && req.user.email) {
+            logger.info(`Ad created by ${req.user.email}`);
+        }
+
         res.status(201).json(ad);
     } catch (error) {
         next(error);
@@ -324,6 +344,22 @@ const updateAd = async (req, res, next) => {
 
         if (ad.author.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({ message: 'İcazəniz yoxdur' });
+        }
+
+        if (req.files && req.files.length > 0) {
+            const uploadedUrls = req.files.map(f => `/uploads/${f.filename}`);
+            let curImgs = req.body.images;
+            if (typeof curImgs === 'string') {
+                try { curImgs = JSON.parse(curImgs); } catch (e) { curImgs = [curImgs]; }
+            }
+            if (!Array.isArray(curImgs)) curImgs = curImgs ? [curImgs] : [];
+            req.body.images = curImgs.concat(uploadedUrls);
+        }
+        if (typeof req.body.specs === 'string') {
+            try { req.body.specs = JSON.parse(req.body.specs); } catch (e) {}
+        }
+        if (typeof req.body.images === 'string') {
+            try { req.body.images = JSON.parse(req.body.images); } catch (e) { req.body.images = [req.body.images]; }
         }
 
         const allowed = ['category', 'brand', 'modelName', 'price', 'condition', 'description', 'images',

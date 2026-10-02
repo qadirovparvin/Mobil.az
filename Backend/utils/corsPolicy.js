@@ -58,7 +58,7 @@ const buildCorsOptions = () => ({
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'Accept', 'Origin']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-CSRF-Signed-Token', 'X-Requested-With', 'Accept', 'Origin', 'Cache-Control', 'Pragma']
 });
 
 module.exports = {

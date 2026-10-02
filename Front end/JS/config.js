@@ -19,6 +19,18 @@ if (typeof globalThis !== 'undefined') {
     globalThis.API_BASE_URL = window.API_URL;
 }
 
+if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
+    const healthUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '') + '/api/health';
+    fetch(healthUrl, { method: 'GET' })
+        .then(r => {
+            if (!r.ok) console.warn('Backend health check returned status:', r.status);
+        })
+        .catch(err => {
+            console.warn('Backend server is down or unreachable (http://localhost:5000). Run "node Backend/ensure_backend.js" to start it.', err);
+        });
+}
+
+
 window.getAuthToken = window.getAuthToken || function getAuthToken() {
     return sessionStorage.getItem('token') || sessionStorage.getItem('adminToken') || '';
 };

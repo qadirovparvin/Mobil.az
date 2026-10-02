@@ -199,7 +199,28 @@ const CATALOG = {
   },
 };
 
-const API_BASE = window.API_URL || window.API_BASE || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+const base = window.API_URL || window.API_BASE || window.API_BASE_URL || 'http://localhost:5000/api';
+console.log('Using API base:', base);
+const API_BASE = base;
+
+async function getCsrf() {
+  let token = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken');
+  if (!token) {
+    try {
+      const r = await fetch(`${base}/auth/csrf-token`, { credentials: 'include' });
+      const d = await r.json();
+      token = d.csrfToken;
+      window.CSRF_TOKEN = token;
+      localStorage.setItem('csrfToken', token);
+      if (d.signedToken) {
+        window.CSRF_SIGNED_TOKEN = d.signedToken;
+        localStorage.setItem('csrfSignedToken', d.signedToken);
+        sessionStorage.setItem('csrfSignedToken', d.signedToken);
+      }
+    } catch(e) { console.warn('CSRF alınmadı', e); }
+  }
+  return token;
+}
 
 const urlParams = typeof window !== 'undefined' && window.location && window.location.search
   ? new URLSearchParams(window.location.search)
@@ -449,7 +470,7 @@ let existingImages = [];
 function getDisplayImageUrl(img) {
   if (!img) return '';
   if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) return img;
-  const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const origin = (base || window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
   return origin + (img.startsWith('/') ? img : '/' + img);
 }
 
@@ -1010,8 +1031,7 @@ async function initEditMode() {
   }
 
   try {
-    const rawToken = window.getAuthToken ? window.getAuthToken() : (sessionStorage.getItem('token') || '');
-    const token = rawToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '') || '';
+    const token = window.getToken ? window.getToken() : (localStorage.getItem('token') || localStorage.getItem('accessToken') || sessionStorage.getItem('token') || '');
     if (!token) {
       if (typeof renderEditErrorBanner === 'function') renderEditErrorBanner('Redaktə üçün hesabınıza daxil olmalısınız.');
       setTimeout(() => { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.href); }, 1500);
@@ -1021,8 +1041,9 @@ async function initEditMode() {
 
     let res;
     try {
-      res = await fetch(`${API_BASE}/ads/${encodeURIComponent(editAdId)}`, {
+      res = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
         method: 'GET',
+        credentials: 'include',
         headers
       });
     } catch (networkErr) {
@@ -1105,15 +1126,14 @@ async function initStoreOption(){
   } catch(e){}
   // 2. REAL source - fetch from API
   try {
-    const rawToken = window.getAuthToken? window.getAuthToken() : (sessionStorage.getItem('token')||'');
-    const token = rawToken || localStorage.getItem('token') || '';
+    const token = window.getToken ? window.getToken() : (localStorage.getItem('token') || localStorage.getItem('accessToken') || sessionStorage.getItem('token') || '');
     if (token) {
-      const res = await fetch(`${window.API_URL||'http://localhost:5000/api'}/stores/my`, { headers: { 'Authorization': `Bearer ${token}` } });
+      const res = await fetch(`${base}/stores/my`, { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
       // try alternative endpoints if 404
       let data = null;
       if (res.ok) data = await res.json();
       else {
-        const res2 = await fetch(`${window.API_URL||'http://localhost:5000/api'}/stores/mine`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const res2 = await fetch(`${base}/stores/mine`, { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
         if (res2.ok) data = await res2.json();
       }
       // data can be {store: {...}} or {...} or [...]
@@ -1163,10 +1183,9 @@ if (adFormEl) {
     }
 
     // ── 1. Auth guard ───────────────────────────────────────
-    const rawToken = window.getAuthToken
-      ? window.getAuthToken()
-      : (sessionStorage.getItem('token') || '');
-    const token = rawToken || (typeof localStorage !== 'undefined' ? localStorage.getItem('token') : '') || '';
+    const token = window.getToken
+      ? window.getToken()
+      : (localStorage.getItem('token') || localStorage.getItem('accessToken') || sessionStorage.getItem('token') || '');
 
     if (!token) {
       alert('Elan yerləşdirmək üçün hesabınıza daxil olun.');
@@ -1223,9 +1242,6 @@ if (adFormEl) {
 
     const rawImageFiles = (files && files.length) ? Array.from(files) : [];
     const validImageFiles = rawImageFiles.filter(f => f.type && f.type.startsWith('image/'));
-    const hasNewImages = validImageFiles.length > 0;
-    const hasExistingImages = currentExistingCount > 0;
-
     const oversizedFile = validImageFiles.find(f => f.size > 5 * 1024 * 1024);
     if (oversizedFile) {
       alert(`"${oversizedFile.name}" faylının ölçüsü 5MB-dən böyükdür. Zəhmət olmasa hər biri 5MB-dən kiçik şəkillər seçin.`);
@@ -1238,44 +1254,16 @@ if (adFormEl) {
     const originalTxt = isEditMode ? 'Yadda Saxla' : (btnSpan ? btnSpan.textContent : 'Elan yerləşdir');
     if (submitBtn) submitBtn.disabled = true;
     if (btnSpan) {
-      btnSpan.textContent = hasNewImages
-        ? 'Şəkillər yüklənir…'
-        : (isEditMode ? 'Məlumatlar yenilənir…' : 'Elan göndərilir…');
+      btnSpan.textContent = isEditMode ? 'Məlumatlar yenilənir…' : 'Elan göndərilir…';
     }
 
     try {
-      // ── 4. Upload images if new ones selected ──────────────
-      let finalImageUrls = [...existingImages];
+      const csrf = await getCsrf();
+      const csrfSigned = localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || window.CSRF_SIGNED_TOKEN || '';
 
-      if (hasNewImages) {
-        const formData = new FormData();
-        validImageFiles.forEach(file => formData.append('images', file));
+      console.log('Submitting ad with token exists:', !!token, 'csrf exists:', !!csrf);
 
-        const uploadRes = await fetch(`${API_BASE}/upload/multiple`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-          body: formData
-        });
-
-        if (!uploadRes.ok) {
-          const err = await uploadRes.json().catch(() => ({}));
-          throw new Error(err.message || 'Şəkil yükləmə xətası');
-        }
-
-        const uploadData = await uploadRes.json();
-        const uploadedUrls = uploadData.urls || [];
-        finalImageUrls = finalImageUrls.concat(uploadedUrls);
-      }
-
-      if (finalImageUrls.length > 10) {
-        alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
-        if (submitBtn) submitBtn.disabled = false;
-        if (btnSpan) btnSpan.textContent = originalTxt;
-        return;
-      }
-
-
-      // ── 5. Build specs object ─────────────────────────────
+      // ── Build specs object ─────────────────────────────
       function getSpecValue(selectId, customInputId) {
         const select = document.getElementById(selectId);
         if (!select) return null;
@@ -1314,7 +1302,6 @@ if (adFormEl) {
         }
       };
 
-      // ── 6. Submit ad (PUT for edit mode, POST for create) ──
       const cuRaw = localStorage.getItem('mobilaz_current_user') || localStorage.getItem('user') || '{}';
       let cu = {};
       try { cu = JSON.parse(cuRaw); } catch(e) {}
@@ -1330,39 +1317,42 @@ if (adFormEl) {
       }
       const isStore = !!(storeId && (checkBox ? checkBox.checked : true));
 
+      const formData = new FormData();
+      formData.append('category', category);
+      formData.append('brand', brand);
+      formData.append('modelName', model);
+      formData.append('price', String(price));
+      if (conditionVal) formData.append('condition', conditionVal);
+      formData.append('description', document.getElementById('description')?.value || '');
+      formData.append('city', city);
+      formData.append('contactPhone', phone);
+      if (specs.memory) formData.append('yaddas', specs.memory);
+      if (specs.ram) formData.append('ram', specs.ram);
+      formData.append('specs', JSON.stringify(specs));
+
+      if (existingImages && existingImages.length) {
+        formData.append('images', JSON.stringify(existingImages));
+      }
+      validImageFiles.forEach(file => formData.append('images', file));
+
+      const reqHeaders = {
+        'Authorization': `Bearer ${token}`
+      };
+      if (csrf) reqHeaders['X-CSRF-Token'] = csrf;
+      if (csrfSigned) reqHeaders['X-CSRF-Signed-Token'] = csrfSigned;
+      // Content-Type YOXDUR - FormData üçün browser özü boundary ilə qoyur!
+
       if (isEditMode) {
-        // In payload for edit, preserve if user was store:
-        if (isEdit && existingAd?.sellerType === 'store' && !isStore) {
-          // if user unchecks store option on edit, keep personal - allow change
-        }
         if (btnSpan) btnSpan.textContent = 'Məlumatlar yenilənir…';
 
-        const updatePayload = {
-          category,
-          brand,
-          modelName: model,
-          price:        Number(price),
-          condition:    conditionVal,
-          description:  document.getElementById('description')?.value || '',
-          images:       finalImageUrls,
-          city,
-          contactPhone: phone,
-          yaddas:       specs.memory,
-          ram:          specs.ram,
-          specs
-        };
-
-        const updateRes = await fetch(`${API_BASE}/ads/${encodeURIComponent(editAdId)}`, {
-          method:  'PUT',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(updatePayload)
+        const updateRes = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: reqHeaders,
+          body: formData
         });
 
         const updateData = await updateRes.json().catch(() => ({}));
-
         if (!updateRes.ok) {
           throw new Error(updateData.message || 'Elan yenilənmə xətası');
         }
@@ -1373,35 +1363,18 @@ if (adFormEl) {
       } else {
         if (btnSpan) btnSpan.textContent = 'Elan göndərilir…';
 
-        const adPayload = {
-          category,
-          brand,
-          modelName: model,
-          price:        Number(price),
-          condition:    conditionVal,
-          description:  document.getElementById('description')?.value || '',
-          images:       finalImageUrls,
-          city,
-          contactPhone: phone,
-          sellerType:   isStore ? 'store' : 'personal',
-          ...(isStore && storeId ? { store: storeId } : {}),
-          yaddas:       specs.memory,
-          ram:          specs.ram,
-          specs
-        };
+        formData.append('sellerType', isStore ? 'store' : 'personal');
+        if (isStore && storeId) formData.append('store', storeId);
 
-        const adRes = await fetch(`${API_BASE}/ads`, {
-          method:  'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(adPayload)
+        const response = await fetch(`${base}/ads`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: reqHeaders,
+          body: formData
         });
 
-        const adData = await adRes.json().catch(() => ({}));
-
-        if (!adRes.ok) {
+        const adData = await response.json().catch(() => ({}));
+        if (!response.ok) {
           throw new Error(adData.message || 'Elan yerləşdirmə xətası');
         }
 
@@ -1409,9 +1382,9 @@ if (adFormEl) {
         window.location.href = 'cabinet.html';
       }
 
-    } catch (error) {
-      console.error('Ad submission error:', error);
-      alert('Xəta: ' + error.message);
+    } catch (err) {
+      console.error('Ad create fetch error:', err);
+      alert('Xəta: Failed to fetch - ' + err.message + ' | base=' + base + ' | token=' + !!token);
       if (submitBtn) submitBtn.disabled = false;
       if (btnSpan) btnSpan.textContent = originalTxt;
     }
