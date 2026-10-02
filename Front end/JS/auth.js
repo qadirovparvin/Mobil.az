@@ -1,8 +1,21 @@
 "use strict";
 
 function getToken() {
-    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
-    for (let k of keys) {
+    const remember = localStorage.getItem('rememberMe') === 'true';
+    const order = remember ? 
+        [() => localStorage.getItem('token'), () => sessionStorage.getItem('token')] :
+        [() => sessionStorage.getItem('token'), () => localStorage.getItem('token')];
+    for (let fn of order) {
+        let t = fn();
+        if (!t) continue;
+        t = t.trim().replace(/^["']+|["']+$/g, '');
+        if (t.startsWith('{')) {
+            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
+        }
+        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+    }
+    const fallbackKeys = ['accessToken', 'authToken', 'adminToken', 'jwt'];
+    for (let k of fallbackKeys) {
         let t = localStorage.getItem(k) || sessionStorage.getItem(k);
         if (!t) continue;
         t = t.trim().replace(/^["']+|["']+$/g, '');
@@ -139,6 +152,14 @@ window.updateAuthUI = updateHeader;
 // DOMContentLoaded Handler
 document.addEventListener("DOMContentLoaded", function () {
     updateHeader();
+
+    const savedEmail = localStorage.getItem('savedEmail');
+    if (savedEmail) {
+        const idInput = document.getElementById('loginIdentifier') || document.getElementById('email');
+        if (idInput && !idInput.value) {
+            idInput.value = savedEmail;
+        }
+    }
 
     const currentUser = getUser();
     const token = getToken();

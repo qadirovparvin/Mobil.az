@@ -1247,8 +1247,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.status === 401 || response.status === 403) {
-                ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
-                window.location.href = 'login.html';
+                try {
+                    const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+                    if (me.status === 401) {
+                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
+                        window.location.href = 'login.html?expired=1';
+                        return;
+                    }
+                } catch(e) {}
                 return;
             }
 
@@ -1427,18 +1433,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.status === 401 || response.status === 403) {
-                if (window.clearAuthSession) {
-                    window.clearAuthSession();
-                } else {
-                    ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
+                let trulyExpired = false;
+                try {
+                    const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+                    if (me.status === 401) trulyExpired = true;
+                } catch(e) {}
+                if (trulyExpired) {
+                    if (window.clearAuthSession) {
+                        window.clearAuthSession();
+                    } else {
+                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
+                    }
+                    list.innerHTML = `
+                        <div class="cab-glass" style="padding:40px 20px;text-align:center;color:var(--cab-danger);">
+                            <p style="margin-bottom:12px;">Sessiyanın vaxtı bitib. Zəhmət olmasa yenidən daxil olun.</p>
+                            <a href="login.html" class="btn-primary" style="display:inline-block;padding:8px 20px;text-decoration:none;">Giriş</a>
+                        </div>
+                    `;
+                    setTimeout(() => { window.location.href = 'login.html?expired=1'; }, 1500);
+                    return;
                 }
-                list.innerHTML = `
-                    <div class="cab-glass" style="padding:40px 20px;text-align:center;color:var(--cab-danger);">
-                        <p style="margin-bottom:12px;">Sessiyanın vaxtı bitib. Zəhmət olmasa yenidən daxil olun.</p>
-                        <a href="login.html" class="btn-primary" style="display:inline-block;padding:8px 20px;text-decoration:none;">Giriş</a>
-                    </div>
-                `;
-                setTimeout(() => { window.location.href = 'login.html'; }, 1500);
                 return;
             }
 

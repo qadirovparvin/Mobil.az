@@ -32,8 +32,21 @@ if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
 
 
 window.getToken = function() {
-    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
-    for (let k of keys) {
+    const remember = localStorage.getItem('rememberMe') === 'true';
+    const order = remember ? 
+        [() => localStorage.getItem('token'), () => sessionStorage.getItem('token')] :
+        [() => sessionStorage.getItem('token'), () => localStorage.getItem('token')];
+    for (let fn of order) {
+        let t = fn();
+        if (!t) continue;
+        t = t.trim().replace(/^["']+|["']+$/g, '');
+        if (t.startsWith('{')) {
+            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
+        }
+        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+    }
+    const fallbackKeys = ['accessToken', 'authToken', 'adminToken', 'jwt'];
+    for (let k of fallbackKeys) {
         let t = localStorage.getItem(k) || sessionStorage.getItem(k);
         if (!t) continue;
         t = t.trim().replace(/^["']+|["']+$/g, '');
@@ -64,9 +77,16 @@ window.isLoggedIn = window.isLoggedIn || function isLoggedIn() {
 };
 window.isAuthenticated = window.isLoggedIn;
 
-window.persistAuthSession = function persistAuthSession(data, token) {
+window.persistAuthSession = function persistAuthSession(data, token, rememberMeParam) {
+    if (typeof window.persistSession === 'function') {
+        return window.persistSession(data || { token }, rememberMeParam);
+    }
     const accessToken = token || data?.accessToken || data?.token || data?.authToken || '';
     const userPayload = data?.user || data || {};
+    let rememberMe = rememberMeParam;
+    if (rememberMe === undefined) {
+        rememberMe = data?.rememberMe !== undefined ? Boolean(data.rememberMe) : (localStorage.getItem('rememberMe') === 'true');
+    }
 
     const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach(k => {
@@ -74,32 +94,35 @@ window.persistAuthSession = function persistAuthSession(data, token) {
         try { sessionStorage.removeItem(k); } catch(e) {}
     });
 
-    if (accessToken) {
-        try { localStorage.setItem('token', accessToken); } catch(e) {}
-        try { sessionStorage.setItem('token', accessToken); } catch(e) {}
-    }
-
     const userStr = JSON.stringify(userPayload);
     const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
-    userKeys.forEach((key) => {
-        try { localStorage.setItem(key, userStr); } catch (e) {}
-        try { sessionStorage.setItem(key, userStr); } catch (e) {}
-    });
 
-    if (userPayload?.role) {
-        try { localStorage.setItem('userRole', userPayload.role); } catch (e) {}
-        try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) {}
-    }
-    if (userPayload?.email) {
-        try { localStorage.setItem('userEmail', userPayload.email); } catch (e) {}
-        try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) {}
-    }
-
-    if (userPayload?.role === 'admin' && accessToken) {
-        try { sessionStorage.setItem('adminToken', accessToken); } catch (e) {}
-        try { localStorage.setItem('adminToken', accessToken); } catch (e) {}
-        try { sessionStorage.setItem('adminUser', userStr); } catch (e) {}
-        try { localStorage.setItem('adminUser', userStr); } catch (e) {}
+    if (rememberMe) {
+        if (accessToken) try { localStorage.setItem('token', accessToken); } catch(e) {}
+        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
+        userKeys.forEach((key) => { try { localStorage.setItem(key, userStr); } catch (e) {} });
+        if (userPayload?.email) {
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) {}
+            try { localStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+        }
+        if (userPayload?.role) try { localStorage.setItem('userRole', userPayload.role); } catch (e) {}
+        if (userPayload?.role === 'admin' && accessToken) {
+            try { localStorage.setItem('adminToken', accessToken); } catch (e) {}
+            try { localStorage.setItem('adminUser', userStr); } catch (e) {}
+        }
+    } else {
+        if (accessToken) try { sessionStorage.setItem('token', accessToken); } catch(e) {}
+        try { localStorage.removeItem('rememberMe'); } catch(e) {}
+        userKeys.forEach((key) => { try { sessionStorage.setItem(key, userStr); } catch (e) {} });
+        if (userPayload?.email) {
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) {}
+            try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+        }
+        if (userPayload?.role) try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) {}
+        if (userPayload?.role === 'admin' && accessToken) {
+            try { sessionStorage.setItem('adminToken', accessToken); } catch (e) {}
+            try { sessionStorage.setItem('adminUser', userStr); } catch (e) {}
+        }
     }
 
     if (typeof window.updateHeader === 'function') {

@@ -45,7 +45,6 @@ const protect = async (req, res, next) => {
         const decoded = tryDecodeToken(token);
 
         if (!decoded) {
-            logger.warn(`Auth failed: token verification failed for token: ${token.slice(0, 15)}...`);
             return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
         }
 

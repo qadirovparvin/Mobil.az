@@ -1055,15 +1055,18 @@ async function initEditMode() {
       if (res.status === 400) {
         throw new Error(errData.message || 'Elan identifikatoru (ID) yalnışdır.');
       } else if (res.status === 401) {
-        console.warn('Token expired in edit mode, auto clearing...');
-        localStorage.removeItem('token');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('jwt');
-        sessionStorage.clear();
-        window.location.href = 'login.html?reason=token_expired&redirect=' + encodeURIComponent(window.location.href);
-        return;
+        try {
+          const me = await fetch(`${base}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+          if (me.status === 401) {
+            console.warn('Token truly expired in edit mode, auto clearing...');
+            ['token','accessToken','authToken','adminToken','jwt'].forEach(k => {
+              try { localStorage.removeItem(k); } catch(e){}
+              try { sessionStorage.removeItem(k); } catch(e){}
+            });
+            window.location.href = 'login.html?expired=1&redirect=' + encodeURIComponent(window.location.href);
+            return;
+          }
+        } catch(e) {}
       } else if (res.status === 403) {
         throw new Error(errData.message || 'Bu elana düzəliş etmək hüququnuz yoxdur.');
       } else if (res.status === 404) {
@@ -1361,15 +1364,20 @@ if (adFormEl) {
         });
 
         if (updateRes.status === 401) {
-          console.warn('Token expired, auto clearing...');
-          localStorage.removeItem('token');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('jwt');
-          sessionStorage.clear();
-          window.location.href = 'login.html?reason=token_expired&redirect=' + encodeURIComponent(`elan-yerlesdir.html?edit=${editAdId}`);
-          throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+          try {
+            const me = await fetch(`${base}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+            if (me.status === 401) {
+              console.warn('Token truly expired, auto clearing...');
+              ['token','accessToken','authToken','adminToken','jwt'].forEach(k => {
+                try { localStorage.removeItem(k); } catch(e){}
+                try { sessionStorage.removeItem(k); } catch(e){}
+              });
+              window.location.href = 'login.html?expired=1&redirect=' + encodeURIComponent(`elan-yerlesdir.html?edit=${editAdId}`);
+              throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+            }
+          } catch(e) {
+            if (e.message && e.message.includes('login səhifəsinə')) throw e;
+          }
         }
 
         if (!updateRes.ok) {
@@ -1396,15 +1404,20 @@ if (adFormEl) {
         });
 
         if (response.status === 401) {
-          console.warn('Token expired, auto clearing...');
-          localStorage.removeItem('token');
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('jwt');
-          sessionStorage.clear();
-          window.location.href = 'login.html?reason=token_expired&redirect=elan-yerlesdir.html';
-          throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+          try {
+            const me = await fetch(`${base}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+            if (me.status === 401) {
+              console.warn('Token truly expired, auto clearing...');
+              ['token','accessToken','authToken','adminToken','jwt'].forEach(k => {
+                try { localStorage.removeItem(k); } catch(e){}
+                try { sessionStorage.removeItem(k); } catch(e){}
+              });
+              window.location.href = 'login.html?expired=1&redirect=elan-yerlesdir.html';
+              throw new Error('Sessiya bitib, login səhifəsinə yönləndirilir...');
+            }
+          } catch(e) {
+            if (e.message && e.message.includes('login səhifəsinə')) throw e;
+          }
         }
 
         if (!response.ok) {

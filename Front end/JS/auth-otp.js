@@ -10,10 +10,19 @@ const SMS_DEV_MODE = true; // TODO: false when SMS paid
 const SMS_DEV_WARNING = 'SMS xidməti hazırda texniki profilaktikadadır. Zəhmət olmasa şifrə ilə daxil olun.';
 
 // Dual-write session persistence across all keys to guarantee header and API sync
-function persistSession(data) {
-    const token = data?.accessToken || data?.token || data?.authToken;
+function persistSession(data, rememberMeParam) {
+    const token = data?.accessToken || data?.token || data?.authToken || (typeof data === 'string' ? data : '');
     if (!token) return;
-    
+
+    let rememberMe = rememberMeParam;
+    if (rememberMe === undefined) {
+        if (data && typeof data.rememberMe !== 'undefined') {
+            rememberMe = Boolean(data.rememberMe);
+        } else {
+            rememberMe = localStorage.getItem('rememberMe') === 'true';
+        }
+    }
+
     const userPayload = {
         id: data._id || data.id || data.user?._id || data.user?.id,
         name: data.name || data.user?.name || '',
@@ -23,35 +32,48 @@ function persistSession(data) {
         role: data.role || data.user?.role || 'user',
         avatar: data.avatar || data.user?.avatar || ''
     };
-    
+
     const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach((key) => {
         try { localStorage.removeItem(key); } catch(e) {}
         try { sessionStorage.removeItem(key); } catch(e) {}
     });
-    try { sessionStorage.clear(); } catch(e) {}
-    try { localStorage.setItem('token', token); } catch(e) {}
 
     const userStr = JSON.stringify(userPayload);
     const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
-    userKeys.forEach((key) => {
-        try { localStorage.setItem(key, userStr); } catch(e) {}
-        try { sessionStorage.setItem(key, userStr); } catch(e) {}
-    });
 
-    try {
-        localStorage.setItem('userRole', userPayload.role);
-        localStorage.setItem('userEmail', userPayload.email);
-        sessionStorage.setItem('userRole', userPayload.role);
-        sessionStorage.setItem('userEmail', userPayload.email);
-        if (userPayload.role === 'admin') {
-            localStorage.setItem('adminToken', token);
-            sessionStorage.setItem('adminToken', token);
-            localStorage.setItem('adminUser', userStr);
-            sessionStorage.setItem('adminUser', userStr);
+    if (rememberMe) {
+        try { localStorage.setItem('token', token); } catch(e) {}
+        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
+        userKeys.forEach(k => { try { localStorage.setItem(k, userStr); } catch(e) {} });
+        if (userPayload.email) {
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
+            try { localStorage.setItem('userEmail', userPayload.email); } catch(e) {}
         }
-    } catch(e) {}
-    
+        if (userPayload.role) {
+            try { localStorage.setItem('userRole', userPayload.role); } catch(e) {}
+        }
+        if (userPayload.role === 'admin') {
+            try { localStorage.setItem('adminToken', token); } catch(e) {}
+            try { localStorage.setItem('adminUser', userStr); } catch(e) {}
+        }
+    } else {
+        try { sessionStorage.setItem('token', token); } catch(e) {}
+        try { localStorage.removeItem('rememberMe'); } catch(e) {}
+        userKeys.forEach(k => { try { sessionStorage.setItem(k, userStr); } catch(e) {} });
+        if (userPayload.email) {
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
+            try { sessionStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+        }
+        if (userPayload.role) {
+            try { sessionStorage.setItem('userRole', userPayload.role); } catch(e) {}
+        }
+        if (userPayload.role === 'admin') {
+            try { sessionStorage.setItem('adminToken', token); } catch(e) {}
+            try { sessionStorage.setItem('adminUser', userStr); } catch(e) {}
+        }
+    }
+
     if (typeof window.setAuthToken === 'function') {
         try { window.setAuthToken(token); } catch(e) {}
     }
@@ -583,6 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const identifier = document.getElementById('loginIdentifier')?.value.trim();
             const password = document.getElementById('loginPassword')?.value || '';
+            const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : true;
             if (!identifier || !password) {
                 showToast('Email/istifadəçi adı və şifrəni daxil edin', 'error');
                 return;
@@ -592,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setLoading(btn, true);
 
             try {
-                const loginPayload = { email: identifier, password };
+                const loginPayload = { email: identifier, password, rememberMe };
                 const res = await fetch(`${window.API_URL}/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -619,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const secondRes = await fetch(`${window.API_URL}/auth/login`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ ...loginPayload, otpCode })
+                                    body: JSON.stringify({ ...loginPayload, otpCode, rememberMe })
                                 });
                                 const secondData = await secondRes.json();
                                 if (!secondRes.ok) {
@@ -641,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
 
                                 document.getElementById('twoFactorModal').style.display = 'none';
-                                persistSession(secondData);
+                                persistSession(secondData, rememberMe);
                                 showToast('Uğurla daxil oldunuz!', 'success');
                                 const redirectTarget = secondData.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
                                 setTimeout(() => window.location.href = redirectTarget, 900);
@@ -676,7 +699,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return fallback;
                 }
 
-                persistSession(data);
+                persistSession(data, rememberMe);
                 showToast('Uğurla daxil oldunuz!', 'success');
                 // Redirect admin users to the admin panel, others to cabinet or safe redirect target
                 const redirectTarget = data.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
