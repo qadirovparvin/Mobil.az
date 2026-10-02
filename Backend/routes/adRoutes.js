@@ -25,7 +25,7 @@ router.get('/:id', adListLimiter, validateObjectIdParam('id'), optionalProtect, 
 router.post('/',          protect, csrfProtection, upload.array('images', MAX_UPLOAD_FILES), processImage, createAd);
 router.put('/:id',        protect, csrfProtection, validateObjectIdParam('id'), upload.array('images', MAX_UPLOAD_FILES), processImage, updateAd);
 router.delete('/:id',     protect, csrfProtection, validateObjectIdParam('id'), deleteAd);
-router.post('/:id/boost', protect, validateObjectIdParam('id'), boostAd);
+router.post('/:id/boost', protect, csrfProtection, validateObjectIdParam('id'), boostAd);
 router.post('/:id/favorite', protect, csrfProtection, validateObjectIdParam('id'), toggleFavorite);
 
 module.exports = router;

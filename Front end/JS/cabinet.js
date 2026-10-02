@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function openBillingPanel() {
+    async function openBillingPanel() {
         const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
         const contents = document.querySelectorAll('.cabinet-tab');
         const settingsTabLink = document.querySelector('.tab-link[data-target="tab-settings"]');
@@ -812,6 +812,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (window.showSettingsPanel && settingsPanelButton) {
             window.showSettingsPanel('panel-billing', settingsPanelButton);
+        }
+
+        // Load real prices from backend before rendering
+        try {
+            const token = getToken();
+            if (token) {
+                const resp = await fetch(`${API_BASE}/wallet/packages`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (resp.ok) {
+                    const { packages: serverPkgs } = await resp.json();
+                    if (Array.isArray(serverPkgs)) {
+                        serverPkgs.forEach((sp) => {
+                            const pkgId = sp.code?.toLowerCase(); // 'VIP' -> 'vip', 'PRO' -> 'pro'
+                            const days = sp.durationDays;
+                            const price = sp.price;
+                            const localPkg = BILLING_PACKAGES.find((p) => p.id === pkgId);
+                            if (localPkg && days && price !== undefined) {
+                                localPkg.prices[days] = price;
+                            }
+                        });
+                    }
+                }
+            }
+        } catch (e) {
+            // Silently fall back to hardcoded prices
         }
 
         renderBillingPanel(getStoredUser());
@@ -856,20 +882,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const topUpHandler = () => {
-            toast.show(t('walletRedirect', 'Redirecting to the payment system...'), 'info');
+            toast.show(t('walletRedirect', 'Cüzdana keçirilir...'), 'info');
+            // Navigate to wallet tab in settings
+            const walletTabBtn = document.querySelector('.settings-nav button[onclick*="panel-wallet"]');
+            if (walletTabBtn && window.showSettingsPanel) {
+                const settingsTabLink = document.querySelector('.tab-link[data-target="tab-settings"]');
+                const settingsTab = document.getElementById('tab-settings');
+                document.querySelectorAll('.tab-link:not(.logout-link)').forEach((t) => t.classList.remove('active'));
+                document.querySelectorAll('.cabinet-tab').forEach((c) => { c.style.display = 'none'; c.classList.remove('active'); });
+                if (settingsTabLink) settingsTabLink.classList.add('active');
+                if (settingsTab) { settingsTab.style.display = 'block'; settingsTab.classList.add('active'); }
+                window.showSettingsPanel('panel-wallet', walletTabBtn);
+            }
         };
 
         document.getElementById('billingTopUpBtn')?.addEventListener('click', topUpHandler);
         document.getElementById('billingGoWalletBtn')?.addEventListener('click', topUpHandler);
 
-        document.getElementById('billingConfirmBtn')?.addEventListener('click', () => {
+        document.getElementById('billingConfirmBtn')?.addEventListener('click', async () => {
             const user = getStoredUser() || {};
             const price = getBillingPrice();
             const methodId = billingState.method;
-            const nextExpiry = new Date();
-            nextExpiry.setDate(nextExpiry.getDate() + billingState.duration);
 
-             if (!isBillingPurchasable()) {
+            if (!isBillingPurchasable()) {
+                return;
+            }
+
+            // Map billing package id + duration to productId expected by backend
+            // BILLING_PACKAGES uses ids: 'vip', 'pro'  → productIds: 'vip-30', 'vip-90', 'pro-30', 'pro-90'
+            const productId = `${billingState.packageId}-${billingState.duration}`;
+
+            const token = getToken();
+            if (!token) {
+                toast.show(billingText('insufficientBalance', 'Zəhmət olmasa hesabınıza daxil olun.'), 'warning');
                 return;
             }
 
@@ -880,43 +925,131 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                const updatedUser = {
-                    ...user,
-                    walletBalance: Number((walletBalance - price).toFixed(2)),
-                    activePackage: billingState.packageId === 'standard' ? null : billingState.packageId.toUpperCase(),
-                    billingExpiresAt: billingState.packageId === 'standard' ? null : nextExpiry.toISOString()
-                };
+                const confirmBtn = document.getElementById('billingConfirmBtn');
+                if (confirmBtn) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.classList.add('is-disabled');
+                }
 
-                persistUser(updatedUser);
-                appendBillingHistory(updatedUser, {
+                try {
+                    // Fetch CSRF token
+                    let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+                    let signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+                    if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+                        try { csrfToken = await window.fetchCsrfToken(); signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || ''; } catch (e) { /* ignore */ }
+                    }
+
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    };
+                    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+                    if (signedCsrf) headers['X-CSRF-Signed-Token'] = signedCsrf;
+
+                    const idempotencyKey = `billing-${billingState.packageId}-${billingState.duration}-${Date.now()}`;
+                    const response = await fetch(`${API_BASE}/wallet/packages/purchase`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers,
+                        body: JSON.stringify({ productId, idempotencyKey })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        let errMsg = data.message || billingText('insufficientBalance', 'Ödəniş uğursuz oldu');
+                        if (data.required !== undefined && data.current !== undefined) {
+                            errMsg = `Balans kifayət deyil. Lazım: ${data.required} AZN, Balansınız: ${data.current} AZN`;
+                        }
+                        throw new Error(errMsg);
+                    }
+
+                    // Update local user state with server response
+                    const nextExpiry = data.packageExpiresAt || data.billingExpiresAt;
+                    const updatedUser = {
+                        ...user,
+                        walletBalance: data.walletBalance !== undefined ? data.walletBalance : user.walletBalance,
+                        activePackage: data.activePackage || (billingState.packageId === 'standard' ? null : billingState.packageId.toUpperCase()),
+                        billingExpiresAt: nextExpiry || null,
+                        packageExpiresAt: nextExpiry || null
+                    };
+
+                    persistUser(updatedUser);
+                    appendBillingHistory(updatedUser, {
+                        packageId: billingState.packageId,
+                        duration: billingState.duration,
+                        amount: price,
+                        method: methodId,
+                        status: 'paid',
+                        date: new Date().toISOString()
+                    });
+
+                    renderCurrentUser(updatedUser);
+                    toast.show(billingText('purchaseSuccess', 'Package activated successfully.'), 'success');
+
+                    // Reset initialized so panel re-opens with new activePackage selected
+                    billingState.initialized = false;
+
+                    // Re-load ads so VIP badge appears immediately
+                    if (typeof loadMyAds === 'function') loadMyAds();
+
+                } catch (err) {
+                    toast.show(err.message || billingText('insufficientBalance', 'Ödəniş zamanı xəta baş verdi'), 'error');
+                } finally {
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.classList.remove('is-disabled');
+                    }
+                    renderBillingPanel(getStoredUser());
+                }
+                return;
+            }
+
+            // card / transfer: create a payment session on backend
+            const confirmBtn = document.getElementById('billingConfirmBtn');
+            if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.classList.add('is-disabled'); }
+
+            try {
+                let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+                let signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+                if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+                    try { csrfToken = await window.fetchCsrfToken(); signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || ''; } catch (e) { /* ignore */ }
+                }
+                const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+                if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+                if (signedCsrf) headers['X-CSRF-Signed-Token'] = signedCsrf;
+
+                const idempotencyKey = `billing-${billingState.packageId}-${billingState.duration}-${Date.now()}`;
+                const response = await fetch(`${API_BASE}/wallet/packages/payment-session`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers,
+                    body: JSON.stringify({ productId, provider: methodId, idempotencyKey })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Sessiya yaradıla bilmədi');
+
+                appendBillingHistory(user, {
                     packageId: billingState.packageId,
                     duration: billingState.duration,
                     amount: price,
                     method: methodId,
-                    status: 'paid',
+                    status: 'pending',
                     date: new Date().toISOString()
                 });
-
-                renderCurrentUser(updatedUser);
-                toast.show(billingText('purchaseSuccess', 'Package activated successfully.'), 'success');
-                return;
+                renderBillingHistory(getStoredUser());
+                toast.show(
+                    methodId === 'card'
+                        ? billingText('redirectCard', 'Redirecting to card payment.')
+                        : billingText('redirectTransfer', 'Opening invoice and transfer instructions.'),
+                    'info'
+                );
+            } catch (err) {
+                toast.show(err.message || 'Ödəniş sessiyası yaradıla bilmədi', 'error');
+            } finally {
+                if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.classList.remove('is-disabled'); }
             }
-
-            appendBillingHistory(user, {
-                packageId: billingState.packageId,
-                duration: billingState.duration,
-                amount: price,
-                method: methodId,
-                status: 'pending',
-                date: new Date().toISOString()
-            });
-            renderBillingHistory(user);
-            toast.show(
-                methodId === 'card'
-                    ? billingText('redirectCard', 'Redirecting to card payment.')
-                    : billingText('redirectTransfer', 'Opening invoice and transfer instructions.'),
-                'info'
-            );
         });
     }
 
