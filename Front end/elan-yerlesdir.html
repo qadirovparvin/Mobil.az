@@ -8,60 +8,21 @@
   <link rel="stylesheet" href="CSS/general.css">
   <link rel="stylesheet" href="CSS/style.css">
   <link rel="stylesheet" href="CSS/elan-yerlesdir.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
-  <header>
-    <div class="container">
-      <a href="index.html" class="logo">
-        <span class="mobil-logo">Mobil<span>.az</span></span>
-      </a>
-      <div class="header-right">
-        <nav class="menu">
-          <ul>
-            <div class="contact-dropdown">
-              <li data-translate="Contact">
-                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-              </li>
-              <div class="contact-menu">
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-              </div>
-            </div>
-            <li class="About" data-translate="About">
-              <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-            </li>
-            <li class="Stores" data-translate="Stores">
-              <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-            </li>
-            <li class="Favorite" data-translate="Favorite">
-              <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-            </li>
-          </ul>
-        </nav>
-        <div class="button-container">
-          <a href="login.html" class="login-btn" data-translate="login-btn">
-            <i class="fas fa-sign-in-alt"></i> Giriş
-          </a>
-          <a href="signup.html" class="register-btn" data-translate="register-btn">
-            <i class="fas fa-user-plus"></i> Qeydiyyat
-          </a>
-        </div>
-        <div class="theme-lang-container">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button class="language-selector">
-            <i class="fas fa-globe"></i>
-            <span id="current-lang" data-translate="language-selector">AZ</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+    <div id="header-placeholder"></div>
 
   <main>
     <div class="ad-page-hero">
@@ -169,11 +130,11 @@
                   <option value="Bakı">Bakı</option>
                   <option value="Gəncə">Gəncə</option>
                   <option value="Sumqayıt">Sumqayıt</option>
-                  <option value="Mingqəçevir">Mingəçevir</option>
-                  <option value="Naxqıvan">Naxçıvan</option>
+                  <option value="Mingəçevir">Mingəçevir</option>
+                  <option value="Naxçıvan">Naxçıvan</option>
                   <option value="Şəki">Şəki</option>
-                  <option value="Şırvan">Şırvan</option>
-                  <option value="Lankəran">Lənkəran</option>
+                  <option value="Şirvan">Şirvan</option>
+                  <option value="Lənkəran">Lənkəran</option>
                   <option value="Abşəron">Abşəron</option>
                   <option value="Ağcabədi">Ağcabədi</option>
                   <option value="Ağdam">Ağdam</option>
@@ -202,7 +163,7 @@
                   <option value="Lerik">Lerik</option>
                   <option value="Masallı">Masallı</option>
                   <option value="Naftalan">Naftalan</option>
-                  <option value="Neftqala">Neftqala</option>
+                  <option value="Neftçala">Neftçala</option>
                   <option value="Oğuz">Oğuz</option>
                   <option value="Qəbələ">Qəbələ</option>
                   <option value="Qax">Qax</option>
@@ -250,13 +211,17 @@
               <div class="form-group">
                 <label for="condition" data-translate="elan-condition">Vəziyyəti</label>
                 <div class="select-wrapper">
-                  <select id="condition" name="condition" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
-                    <option data-translate-option="opt-yeni">Yeni</option>
-                    <option data-translate-option="opt-islenmiş">İşlənmiş</option>
+                  <select id="condition" name="condition" onchange="handleOtherSelect(this, 'condition_custom')">
+                    <option value="">— Seçin —</option>
+                    <option value="Yeni" data-translate-option="opt-yeni">Yeni</option>
+                    <option value="İşlənmiş" data-translate-option="opt-islenmiş">İşlənmiş</option>
+                    <option value="Təmir olunub">Təmir olunub</option>
+                    <option value="other">Digər</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('condition')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="condition_custom" class="custom-spec-input" placeholder="Məs: Yenidən fərqsiz" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -265,33 +230,43 @@
               <div class="form-group">
                 <label for="memory" data-translate="elan-memory">Yaddaş (GB)</label>
                 <div class="select-wrapper">
-                  <select id="memory" name="memory" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
-                    <option data-translate-option="opt-64-az">64 GB-dən az</option>
-                    <option data-translate-option="opt-64">64 GB</option>
-                    <option data-translate-option="opt-128">128 GB</option>
-                    <option data-translate-option="opt-256">256 GB</option>
-                    <option data-translate-option="opt-512">512 GB</option>
-                    <option data-translate-option="opt-512-cox">512 GB-dən daha çox</option>
+                  <select id="memory" name="memory" onchange="handleOtherSelect(this, 'memory_custom')">
+                    <option value="">— Seçin (boş burax) —</option>
+                    <option value="16">16 GB</option>
+                    <option value="32">32 GB</option>
+                    <option value="64">64 GB</option>
+                    <option value="64-dan-az" data-translate-option="opt-64-az">64 GB-dan az</option>
+                    <option value="128">128 GB</option>
+                    <option value="256">256 GB</option>
+                    <option value="512">512 GB</option>
+                    <option value="1024">1 TB (1024 GB)</option>
+                    <option value="512-den-cox" data-translate-option="opt-512-cox">512 GB-dan daha çox</option>
+                    <option value="other">Digər (özünüz yazın)</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('memory')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="memory_custom" class="custom-spec-input" placeholder="Məs: 16 GB və ya 2 TB" style="display:none; margin-top:8px;">
               </div>
               <div class="form-group">
                 <label for="ram" data-translate="elan-ram">RAM (GB)</label>
                 <div class="select-wrapper">
-                  <select id="ram" name="ram" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
+                  <select id="ram" name="ram" onchange="handleOtherSelect(this, 'ram_custom')">
+                    <option value="">— Seçin —</option>
                     <option value="2">2 GB</option>
                     <option value="3">3 GB</option>
                     <option value="4">4 GB</option>
                     <option value="6">6 GB</option>
                     <option value="8">8 GB</option>
                     <option value="12">12 GB</option>
-                    <option value="16+">16 GB+</option>
+                    <option value="16">16 GB</option>
+                    <option value="16-dan-cox">16 GB-dan çox</option>
+                    <option value="other">Digər</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('ram')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="ram_custom" class="custom-spec-input" placeholder="Məs: 24 GB və ya 32 GB" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -300,27 +275,34 @@
               <div class="form-group">
                 <label for="screen_size" data-translate="elan-screen">Ekran ölçüsü</label>
                 <div class="select-wrapper">
-                  <select id="screen_size" name="screen_size" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
+                  <select id="screen_size" name="screen_size" onchange="handleOtherSelect(this, 'screen_size_custom')">
+                    <option value="">— Seçin —</option>
                     <option value="<5.5">&lt;5.5"</option>
                     <option value="5.5-6.1">5.5" – 6.1"</option>
                     <option value="6.1-6.7">6.1" – 6.7"</option>
                     <option value=">6.7">&gt;6.7"</option>
+                    <option value="other">Digər</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('screen_size')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="screen_size_custom" class="custom-spec-input" placeholder="Məs: 6.8&quot;" style="display:none; margin-top:8px;">
               </div>
               <div class="form-group">
                 <label for="battery" data-translate="elan-battery">Batareya (mAh)</label>
                 <div class="select-wrapper">
-                  <select id="battery" name="battery" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
+                  <select id="battery" name="battery" onchange="handleOtherSelect(this, 'battery_custom')">
+                    <option value="">— Seçin —</option>
                     <option value="<3000">&lt;3000</option>
-                    <option value="3000-4500">3000 – 4500</option>
-                    <option value=">4500">&gt;4500</option>
+                    <option value="3000-4000">3000-4000</option>
+                    <option value="4000-5000">4000-5000</option>
+                    <option value="5000+">5000+ mAh</option>
+                    <option value="other">Digər</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('battery')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="battery_custom" class="custom-spec-input" placeholder="Məs: 6000 mAh" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -329,18 +311,20 @@
               <div class="form-group">
                 <label for="color" data-translate="elan-color">Rəng</label>
                 <div class="select-wrapper">
-                  <select id="color" name="color" data-translate-placeholder="elan-select">
-                    <option disabled selected value="">Seçin</option>
-                    <option data-translate-option="opt-qara">Qara</option>
-                    <option data-translate-option="opt-ag">Ağ</option>
-                    <option data-translate-option="opt-qizili">Qızılı</option>
-                    <option data-translate-option="opt-gumushu">Gümüşü</option>
-                    <option data-translate-option="opt-boz">Boz</option>
-                    <option data-translate-option="opt-mavi">Mavi</option>
-                    <option data-translate-option="opt-diger">Digər</option>
+                  <select id="color" name="color" onchange="handleOtherSelect(this, 'color_custom')">
+                    <option value="">— Seçin —</option>
+                    <option value="black" data-translate-option="opt-qara">Qara</option>
+                    <option value="white" data-translate-option="opt-ag">Ağ</option>
+                    <option value="gold" data-translate-option="opt-qizili">Qızılı</option>
+                    <option value="silver" data-translate-option="opt-gumushu">Gümüşü</option>
+                    <option value="grey" data-translate-option="opt-boz">Boz</option>
+                    <option value="blue" data-translate-option="opt-mavi">Mavi</option>
+                    <option value="other" data-translate-option="opt-diger">Digər</option>
                   </select>
+                  <button type="button" class="clear-select" onclick="clearSelect('color')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
+                <input type="text" id="color_custom" class="custom-spec-input" placeholder="Məs: Yaşıl və ya Bənövşəyi" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -423,6 +407,13 @@
                   placeholder="+994 XX XXX XX XX" required>
               </div>
             </div>
+
+            <div id="storePostOption" style="display:none; margin:12px 0; padding:10px 14px; border:1px solid #e0e0e0; border-radius:8px; background:#f9f9f9">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+                <input type="checkbox" id="postAsStore" checked>
+                <span>Mağaza adından yerləşdir: <b id="myStoreName"></b></span>
+              </label>
+            </div>
           </div>
 
           <button type="submit" class="ad-form-btn" data-translate="elan-submit">
@@ -476,40 +467,13 @@
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-column">
-        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-        <ul>
-          <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
-          <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a>
-          </li>
-          <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
-                qaydaları</span></a></li>
-          <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
-        </ul>
-      </div>
-      <div class="footer-column">
-        <h3 class="contact" data-translate="contact">Əlaqə</h3>
-        <ul>
-          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-        </ul>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-    </div>
-  </footer>
+    <div id="footer-placeholder"></div>
 
-  <script src="JS/elan-yerlesdir.js"></script>
+  <script src="JS/config.js"></script>
   <script src="JS/auth.js"></script>
+  <script src="JS/elan-yerlesdir.js"></script>
   <script src="JS/script.js"></script>
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

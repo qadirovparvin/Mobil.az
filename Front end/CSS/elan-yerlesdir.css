@@ -298,6 +298,63 @@
   font-size: 13px;
 }
 
+.clear-select {
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #f0f0f5;
+  border: 1px solid #d5d5e2;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #6c6c80;
+  transition: all 0.18s ease;
+  z-index: 2;
+  padding: 0;
+  user-select: none;
+}
+
+.clear-select:hover {
+  background: #e2e2ed;
+  color: #1a1a24;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.clear-select.visible {
+  display: flex !important;
+}
+
+.select-wrapper.has-value select {
+  padding-right: 58px !important;
+}
+
+.custom-spec-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #fdfdfd;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.custom-spec-input:focus {
+  outline: none;
+  border-color: #6a35b5;
+  box-shadow: 0 0 0 3px rgba(106, 53, 181, 0.12);
+  background: #fff;
+}
+
 .input-wrapper {
   position: relative;
   display: flex;

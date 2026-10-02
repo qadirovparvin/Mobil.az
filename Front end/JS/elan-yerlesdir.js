@@ -219,7 +219,8 @@ const categorySelect = document.getElementById('category');
 const brandSelect = document.getElementById('brand');
 const modelSelect = document.getElementById('model');
 
-function clearSelect(sel, placeholder) {
+function resetSelectOptions(sel, placeholder) {
+  if (!sel) return;
   sel.innerHTML = '';
   const opt = document.createElement('option');
   opt.disabled = true;
@@ -227,6 +228,81 @@ function clearSelect(sel, placeholder) {
   opt.value = '';
   opt.textContent = placeholder;
   sel.appendChild(opt);
+}
+
+function updateClearButtonState(selectEl) {
+  if (!selectEl) return;
+  const wrapper = selectEl.closest('.select-wrapper');
+  if (!wrapper) return;
+  const clearBtn = wrapper.querySelector('.clear-select');
+  const hasValue = !!(selectEl.value && String(selectEl.value).trim() !== '');
+  if (clearBtn) {
+    if (hasValue) {
+      clearBtn.classList.add('visible');
+    } else {
+      clearBtn.classList.remove('visible');
+    }
+  }
+  if (hasValue) {
+    wrapper.classList.add('has-value');
+  } else {
+    wrapper.classList.remove('has-value');
+  }
+}
+window.updateClearButtonState = updateClearButtonState;
+
+function handleOtherSelect(selectEl, customInputId) {
+  if (!selectEl) return;
+  const customInput = document.getElementById(customInputId);
+  if (selectEl.value === 'other') {
+    if (customInput) {
+      customInput.style.display = 'block';
+      customInput.required = true;
+      customInput.focus();
+    }
+  } else {
+    if (customInput) {
+      customInput.style.display = 'none';
+      customInput.required = false;
+      customInput.value = '';
+    }
+  }
+  updateClearButtonState(selectEl);
+}
+window.handleOtherSelect = handleOtherSelect;
+
+function clearSelect(id) {
+  let targetId = id;
+  if (id === 'yaddas') targetId = 'memory';
+  const sel = (typeof targetId === 'string')
+    ? (document.getElementById(targetId) || document.getElementById(id))
+    : targetId;
+  if (!sel) return;
+  sel.value = '';
+  sel.dispatchEvent(new Event('change', { bubbles: true }));
+  const actualId = sel.id;
+  const custom = document.getElementById(actualId + '_custom') || (actualId === 'memory' ? document.getElementById('yaddas_custom') : null);
+  if (custom) {
+    custom.style.display = 'none';
+    custom.required = false;
+    custom.value = '';
+  }
+  updateClearButtonState(sel);
+}
+window.clearSelect = clearSelect;
+
+if (typeof document !== 'undefined') {
+  const initSelectClearButtons = () => {
+    document.querySelectorAll('.select-wrapper select').forEach((sel) => {
+      updateClearButtonState(sel);
+      sel.addEventListener('change', () => updateClearButtonState(sel));
+    });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSelectClearButtons);
+  } else {
+    initSelectClearButtons();
+  }
 }
 
 function normalizeBrandKey(brand) {
@@ -249,8 +325,8 @@ function getCatalogModels(category, brand) {
 }
 
 function populateBrands(category) {
-  clearSelect(brandSelect, _t.brandPlaceholder);
-  clearSelect(modelSelect, _t.modelPlaceholderCat);
+  resetSelectOptions(brandSelect, _t.brandPlaceholder);
+  resetSelectOptions(modelSelect, _t.modelPlaceholderCat);
 
   if (!category || !CATALOG[category]) return;
 
@@ -265,7 +341,7 @@ function populateBrands(category) {
 }
 
 function populateModels(category, brand) {
-  clearSelect(modelSelect, _t.modelPlaceholderBrand);
+  resetSelectOptions(modelSelect, _t.modelPlaceholderBrand);
   const models = getCatalogModels(category, brand);
   if (!models) return;
 
@@ -288,8 +364,8 @@ let _t = {
 };
 
 // Initialize — no category chosen yet
-clearSelect(brandSelect, _t.brandPlaceholder);
-clearSelect(modelSelect, _t.modelPlaceholderCat);
+resetSelectOptions(brandSelect, _t.brandPlaceholder);
+resetSelectOptions(modelSelect, _t.modelPlaceholderCat);
 
 // Sync with the central language switcher
 document.addEventListener('langchange', (e) => {
@@ -614,6 +690,7 @@ function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = fals
   const rawStr = String(value).trim();
   if (!rawStr) {
     selectEl.value = '';
+    updateClearButtonState(selectEl);
     return;
   }
 
@@ -624,15 +701,59 @@ function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = fals
     opt.value === decoded || opt.value === rawStr || decodeBasicEntities(opt.value) === decoded
   );
 
-  // Backward-compatible alias matching for "Diger" vs "Digər"
-  if (!matchingOpt && (decoded === 'Diger' || decoded === 'Digər')) {
+  // Backward-compatible alias matching for "Diger" vs "Digər" vs "other"
+  if (!matchingOpt && (decoded === 'Diger' || decoded === 'Digər' || decoded === 'other')) {
     matchingOpt = Array.from(selectEl.options || []).find((opt) =>
-      opt.value === 'Digər' || opt.value === 'Diger'
+      opt.value === 'Digər' || opt.value === 'Diger' || opt.value === 'other'
+    );
+  }
+
+  // Memory aliases: below-64 vs 64-dan-az, 512+ vs 512-den-cox
+  if (!matchingOpt && (decoded === 'below-64' || decoded === '64-dan-az')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === '64-dan-az' || opt.value === 'below-64'
+    );
+  }
+  if (!matchingOpt && (decoded === '512+' || decoded === '512-den-cox')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === '512-den-cox' || opt.value === '512+'
+    );
+  }
+  if (!matchingOpt && (decoded === '16+' || decoded === '16-dan-cox')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === '16-dan-cox' || opt.value === '16+'
+    );
+  }
+  if (!matchingOpt && (decoded.toLowerCase() === 'yeni')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === 'Yeni' || opt.value === 'yeni'
+    );
+  }
+  if (!matchingOpt && (decoded.toLowerCase() === 'islenmis' || decoded === 'İşlənmiş')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === 'İşlənmiş' || opt.value === 'islenmis'
+    );
+  }
+  if (!matchingOpt && (decoded.toLowerCase() === 'temir-olunub' || decoded === 'Təmir olunub')) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
+      opt.value === 'Təmir olunub' || opt.value === 'temir-olunub'
     );
   }
 
   if (matchingOpt) {
     selectEl.value = matchingOpt.value;
+    updateClearButtonState(selectEl);
+    return;
+  }
+
+  // If not in options, check if there's an 'other' option and custom input (e.g. custom memory/ram/battery/color)
+  const customInput = document.getElementById(selectEl.id + '_custom') || (selectEl.id === 'memory' ? document.getElementById('yaddas_custom') : null);
+  const otherOpt = Array.from(selectEl.options || []).find((opt) => opt.value === 'other');
+  if (otherOpt && customInput) {
+    selectEl.value = 'other';
+    customInput.style.display = 'block';
+    customInput.value = decoded;
+    updateClearButtonState(selectEl);
     return;
   }
 
@@ -647,6 +768,7 @@ function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = fals
     // For structured dropdowns, safely reset to unselected placeholder
     selectEl.value = '';
   }
+  updateClearButtonState(selectEl);
 }
 
 
@@ -1075,8 +1197,6 @@ if (adFormEl) {
     const phone       = document.getElementById('phone') ? document.getElementById('phone').value : '';
     const cityEl      = document.getElementById('city');
     const city        = cityEl ? cityEl.value : '';
-    const conditionEl = document.getElementById('condition');
-    const condition   = conditionEl ? conditionEl.value : '';
 
     if (!category)           { alert('Zəhmət olmasa kateqoriya seçin.');  return; }
     if (!brand)              { alert('Zəhmət olmasa marka seçin.');       return; }
@@ -1087,7 +1207,6 @@ if (adFormEl) {
       alert('Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67).');
       return;
     }
-    if (!condition)          { alert('Zəhmət olmasa məhsulun vəziyyətini seçin.'); return; }
 
     const currentExistingCount = (isEditMode && Array.isArray(existingImages)) ? existingImages.length : 0;
     const newFileCount = files ? files.length : 0;
@@ -1157,12 +1276,35 @@ if (adFormEl) {
 
 
       // ── 5. Build specs object ─────────────────────────────
+      function getSpecValue(selectId, customInputId) {
+        const select = document.getElementById(selectId);
+        if (!select) return null;
+        const val = select.value ? select.value.trim() : '';
+        if (val === 'other') {
+          const custom = document.getElementById(customInputId || (selectId + '_custom'));
+          return (custom && custom.value.trim()) ? custom.value.trim() : null;
+        }
+        return val || null;
+      }
+
+      function getConditionValue() {
+        const condEl = document.getElementById('condition');
+        if (!condEl) return null;
+        const val = condEl.value ? condEl.value.trim() : '';
+        if (val === 'other') {
+          const custom = document.getElementById('condition_custom');
+          return (custom && custom.value.trim()) ? custom.value.trim() : null;
+        }
+        return val || null;
+      }
+
+      const conditionVal = getConditionValue();
       const specs = {
-        memory:     document.getElementById('memory')?.value      || '',
-        ram:        document.getElementById('ram')?.value         || '',
-        color:      document.getElementById('color')?.value       || '',
-        screenSize: document.getElementById('screen_size')?.value || '',
-        battery:    document.getElementById('battery')?.value     || '',
+        memory:     getSpecValue('memory', 'memory_custom'),
+        ram:        getSpecValue('ram', 'ram_custom'),
+        color:      getSpecValue('color', 'color_custom'),
+        screenSize: getSpecValue('screen_size', 'screen_size_custom'),
+        battery:    getSpecValue('battery', 'battery_custom'),
         features: {
           nfc:         document.getElementById('nfc')?.checked         || false,
           fingerprint: document.getElementById('fingerprint')?.checked || false,
@@ -1200,11 +1342,13 @@ if (adFormEl) {
           brand,
           modelName: model,
           price:        Number(price),
-          condition,
+          condition:    conditionVal,
           description:  document.getElementById('description')?.value || '',
           images:       finalImageUrls,
           city,
           contactPhone: phone,
+          yaddas:       specs.memory,
+          ram:          specs.ram,
           specs
         };
 
@@ -1234,13 +1378,15 @@ if (adFormEl) {
           brand,
           modelName: model,
           price:        Number(price),
-          condition,
+          condition:    conditionVal,
           description:  document.getElementById('description')?.value || '',
           images:       finalImageUrls,
           city,
           contactPhone: phone,
           sellerType:   isStore ? 'store' : 'personal',
           ...(isStore && storeId ? { store: storeId } : {}),
+          yaddas:       specs.memory,
+          ram:          specs.ram,
           specs
         };
 

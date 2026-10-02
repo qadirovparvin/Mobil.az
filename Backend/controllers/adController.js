@@ -77,7 +77,11 @@ const getAds = async (req, res, next) => {
         if (category)      filter.category      = readString(category, { fieldName: 'category', maxLength: 80 });
         if (brand)         filter.brand         = readString(brand, { fieldName: 'brand', maxLength: 80 });
         if (city)          filter.city          = readString(city, { fieldName: 'city', maxLength: 80 });
-        if (condition)     filter.condition     = readEnum(condition, ['Yeni', 'İşlənmiş'], { fieldName: 'condition', required: true, maxLength: 20 });
+        if (condition) {
+            const rawCond = String(condition).trim();
+            const condVal = (rawCond === 'yeni' || rawCond === 'Yeni') ? 'Yeni' : ((rawCond === 'islenmis' || rawCond === 'İşlənmiş') ? 'İşlənmiş' : ((rawCond === 'temir-olunub' || rawCond === 'Təmir olunub') ? 'Təmir olunub' : rawCond));
+            filter.condition = sanitizePlainText(condVal, { maxLength: 50 });
+        }
         if (promotionType) {
             const cleanPromotionType = readEnum(promotionType, ['none', 'BumpUp', 'VIP', 'PRO', 'Urgent', 'Premium'], { fieldName: 'promotionType', required: true, maxLength: 20 });
             if (cleanPromotionType === 'VIP' || cleanPromotionType === 'Premium' || cleanPromotionType === 'PRO') {
@@ -217,15 +221,15 @@ const createAd = async (req, res, next) => {
         validateAllowedFields(req.body, [
             'category', 'brand', 'modelName', 'price', 'condition',
             'description', 'images', 'city', 'region', 'contactPhone',
-            'sellerType', 'store', 'specs'
+            'sellerType', 'store', 'specs', 'yaddas', 'ram'
         ], 'body');
         const {
             category, brand, modelName, price, condition,
             description, images, city, region, contactPhone,
-            sellerType, store, specs
+            sellerType, store, specs, yaddas, ram
         } = req.body;
 
-        if (!category || !brand || !modelName || !price || !condition || !city) {
+        if (!category || !brand || !modelName || !price || !city) {
             return res.status(400).json({ message: 'Məcburi sahələri doldurun' });
         }
         const normalizedPrice = Number(price);
@@ -254,13 +258,32 @@ const createAd = async (req, res, next) => {
             listingStore = approvedStore._id;
         }
 
+        let cleanCondition = null;
+        if (condition) {
+            const rawCond = String(condition).trim();
+            if (rawCond === 'yeni' || rawCond === 'Yeni') cleanCondition = 'Yeni';
+            else if (rawCond === 'islenmis' || rawCond === 'İşlənmiş') cleanCondition = 'İşlənmiş';
+            else if (rawCond === 'temir-olunub' || rawCond === 'Təmir olunub') cleanCondition = 'Təmir olunub';
+            else if (rawCond !== '') cleanCondition = sanitizePlainText(rawCond, { maxLength: 50 });
+        }
+
+        const cleanSpecs = sanitizeSpecs(specs);
+        const cleanYaddas = sanitizePlainText(yaddas || cleanSpecs?.memory || '', { maxLength: 80 }) || null;
+        const cleanRam = sanitizePlainText(ram || cleanSpecs?.ram || '', { maxLength: 80 }) || null;
+        if (cleanSpecs) {
+            if (cleanYaddas && !cleanSpecs.memory) cleanSpecs.memory = cleanYaddas;
+            if (cleanRam && !cleanSpecs.ram) cleanSpecs.ram = cleanRam;
+        }
+
         const ad = await Ad.create({
             author: req.user._id,
             category: cleanCategory,
             brand: cleanBrand,
             modelName: cleanModelName,
             price: normalizedPrice,
-            condition: readEnum(condition, ['Yeni', 'İşlənmiş'], { fieldName: 'condition', required: true, maxLength: 20 }),
+            condition: cleanCondition,
+            yaddas: cleanYaddas,
+            ram: cleanRam,
             description: sanitizePlainText(description || '', { maxLength: 5000 }),
             images:      cleanImages || [],
             city: cleanCity,
@@ -268,7 +291,7 @@ const createAd = async (req, res, next) => {
             contactPhone: sanitizePlainText(contactPhone || req.user.phone || '', { maxLength: 40 }),
             sellerType:  listingSellerType,
             store:       listingStore,
-            specs:       sanitizeSpecs(specs),
+            specs:       cleanSpecs,
             status:      'pending'
         });
 
@@ -304,7 +327,7 @@ const updateAd = async (req, res, next) => {
         }
 
         const allowed = ['category', 'brand', 'modelName', 'price', 'condition', 'description', 'images',
-                         'city', 'region', 'contactPhone', 'specs'];
+                         'city', 'region', 'contactPhone', 'specs', 'yaddas', 'ram'];
         const adminOnlyAllowed = ['status'];
         validateAllowedFields(req.body, req.user.role === 'admin' ? allowed.concat(adminOnlyAllowed) : allowed, 'body');
 
@@ -323,14 +346,35 @@ const updateAd = async (req, res, next) => {
                     ad.images = cleanImages;
                 } else if (field === 'specs') {
                     ad.specs = sanitizeSpecs(req.body.specs);
+                    if (ad.specs?.memory) ad.yaddas = ad.specs.memory;
+                    if (ad.specs?.ram) ad.ram = ad.specs.ram;
+                } else if (field === 'yaddas' || field === 'ram') {
+                    const cleanVal = req.body[field] ? sanitizePlainText(String(req.body[field]), { maxLength: 80 }) : null;
+                    ad[field] = cleanVal;
+                    if (field === 'yaddas') {
+                        if (!ad.specs) ad.specs = {};
+                        ad.specs.memory = cleanVal;
+                    }
+                    if (field === 'ram') {
+                        if (!ad.specs) ad.specs = {};
+                        ad.specs.ram = cleanVal;
+                    }
                 } else if (field === 'price') {
                     const nextPrice = Number(req.body.price);
                     if (!Number.isFinite(nextPrice) || nextPrice <= 0) throw httpError(400, { message: 'Qiymət düzgün deyil' });
                     ad.price = nextPrice;
+                } else if (field === 'condition') {
+                    let normalized = null;
+                    if (req.body.condition) {
+                        const raw = String(req.body.condition).trim();
+                        if (raw === 'yeni' || raw === 'Yeni') normalized = 'Yeni';
+                        else if (raw === 'islenmis' || raw === 'İşlənmiş') normalized = 'İşlənmiş';
+                        else if (raw === 'temir-olunub' || raw === 'Təmir olunub') normalized = 'Təmir olunub';
+                        else if (raw !== '') normalized = sanitizePlainText(raw, { maxLength: 50 });
+                    }
+                    ad.condition = normalized;
                 } else {
-                    ad[field] = field === 'condition'
-                        ? readEnum(req.body[field], ['Yeni', 'İşlənmiş'], { fieldName: field, required: true, maxLength: 20 })
-                        : req.body[field];
+                    ad[field] = req.body[field];
                 }
             }
         });
