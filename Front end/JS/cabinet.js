@@ -573,23 +573,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderBillingCurrentCard(user) {
         const currentPackageId = resolveCurrentPackageId(user);
         const currentPackageName = document.getElementById('billingCurrentPackageName');
-        const currentPackageBadge = document.getElementById('billingCurrentPackageBadge');
-        const walletBalance = document.getElementById('billingWalletBalance');
+        const currentBalance = document.getElementById('billingCurrentBalance') || document.getElementById('billingWalletBalance');
 
         if (currentPackageName) currentPackageName.textContent = getBillingPackageName(currentPackageId);
-        if (walletBalance) walletBalance.textContent = formatCurrency(user?.walletBalance || 0);
-
-        if (currentPackageBadge) {
-            const isActive = currentPackageId !== 'standard';
-            currentPackageBadge.classList.toggle('is-active', isActive);
-            currentPackageBadge.innerHTML = isActive
-                ? `<i class="fas fa-crown"></i> <strong id="billingCurrentPackageName">${escapeHtml(getBillingPackageName(currentPackageId))}</strong>`
-                : `<i class="fas fa-check-circle"></i> <strong id="billingCurrentPackageName">Standart</strong>`;
-        }
+        if (currentBalance) currentBalance.textContent = formatCurrency(user?.walletBalance || 0);
     }
 
     function renderBillingPackages(user) {
-        const packageGrid = document.getElementById('billingPackageGrid');
+        const packageGrid = document.getElementById('billingPackagesRow') || document.getElementById('billingPackageGrid');
         if (!packageGrid) return;
 
         const currentPackageId = resolveCurrentPackageId(user);
@@ -599,17 +590,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const isPopular = pkg.id === 'vip';
             const isCurrent = currentPackageId === pkg.id;
 
-            const cardClasses = ['pkg-card'];
-            if (isPopular) cardClasses.push('pkg-card--popular');
-            if (isSelected) cardClasses.push('pkg-card--selected');
-
             let badgeHtml = '';
             if (isCurrent) {
-                badgeHtml = `<div class="pkg-card__badge-current"><i class="fas fa-check"></i> ${escapeHtml(billingText('currentPlan', 'Cari plan'))}</div>`;
+                badgeHtml = `<span class="badge" style="background:#64748b;">${escapeHtml(billingText('currentPlan', 'Cari plan'))}</span>`;
             } else if (isSelected) {
-                badgeHtml = `<div class="pkg-card__badge-selected">✓ ${escapeHtml(billingText('selectedNow', 'Seçildi'))}</div>`;
+                badgeHtml = `<span class="badge" style="background:#10b981;">✓ ${escapeHtml(billingText('selectedNow', 'Seçildi'))}</span>`;
             } else if (isPopular) {
-                badgeHtml = `<div class="pkg-card__badge-popular"><i class="fas fa-crown"></i> ${escapeHtml(billingText('featuredPopular', 'Populyar'))}</div>`;
+                badgeHtml = `<span class="badge">${escapeHtml(billingText('featuredPopular', 'Populyar'))}</span>`;
             }
 
             const buttonLabel = isSelected
@@ -619,34 +606,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const durationText = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} gün`));
 
             const features = pkg.featureKeys.map((key) => `
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>${escapeHtml(billingText(key, key))}</span>
-                </li>
+                <li>${escapeHtml(billingText(key, key))}</li>
             `).join('');
 
             return `
-                <article class="${cardClasses.join(' ')}" data-package="${pkg.id}" data-package-id="${pkg.id}" role="button" tabindex="0" aria-pressed="${isSelected ? 'true' : 'false'}">
+                <article class="pkg-card ${isSelected ? 'selected' : ''}" data-package="${pkg.id}" data-package-id="${pkg.id}" role="button" tabindex="0">
                     ${badgeHtml}
-                    <div class="pkg-card__top">
-                        <span class="pkg-card__name">${escapeHtml(getBillingPackageName(pkg.id))}</span>
-                        <div class="pkg-card__price">
-                            <b>${escapeHtml(String(price))}</b>
-                            <span class="currency">AZN</span>
-                            <i>/ ${price === 0 ? 'həmişə' : durationText}</i>
-                        </div>
-                    </div>
-                    <ul class="pkg-card__features">
-                        ${features}
-                    </ul>
-                    <button type="button" class="pkg-card__select">${buttonLabel}</button>
+                    <div class="pkg-name">${escapeHtml(getBillingPackageName(pkg.id))}</div>
+                    <div class="price"><b>${escapeHtml(String(price))}</b> <i>AZN / ${price === 0 ? 'həmişə' : durationText}</i></div>
+                    <ul>${features}</ul>
+                    <button type="button" class="select-btn">${buttonLabel}</button>
                 </article>
             `;
         }).join('');
     }
 
     function renderBillingMethods(user) {
-        const methodGrid = document.getElementById('billingMethodGrid');
+        const methodGrid = document.getElementById('billingMethodsRow') || document.getElementById('billingMethodGrid');
         if (!methodGrid) return;
 
         const walletBalance = Number(user?.walletBalance || 0);
@@ -659,21 +635,18 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (method.id === 'card') {
                 hint = 'Visa / Mastercard';
             } else if (method.id === 'transfer') {
-                hint = 'Hüquqi şəxslər üçün';
+                hint = 'Qaimə / Köçürmə';
             }
 
             return `
-                <button type="button" class="pay-tab ${isSelected ? 'pay-tab--active is-selected' : ''}" data-method="${method.id}" data-method-id="${method.id}" role="tab" aria-selected="${isSelected ? 'true' : 'false'}">
-                    <span class="pay-tab__icon"><i class="fas ${method.icon}"></i></span>
-                    <div class="pay-tab__content">
-                        <span class="pay-tab__title">${escapeHtml(billingText(method.nameKey, method.id))}</span>
-                        <span class="pay-tab__hint">${escapeHtml(hint)}</span>
-                    </div>
+                <button type="button" class="pay-tab ${isSelected ? 'active' : ''}" data-method="${method.id}" data-method-id="${method.id}">
+                    <span>${escapeHtml(billingText(method.nameKey, method.id))}</span>
+                    <small>${escapeHtml(hint)}</small>
                 </button>
             `;
         }).join('');
 
-        const payDesc = document.getElementById('billingPayDesc');
+        const payDesc = document.getElementById('billingMethodDesc') || document.getElementById('billingPayDesc');
         if (payDesc) {
             if (billingState.method === 'wallet') {
                 payDesc.textContent = billingText('methodWalletDesc', 'Balans kifayət edirsə, paket dərhal aktivləşir.');
@@ -691,12 +664,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = getBillingPrice();
         const canPurchase = isBillingPurchasable(selectedPackage.id);
 
-        const summaryPackage = document.getElementById('billingSummaryPackage');
-        const summaryDuration = document.getElementById('billingSummaryDuration');
-        const summaryMethod = document.getElementById('billingSummaryMethod');
-        const summaryTotal = document.getElementById('billingSummaryTotal');
+        const summaryPackage = document.getElementById('summaryPackage') || document.getElementById('billingSummaryPackage');
+        const summaryDuration = document.getElementById('summaryDuration') || document.getElementById('billingSummaryDuration');
+        const summaryMethod = document.getElementById('summaryMethod') || document.getElementById('billingSummaryMethod');
+        const summaryTotal = document.getElementById('summaryTotal') || document.getElementById('billingSummaryTotal');
         const confirmBtn = document.getElementById('billingConfirmBtn');
-        const confirmBtnSpan = confirmBtn?.querySelector('span');
         const walletBtn = document.getElementById('billingGoWalletBtn');
         const walletBalance = Number(user?.walletBalance || 0);
 
@@ -712,10 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirmBtn) {
             confirmBtn.disabled = !canPurchase;
             confirmBtn.classList.toggle('is-disabled', !canPurchase);
-            confirmBtn.setAttribute('aria-disabled', canPurchase ? 'false' : 'true');
-        }
-        if (confirmBtnSpan) {
-            confirmBtnSpan.textContent = canPurchase
+            confirmBtn.textContent = canPurchase
                 ? billingText('confirmPurchase', 'Paketi aktivləşdir')
                 : billingText('noPaymentRequired', 'Ödəniş tələb olunmur');
         }
@@ -724,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
             walletBtn.hidden = !canPurchase || billingState.method !== 'wallet' || walletBalance >= total;
             if (!walletBtn.hidden) {
                 const diff = (total - walletBalance).toFixed(2);
-                walletBtn.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Balans çatışmır (${diff} AZN) — Artır`;
+                walletBtn.textContent = `Balans çatışmır (${diff} AZN) — Artır`;
             }
         }
     }
@@ -794,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBillingSummary(user || {});
         renderBillingHistory(user || {});
 
-        document.querySelectorAll('.billing-duration-btn').forEach((button) => {
+        document.querySelectorAll('.billing-duration-btn, .dur-btn').forEach((button) => {
             button.classList.toggle('active', Number(button.dataset.duration) === billingState.duration);
         });
     }
@@ -857,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         panel.dataset.bound = 'true';
         panel.addEventListener('click', (event) => {
-            const durationButton = event.target.closest('.billing-duration-btn');
+            const durationButton = event.target.closest('.billing-duration-btn, .dur-btn');
             if (durationButton) {
                 billingState.duration = Number(durationButton.dataset.duration) || 30;
                 renderBillingPanel(getStoredUser());

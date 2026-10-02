@@ -437,139 +437,56 @@
                             </div>
 
                             <!-- Billing Settings -->
-                            <div id="panel-billing" class="settings-panel billing-settings-container">
-                                <section id="billing-panel" class="billing-v2">
-                                    <div class="billing-v2__layout">
+                            <div id="panel-billing" class="settings-panel">
+                                <section id="billing-panel" class="billing-simple">
+                                    <div class="billing-simple__inner">
                                         
-                                        <!-- LEFT (Packages + Payment + History) -->
-                                        <div class="billing-v2__main">
-                                            <div class="billing-v2__header">
-                                                <div class="billing-v2__header-text">
-                                                    <span class="billing-v2__badge"><i class="fas fa-sparkles"></i> Premium Planlar</span>
-                                                    <h2 data-billing-i18n="billingHeading">Hesab paketini yüksəlt</h2>
-                                                    <p data-billing-i18n="subtitle">Elanlarınız daha çox görünsün, daha tez satılsın</p>
-                                                </div>
-                                                <div class="billing-duration-switch" id="billingDurationSwitch" role="group" aria-label="Müddət seçimi">
-                                                    <button type="button" class="billing-duration-btn active" data-duration="30">
-                                                        <span>30 gün</span>
-                                                    </button>
-                                                    <button type="button" class="billing-duration-btn" data-duration="90">
-                                                        <span>90 gün</span>
-                                                        <span class="duration-discount-tag">-17%</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Linear/Stripe Status Bar -->
-                                            <div class="billing-status-strip">
-                                                <div class="status-strip__item">
-                                                    <span class="status-strip__label">Cari paket:</span>
-                                                    <span class="status-strip__chip" id="billingCurrentPackageBadge">
-                                                        <i class="fas fa-check-circle"></i>
-                                                        <strong id="billingCurrentPackageName">Standart</strong>
-                                                    </span>
-                                                </div>
-                                                <div class="status-strip__divider"></div>
-                                                <div class="status-strip__item">
-                                                    <span class="status-strip__label">Daxili balans:</span>
-                                                    <strong class="status-strip__balance" id="billingWalletBalance">0.00 AZN</strong>
-                                                </div>
-                                                <button type="button" class="btn-topup-inline" id="billingTopUpQuickBtn">
-                                                    <i class="fas fa-plus"></i> Balansı artır
-                                                </button>
-                                            </div>
-
-                                            <!-- Packages Grid -->
-                                            <div class="pkg-grid" id="billingPackageGrid">
-                                                <!-- Dynamic pkg-card cards populated by JS -->
-                                            </div>
-
-                                            <!-- Payment Method Section -->
-                                            <div class="pay-section">
-                                                <div class="pay-section__top">
-                                                    <div>
-                                                        <h3 data-billing-i18n="paymentMethod">Ödəniş üsulu</h3>
-                                                        <span class="pay-section__sub">Təhlükəsiz və anında aktivləşən ödəniş</span>
-                                                    </div>
-                                                </div>
-                                                <div class="pay-tabs" id="billingMethodGrid" role="tablist">
-                                                    <!-- Dynamic pay-tab buttons populated by JS -->
-                                                </div>
-                                                <div class="pay-desc" id="billingPayDesc">
-                                                    Visa və Mastercard ilə onlayn ödəniş edin. 3D Secure ilə qorunur.
-                                                </div>
-                                            </div>
-
-                                            <!-- Payment History -->
-                                            <div class="billing-v2__history">
-                                                <div class="history-head">
-                                                    <div>
-                                                        <h4 data-billing-i18n="historyTitle">Ödəniş tarixçəsi</h4>
-                                                        <span class="history-sub" data-billing-i18n="historyHint">Son ödənişlər və aktivləşdirmələr burada görünür.</span>
-                                                    </div>
-                                                </div>
-                                                <div id="billingHistoryList" class="billing-history-list"></div>
-                                            </div>
+                                        <!-- ÜST: Cari vəziyyət 1 sətir -->
+                                        <div class="billing-current-row">
+                                            <span>Cari paket: <b id="billingCurrentPackageName">Standart</b></span>
+                                            <span>Balans: <b id="billingCurrentBalance">0.00 AZN</b></span>
+                                            <button id="billingTopUpBtn" type="button" class="btn-topup-simple">Balansı artır</button>
                                         </div>
 
-                                        <!-- RIGHT (Sticky Order Summary - Glassmorphism) -->
-                                        <aside class="billing-v2__summary">
-                                            <div class="summary-card">
-                                                <div class="summary-card__header">
-                                                    <span class="summary-badge"><i class="fas fa-shield-alt"></i> TƏHLÜKƏSİZ ÖDƏNİŞ</span>
-                                                    <div class="summary-card__label" data-billing-i18n="orderSummary">SİFARİŞ XÜLASƏSİ</div>
-                                                </div>
-
-                                                <div class="summary-card__rows">
-                                                    <div class="summary-card__row">
-                                                        <span data-billing-i18n="summaryPackage">Paket</span>
-                                                        <strong id="billingSummaryPackage">VIP</strong>
-                                                    </div>
-                                                    <div class="summary-card__row">
-                                                        <span data-billing-i18n="summaryDuration">Müddət</span>
-                                                        <strong id="billingSummaryDuration">30 gün</strong>
-                                                    </div>
-                                                    <div class="summary-card__row">
-                                                        <span data-billing-i18n="summaryMethod">Üsul</span>
-                                                        <strong id="billingSummaryMethod">Bank kartı</strong>
+                                        <!-- ORTA: 2 sütun - SOL paketlər, SAĞ ödəniş+xülasə -->
+                                        <div class="billing-grid">
+                                            
+                                            <!-- SOL: Paketlər yan-yana 3 kart - KOMPAKT -->
+                                            <div class="billing-left">
+                                                <div class="billing-head-row">
+                                                    <h2 class="billing-title">Paket seçin</h2>
+                                                    <div class="duration-pills" id="billingDurationSwitch">
+                                                        <button type="button" class="dur-btn active" data-duration="30">30 gün</button>
+                                                        <button type="button" class="dur-btn" data-duration="90">90 gün</button>
                                                     </div>
                                                 </div>
 
-                                                <div class="summary-card__separator"></div>
-
-                                                <div class="summary-card__total">
-                                                    <div class="total-copy">
-                                                        <span data-billing-i18n="summaryTotal">Yekun</span>
-                                                        <small>ƏDV və rüsumlar daxildir</small>
-                                                    </div>
-                                                    <strong id="billingSummaryTotal">12.00 AZN</strong>
+                                                <div class="pkg-row" id="billingPackagesRow">
+                                                    <!-- JS dolduracaq - KOMPAKT KARTLAR -->
                                                 </div>
 
-                                                <div class="summary-card__cta-stack">
-                                                    <button type="button" id="billingConfirmBtn" class="btn-primary">
-                                                        <span>Paketi aktivləşdir</span>
-                                                        <i class="fas fa-arrow-right"></i>
-                                                    </button>
-                                                    <button type="button" id="billingTopUpBtn" class="btn-ghost">
-                                                        <i class="fas fa-wallet"></i>
-                                                        <span data-billing-i18n="topUpBalance">Balansı artır</span>
-                                                    </button>
-                                                    <button type="button" id="billingGoWalletBtn" class="btn-ghost btn-insufficient" hidden>
-                                                        <i class="fas fa-triangle-exclamation"></i>
-                                                        <span data-billing-i18n="needBalance">Balans çatışmır — Artır</span>
-                                                    </button>
+                                                <h3 class="pay-title">Ödəniş üsulu</h3>
+                                                <div class="pay-row" id="billingMethodsRow">
+                                                    <!-- 3 sadə düymə yan-yana -->
                                                 </div>
+                                                <div id="billingMethodDesc" class="pay-desc"></div>
+                                            </div>
 
-                                                <div class="summary-card__trust">
-                                                    <span class="trust-item"><i class="fas fa-lock"></i> SSL 256-bit</span>
-                                                    <span class="trust-sep">•</span>
-                                                    <span class="trust-item"><i class="fas fa-bolt"></i> Dərhal aktivləşmə</span>
-                                                    <span class="trust-sep">•</span>
-                                                    <span class="trust-item"><i class="fas fa-headset"></i> 7/24 dəstək</span>
+                                            <!-- SAĞ: Xülasə - KOMPAKT, STICKY YOX, sadə kart -->
+                                            <div class="billing-right">
+                                                <div class="summary-box" id="billingSummaryBox">
+                                                    <div class="summary-label">SİFARİŞ XÜLASƏSİ</div>
+                                                    <div class="summary-line"><span>Paket</span><strong id="summaryPackage">PRO</strong></div>
+                                                    <div class="summary-line"><span>Müddət</span><strong id="summaryDuration">30 gün</strong></div>
+                                                    <div class="summary-line"><span>Üsul</span><strong id="summaryMethod">Bank kartı</strong></div>
+                                                    <div class="summary-total"><span>Yekun</span><strong id="summaryTotal">24.00 AZN</strong></div>
+                                                    <button id="billingConfirmBtn" type="button" class="btn-buy">Paketi aktivləşdir</button>
+                                                    <button id="billingGoWalletBtn" type="button" class="btn-buy-warn" hidden>Balans çatışmır — Artır</button>
+                                                    <div class="trust">🔒 Təhlükəsiz ödəniş</div>
                                                 </div>
                                             </div>
-                                        </aside>
 
+                                        </div>
                                     </div>
                                 </section>
                             </div>
