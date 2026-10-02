@@ -211,17 +211,15 @@
               <div class="form-group">
                 <label for="condition" data-translate="elan-condition">Vəziyyəti</label>
                 <div class="select-wrapper">
-                  <select id="condition" name="condition" onchange="handleOtherSelect(this, 'condition_custom')">
-                    <option value="">— Seçin —</option>
+                  <select id="condition" name="condition">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="Yeni" data-translate-option="opt-yeni">Yeni</option>
                     <option value="İşlənmiş" data-translate-option="opt-islenmiş">İşlənmiş</option>
                     <option value="Təmir olunub">Təmir olunub</option>
-                    <option value="other">Digər</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('condition')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="condition_custom" class="custom-spec-input" placeholder="Məs: Yenidən fərqsiz" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -230,8 +228,8 @@
               <div class="form-group">
                 <label for="memory" data-translate="elan-memory">Yaddaş (GB)</label>
                 <div class="select-wrapper">
-                  <select id="memory" name="memory" onchange="handleOtherSelect(this, 'memory_custom')">
-                    <option value="">— Seçin (boş burax) —</option>
+                  <select id="memory" name="memory">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="16">16 GB</option>
                     <option value="32">32 GB</option>
                     <option value="64">64 GB</option>
@@ -241,18 +239,16 @@
                     <option value="512">512 GB</option>
                     <option value="1024">1 TB (1024 GB)</option>
                     <option value="512-den-cox" data-translate-option="opt-512-cox">512 GB-dan daha çox</option>
-                    <option value="other">Digər (özünüz yazın)</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('memory')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="memory_custom" class="custom-spec-input" placeholder="Məs: 16 GB və ya 2 TB" style="display:none; margin-top:8px;">
               </div>
               <div class="form-group">
                 <label for="ram" data-translate="elan-ram">RAM (GB)</label>
                 <div class="select-wrapper">
-                  <select id="ram" name="ram" onchange="handleOtherSelect(this, 'ram_custom')">
-                    <option value="">— Seçin —</option>
+                  <select id="ram" name="ram">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="2">2 GB</option>
                     <option value="3">3 GB</option>
                     <option value="4">4 GB</option>
@@ -261,12 +257,10 @@
                     <option value="12">12 GB</option>
                     <option value="16">16 GB</option>
                     <option value="16-dan-cox">16 GB-dan çox</option>
-                    <option value="other">Digər</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('ram')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="ram_custom" class="custom-spec-input" placeholder="Məs: 24 GB və ya 32 GB" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -275,34 +269,30 @@
               <div class="form-group">
                 <label for="screen_size" data-translate="elan-screen">Ekran ölçüsü</label>
                 <div class="select-wrapper">
-                  <select id="screen_size" name="screen_size" onchange="handleOtherSelect(this, 'screen_size_custom')">
-                    <option value="">— Seçin —</option>
+                  <select id="screen_size" name="screen_size">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="<5.5">&lt;5.5"</option>
                     <option value="5.5-6.1">5.5" – 6.1"</option>
                     <option value="6.1-6.7">6.1" – 6.7"</option>
                     <option value=">6.7">&gt;6.7"</option>
-                    <option value="other">Digər</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('screen_size')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="screen_size_custom" class="custom-spec-input" placeholder="Məs: 6.8&quot;" style="display:none; margin-top:8px;">
               </div>
               <div class="form-group">
                 <label for="battery" data-translate="elan-battery">Batareya (mAh)</label>
                 <div class="select-wrapper">
-                  <select id="battery" name="battery" onchange="handleOtherSelect(this, 'battery_custom')">
-                    <option value="">— Seçin —</option>
+                  <select id="battery" name="battery">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="<3000">&lt;3000</option>
                     <option value="3000-4000">3000-4000</option>
                     <option value="4000-5000">4000-5000</option>
                     <option value="5000+">5000+ mAh</option>
-                    <option value="other">Digər</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('battery')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="battery_custom" class="custom-spec-input" placeholder="Məs: 6000 mAh" style="display:none; margin-top:8px;">
               </div>
             </div>
 
@@ -311,20 +301,18 @@
               <div class="form-group">
                 <label for="color" data-translate="elan-color">Rəng</label>
                 <div class="select-wrapper">
-                  <select id="color" name="color" onchange="handleOtherSelect(this, 'color_custom')">
-                    <option value="">— Seçin —</option>
+                  <select id="color" name="color">
+                    <option value="">Seçin (boş burax)</option>
                     <option value="black" data-translate-option="opt-qara">Qara</option>
                     <option value="white" data-translate-option="opt-ag">Ağ</option>
                     <option value="gold" data-translate-option="opt-qizili">Qızılı</option>
                     <option value="silver" data-translate-option="opt-gumushu">Gümüşü</option>
                     <option value="grey" data-translate-option="opt-boz">Boz</option>
                     <option value="blue" data-translate-option="opt-mavi">Mavi</option>
-                    <option value="other" data-translate-option="opt-diger">Digər</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('color')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
                 </div>
-                <input type="text" id="color_custom" class="custom-spec-input" placeholder="Məs: Yaşıl və ya Bənövşəyi" style="display:none; margin-top:8px;">
               </div>
             </div>
 
