@@ -176,8 +176,10 @@ const validatePasswordStrength = (password) => {
 const buildAuthResponse = (user, accessToken, rememberMe = false) => {
     const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
     const expires = isRemember ? '30d' : '7d';
+    const safeUser = toSafeUser(user);
     return {
-        ...toSafeUser(user),
+        ...safeUser,
+        user: safeUser,
         token: accessToken,
         accessToken,
         accessTokenExpiresIn: expires,

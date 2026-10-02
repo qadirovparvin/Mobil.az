@@ -213,7 +213,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // If logged in and on login/signup page, redirect them away
         if (window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html")) {
-            if (window.location.search.includes('expired') || window.location.search.includes('reason=')) {
+            const isManualLogin = Boolean(window.loginFormSubmitted || sessionStorage.getItem('manualLoginInProgress'));
+            if (!isManualLogin && (window.location.search.includes('expired') || window.location.search.includes('reason='))) {
                 ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
                     try { localStorage.removeItem(k); } catch(e){}
                     try { sessionStorage.removeItem(k); } catch(e){}
@@ -221,7 +222,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             if (window.location.pathname.includes("login.html")) {
-                // Let login.html verified pre-check script handle authenticated redirect safely
+                // Let login.html verified pre-check script or onLoginSuccess handle redirect safely
                 return;
             }
             window.location.href = currentUser.role === 'admin' ? "admin.html" : "index.html";

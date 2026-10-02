@@ -91,6 +91,90 @@ function persistSession(data, rememberMeParam) {
 window.persistSession = persistSession;
 window.persistAuthSession = persistSession;
 
+function onLoginSuccess(token, user, rememberMe, redirectTarget) {
+    window.loginFormSubmitted = true;
+    try { sessionStorage.setItem('manualLoginInProgress', 'true'); } catch(e) {}
+
+    // Loop flag-ləri tam sil
+    sessionStorage.removeItem('lastRedirectTime');
+    sessionStorage.removeItem('last401Time');
+    localStorage.removeItem('lastRedirectTime');
+    sessionStorage.removeItem('isCabinetRedirecting');
+    sessionStorage.removeItem('isRedirecting');
+
+    // URL-də expired/reason varsa təmizlə
+    if (window.location.search.includes('expired') || window.location.search.includes('reason')) {
+        try {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } catch(e) {}
+    }
+
+    // Token-i DÜZGÜN saxla - rememberMe true-dursa localStorage, false-dursa sessionStorage
+    const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
+    tokenKeys.forEach(k => {
+        try { localStorage.removeItem(k); } catch(e) {}
+        try { sessionStorage.removeItem(k); } catch(e) {}
+    });
+
+    if (rememberMe) {
+        try { localStorage.setItem('token', token); } catch(e) {}
+        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
+    } else {
+        try { sessionStorage.setItem('token', token); } catch(e) {}
+        try { localStorage.setItem('rememberMe', 'false'); } catch(e) {}
+    }
+
+    const userPayload = {
+        id: user?._id || user?.id,
+        name: user?.name || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+        role: user?.role || 'user',
+        avatar: user?.avatar || ''
+    };
+    const userStr = JSON.stringify(userPayload);
+    ['user', 'mobilaz_current_user', 'mobilaz_user'].forEach(k => {
+        try { localStorage.setItem(k, userStr); } catch(e) {}
+        try { sessionStorage.setItem(k, userStr); } catch(e) {}
+    });
+
+    if (userPayload.email) {
+        try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
+        try { localStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+    }
+    if (userPayload.role) {
+        try { localStorage.setItem('userRole', userPayload.role); } catch(e) {}
+    }
+
+    if (userPayload.role === 'admin') {
+        if (rememberMe) {
+            try { localStorage.setItem('adminToken', token); } catch(e) {}
+            try { localStorage.setItem('adminUser', userStr); } catch(e) {}
+        } else {
+            try { sessionStorage.setItem('adminToken', token); } catch(e) {}
+            try { sessionStorage.setItem('adminUser', userStr); } catch(e) {}
+        }
+    }
+
+    if (typeof window.updateHeader === 'function') {
+        try { window.updateHeader(); } catch(e) {}
+    }
+
+    if (window.showToast) {
+        showToast('Uğurlu giriş! Hesabınıza yönləndirilirsiniz...', 'success');
+    }
+
+    const defaultTarget = userPayload.role === 'admin' ? 'admin.html' : 'cabinet.html';
+    const target = redirectTarget || defaultTarget;
+
+    setTimeout(() => {
+        try { sessionStorage.removeItem('manualLoginInProgress'); } catch(e) {}
+        window.location.href = target;
+    }, 500);
+}
+window.onLoginSuccess = onLoginSuccess;
+
 function clearSession() {
     const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
     keys.forEach((key) => {
@@ -664,12 +748,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
 
                                 document.getElementById('twoFactorModal').style.display = 'none';
-                                sessionStorage.removeItem('lastRedirectTime');
-                                sessionStorage.removeItem('last401Time');
-                                persistSession(secondData, rememberMe);
-                                showToast('Uğurla daxil oldunuz!', 'success');
-                                const redirectTarget = secondData.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
-                                setTimeout(() => window.location.href = redirectTarget, 900);
+                                const redirectTarget = secondData.role === 'admin' || secondData.user?.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
+                                onLoginSuccess(secondData.accessToken || secondData.token, secondData.user || secondData, rememberMe, redirectTarget);
                             } catch (err) {
                                 console.error('Login 2FA fetch error:', err);
                                 showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
@@ -701,13 +781,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return fallback;
                 }
 
-                sessionStorage.removeItem('lastRedirectTime');
-                sessionStorage.removeItem('last401Time');
-                persistSession(data, rememberMe);
-                showToast('Uğurla daxil oldunuz!', 'success');
-                // Redirect admin users to the admin panel, others to cabinet or safe redirect target
-                const redirectTarget = data.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
-                setTimeout(() => window.location.href = redirectTarget, 900);
+                const redirectTarget = data.role === 'admin' || data.user?.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
+                onLoginSuccess(data.accessToken || data.token, data.user || data, rememberMe, redirectTarget);
             } catch (err) {
                 console.error('Login fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');

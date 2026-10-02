@@ -259,8 +259,35 @@
     </div>
 
     <script>
-        // Loop protection - əgər son 3 saniyədə redirect olubsa və ya expired gəlibsə, tokenləri təmizlə
-        (function() {
+        // Loop protection - YALNIZ səhifə ilk yüklənəndə işləməlidir, login submit olanda yox
+        window.loginFormSubmitted = false;
+        document.addEventListener('DOMContentLoaded', () => {
+            const pForm = document.getElementById('passwordLoginForm');
+            if (pForm) pForm.addEventListener('submit', () => { window.loginFormSubmitted = true; });
+            const sForm = document.getElementById('smsLoginForm');
+            if (sForm) sForm.addEventListener('submit', () => { window.loginFormSubmitted = true; });
+            const eForm = document.getElementById('emailLoginForm');
+            if (eForm) eForm.addEventListener('submit', () => { window.loginFormSubmitted = true; });
+            const twoFactorForm = document.getElementById('twoFactorForm');
+            if (twoFactorForm) twoFactorForm.addEventListener('submit', () => { window.loginFormSubmitted = true; });
+        });
+
+        window.addEventListener('load', () => {
+            if (window.loginFormSubmitted) return;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('expired') || urlParams.has('reason')) {
+                // Expired ilə gəlmisənsə, köhnə tokenləri sil və bu səhifədə qal
+                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e){}
+                    try { sessionStorage.removeItem(k); } catch(e){}
+                });
+                if (!window.loginFormSubmitted) {
+                    try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+                }
+                return;
+            }
+
             const lastRedirect = sessionStorage.getItem('lastRedirectTime');
             const now = Date.now();
             if (lastRedirect && (now - parseInt(lastRedirect, 10)) < 3000) {
@@ -270,33 +297,28 @@
                     try { sessionStorage.removeItem(k); } catch(e){}
                 });
                 sessionStorage.removeItem('lastRedirectTime');
-            } else if (window.location.search.includes('expired') || window.location.search.includes('reason=')) {
-                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                    try { localStorage.removeItem(k); } catch(e){}
-                    try { sessionStorage.removeItem(k); } catch(e){}
-                });
-            } else {
-                const token = (localStorage.getItem('token') || sessionStorage.getItem('token') || '').trim().replace(/^["']+|["']+$/g, '');
-                if (token && token.length > 30 && token.split('.').length === 3 && !window.location.search.includes('expired')) {
-                    const apiBase = window.API_URL || 'http://localhost:5000/api';
-                    fetch(apiBase + '/auth/me', {
-                        headers: { Authorization: 'Bearer ' + token }
-                    }).then(r => {
-                        if (r.ok) {
-                            sessionStorage.setItem('lastRedirectTime', Date.now().toString());
-                            window.location.href = 'cabinet.html';
-                        } else {
-                            ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                                try { localStorage.removeItem(k); } catch(e){}
-                                try { sessionStorage.removeItem(k); } catch(e){}
-                            });
-                        }
-                    }).catch(() => {
-                        // Backend unreachable, do not clear
-                    });
-                }
+                return;
             }
-        })();
+
+            // Normal auto-login check (yalnız expired/reason yoxdursa)
+            const token = (localStorage.getItem('token') || sessionStorage.getItem('token') || '').trim().replace(/^["']+|["']+$/g, '');
+            if (token && token.length > 30 && token.split('.').length === 3) {
+                const apiBase = window.API_URL || 'http://localhost:5000/api';
+                fetch(apiBase + '/auth/me', {
+                    headers: { Authorization: 'Bearer ' + token }
+                }).then(r => {
+                    if (r.ok && !window.loginFormSubmitted) {
+                        sessionStorage.setItem('lastRedirectTime', Date.now().toString());
+                        window.location.href = 'cabinet.html';
+                    } else if (!r.ok) {
+                        ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                            try { localStorage.removeItem(k); } catch(e){}
+                            try { sessionStorage.removeItem(k); } catch(e){}
+                        });
+                    }
+                }).catch(() => {});
+            }
+        });
     </script>
     <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
