@@ -1237,7 +1237,38 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetchReferralStats();
+        let isCabinetRedirecting = false;
+        async function handleCabinet401(res) {
+            if (isCabinetRedirecting || window.location.href.includes('login.html')) return;
+            isCabinetRedirecting = true;
+            const last401 = sessionStorage.getItem('last401Time');
+            const now = Date.now();
+            if (last401 && (now - parseInt(last401, 10)) < 5000) {
+                console.warn('401 loop detected, clearing all tokens');
+                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e){}
+                    try { sessionStorage.removeItem(k); } catch(e){}
+                });
+                sessionStorage.removeItem('last401Time');
+                window.location.href = 'login.html?reason=loop_break';
+                return;
+            }
+            sessionStorage.setItem('last401Time', now.toString());
+
+            const curToken = window.getToken ? window.getToken() : (localStorage.getItem('token') || sessionStorage.getItem('token'));
+            try {
+                const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${curToken}` } });
+                if (me.status === 401) {
+                    ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                        try { localStorage.removeItem(k); } catch(e){}
+                        try { sessionStorage.removeItem(k); } catch(e){}
+                    });
+                    window.location.href = 'login.html?expired=1';
+                    return;
+                }
+            } catch(e) {}
+            isCabinetRedirecting = false;
+        }
 
         try {
             const response = await fetch(`${API_BASE}/user/profile`, {
@@ -1247,14 +1278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.status === 401 || response.status === 403) {
-                try {
-                    const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-                    if (me.status === 401) {
-                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
-                        window.location.href = 'login.html?expired=1';
-                        return;
-                    }
-                } catch(e) {}
+                await handleCabinet401(response);
                 return;
             }
 
@@ -1433,25 +1457,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.status === 401 || response.status === 403) {
-                let trulyExpired = false;
-                try {
-                    const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
-                    if (me.status === 401) trulyExpired = true;
-                } catch(e) {}
-                if (trulyExpired) {
-                    if (window.clearAuthSession) {
-                        window.clearAuthSession();
-                    } else {
-                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach((key) => { localStorage.removeItem(key); sessionStorage.removeItem(key); });
-                    }
-                    list.innerHTML = `
-                        <div class="cab-glass" style="padding:40px 20px;text-align:center;color:var(--cab-danger);">
-                            <p style="margin-bottom:12px;">Sessiyanın vaxtı bitib. Zəhmət olmasa yenidən daxil olun.</p>
-                            <a href="login.html" class="btn-primary" style="display:inline-block;padding:8px 20px;text-decoration:none;">Giriş</a>
-                        </div>
-                    `;
-                    setTimeout(() => { window.location.href = 'login.html?expired=1'; }, 1500);
-                    return;
+                if (typeof handleCabinet401 === 'function') {
+                    await handleCabinet401(response);
+                } else {
+                    window.location.href = 'login.html?expired=1';
                 }
                 return;
             }

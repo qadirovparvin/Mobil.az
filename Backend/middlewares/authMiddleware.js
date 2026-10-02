@@ -71,7 +71,9 @@ const protect = async (req, res, next) => {
         req.user = user;
         return next();
     } catch (error) {
-        logger.error('Auth middleware error:', error.message);
+        if (error.name !== 'JsonWebTokenError' && error.name !== 'TokenExpiredError') {
+            logger.error('Auth middleware error:', error.message);
+        }
         return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
     }
 };

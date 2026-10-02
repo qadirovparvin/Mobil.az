@@ -664,6 +664,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
 
                                 document.getElementById('twoFactorModal').style.display = 'none';
+                                sessionStorage.removeItem('lastRedirectTime');
+                                sessionStorage.removeItem('last401Time');
                                 persistSession(secondData, rememberMe);
                                 showToast('Uğurla daxil oldunuz!', 'success');
                                 const redirectTarget = secondData.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
@@ -699,6 +701,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     return fallback;
                 }
 
+                sessionStorage.removeItem('lastRedirectTime');
+                sessionStorage.removeItem('last401Time');
                 persistSession(data, rememberMe);
                 showToast('Uğurla daxil oldunuz!', 'success');
                 // Redirect admin users to the admin panel, others to cabinet or safe redirect target

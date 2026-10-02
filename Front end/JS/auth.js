@@ -1,28 +1,32 @@
 "use strict";
 
 function getToken() {
-    const remember = localStorage.getItem('rememberMe') === 'true';
-    const order = remember ? 
-        [() => localStorage.getItem('token'), () => sessionStorage.getItem('token')] :
-        [() => sessionStorage.getItem('token'), () => localStorage.getItem('token')];
-    for (let fn of order) {
-        let t = fn();
-        if (!t) continue;
-        t = t.trim().replace(/^["']+|["']+$/g, '');
-        if (t.startsWith('{')) {
-            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
-        }
-        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+    if (typeof window.getToken === 'function' && window.getToken !== getToken) {
+        return window.getToken();
     }
-    const fallbackKeys = ['accessToken', 'authToken', 'adminToken', 'jwt'];
+    const tryGet = (store, key) => {
+        try { 
+            let t = store.getItem(key);
+            if (!t || t === 'null' || t === 'undefined' || t === '""' || t === "''") return null;
+            t = t.trim().replace(/^["']+|["']+$/g, '');
+            if (t.length < 30) return null;
+            if (t.split('.').length !== 3) return null;
+            return t;
+        } catch(e) { return null; }
+    };
+    const remember = localStorage.getItem('rememberMe') === 'true';
+    const sources = remember ? 
+        [() => [localStorage, 'token'], () => [sessionStorage, 'token'], () => [localStorage, 'accessToken'], () => [localStorage, 'authToken']] :
+        [() => [sessionStorage, 'token'], () => [localStorage, 'token'], () => [sessionStorage, 'accessToken'], () => [sessionStorage, 'authToken']];
+    for (let fn of sources) {
+        const [store, key] = fn();
+        let t = tryGet(store, key);
+        if (t) return t;
+    }
+    const fallbackKeys = ['adminToken', 'jwt'];
     for (let k of fallbackKeys) {
-        let t = localStorage.getItem(k) || sessionStorage.getItem(k);
-        if (!t) continue;
-        t = t.trim().replace(/^["']+|["']+$/g, '');
-        if (t.startsWith('{')) {
-            try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
-        }
-        if (t && t.length > 30 && t !== 'null' && t !== 'undefined') return t;
+        let t = tryGet(localStorage, k) || tryGet(sessionStorage, k);
+        if (t) return t;
     }
     return '';
 }
@@ -209,6 +213,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // If logged in and on login/signup page, redirect them away
         if (window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html")) {
+            if (window.location.search.includes('expired') || window.location.search.includes('reason=')) {
+                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e){}
+                    try { sessionStorage.removeItem(k); } catch(e){}
+                });
+                return;
+            }
+            if (window.location.pathname.includes("login.html")) {
+                // Let login.html verified pre-check script handle authenticated redirect safely
+                return;
+            }
             window.location.href = currentUser.role === 'admin' ? "admin.html" : "index.html";
         }
     } else {

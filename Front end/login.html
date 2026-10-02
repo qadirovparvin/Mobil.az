@@ -258,6 +258,46 @@
         </div>
     </div>
 
+    <script>
+        // Loop protection - əgər son 3 saniyədə redirect olubsa və ya expired gəlibsə, tokenləri təmizlə
+        (function() {
+            const lastRedirect = sessionStorage.getItem('lastRedirectTime');
+            const now = Date.now();
+            if (lastRedirect && (now - parseInt(lastRedirect, 10)) < 3000) {
+                console.warn('Redirect loop detected, clearing tokens');
+                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e){}
+                    try { sessionStorage.removeItem(k); } catch(e){}
+                });
+                sessionStorage.removeItem('lastRedirectTime');
+            } else if (window.location.search.includes('expired') || window.location.search.includes('reason=')) {
+                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch(e){}
+                    try { sessionStorage.removeItem(k); } catch(e){}
+                });
+            } else {
+                const token = (localStorage.getItem('token') || sessionStorage.getItem('token') || '').trim().replace(/^["']+|["']+$/g, '');
+                if (token && token.length > 30 && token.split('.').length === 3 && !window.location.search.includes('expired')) {
+                    const apiBase = window.API_URL || 'http://localhost:5000/api';
+                    fetch(apiBase + '/auth/me', {
+                        headers: { Authorization: 'Bearer ' + token }
+                    }).then(r => {
+                        if (r.ok) {
+                            sessionStorage.setItem('lastRedirectTime', Date.now().toString());
+                            window.location.href = 'cabinet.html';
+                        } else {
+                            ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
+                                try { localStorage.removeItem(k); } catch(e){}
+                                try { sessionStorage.removeItem(k); } catch(e){}
+                            });
+                        }
+                    }).catch(() => {
+                        // Backend unreachable, do not clear
+                    });
+                }
+            }
+        })();
+    </script>
     <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/auth-otp.js"></script>
