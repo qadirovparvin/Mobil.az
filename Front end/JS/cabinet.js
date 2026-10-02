@@ -573,25 +573,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderBillingCurrentCard(user) {
         const currentPackageId = resolveCurrentPackageId(user);
         const currentPackageName = document.getElementById('billingCurrentPackageName');
-        const currentPackageNote = document.getElementById('billingCurrentPackageNote');
         const currentPackageBadge = document.getElementById('billingCurrentPackageBadge');
         const walletBalance = document.getElementById('billingWalletBalance');
-        const activeDuration = document.getElementById('billingActiveDuration');
-        const nextPayment = document.getElementById('billingNextPayment');
 
         if (currentPackageName) currentPackageName.textContent = getBillingPackageName(currentPackageId);
-        if (currentPackageNote) currentPackageNote.textContent = getBillingCurrentNote(currentPackageId);
         if (walletBalance) walletBalance.textContent = formatCurrency(user?.walletBalance || 0);
-        if (activeDuration) activeDuration.textContent = getBillingActiveDuration(user);
-        if (nextPayment) nextPayment.textContent = getBillingNextPayment(user);
 
         if (currentPackageBadge) {
             const isActive = currentPackageId !== 'standard';
-            currentPackageBadge.textContent = isActive
-                ? t('statusActive', 'Aktiv')
-                : billingText('includedPlan', 'Included');
             currentPackageBadge.classList.toggle('is-active', isActive);
-            currentPackageBadge.classList.toggle('is-included', !isActive);
+            currentPackageBadge.innerHTML = isActive
+                ? `<i class="fas fa-crown"></i> <strong id="billingCurrentPackageName">${escapeHtml(getBillingPackageName(currentPackageId))}</strong>`
+                : `<i class="fas fa-check-circle"></i> <strong id="billingCurrentPackageName">Standart</strong>`;
         }
     }
 
@@ -603,53 +596,50 @@ document.addEventListener('DOMContentLoaded', () => {
         packageGrid.innerHTML = BILLING_PACKAGES.map((pkg) => {
             const price = getBillingPrice(pkg.id, billingState.duration);
             const isSelected = billingState.packageId === pkg.id;
-            const isFeatured = Boolean(pkg.featuredLabelKey);
-            const featuredLabel = isFeatured ? escapeHtml(billingText(pkg.featuredLabelKey, '')) : '';
-            const stateLabel = currentPackageId === pkg.id
-                ? billingText('currentPlan', 'Current plan')
-                : (pkg.id === 'standard'
-                    ? billingText('includedPlan', 'Included')
-                    : (featuredLabel || billingText('featuredPopular', 'Popular')));
-            const footerLabel = isSelected
-                ? billingText('selectedNow', 'Selected')
-                : billingText('selectNow', 'Choose');
-            const durationLabel = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} days`));
+            const isPopular = pkg.id === 'vip';
+            const isCurrent = currentPackageId === pkg.id;
+
+            const cardClasses = ['pkg-card'];
+            if (isPopular) cardClasses.push('pkg-card--popular');
+            if (isSelected) cardClasses.push('pkg-card--selected');
+
+            let badgeHtml = '';
+            if (isCurrent) {
+                badgeHtml = `<div class="pkg-card__badge-current"><i class="fas fa-check"></i> ${escapeHtml(billingText('currentPlan', 'Cari plan'))}</div>`;
+            } else if (isSelected) {
+                badgeHtml = `<div class="pkg-card__badge-selected">✓ ${escapeHtml(billingText('selectedNow', 'Seçildi'))}</div>`;
+            } else if (isPopular) {
+                badgeHtml = `<div class="pkg-card__badge-popular"><i class="fas fa-crown"></i> ${escapeHtml(billingText('featuredPopular', 'Populyar'))}</div>`;
+            }
+
+            const buttonLabel = isSelected
+                ? `✓ ${escapeHtml(billingText('selectedNow', 'Seçildi'))}`
+                : escapeHtml(billingText('selectNow', 'Seç'));
+
+            const durationText = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} gün`));
+
             const features = pkg.featureKeys.map((key) => `
-                <div class="billing-package-feature">
-                    <i class="fas fa-check-circle"></i>
+                <li>
+                    <i class="fas fa-check"></i>
                     <span>${escapeHtml(billingText(key, key))}</span>
-                </div>
+                </li>
             `).join('');
 
             return `
-                <article class="billing-package-option ${isSelected ? 'is-selected' : ''} ${isFeatured ? 'is-featured' : ''}" data-package-id="${pkg.id}" role="button" tabindex="0" aria-pressed="${isSelected ? 'true' : 'false'}" ${isFeatured ? `data-featured-label="${featuredLabel}"` : ''}>
-                    <div class="billing-package-top">
-                        <div class="billing-package-title-group">
-                            <div class="billing-package-icon billing-package-icon-${pkg.id}">
-                                <i class="fas ${pkg.icon || 'fa-box'}"></i>
-                            </div>
-                            <div>
-                                <h5 class="billing-package-name">${escapeHtml(getBillingPackageName(pkg.id))}</h5>
-                                <p class="billing-package-description">${escapeHtml(billingText(pkg.descriptionKey, ''))}</p>
-                            </div>
-                        </div>
-                        <div class="billing-method-chip">${escapeHtml(stateLabel)}</div>
-                    </div>
-                    <div class="billing-package-price-row">
-                        <div class="billing-package-price">
-                            ${price === 0 ? escapeHtml(billingText('freePlan', 'Free')) : escapeHtml(String(price))}
-                            <small>${escapeHtml(price === 0 ? '' : 'AZN')}</small>
-                        </div>
-                        <div class="billing-package-period">
-                            <strong>${durationLabel}</strong>
-                            <span>${escapeHtml(price === 0 ? billingText('includedPlan', 'Included') : billingText('perPeriod', 'per period'))}</span>
+                <article class="${cardClasses.join(' ')}" data-package="${pkg.id}" data-package-id="${pkg.id}" role="button" tabindex="0" aria-pressed="${isSelected ? 'true' : 'false'}">
+                    ${badgeHtml}
+                    <div class="pkg-card__top">
+                        <span class="pkg-card__name">${escapeHtml(getBillingPackageName(pkg.id))}</span>
+                        <div class="pkg-card__price">
+                            <b>${escapeHtml(String(price))}</b>
+                            <span class="currency">AZN</span>
+                            <i>/ ${price === 0 ? 'həmişə' : durationText}</i>
                         </div>
                     </div>
-                    <div class="billing-package-features">${features}</div>
-                    <div class="billing-package-footer">
-                        <span>${escapeHtml(footerLabel)}</span>
-                        <i class="fas ${isSelected ? 'fa-circle-check' : 'fa-arrow-right'}"></i>
-                    </div>
+                    <ul class="pkg-card__features">
+                        ${features}
+                    </ul>
+                    <button type="button" class="pkg-card__select">${buttonLabel}</button>
                 </article>
             `;
         }).join('');
@@ -659,26 +649,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const methodGrid = document.getElementById('billingMethodGrid');
         if (!methodGrid) return;
 
-        const selectedPrice = getBillingPrice();
         const walletBalance = Number(user?.walletBalance || 0);
 
         methodGrid.innerHTML = BILLING_METHODS.map((method) => {
             const isSelected = billingState.method === method.id;
-            const chipLabel = method.id === 'wallet'
-                ? billingText(walletBalance >= selectedPrice ? 'enoughBalance' : 'lowBalance', 'Enough balance')
-                : billingText(method.chipKey, method.chipKey);
+            let hint = '';
+            if (method.id === 'wallet') {
+                hint = `Balans: ${formatCurrency(walletBalance)}`;
+            } else if (method.id === 'card') {
+                hint = 'Visa / Mastercard';
+            } else if (method.id === 'transfer') {
+                hint = 'Hüquqi şəxslər üçün';
+            }
 
             return `
-                <article class="billing-method-option ${isSelected ? 'is-selected' : ''} ${!isBillingPurchasable() ? 'is-disabled' : ''}" data-method-id="${method.id}" role="button" tabindex="${isBillingPurchasable() ? '0' : '-1'}" aria-pressed="${isSelected ? 'true' : 'false'}" aria-disabled="${isBillingPurchasable() ? 'false' : 'true'}">
-                    <div class="billing-method-top">
-                        <div class="billing-method-icon"><i class="fas ${method.icon}"></i></div>
-                        <div class="billing-method-chip">${escapeHtml(chipLabel)}</div>
+                <button type="button" class="pay-tab ${isSelected ? 'pay-tab--active is-selected' : ''}" data-method="${method.id}" data-method-id="${method.id}" role="tab" aria-selected="${isSelected ? 'true' : 'false'}">
+                    <span class="pay-tab__icon"><i class="fas ${method.icon}"></i></span>
+                    <div class="pay-tab__content">
+                        <span class="pay-tab__title">${escapeHtml(billingText(method.nameKey, method.id))}</span>
+                        <span class="pay-tab__hint">${escapeHtml(hint)}</span>
                     </div>
-                    <h5 class="billing-method-name">${escapeHtml(billingText(method.nameKey, method.id))}</h5>
-                    <p class="billing-method-description">${escapeHtml(billingText(method.descriptionKey, ''))}</p>
-                </article>
+                </button>
             `;
         }).join('');
+
+        const payDesc = document.getElementById('billingPayDesc');
+        if (payDesc) {
+            if (billingState.method === 'wallet') {
+                payDesc.textContent = billingText('methodWalletDesc', 'Balans kifayət edirsə, paket dərhal aktivləşir.');
+            } else if (billingState.method === 'card') {
+                payDesc.textContent = billingText('methodCardDesc', 'Visa və Mastercard ilə onlayn ödəniş edin. 3D Secure ilə qorunur.');
+            } else if (billingState.method === 'transfer') {
+                payDesc.textContent = billingText('methodTransferDesc', 'Hüquqi şəxslər üçün qaimə və bank köçürməsi.');
+            }
+        }
     }
 
     function renderBillingSummary(user = getStoredUser()) {
@@ -692,17 +696,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryMethod = document.getElementById('billingSummaryMethod');
         const summaryTotal = document.getElementById('billingSummaryTotal');
         const confirmBtn = document.getElementById('billingConfirmBtn');
-        const confirmBtnText = confirmBtn?.querySelector('span');
+        const confirmBtnSpan = confirmBtn?.querySelector('span');
         const walletBtn = document.getElementById('billingGoWalletBtn');
         const walletBalance = Number(user?.walletBalance || 0);
 
         if (summaryPackage) summaryPackage.textContent = getBillingPackageName(selectedPackage.id);
         if (summaryDuration) summaryDuration.textContent = canPurchase
-            ? billingText(`duration${billingState.duration}`, `${billingState.duration} days`)
-            : billingText('includedPlan', 'Included');
+            ? billingText(`duration${billingState.duration}`, `${billingState.duration} gün`)
+            : billingText('includedPlan', 'Daxildir');
         if (summaryMethod) summaryMethod.textContent = canPurchase
             ? billingText(selectedMethod.nameKey, selectedMethod.id)
-            : billingText('includedPlan', 'Included');
+            : billingText('includedPlan', 'Daxildir');
         if (summaryTotal) summaryTotal.textContent = formatCurrency(total);
 
         if (confirmBtn) {
@@ -710,14 +714,18 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmBtn.classList.toggle('is-disabled', !canPurchase);
             confirmBtn.setAttribute('aria-disabled', canPurchase ? 'false' : 'true');
         }
-        if (confirmBtnText) {
-            confirmBtnText.textContent = canPurchase
-                ? billingText('confirmPurchase', 'Activate package')
-                : billingText('noPaymentRequired', 'No payment required');
+        if (confirmBtnSpan) {
+            confirmBtnSpan.textContent = canPurchase
+                ? billingText('confirmPurchase', 'Paketi aktivləşdir')
+                : billingText('noPaymentRequired', 'Ödəniş tələb olunmur');
         }
 
         if (walletBtn) {
             walletBtn.hidden = !canPurchase || billingState.method !== 'wallet' || walletBalance >= total;
+            if (!walletBtn.hidden) {
+                const diff = (total - walletBalance).toFixed(2);
+                walletBtn.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Balans çatışmır (${diff} AZN) — Artır`;
+            }
         }
     }
 
@@ -844,7 +852,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function bindBillingPanel() {
-        const panel = document.getElementById('panel-billing');
+        const panel = document.getElementById('panel-billing') || document.getElementById('billing-panel');
         if (!panel || panel.dataset.bound === 'true') return;
 
         panel.dataset.bound = 'true';
@@ -856,17 +864,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const packageOption = event.target.closest('[data-package-id]');
+            const packageOption = event.target.closest('[data-package-id], [data-package], .pkg-card');
             if (packageOption) {
-                billingState.packageId = packageOption.getAttribute('data-package-id') || 'vip';
+                billingState.packageId = packageOption.getAttribute('data-package-id') || packageOption.getAttribute('data-package') || 'vip';
                 renderBillingPanel(getStoredUser());
                 return;
             }
 
-            const methodOption = event.target.closest('[data-method-id]');
+            const methodOption = event.target.closest('[data-method-id], [data-method], .pay-tab');
             if (methodOption) {
                 if (!isBillingPurchasable()) return;
-                billingState.method = methodOption.getAttribute('data-method-id') || 'wallet';
+                billingState.method = methodOption.getAttribute('data-method-id') || methodOption.getAttribute('data-method') || 'wallet';
                 renderBillingPanel(getStoredUser());
             }
         });
@@ -874,7 +882,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panel.addEventListener('keydown', (event) => {
             if (event.key !== 'Enter' && event.key !== ' ') return;
 
-            const interactiveCard = event.target.closest('[data-package-id], [data-method-id]');
+            const interactiveCard = event.target.closest('[data-package-id], [data-package], [data-method-id], [data-method]');
             if (!interactiveCard) return;
 
             event.preventDefault();
@@ -897,6 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         document.getElementById('billingTopUpBtn')?.addEventListener('click', topUpHandler);
+        document.getElementById('billingTopUpQuickBtn')?.addEventListener('click', topUpHandler);
         document.getElementById('billingGoWalletBtn')?.addEventListener('click', topUpHandler);
 
         document.getElementById('billingConfirmBtn')?.addEventListener('click', async () => {

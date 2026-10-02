@@ -8,68 +8,22 @@
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/cabinet.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
     <script>
-        if (localStorage.getItem('mobilaz_theme') === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-        }
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
     </script>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <span class="mobil-logo">Mobil<span>.az</span></span>
-            </a>
-            <div class="header-right">
-                <nav class="menu">
-                    <ul>
-                        <div class="contact-dropdown">
-                            <li data-translate="Contact">
-                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-                            </li>
-                            <div class="contact-menu">
-                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
-                                    Instagram</a>
-                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
-                                    Facebook</a>
-                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
-                                    WhatsApp</a>
-                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-                            </div>
-                        </div>
-                        <li class="About" data-translate="About">
-                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-                        </li>
-                        <li class="Stores" data-translate="Stores">
-                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-                        </li>
-                        <li class="Favorite" data-translate="Favorite">
-                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="button-container">
-                    <a href="login.html" class="login-btn" data-translate="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş
-                    </a>
-                    <a href="signup.html" class="register-btn" data-translate="register-btn">
-                        <i class="fas fa-user-plus"></i> Qeydiyyat
-                    </a>
-                </div>
-                <div class="theme-lang-container">
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span id="current-lang" data-translate="language-selector">AZ</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+      <div id="header-placeholder"></div>
 
     <main class="cabinet-main">
         <div class="cabinet-wrapper">
@@ -181,12 +135,12 @@
                                     </div>
                                     <div class="ref-stat">
                                         <span class="ref-stat-label">Dəvətlər</span>
-                                        <span class="ref-stat-value">3</span>
+                                        <span class="ref-stat-value" id="referralCount">0</span>
                                     </div>
                                 </div>
 
                                 <div class="copy-link-box">
-                                    <input type="text" value="https://mobil.az/ref/..." readonly id="referralLink">
+                                    <input type="text" readonly id="referralLink">
                                     <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i> <span data-translate="mon-copy-link">Kopyala</span></button>
                                 </div>
                             </div>
@@ -240,53 +194,6 @@
                         </div>
 
                         <div class="my-ads-list">
-                            <!-- Ad Item 1 -->
-                            <div class="my-ad-item cab-glass" data-status="active" data-id="101">
-                                <span class="ad-status-badge">Aktiv</span>
-                                <img src="https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=400" class="my-ad-img" alt="iPhone 15">
-                                <div class="my-ad-details">
-                                    <h4>iPhone 15 Pro Max 256GB</h4>
-                                    <div class="ad-meta">
-                                        <span><i class="fas fa-eye"></i> 142</span>
-                                        <span><i class="fas fa-heart"></i> 18</span>
-                                        <span><i class="fas fa-calendar-alt"></i> 12 Apr 2026</span>
-                                    </div>
-                                    <p class="ad-price">2450 AZN</p>
-                                </div>
-                                <div class="my-ad-controls">
-                                    <button class="btn-boost" onclick="openPromotionModal(101)">
-                                        <i class="fas fa-rocket"></i> <span data-translate="mon-promote-ad">Tanıt</span>
-                                    </button>
-                                    <div class="my-ad-actions">
-                                        <button class="btn-action edit-action"><i class="fas fa-edit"></i></button>
-                                        <button class="btn-action delete-action"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Ad Item 2 -->
-                            <div class="my-ad-item cab-glass" data-status="active" data-id="102">
-                                <span class="ad-status-badge">Aktiv</span>
-                                <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=400" class="my-ad-img" alt="S24 Ultra">
-                                <div class="my-ad-details">
-                                    <h4>Samsung S24 Ultra 512GB</h4>
-                                    <div class="ad-meta">
-                                        <span><i class="fas fa-eye"></i> 89</span>
-                                        <span><i class="fas fa-heart"></i> 5</span>
-                                        <span><i class="fas fa-calendar-alt"></i> 13 Apr 2026</span>
-                                    </div>
-                                    <p class="ad-price">2200 AZN</p>
-                                </div>
-                                <div class="my-ad-controls">
-                                    <button class="btn-boost" onclick="openPromotionModal(102)">
-                                        <i class="fas fa-rocket"></i> <span data-translate="mon-promote-ad">Tanıt</span>
-                                    </button>
-                                    <div class="my-ad-actions">
-                                        <button class="btn-action edit-action"><i class="fas fa-edit"></i></button>
-                                        <button class="btn-action delete-action"><i class="fas fa-trash"></i></button>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -530,137 +437,140 @@
                             </div>
 
                             <!-- Billing Settings -->
-                            <div id="panel-billing" class="settings-panel">
-                                <div class="billing-panel-head">
-                                    <div>
-                                        <h3 data-billing-i18n="billingHeading">Paketlər və ödənişlər</h3>
-                                        <p class="billing-subtitle" data-billing-i18n="subtitle">Hesabınıza uyğun paketi seçin, ödənişi tamamlayın və üstünlükləri dərhal aktivləşdirin.</p>
-                                    </div>
-                                    <button type="button" class="btn-primary" id="billingTopUpBtn">
-                                        <i class="fas fa-wallet"></i>
-                                        <span data-billing-i18n="topUpBalance">Balansı artır</span>
-                                    </button>
-                                </div>
-
-                                <div class="billing-overview-grid">
-                                    <section class="billing-card billing-current-card">
-                                        <div class="billing-card-label" data-billing-i18n="currentPackage">Cari paket</div>
-                                        <div class="billing-current-main">
-                                            <div>
-                                                <h4 id="billingCurrentPackageName">Standart</h4>
-                                                <p id="billingCurrentPackageNote">Hazırda standart hesabdan istifadə edirsiniz. Daha çox görünürlük üçün paket seçin.</p>
-                                            </div>
-                                            <span id="billingCurrentPackageBadge" class="billing-status-badge">Daxildir</span>
-                                        </div>
-                                        <div class="billing-meta-grid">
-                                            <div class="billing-meta-item">
-                                                <span data-billing-i18n="walletBalance">Balans</span>
-                                                <strong id="billingWalletBalance">0.00 AZN</strong>
-                                            </div>
-                                            <div class="billing-meta-item">
-                                                <span data-billing-i18n="selectedDuration">Müddət</span>
-                                                <strong id="billingActiveDuration">-</strong>
-                                            </div>
-                                            <div class="billing-meta-item">
-                                                <span data-billing-i18n="nextPayment">Növbəti ödəniş</span>
-                                                <strong id="billingNextPayment">-</strong>
-                                            </div>
-                                        </div>
-                                    </section>
-
-                                    <section class="billing-card billing-highlight-card">
-                                        <div class="billing-card-label" data-billing-i18n="whyUpgrade">Niyə yüksəldəsiniz?</div>
-                                        <h4 data-billing-i18n="highlightTitle">Daha çox görünürlük, daha rahat ödəniş axını</h4>
-                                        <div class="billing-highlight-list">
-                                            <div class="billing-highlight-item">
-                                                <i class="fas fa-bolt"></i>
-                                                <div>
-                                                    <strong data-billing-i18n="highlightFastTitle">Sürətli seçim</strong>
-                                                    <span data-billing-i18n="highlightFastText">Paket, müddət və ödəniş üsulu bir yerdə aydın göstərilir.</span>
+                            <div id="panel-billing" class="settings-panel billing-settings-container">
+                                <section id="billing-panel" class="billing-v2">
+                                    <div class="billing-v2__layout">
+                                        
+                                        <!-- LEFT (Packages + Payment + History) -->
+                                        <div class="billing-v2__main">
+                                            <div class="billing-v2__header">
+                                                <div class="billing-v2__header-text">
+                                                    <span class="billing-v2__badge"><i class="fas fa-sparkles"></i> Premium Planlar</span>
+                                                    <h2 data-billing-i18n="billingHeading">Hesab paketini yüksəlt</h2>
+                                                    <p data-billing-i18n="subtitle">Elanlarınız daha çox görünsün, daha tez satılsın</p>
+                                                </div>
+                                                <div class="billing-duration-switch" id="billingDurationSwitch" role="group" aria-label="Müddət seçimi">
+                                                    <button type="button" class="billing-duration-btn active" data-duration="30">
+                                                        <span>30 gün</span>
+                                                    </button>
+                                                    <button type="button" class="billing-duration-btn" data-duration="90">
+                                                        <span>90 gün</span>
+                                                        <span class="duration-discount-tag">-17%</span>
+                                                    </button>
                                                 </div>
                                             </div>
-                                            <div class="billing-highlight-item">
-                                                <i class="fas fa-chart-line"></i>
-                                                <div>
-                                                    <strong data-billing-i18n="highlightGrowthTitle">Aydın üstünlüklər</strong>
-                                                    <span data-billing-i18n="highlightGrowthText">Hər paket üzrə elan limiti və görünürlük fərqi əvvəlcədən görünür.</span>
+
+                                            <!-- Linear/Stripe Status Bar -->
+                                            <div class="billing-status-strip">
+                                                <div class="status-strip__item">
+                                                    <span class="status-strip__label">Cari paket:</span>
+                                                    <span class="status-strip__chip" id="billingCurrentPackageBadge">
+                                                        <i class="fas fa-check-circle"></i>
+                                                        <strong id="billingCurrentPackageName">Standart</strong>
+                                                    </span>
+                                                </div>
+                                                <div class="status-strip__divider"></div>
+                                                <div class="status-strip__item">
+                                                    <span class="status-strip__label">Daxili balans:</span>
+                                                    <strong class="status-strip__balance" id="billingWalletBalance">0.00 AZN</strong>
+                                                </div>
+                                                <button type="button" class="btn-topup-inline" id="billingTopUpQuickBtn">
+                                                    <i class="fas fa-plus"></i> Balansı artır
+                                                </button>
+                                            </div>
+
+                                            <!-- Packages Grid -->
+                                            <div class="pkg-grid" id="billingPackageGrid">
+                                                <!-- Dynamic pkg-card cards populated by JS -->
+                                            </div>
+
+                                            <!-- Payment Method Section -->
+                                            <div class="pay-section">
+                                                <div class="pay-section__top">
+                                                    <div>
+                                                        <h3 data-billing-i18n="paymentMethod">Ödəniş üsulu</h3>
+                                                        <span class="pay-section__sub">Təhlükəsiz və anında aktivləşən ödəniş</span>
+                                                    </div>
+                                                </div>
+                                                <div class="pay-tabs" id="billingMethodGrid" role="tablist">
+                                                    <!-- Dynamic pay-tab buttons populated by JS -->
+                                                </div>
+                                                <div class="pay-desc" id="billingPayDesc">
+                                                    Visa və Mastercard ilə onlayn ödəniş edin. 3D Secure ilə qorunur.
                                                 </div>
                                             </div>
-                                            <div class="billing-highlight-item">
-                                                <i class="fas fa-shield-heart"></i>
-                                                <div>
-                                                    <strong data-billing-i18n="highlightTrustTitle">Etibarlı ödəniş</strong>
-                                                    <span data-billing-i18n="highlightTrustText">Ödənişdən əvvəl yekun məbləğ və seçilmiş üsul dəqiq göstərilir.</span>
+
+                                            <!-- Payment History -->
+                                            <div class="billing-v2__history">
+                                                <div class="history-head">
+                                                    <div>
+                                                        <h4 data-billing-i18n="historyTitle">Ödəniş tarixçəsi</h4>
+                                                        <span class="history-sub" data-billing-i18n="historyHint">Son ödənişlər və aktivləşdirmələr burada görünür.</span>
+                                                    </div>
+                                                </div>
+                                                <div id="billingHistoryList" class="billing-history-list"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- RIGHT (Sticky Order Summary - Glassmorphism) -->
+                                        <aside class="billing-v2__summary">
+                                            <div class="summary-card">
+                                                <div class="summary-card__header">
+                                                    <span class="summary-badge"><i class="fas fa-shield-alt"></i> TƏHLÜKƏSİZ ÖDƏNİŞ</span>
+                                                    <div class="summary-card__label" data-billing-i18n="orderSummary">SİFARİŞ XÜLASƏSİ</div>
+                                                </div>
+
+                                                <div class="summary-card__rows">
+                                                    <div class="summary-card__row">
+                                                        <span data-billing-i18n="summaryPackage">Paket</span>
+                                                        <strong id="billingSummaryPackage">VIP</strong>
+                                                    </div>
+                                                    <div class="summary-card__row">
+                                                        <span data-billing-i18n="summaryDuration">Müddət</span>
+                                                        <strong id="billingSummaryDuration">30 gün</strong>
+                                                    </div>
+                                                    <div class="summary-card__row">
+                                                        <span data-billing-i18n="summaryMethod">Üsul</span>
+                                                        <strong id="billingSummaryMethod">Bank kartı</strong>
+                                                    </div>
+                                                </div>
+
+                                                <div class="summary-card__separator"></div>
+
+                                                <div class="summary-card__total">
+                                                    <div class="total-copy">
+                                                        <span data-billing-i18n="summaryTotal">Yekun</span>
+                                                        <small>ƏDV və rüsumlar daxildir</small>
+                                                    </div>
+                                                    <strong id="billingSummaryTotal">12.00 AZN</strong>
+                                                </div>
+
+                                                <div class="summary-card__cta-stack">
+                                                    <button type="button" id="billingConfirmBtn" class="btn-primary">
+                                                        <span>Paketi aktivləşdir</span>
+                                                        <i class="fas fa-arrow-right"></i>
+                                                    </button>
+                                                    <button type="button" id="billingTopUpBtn" class="btn-ghost">
+                                                        <i class="fas fa-wallet"></i>
+                                                        <span data-billing-i18n="topUpBalance">Balansı artır</span>
+                                                    </button>
+                                                    <button type="button" id="billingGoWalletBtn" class="btn-ghost btn-insufficient" hidden>
+                                                        <i class="fas fa-triangle-exclamation"></i>
+                                                        <span data-billing-i18n="needBalance">Balans çatışmır — Artır</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="summary-card__trust">
+                                                    <span class="trust-item"><i class="fas fa-lock"></i> SSL 256-bit</span>
+                                                    <span class="trust-sep">•</span>
+                                                    <span class="trust-item"><i class="fas fa-bolt"></i> Dərhal aktivləşmə</span>
+                                                    <span class="trust-sep">•</span>
+                                                    <span class="trust-item"><i class="fas fa-headset"></i> 7/24 dəstək</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </section>
-                                </div>
+                                        </aside>
 
-                                <section class="billing-card">
-                                    <div class="billing-section-top">
-                                        <div>
-                                            <h4 data-billing-i18n="choosePackage">Paket seçin</h4>
-                                            <p data-billing-i18n="choosePackageHint">Elan sayınıza və satış həcminizə uyğun paketi seçin.</p>
-                                        </div>
-                                        <div class="billing-duration-switch" id="billingDurationSwitch">
-                                            <button type="button" class="billing-duration-btn active" data-duration="30" data-billing-i18n="duration30">30 gün</button>
-                                            <button type="button" class="billing-duration-btn" data-duration="90" data-billing-i18n="duration90">90 gün</button>
-                                        </div>
                                     </div>
-                                    <div id="billingPackageGrid" class="billing-package-grid"></div>
-                                </section>
-
-                                <div class="billing-bottom-grid">
-                                    <section class="billing-card">
-                                        <div class="billing-section-top">
-                                            <div>
-                                                <h4 data-billing-i18n="paymentMethod">Ödəniş üsulu</h4>
-                                                <p data-billing-i18n="paymentMethodHint">Ödənişi tamamlamaq üçün uyğun üsulu seçin.</p>
-                                            </div>
-                                        </div>
-                                        <div id="billingMethodGrid" class="billing-method-grid"></div>
-                                    </section>
-
-                                    <section class="billing-card billing-summary-card">
-                                        <div class="billing-card-label" data-billing-i18n="orderSummary">Sifariş xülasəsi</div>
-                                        <div class="billing-summary-rows">
-                                            <div class="billing-summary-row">
-                                                <span data-billing-i18n="summaryPackage">Paket</span>
-                                                <strong id="billingSummaryPackage">VIP</strong>
-                                            </div>
-                                            <div class="billing-summary-row">
-                                                <span data-billing-i18n="summaryDuration">Müddət</span>
-                                                <strong id="billingSummaryDuration">30 gün</strong>
-                                            </div>
-                                            <div class="billing-summary-row">
-                                                <span data-billing-i18n="summaryMethod">Üsul</span>
-                                                <strong id="billingSummaryMethod">Daxili balans</strong>
-                                            </div>
-                                            <div class="billing-summary-row billing-summary-row-total">
-                                                <span data-billing-i18n="summaryTotal">Yekun</span>
-                                                <strong id="billingSummaryTotal">12.00 AZN</strong>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn-primary w-100" id="billingConfirmBtn">
-                                            <i class="fas fa-check-circle"></i>
-                                            <span data-billing-i18n="confirmPurchase">Paketi aktivləşdir</span>
-                                        </button>
-                                        <button type="button" class="btn-secondary-soft w-100" id="billingGoWalletBtn">
-                                            <i class="fas fa-plus-circle"></i>
-                                            <span data-billing-i18n="needBalance">Balansı artır</span>
-                                        </button>
-                                    </section>
-                                </div>
-
-                                <section class="billing-card">
-                                    <div class="billing-section-top">
-                                        <div>
-                                            <h4 data-billing-i18n="historyTitle">Ödəniş tarixçəsi</h4>
-                                            <p data-billing-i18n="historyHint">Son ödənişlər və aktivləşdirmələr burada görünür.</p>
-                                        </div>
-                                    </div>
-                                    <div id="billingHistoryList" class="billing-history-list"></div>
                                 </section>
                             </div>
                         </div>
@@ -671,106 +581,58 @@
         </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-                <ul>
-                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
-                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
-                    <li><a href="rules.html#posting-rules"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
-                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3 class="contact" data-translate="contact">Əlaqə</h3>
-                <ul>
-                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-                </ul>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-        </div>
-    </footer>
+      <div id="footer-placeholder"></div>
 
     <!-- Promotion Modal -->
-    <div id="promotionModal" class="modal-overlay">
+    <div id="promotionModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="promotion-title">
         <div class="modal-card cab-glass">
             <div class="modal-header">
-                <h2 data-translate="mon-promote-ad">Elanı Tanıt</h2>
+                <h2 id="promotion-title" data-translate="mon-promote-ad">Elanı Tanıt</h2>
                 <button class="btn-close-modal" onclick="closePromotionModal()"><i class="fas fa-times"></i></button>
             </div>
             
             <div class="promo-packages">
-                <!-- Bump Up -->
-                <div class="promo-pkg-card" onclick="selectPackage('bump')">
-                    <input type="radio" name="promoPack" id="pkg-bump" value="bump">
-                    <label for="pkg-bump" class="pkg-label">
-                        <div class="pkg-icon bump"><i class="fas fa-arrow-up"></i></div>
+                <!-- Urgent / Təcili -->
+                <div class="promo-pkg-card" onclick="selectPackage('Urgent')">
+                    <input type="radio" name="promoPack" id="pkg-urgent" value="Urgent">
+                    <label for="pkg-urgent" class="pkg-label">
+                        <div class="pkg-icon bump" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fas fa-fire"></i></div>
                         <div class="pkg-info">
-                            <h4 data-translate="mon-bump">İrəli çək</h4>
-                            <p>Elanı birbaşa ən üst sıraya daşıyın</p>
+                            <h4>Təcili</h4>
+                            <p>3 gün ərzində qırmızı "Təcili" nişanı ilə vurğulayın</p>
                         </div>
-                        <div class="pkg-price">1.00 <small>AZN</small></div>
+                        <div class="pkg-price">3.00 <small>AZN</small></div>
                     </label>
                 </div>
 
                 <!-- VIP -->
-                <div class="promo-pkg-card" onclick="selectPackage('vip')">
-                    <input type="radio" name="promoPack" id="pkg-vip" value="vip">
+                <div class="promo-pkg-card" onclick="selectPackage('VIP')">
+                    <input type="radio" name="promoPack" id="pkg-vip" value="VIP">
                     <label for="pkg-vip" class="pkg-label">
                         <div class="pkg-icon vip"><i class="fas fa-crown"></i></div>
                         <div class="pkg-info">
-                            <h4 data-translate="mon-vip">VİP</h4>
-                            <p>VIP bölməsində xüsusi rənglə vurğulayın</p>
+                            <h4>VİP</h4>
+                            <p>7 gün ərzində VIP bölməsində vurğulayın</p>
                         </div>
-                        <div class="pkg-price-tiers">
-                            <span class="tier" data-price="2" data-duration="1">1 gün: 2 AZN</span>
-                            <span class="tier" data-price="4" data-duration="3">3 gün: 4 AZN</span>
-                        </div>
+                        <div class="pkg-price">5.00 <small>AZN</small></div>
                     </label>
                 </div>
 
-                <!-- PRO -->
-                <div class="promo-pkg-card" onclick="selectPackage('pro')">
-                    <input type="radio" name="promoPack" id="pkg-pro" value="pro">
-                    <label for="pkg-pro" class="pkg-label">
+                <!-- Premium -->
+                <div class="promo-pkg-card" onclick="selectPackage('Premium')">
+                    <input type="radio" name="promoPack" id="pkg-premium" value="Premium">
+                    <label for="pkg-premium" class="pkg-label">
                         <div class="pkg-icon pro"><i class="fas fa-bolt"></i></div>
                         <div class="pkg-info">
-                            <h4 data-translate="mon-pro">PRO</h4>
-                            <p>Maksimum görünmə + Avtomatik irəli çəkmə</p>
+                            <h4>Premium</h4>
+                            <p>15 gün ərzində maksimum görünmə və VIP lenti</p>
                         </div>
-                        <div class="pkg-price-tiers">
-                            <span class="tier" data-price="4" data-duration="1">1 gün: 4 AZN</span>
-                            <span class="tier" data-price="8" data-duration="3">3 gün: 8 AZN</span>
-                        </div>
+                        <div class="pkg-price">10.00 <small>AZN</small></div>
                     </label>
-                </div>
-            </div>
-
-            <div class="tier-selector" id="tierSelector" style="display:none;">
-                <label data-translate="mon-duration">Müddət:</label>
-                <div class="tier-options">
-                    <button class="btn-tier active" data-days="1" onclick="setDuration(1)">1 Gün</button>
-                    <button class="btn-tier" data-days="3" onclick="setDuration(3)">3 Gün</button>
                 </div>
             </div>
 
             <div class="promo-summary">
-                <div class="referral-credit-toggle">
-                    <label class="checkbox-group">
-                        <input type="checkbox" id="useReferralCredit" onchange="updateTotal()">
-                        <span data-translate="mon-use-credit">Referal kreditindən istifadə et (max 50%)</span>
-                    </label>
-                    <span class="avail-credit">Balans: 15.00 AZN</span>
-                </div>
                 <hr>
                 <div class="summary-row">
                     <span data-translate="mon-total">Cəmi:</span>
@@ -783,32 +645,56 @@
         </div>
     </div>
 
+    <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js?v=2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
             const contents = document.querySelectorAll('.cabinet-tab');
+
+            function activateTab(targetId) {
+                if (!targetId) return;
+                const normalizedId = targetId.startsWith('#') ? targetId.slice(1) : targetId;
+                const tabId = normalizedId === 'messages' ? 'tab-messages' : normalizedId;
+                
+                const targetLink = document.querySelector(`.tab-link[data-target="${tabId}"]`);
+                const targetContent = document.getElementById(tabId);
+                if (!targetContent) return;
+
+                tabs.forEach(t => t.classList.remove('active'));
+                if (targetLink) targetLink.classList.add('active');
+
+                contents.forEach(content => {
+                    content.style.display = 'none';
+                    content.classList.remove('active');
+                });
+
+                targetContent.style.display = 'block';
+                targetContent.classList.add('active');
+            }
             
             tabs.forEach(tab => {
                 tab.addEventListener('click', function(e) {
                     e.preventDefault();
-                    
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    contents.forEach(content => {
-                        content.style.display = 'none';
-                        content.classList.remove('active');
-                    });
-                    
                     const targetId = this.getAttribute('data-target');
-                    const targetContent = document.getElementById(targetId);
-                    if (targetContent) {
-                        targetContent.style.display = 'block';
-                        targetContent.classList.add('active');
+                    activateTab(targetId);
+                    if (targetId) {
+                        try {
+                            history.replaceState(null, '', `#${targetId}`);
+                        } catch (err) {}
                     }
                 });
+            });
+
+            if (window.location.hash) {
+                activateTab(window.location.hash);
+            }
+
+            window.addEventListener('hashchange', function() {
+                if (window.location.hash) {
+                    activateTab(window.location.hash);
+                }
             });
         });
 
@@ -836,7 +722,11 @@
             }
         };
     </script>
+    <script>
+        document.write('<script src="' + (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '') + '/socket.io/socket.io.js"><\/script>');
+    </script>
     <script src="JS/cabinet.js"></script>
     <script src="JS/favorites.js"></script>
+  <script src="JS/components.js"></script>
 </body>
 </html>
