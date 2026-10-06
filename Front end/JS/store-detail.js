@@ -848,8 +848,10 @@ function renderHero() {
         };
     }
 
-    if (elements.storeName) {
-        elements.storeName.textContent = storeDisplayName;
+    const nameEl = elements.storeName || document.getElementById("storeName") || document.getElementById("store-name");
+    if (nameEl) {
+        nameEl.textContent = storeDisplayName;
+        nameEl.style.color = "#ffffff";
     }
 
     if (elements.breadcrumbStoreName) {

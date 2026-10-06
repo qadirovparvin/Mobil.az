@@ -8,6 +8,7 @@ const adSchema = new mongoose.Schema({
     sellerType: { type: String, enum: ['personal', 'store'], default: 'personal' },
 
     // ── Core Info ─────────────────────────────────────────
+    title:       { type: String, default: '' },
     category:    { type: String, required: true },
     brand:       { type: String, required: true },
     modelName:   { type: String, required: true },
