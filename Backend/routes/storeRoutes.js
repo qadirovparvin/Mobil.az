@@ -1,9 +1,11 @@
 const express = require('express');
 const router  = express.Router();
 const { protect } = require('../middlewares/authMiddleware');
+const { csrfProtection } = require('../middlewares/csrfProtection');
+const { validateObjectIdParam } = require('../utils/securityValidation');
 const {
-    createStore, getStoreById, getStores,
-    getMyStore, updateStore, addReview, getReviews
+    createStore, getStoreById, getStoreListings, getStores, getAllStores,
+    getMyStore, updateStore, addReview, getReviews, deleteStore
 } = require('../controllers/storeController');
 
 // Public
@@ -13,12 +15,14 @@ router.get('/',    getStores);
 router.get('/my',  protect, getMyStore);
 
 // Public
-router.get('/:id',         getStoreById);
-router.get('/:id/reviews', getReviews);
+router.get('/:id',          validateObjectIdParam('id'), getStoreById);
+router.get('/:id/listings', validateObjectIdParam('id'), getStoreListings);
+router.get('/:id/reviews',  validateObjectIdParam('id'), getReviews);
 
 // Protected
-router.post('/',              protect, createStore);
-router.put('/:id',            protect, updateStore);
-router.post('/:id/reviews',   protect, addReview);
+router.post('/',              protect, csrfProtection, createStore);
+router.put('/:id',            protect, csrfProtection, validateObjectIdParam('id'), updateStore);
+router.post('/:id/reviews',   protect, csrfProtection, validateObjectIdParam('id'), addReview);
+router.delete('/:id',         protect, csrfProtection, validateObjectIdParam('id'), deleteStore);
 
 module.exports = router;

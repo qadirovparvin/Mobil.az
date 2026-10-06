@@ -35,7 +35,7 @@
     <section id="store-hero" class="store-hero-section" aria-label="Mağaza örtük şəkli və profil headeri">
       <!-- 1. Cover Image Container -->
       <div id="store-cover" class="store-cover">
-        <img id="store-cover-img" class="store-cover-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Mağaza örtük şəkli" data-store-cover loading="eager">
+        <img id="store-cover-img" class="store-cover-image" src="assets/images/default-cover.svg" alt="Mağaza örtük şəkli" data-store-cover loading="eager" onerror="this.onerror=null;this.src='assets/images/default-store.svg';">
         <div class="store-cover-fallback"></div>
         <div class="store-cover-overlay" aria-hidden="true"></div>
       </div>
@@ -46,22 +46,22 @@
           <div class="store-hero-profile">
             <!-- 2. Store Logo Container -->
             <div id="store-logo-wrapper" class="store-logo-wrapper">
-              <img id="store-logo-img" class="store-logo-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Mağaza logosu" data-store-logo loading="eager">
+              <img id="store-logo-img" class="store-logo-image" src="assets/images/default-avatar.svg" alt="Mağaza logosu" data-store-logo loading="eager" onerror="this.onerror=null;this.src='assets/images/default-avatar.svg';">
               <span id="store-status-badge" class="store-status-badge" data-store-status aria-label="Status"></span>
             </div>
 
             <!-- 3. Store Identity -->
             <div class="store-identity-details">
               <div class="store-title-group">
-                <h1 id="store-name" class="store-name" data-store-name></h1>
+                <h1 id="store-name" class="store-name" data-store-name>Mağaza</h1>
                 
-                <span id="store-verified-badge" class="store-badge verified-badge" data-store-verified aria-label="Təsdiqlənmiş rəsmi mağaza"></span>
+                <span id="store-verified-badge" class="store-badge verified-badge" data-store-verified aria-label="Təsdiqlənmiş rəsmi mağaza">Təsdiqlənmiş</span>
               </div>
 
               <div class="store-reputation-meta">
                 <div id="store-rating" class="store-rating" role="img" aria-label="Mağaza reytinqi">
-                  <span id="store-rating-score" class="store-rating-score" data-store-rating aria-label="Reytinq"></span>
-                  <span id="store-review-count" class="store-review-count" data-store-reviews-count aria-label="Rəy sayı"></span>
+                  <span id="store-rating-score" class="store-rating-score" data-store-rating aria-label="Reytinq">Yeni</span>
+                  <span id="store-review-count" class="store-review-count" data-store-reviews-count aria-label="Rəy sayı">(0)</span>
                 </div>
               </div>
 
@@ -69,15 +69,15 @@
               <ul class="store-meta-list" aria-label="Mağaza haqqında köməkçi məlumatlar">
                 <li class="store-meta-item">
                   <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                  <address id="store-meta-location" class="store-meta-location" data-store-location></address>
+                  <address id="store-meta-location" class="store-meta-location" data-store-location>Bakı</address>
                 </li>
                 <li class="store-meta-item">
                   <i class="fas fa-calendar-alt" aria-hidden="true"></i>
-                  <time id="store-meta-joined" class="store-meta-joined" data-store-joined></time>
+                  <time id="store-meta-joined" class="store-meta-joined" data-store-joined>2025</time>
                 </li>
                 <li class="store-meta-item">
                   <i class="fas fa-bolt" aria-hidden="true"></i>
-                  <span id="store-meta-response" class="store-meta-response" data-store-response-time></span>
+                  <span id="store-meta-response" class="store-meta-response" data-store-response-time>1 saat ərzində cavab verir</span>
                 </li>
               </ul>
             </div>
@@ -114,15 +114,15 @@
       <div class="container">
         <div id="statistics-grid" class="statistics-grid">
           <div id="stat-card-rating" class="stat-card" data-stat="rating">
-            <span id="stat-rating-value" class="stat-value" data-store-stat-rating></span>
+            <span id="stat-rating-value" class="stat-value" data-store-stat-rating>Yeni</span>
             <span class="stat-label" data-translate="label-stat-rating">Reytinq</span>
           </div>
           <div id="stat-card-ads" class="stat-card" data-stat="active-ads">
-            <span id="stat-ads-value" class="stat-value" data-store-stat-ads></span>
+            <span id="stat-ads-value" class="stat-value" data-store-stat-ads>0</span>
             <span class="stat-label" data-translate="label-stat-ads">Aktiv Elan</span>
           </div>
           <div id="stat-card-feedback" class="stat-card" data-stat="positive-feedback">
-            <span id="stat-feedback-value" class="stat-value" data-store-stat-feedback></span>
+            <span id="stat-feedback-value" class="stat-value" data-store-stat-feedback>100%</span>
             <span class="stat-label" data-translate="label-stat-feedback">Müsbət Rəy</span>
           </div>
         </div>
@@ -296,19 +296,29 @@
           <!-- Contact Card -->
           <div id="contact-card" class="sidebar-card" aria-labelledby="sidebar-contact-title">
             <h3 id="sidebar-contact-title" class="card-title" data-translate="title-sidebar-contact">Əlaqə</h3>
-            <div id="sidebar-contact-content" class="card-body" data-store-sidebar-contact></div>
+            <div id="sidebar-contact-content" class="card-body" data-store-sidebar-contact>
+              <div class="sidebar-info-row"><i class="fas fa-phone-alt"></i> <span>+994 50 000 00 00</span></div>
+              <div class="sidebar-info-row"><i class="fas fa-map-marker-alt"></i> <span>Bakı şəhəri</span></div>
+              <div class="sidebar-info-row"><i class="fas fa-clock"></i> <span>Hər gün 09:00 - 20:00</span></div>
+            </div>
           </div>
 
           <!-- Business Info Card -->
           <div id="business-card" class="sidebar-card" aria-labelledby="sidebar-business-title">
             <h3 id="sidebar-business-title" class="card-title" data-translate="title-sidebar-business">Rəsmi Məlumatlar</h3>
-            <div id="sidebar-business-content" class="card-body" data-store-sidebar-business></div>
+            <div id="sidebar-business-content" class="card-body" data-store-sidebar-business>
+              <div class="sidebar-info-row"><strong>VÖEN:</strong> <span>1234567890</span></div>
+              <div class="sidebar-info-row"><strong>Hüquqi ad:</strong> <span>Rəsmi Mağaza</span></div>
+              <div class="sidebar-info-row"><strong>Qeydiyyat:</strong> <span>01.01.2025</span></div>
+            </div>
           </div>
 
           <!-- Working Hours Card -->
           <div id="working-hours-card" class="sidebar-card" aria-labelledby="sidebar-hours-title">
             <h3 id="sidebar-hours-title" class="card-title" data-translate="title-sidebar-hours">İş Rejimi</h3>
-            <div id="sidebar-hours-content" class="card-body" data-store-sidebar-hours></div>
+            <div id="sidebar-hours-content" class="card-body" data-store-sidebar-hours>
+              <div class="sidebar-info-row"><i class="fas fa-calendar-check"></i> <span>Hər gün 09:00 - 20:00</span></div>
+            </div>
           </div>
 
           <!-- Social Links Card -->

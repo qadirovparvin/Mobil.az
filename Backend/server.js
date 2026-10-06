@@ -282,8 +282,10 @@ app.post('/api/wallet/topup', strictLimiter);
 app.post('/api/wallet/packages/purchase', strictLimiter);
 app.post('/api/wallet/packages/payment-session', strictLimiter);
 
-// Serve uploaded files statically
+// Serve uploaded files and default assets statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/images', express.static(path.join(__dirname, '../Front end/images')));
+app.use('/assets', express.static(path.join(__dirname, '../Front end/assets')));
 
 // ── API Routes ────────────────────────────────────────────
 app.use('/api/auth',          authLimiter, require('./routes/authRoutes'));

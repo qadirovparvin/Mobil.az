@@ -36,7 +36,16 @@ async function loadStores() {
     if (loading) loading.style.display = 'none';
 
     if (!stores.length) {
-      if (empty) empty.style.display = 'block';
+      if (empty) {
+        empty.style.display = 'block';
+        empty.innerHTML = `
+          <div class="empty-state" style="text-align:center;padding:60px 20px;grid-column:1/-1;">
+            <div style="font-size:48px;margin-bottom:12px;">🏪</div>
+            <h3 style="font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text-primary);">Hələ mağaza yoxdur</h3>
+            <p style="color:var(--text-secondary);font-size:14px;">Hal-hazırda aktiv mağaza mövcud deyil. İlk mağazanı siz açın!</p>
+          </div>
+        `;
+      }
       return;
     }
 
@@ -51,15 +60,15 @@ async function loadStores() {
       const rawPhone = String(store.phone || store.contactNumber || '').replace(/[^0-9]/g, '');
       const rating = (store.rating && !isNaN(store.rating)) ? Number(store.rating).toFixed(1) : '5.0';
       const reviews = store.reviewCount || 0;
-      const cover = getImageUrl(store.coverUrl || store.cover, 'https://images.unsplash.com/photo-1541560052-5e137f229371?q=80&w=600');
-      const logo = getImageUrl(store.logo || store.logoUrl || store.image, 'https://i.pinimg.com/736x/e7/85/29/e78529fcd6194bae5fd828b46a5a501b.jpg');
+      const cover = getImageUrl(store.coverUrl || store.cover, 'assets/images/default-cover.svg');
+      const logo = getImageUrl(store.logo || store.logoUrl || store.image, 'assets/images/default-avatar.svg');
       const isVerified = Boolean(store.isVerified);
       const count = store.adCount ?? (store.adCount === 0 ? store.adCount : (store.adsCount ?? (store.ads ? store.ads.length : 0)));
 
       return `
         <div class="list-store-card">
           <div class="list-store-image" style="background-image: url('${cover}');">
-            <img src="${logo}" alt="${name}" class="store-logo-overlay">
+            <img src="${logo}" alt="${name}" class="store-logo-overlay" onerror="this.src='assets/images/default-avatar.svg'">
           </div>
           <div class="list-store-content">
             <div class="store-header-row">
@@ -96,9 +105,17 @@ async function loadStores() {
       `;
     }).join('');
   } catch(e) {
-    if (loading) {
-      loading.style.display = 'block';
-      loading.textContent = 'Mağazalar yüklənmədi: ' + e.message;
+    console.error("loadStores error:", e);
+    if (loading) loading.style.display = 'none';
+    if (empty) {
+      empty.style.display = 'block';
+      empty.innerHTML = `
+        <div class="empty-state" style="text-align:center;padding:60px 20px;grid-column:1/-1;">
+          <div style="font-size:48px;margin-bottom:12px;">🏪</div>
+          <h3 style="font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text-primary);">Hələ mağaza yoxdur</h3>
+          <p style="color:var(--text-secondary);font-size:14px;">Hal-hazırda aktiv mağaza mövcud deyil.</p>
+        </div>
+      `;
     }
   }
 }

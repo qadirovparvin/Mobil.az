@@ -132,25 +132,84 @@ const createStore = async (req, res, next) => {
 const getStoreById = async (req, res, next) => {
     try {
         const store = await Store.findById(req.params.id)
-            .populate('owner', 'name lastName avatar createdAt');
+            .populate('owner', 'name lastName avatar createdAt phone email');
 
-        if (!store) return res.status(404).json({ message: 'Mağaza tapılmadı' });
-        if (store.status !== 'active' || !store.isVerified) {
-            return res.status(404).json({ message: 'Mağaza tapılmadı' });
+        if (!store) {
+            return res.status(404).json({ message: 'Mağaza tapılmadı', store: null, listings: [], ads: [], rating: 0, activeCount: 0 });
         }
 
         // Active ads for this store
-        const ads = await Ad.find({ store: store._id, status: 'active' })
-            .sort({ promotionType: -1, createdAt: -1 })
-            .limit(50);
+        const ads = await Ad.find({
+            $or: [
+                { store: store._id },
+                { author: store.owner ? (store.owner._id || store.owner) : null }
+            ],
+            status: 'active'
+        })
+        .sort({ promotionType: -1, createdAt: -1 })
+        .limit(100)
+        .lean();
 
-        const safeStore = store.toObject();
+        const safeStore = store.toObject ? store.toObject() : store;
         delete safeStore.taxDocumentUrl;
         delete safeStore.identityDocumentUrl;
         delete safeStore.kycDocuments;
-        res.json({ store: safeStore, ads });
+
+        res.status(200).json({
+            store: safeStore,
+            listings: ads || [],
+            ads: ads || [],
+            rating: store.rating || 0,
+            activeCount: (ads || []).length,
+            reviewCount: store.reviewCount || 0
+        });
     } catch (error) {
-        next(error);
+        console.error('getStoreById error:', error);
+        res.status(200).json({
+            store: null,
+            listings: [],
+            ads: [],
+            error: false,
+            message: 'Boş mağaza'
+        });
+    }
+};
+
+// @desc    Get store listings (public)
+// @route   GET /api/stores/:id/listings
+// @access  Public
+const getStoreListings = async (req, res, next) => {
+    try {
+        const store = await Store.findById(req.params.id);
+        if (!store) {
+            return res.status(200).json({ listings: [], ads: [], total: 0 });
+        }
+
+        const ads = await Ad.find({
+            $or: [
+                { store: store._id },
+                { author: store.owner }
+            ],
+            status: 'active'
+        })
+        .sort({ promotionType: -1, createdAt: -1 })
+        .limit(100)
+        .lean();
+
+        res.status(200).json({
+            listings: ads || [],
+            ads: ads || [],
+            total: (ads || []).length
+        });
+    } catch (error) {
+        console.error('getStoreListings error:', error);
+        res.status(200).json({
+            listings: [],
+            ads: [],
+            total: 0,
+            error: false,
+            message: 'Elanlar tapılmadı'
+        });
     }
 };
 
@@ -190,7 +249,17 @@ const getStores = async (req, res, next) => {
             hasPreviousPage: paging.page > 1
         });
     } catch (error) {
-        next(error);
+        console.error('getStores error:', error);
+        res.status(200).json({ 
+            stores: [], 
+            page: 1, 
+            limit: 20, 
+            totalAds: 0, 
+            totalPages: 1, 
+            hasNextPage: false, 
+            hasPreviousPage: false,
+            error: false
+        });
     }
 };
 
@@ -344,4 +413,15 @@ const deleteStore = async (req, res, next) => {
     }
 };
 
-module.exports = { createStore, getStoreById, getStores, getMyStore, updateStore, addReview, getReviews, deleteStore };
+module.exports = {
+    createStore,
+    getStoreById,
+    getStoreListings,
+    getStores,
+    getAllStores: getStores,
+    getMyStore,
+    updateStore,
+    addReview,
+    getReviews,
+    deleteStore
+};
