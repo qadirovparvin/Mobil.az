@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const durationText = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} gün`));
 
             const features = pkg.featureKeys.map((key) => `
-                <li>${escapeHtml(billingText(key, key))}</li>
+                <li><span class="check">✓</span><span class="feature-text">${escapeHtml(billingText(key, key))}</span></li>
             `).join('');
 
             return `
@@ -640,8 +640,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return `
                 <button type="button" class="pay-tab ${isSelected ? 'active' : ''}" data-method="${method.id}" data-method-id="${method.id}">
-                    <span>${escapeHtml(billingText(method.nameKey, method.id))}</span>
-                    <small>${escapeHtml(hint)}</small>
+                    <div class="pay-tab-title">${escapeHtml(billingText(method.nameKey, method.id))}</div>
+                    <div class="sub">${escapeHtml(hint)}</div>
                 </button>
             `;
         }).join('');

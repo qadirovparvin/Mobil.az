@@ -41,10 +41,10 @@
 }
 
 .cabinet-wrapper {
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
     display: flex;
-    gap: 40px;
+    gap: 30px;
 }
 
 /* Base Glassmorphism */
@@ -276,6 +276,23 @@
 .settings-nav button:hover, .settings-nav button.active { background: rgba(109, 40, 217, 0.1); color: var(--cab-primary); }
 [data-theme="dark"] body .settings-nav button:hover, [data-theme="dark"] body .settings-nav button.active { background: rgba(139, 92, 246, 0.2); color: var(--cab-primary-light); }
 
+.settings-grid:has(#panel-billing.active),
+.settings-grid.billing-mode {
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+.settings-grid:has(#panel-billing.active) .settings-nav,
+.settings-grid.billing-mode .settings-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.settings-grid:has(#panel-billing.active) .settings-nav button,
+.settings-grid.billing-mode .settings-nav button {
+    flex: 1 1 auto;
+    justify-content: center;
+}
+
 .settings-panel { display: none; animation: cabFadeIn 0.3s ease; }
 .settings-panel.active { display: block; }
 .settings-panel h3 { font-size: 20px; margin-bottom: 25px; color: var(--text-main); padding-bottom: 10px; border-bottom: 1px solid var(--cab-glass-border); }
@@ -337,7 +354,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 }
 
 .billing-simple__inner {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -376,8 +393,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .billing-grid {
     display: grid;
-    grid-template-columns: 1fr 310px;
-    gap: 20px;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
     align-items: start;
 }
 
@@ -423,8 +440,8 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .pkg-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, minmax(240px, 1fr));
+    gap: 16px;
     margin-bottom: 16px;
 }
 
@@ -432,8 +449,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 .pkg-card {
     background: white;
     border: 1px solid #e5e5e7;
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 20px;
+    min-width: 240px;
     position: relative;
     cursor: pointer;
     transition: .15s;
@@ -487,23 +505,40 @@ input:checked + .slider:before { transform: translateX(20px); }
 .pkg-card ul {
     list-style: none;
     padding: 0;
-    margin: 0 0 10px;
+    margin: 12px 0;
     flex: 1;
 }
 
 .pkg-card ul li {
-    font-size: 12px;
-    color: #52525b;
-    padding: 3px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 6px 0;
     display: flex;
-    gap: 6px;
-    align-items: center;
+    gap: 8px;
+    align-items: flex-start;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 
 .pkg-card ul li::before {
-    content: '✓';
+    display: none;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.pkg-card .check {
     color: #6c5ce7;
     font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.pkg-card .feature-text {
+    display: inline;
+    white-space: normal;
 }
 
 .pkg-card .select-btn {
@@ -535,12 +570,15 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .pay-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .pay-tab {
     flex: 1;
-    padding: 10px 8px;
+    min-width: 140px;
+    padding: 12px 14px;
+    white-space: nowrap;
     border: 1px solid #e5e5e7;
     border-radius: 10px;
     background: white;
@@ -562,11 +600,15 @@ input:checked + .slider:before { transform: translateX(20px); }
     font-weight: 600;
 }
 
+.pay-tab .sub,
 .pay-tab small {
+    display: block;
     font-size: 11px;
     color: #71717a;
+    white-space: nowrap;
 }
 
+.pay-tab.active .sub,
 .pay-tab.active small {
     color: #6c5ce7;
 }
@@ -704,6 +746,20 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: #d4d4d8;
 }
 
+[data-theme="dark"] body .pkg-card .check {
+    color: #a78bfa;
+}
+
+[data-theme="dark"] body .pay-tab .sub,
+[data-theme="dark"] body .pay-tab small {
+    color: #a1a1aa;
+}
+
+[data-theme="dark"] body .pay-tab.active .sub,
+[data-theme="dark"] body .pay-tab.active small {
+    color: #a78bfa;
+}
+
 [data-theme="dark"] body .pkg-card .select-btn {
     background: #3f3f46;
     border-color: #52525b;
@@ -729,12 +785,20 @@ input:checked + .slider:before { transform: translateX(20px); }
     color: #f4f4f5;
 }
 
-/* MOBILE - 1 SÜTUN */
-@media(max-width: 900px){
+/* RESPONSIVE BILLING */
+@media (max-width: 1100px) {
+    .pkg-row { grid-template-columns: repeat(3, 1fr); }
+    .pkg-card { min-width: auto; }
+}
+
+@media (max-width: 900px) {
     .billing-grid { grid-template-columns: 1fr; }
-    .pkg-row { grid-template-columns: 1fr; }
     .billing-current-row { flex-wrap: wrap; }
     .btn-topup-simple { margin-left: 0; width: 100%; }
+}
+
+@media (max-width: 700px) {
+    .pkg-row { grid-template-columns: 1fr; }
 }
 
 /* Danger Zone */

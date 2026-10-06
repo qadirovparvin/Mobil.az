@@ -637,6 +637,15 @@
                 void target.offsetWidth;
                 target.classList.add('active');
             }
+
+            const settingsGrid = document.querySelector('.settings-grid');
+            if (settingsGrid) {
+                if (panelId === 'panel-billing') {
+                    settingsGrid.classList.add('billing-mode');
+                } else {
+                    settingsGrid.classList.remove('billing-mode');
+                }
+            }
         };
     </script>
     <script>
