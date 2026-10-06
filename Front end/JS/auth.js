@@ -90,22 +90,95 @@ function updateHeader() {
             const isAdmin = currentUser.role === 'admin';
 
             buttonContainer.innerHTML = `
-                <a href="cabinet.html#panel-notifications" style="position:relative; margin-right: 12px; color: var(--text-primary); text-decoration: none; display: flex; align-items: center;" id="headerNotificationBell" title="Bildirişlər">
-                    <i class="fas fa-bell" style="font-size: 18px;"></i>
-                    <span id="unreadBadge" style="display:none; position:absolute; top:-6px; right:-8px; background:#dc3545; color:white; font-size:10px; font-weight:bold; padding:2px 5px; border-radius:10px;">0</span>
-                </a>
+                <!-- BİLDİRİŞ - AYRI DROPDOWN -->
+                <div class="notif-wrapper" style="position:relative;">
+                    <button id="notifBell" class="icon-btn notif-bell-btn" type="button" aria-label="Bildirişlər" title="Bildirişlər">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notifCount" style="display:none;">0</span>
+                    </button>
+                    <div id="notifDropdown" class="dropdown-panel notif-panel hidden">
+                        <div class="dropdown-header">
+                            <span class="dropdown-title">Bildirişlər</span>
+                            <button type="button" id="markAllRead" class="btn-mark-all-read">Hamısını oxu</button>
+                        </div>
+                        <div id="notifList" class="notif-list-container">
+                            <div class="notif-empty-state">Yüklənir...</div>
+                        </div>
+                    </div>
+                </div>
+
                 ${isAdmin ? `
-                <a href="admin.html" class="admin-panel-btn-header" style="background: linear-gradient(135deg, #e53935, #d32f2f); color: white; border: none; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; margin-right: 8px; box-shadow: 0 2px 6px rgba(229,57,53,0.3);">
+                <a href="admin.html" class="admin-panel-btn-header" style="background: linear-gradient(135deg, #e53935, #d32f2f); color: white; border: none; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; margin-right: 4px; box-shadow: 0 2px 6px rgba(229,57,53,0.3);">
                     <i class="fas fa-shield-alt"></i> Admin Panel
                 </a>
                 ` : ''}
-                <a href="cabinet.html" class="cabinet-btn-header" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; box-shadow: 0 2px 6px rgba(108,92,231,0.3);">
-                    <i class="fas fa-user-circle"></i> <span>${displayName}</span>
-                </a>
-                <a href="#" class="header-logout-btn" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; margin-left: 8px; font-size: 15px; cursor: pointer; transition: all 0.2s;" title="Çıxış" aria-label="Çıxış">
-                    <i class="fas fa-sign-out-alt"></i>
-                </a>
+
+                <!-- PROFİL - AYRI DROPDOWN -->
+                <div class="profile-wrapper" style="position:relative;">
+                    <button id="profileBtn" class="cabinet-btn-header" type="button" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; box-shadow: 0 2px 6px rgba(108,92,231,0.3); cursor: pointer;">
+                        <i class="fas fa-user-circle"></i> <span>${displayName}</span>
+                        <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 2px; opacity: 0.8;"></i>
+                    </button>
+                    <div id="profileDropdown" class="dropdown-panel profile-panel hidden">
+                        <div class="profile-card-top">
+                            <div class="avatar"><i class="fas fa-user"></i></div>
+                            <div class="profile-user-details">
+                                <div class="profile-name">${displayName}</div>
+                                <div class="profile-email">${currentUser.email || ''}</div>
+                                <span class="role-badge">${isAdmin ? 'ADMİN HESAB' : 'STANDART HESAB'}</span>
+                            </div>
+                        </div>
+                        <div class="profile-menu-links">
+                            <a href="cabinet.html#tab-profile"><i class="fas fa-chart-pie"></i> İdarə Paneli</a>
+                            <a href="cabinet.html#tab-ads"><i class="fas fa-list-alt"></i> Mənim elanlarım</a>
+                            <a href="cabinet.html#tab-messages"><i class="fas fa-envelope"></i> Mesajlar</a>
+                            <a href="cabinet.html#tab-settings"><i class="fas fa-cog"></i> Tənzimləmələr</a>
+                            ${isAdmin ? '<a href="admin.html" class="admin-link"><i class="fas fa-shield-alt"></i> Adminliyə keç</a>' : ''}
+                            <a href="#" class="header-logout-btn text-danger"><i class="fas fa-sign-out-alt"></i> Çıxış</a>
+                        </div>
+                    </div>
+                </div>
             `;
+
+            // Separate event listeners
+            const notifBell = buttonContainer.querySelector('#notifBell');
+            const notifDropdown = buttonContainer.querySelector('#notifDropdown');
+            const profileBtn = buttonContainer.querySelector('#profileBtn');
+            const profileDropdown = buttonContainer.querySelector('#profileDropdown');
+
+            notifBell?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                profileDropdown?.classList.add('hidden');
+                notifDropdown?.classList.toggle('hidden');
+                if (!notifDropdown?.classList.contains('hidden')) {
+                    loadNotifications();
+                }
+            });
+
+            profileBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifDropdown?.classList.add('hidden');
+                profileDropdown?.classList.toggle('hidden');
+            });
+
+            notifDropdown?.addEventListener('click', (e) => e.stopPropagation());
+            profileDropdown?.addEventListener('click', (e) => e.stopPropagation());
+
+            const markAllReadBtn = buttonContainer.querySelector('#markAllRead');
+            markAllReadBtn?.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const curToken = getToken();
+                if (!curToken) return;
+                try {
+                    await fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/read-all', {
+                        method: 'PUT',
+                        headers: { 'Authorization': 'Bearer ' + curToken }
+                    });
+                    const badge = buttonContainer.querySelector('#notifCount');
+                    if (badge) badge.style.display = 'none';
+                    loadNotifications();
+                } catch (err) {}
+            });
 
             const logoutBtn = buttonContainer.querySelector('.header-logout-btn');
             if (logoutBtn) {
@@ -117,7 +190,7 @@ function updateHeader() {
                         clearSession();
                     } else {
                         ['token', 'accessToken', 'authToken', 'adminToken'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
-                        ['user', 'mobilaz_current_user', 'adminUser', 'mobilaz_user', 'userRole', 'userEmail'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                        ['user', 'mobilaz_current_user', 'adminUser', 'mobilaz_user', 'userRole', 'userEmail'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
                     }
                     window.location.href = "index.html";
                 });
@@ -141,15 +214,56 @@ function updateHeader() {
         .then(res => res.ok ? res.json() : null)
         .then(data => {
             if (data && data.count > 0) {
-                document.querySelectorAll('#unreadBadge').forEach(badge => {
+                document.querySelectorAll('#notifCount').forEach(badge => {
                     badge.textContent = data.count > 99 ? '99+' : data.count;
-                    badge.style.display = 'block';
+                    badge.style.display = 'inline-block';
                 });
             }
         })
         .catch(() => {});
     }
 }
+
+// Global outside click handler to close dropdowns
+document.addEventListener('click', () => {
+    document.querySelectorAll('#notifDropdown').forEach(d => d.classList.add('hidden'));
+    document.querySelectorAll('#profileDropdown').forEach(d => d.classList.add('hidden'));
+});
+
+async function loadNotifications() {
+    const listEl = document.getElementById('notifList');
+    if (!listEl) return;
+    const token = getToken();
+    if (!token) {
+        listEl.innerHTML = '<div class="notif-empty-state">Daxil olmamısınız</div>';
+        return;
+    }
+
+    try {
+        const res = await fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (!res.ok) throw new Error('Network error');
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.notifications || []);
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="notif-empty-state">Bildiriş yoxdur</div>';
+            return;
+        }
+        listEl.innerHTML = items.map(n => {
+            const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleDateString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : '';
+            return `
+                <div class="notif-item ${n.read ? '' : 'unread'}">
+                    <div>${n.title ? `<strong>${n.title}</strong><br>` : ''}${n.message || ''}</div>
+                    ${timeStr ? `<span class="notif-item-time">${timeStr}</span>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (err) {
+        listEl.innerHTML = '<div class="notif-empty-state">Bildirişlər yüklənə bilmədi</div>';
+    }
+}
+window.loadNotifications = loadNotifications;
 window.updateHeader = updateHeader;
 window.updateAuthUI = updateHeader;
 
@@ -222,13 +336,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             if (window.location.pathname.includes("login.html")) {
-                // Let login.html verified pre-check script or onLoginSuccess handle redirect safely
                 return;
             }
             window.location.href = currentUser.role === 'admin' ? "admin.html" : "index.html";
         }
     } else {
-        // If not logged in and trying to access cabinet, redirect to login
         if (window.location.pathname.includes("cabinet.html")) {
             window.location.href = "login.html";
         }

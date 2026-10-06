@@ -573,6 +573,14 @@
             function activateTab(targetId) {
                 if (!targetId) return;
                 const normalizedId = targetId.startsWith('#') ? targetId.slice(1) : targetId;
+                if (normalizedId.startsWith('panel-')) {
+                    activateTab('tab-settings');
+                    const btn = document.querySelector(`.settings-nav button[onclick*="${normalizedId}"]`);
+                    if (window.showSettingsPanel && btn) {
+                        window.showSettingsPanel(normalizedId, btn);
+                    }
+                    return;
+                }
                 const tabId = normalizedId === 'messages' ? 'tab-messages' : normalizedId;
                 
                 const targetLink = document.querySelector(`.tab-link[data-target="${tabId}"]`);
