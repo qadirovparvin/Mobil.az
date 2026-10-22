@@ -64,6 +64,7 @@ const {
     verificationIpLimiter
 } = require('./utils/abuseGuards');
 const { ensureDefaultPackages } = require('./utils/packageCatalog');
+const { reconcilePendingPayments } = require('./jobs/paymentReconciliation');
 
 // Load env vars (always resolve from this file's directory)
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -74,7 +75,7 @@ if (!JWT_SECRET) {
     logger.error('❌ CRITICAL ERROR: JWT_SECRET environment variable is not defined.');
     process.exit(1);
 }
-if (process.env.NODE_ENV === 'production' && (JWT_SECRET === 'airyphone_super_secret_jwt_key_2024_change_in_production' || JWT_SECRET.length < 32)) {
+if (process.env.NODE_ENV === 'production' && (JWT_SECRET === 'mobilaz_super_secret_jwt_key_2024_change_in_production' || JWT_SECRET === 'airyphone_super_secret_jwt_key_2024_change_in_production' || JWT_SECRET.length < 32)) {
     logger.error('❌ CRITICAL SECURITY ERROR: Weak or default JWT_SECRET is not allowed in production.');
     process.exit(1);
 }
@@ -96,10 +97,15 @@ if (process.env.NODE_ENV === 'production') {
         logger.error('❌ CRITICAL SECURITY ERROR: REFRESH_TOKEN_SECRET is required in production.');
         process.exit(1);
     }
-    if (!/^[0-9a-f]{64}$/i.test(process.env.TWO_FACTOR_SECRET_ENCRYPTION_KEY || '')) {
-        logger.error('❌ CRITICAL SECURITY ERROR: TWO_FACTOR_SECRET_ENCRYPTION_KEY must be a 32-byte hex key in production.');
-        process.exit(1);
-    }
+}
+
+// ── 2FA Secret Validation ────────────────────────────────
+const { validateTotpConfig } = require('./utils/totp');
+try {
+    validateTotpConfig();
+} catch (error) {
+    logger.error(`❌ CRITICAL SECURITY ERROR: ${error.message}`);
+    process.exit(1);
 }
 
 // ── Connect to Database & Auto-Seed Admin ────────────────
@@ -152,13 +158,20 @@ const runScheduledExpiryChecks = async () => {
     }
 
     try {
-        await Promise.all([
+        const schedulerTasks = [
             expirePromotions().catch(err => logger.error('Expiry check failed:', err.message)),
             expireAds().catch(err => logger.error('Ad expiry check failed:', err.message)),
             notifyExpiringAds().catch(err => logger.error('Ad expiry warning check failed:', err.message)),
-            expireUnverifiedUsers().catch(err => logger.error('Unverified expiry check failed:', err.message)),
-            cleanupOrphanedUploads().catch(err => logger.error('Upload cleanup failed:', err.message))
-        ]);
+            expireUnverifiedUsers().catch(err => logger.error('Unverified expiry check failed:', err.message))
+        ];
+
+        if (process.env.CLEANUP_ORPHANS === 'true' && process.env.NODE_ENV === 'production') {
+            schedulerTasks.push(
+                cleanupOrphanedUploads().catch(err => logger.error('Upload cleanup failed:', err.message))
+            );
+        }
+
+        await Promise.all(schedulerTasks);
     } finally {
         await lock.release();
     }
@@ -170,6 +183,11 @@ connectDB().then(async () => {
     if (process.env.DISABLE_IN_PROCESS_SCHEDULER !== 'true') {
         setTimeout(runScheduledExpiryChecks, 5000);
         setInterval(runScheduledExpiryChecks, Number(process.env.EXPIRY_CHECK_INTERVAL_MS || 60 * 60 * 1000));
+
+        if (process.env.PAYMENT_RECONCILIATION_ENABLED !== 'false') {
+            setInterval(reconcilePendingPayments, 5 * 60 * 1000);
+            console.log('✅ Payment reconciliation enabled (5min)');
+        }
     } else {
         logger.info('In-process scheduler disabled; run expiryChecker jobs from an external scheduler.');
     }
@@ -188,23 +206,18 @@ const corsOptions = buildCorsOptions();
 const io = new Server(server, { cors: corsOptions });
 app.set('io', io);
 
-// Helper to identify admin requests to exempt them from rate limits
+// Helper to identify verified authenticated admin requests to exempt them from rate limits
 const isAdminRequest = (req) => {
-    const raw = req.body?.email || req.body?.identifier || req.user?.email || '';
-    const email = String(raw).trim().toLowerCase();
-    const adminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
-    if (email === adminEmail || email === 'mobil@gmail.com') return true;
-    if (req.user && (req.user.role === 'admin' || req.user.email?.toLowerCase() === 'mobil@gmail.com')) return true;
-    return false;
+    return Boolean(req.user && req.user.role === 'admin' && req.user.isVerified);
 };
 
 // ── Rate Limiters ─────────────────────────────────────────
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
-    max: 100,
+    max: process.env.NODE_ENV === 'production' ? 1000 : 10000,
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => isAdminRequest(req),
+    skip: (req) => isAdminRequest(req) || req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1' || process.env.NODE_ENV !== 'production',
     message: { message: 'Çox sayda sorğu göndərildi. Zəhmət olmasa bir az gözləyin.' }
 });
 
@@ -213,7 +226,6 @@ const authLimiter = rateLimit({
     max: 30,                    // max 30 login/register attempts per 15min
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => isAdminRequest(req),
     message: { message: 'Çox sayda giriş cəhdi. 15 dəqiqə sonra yenidən cəhd edin.' }
 });
 
@@ -222,7 +234,6 @@ const strictLimiter = rateLimit({
     max: 15,                     // max 15 requests per 15 minutes
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => isAdminRequest(req),
     message: { message: 'Çox sayda sorğu göndərildi. Zəhmət olmasa 15 dəqiqə sonra yenidən cəhd edin.' }
 });
 
@@ -231,7 +242,6 @@ const passwordResetLimiter = rateLimit({
     max: Number(process.env.PASSWORD_RESET_RATE_LIMIT || 5),
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => isAdminRequest(req),
     message: { message: 'Əgər bu email qeydiyyatdan keçibsə, sıfırlama linki göndəriləcək' }
 });
 
@@ -286,6 +296,11 @@ app.post('/api/wallet/packages/payment-session', strictLimiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/images', express.static(path.join(__dirname, '../Front end/images')));
 app.use('/assets', express.static(path.join(__dirname, '../Front end/assets')));
+app.use('/Photo', express.static(path.join(__dirname, '../Front end/Photo')));
+app.use('/photo', express.static(path.join(__dirname, '../Front end/Photo')));
+app.use('/Front end', express.static(path.join(__dirname, '../Front end')));
+app.use('/Frontend', express.static(path.join(__dirname, '../Front end')));
+app.use(express.static(path.join(__dirname, '../Front end')));
 
 // ── API Routes ────────────────────────────────────────────
 app.use('/api/auth',          authLimiter, require('./routes/authRoutes'));
@@ -302,6 +317,17 @@ app.use('/api/reviews',       require('./routes/reviewRoutes'));
 app.use('/api/questions',     require('./routes/questionRoutes'));
 app.use('/api/referral',      require('./routes/referralRoutes'));
 
+app.get('/api/categories', (req, res) => {
+    res.json({
+        data: [
+            { _id: 'phone', name: 'Telefonlar' },
+            { _id: 'tablet', name: 'Planşetlər' },
+            { _id: 'headphone', name: 'Qulaqcıqlar' },
+            { _id: 'accessory', name: 'Telefon aksessuarları' }
+        ]
+    });
+});
+
 // ── Health Check ──────────────────────────────────────────
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
@@ -309,7 +335,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/', (req, res) => {
     res.json({
-        message: 'AiryPhone API v1.0',
+        message: 'Mobil.az API v1.0',
         status:  'running',
         endpoints: {
             auth:          '/api/auth',
@@ -323,6 +349,14 @@ app.get('/', (req, res) => {
         }
     });
 });
+
+// ── Static Files Serving ─────────────────────────────────
+const frontendDir = path.join(__dirname, '..', 'Front end');
+const frontendAltDir = path.join(__dirname, '..', 'Frontend');
+app.use(express.static(frontendDir));
+app.use('/Frontend', express.static(frontendAltDir));
+app.use('/Front%20end', express.static(frontendDir));
+app.use('/Front end', express.static(frontendDir));
 
 app.use(validationErrorHandler);
 
@@ -566,7 +600,12 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, '0.0.0.0', () => logger.info(`🚀 Server running on http://localhost:${PORT}`));
+server.listen(PORT, '0.0.0.0', () => {
+    logger.info(`🚀 Server running on http://localhost:${PORT}`);
+    if (typeof process.send === 'function') {
+        process.send('ready');
+    }
+});
 
 // ── Graceful Shutdown ─────────────────────────────────────
 const gracefulShutdown = () => {

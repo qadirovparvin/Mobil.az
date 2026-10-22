@@ -79,8 +79,7 @@ const isAdminUser = (user) => {
 };
 
 const isAccountLocked = (user) => {
-    if (isAdminUser(user)) return false;
-    return Boolean(user.lockUntil && user.lockUntil > new Date());
+    return Boolean(user && user.lockUntil && user.lockUntil > new Date());
 };
 
 const pruneRefreshTokens = (user) => {
@@ -92,7 +91,7 @@ const pruneRefreshTokens = (user) => {
         .slice(0, retainedSessionCount);
 };
 
-const issueRefreshToken = async (user, req, res) => {
+const issueRefreshToken = async (user, req, res, rememberMe = false) => {
     pruneRefreshTokens(user);
 
     if ((user.refreshTokens || []).filter((token) => token.expiresAt > new Date()).length >= MAX_REFRESH_SESSIONS
@@ -102,7 +101,8 @@ const issueRefreshToken = async (user, req, res) => {
         throw error;
     }
 
-    const refreshToken = generateRefreshToken(user);
+    const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1' || req.body?.rememberMe === true || req.body?.rememberMe === 'true');
+    const refreshToken = generateRefreshToken(user, isRemember);
     user.refreshTokens.push({
         tokenHash: refreshToken.tokenHash,
         sessionId: refreshToken.sessionId,
@@ -119,19 +119,16 @@ const issueRefreshToken = async (user, req, res) => {
 };
 
 const recordFailedLogin = async (user) => {
-    if (isAdminUser(user)) {
-        user.loginAttempts = 0;
-        user.lockUntil = null;
-        user.lastFailedLogin = new Date();
-        await user.save();
-        return;
-    }
-
     user.loginAttempts = (user.loginAttempts || 0) + 1;
     user.lastFailedLogin = new Date();
 
-    if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-        user.lockUntil = new Date(Date.now() + ACCOUNT_LOCK_TIME_MS);
+    const isAdmin = isAdminUser(user);
+    const maxAttempts = isAdmin ? 10 : MAX_LOGIN_ATTEMPTS; // Admin: 10, User: 5
+    const lockTimeMs = isAdmin ? 30 * 60 * 1000 : ACCOUNT_LOCK_TIME_MS; // Admin: 30 dəq, User: 15 dəq
+
+    if (user.loginAttempts >= maxAttempts) {
+        user.lockUntil = new Date(Date.now() + lockTimeMs);
+        logger.warn(`Account locked due to consecutive failed logins: ${user.email} (id=${user._id}, role=${user.role}, attempts=${user.loginAttempts})`);
     }
 
     await user.save();
@@ -144,9 +141,7 @@ const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
 const genericRegistrationMessage = 'Qeydiyyat tamamlanmadı. Məlumatları yoxlayıb yenidən cəhd edin.';
 
 const isResetRateLimitedByEmail = async (email) => {
-    const adminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
     const cleanEmail = String(email || '').trim().toLowerCase();
-    if (cleanEmail === adminEmail || cleanEmail === 'mobil@gmail.com') return false;
 
     const windowMs = Number(process.env.PASSWORD_RESET_RATE_WINDOW_MS || 60 * 60 * 1000);
     const limit = Number(process.env.PASSWORD_RESET_IDENTIFIER_RATE_LIMIT || 3);
@@ -177,7 +172,13 @@ const isResetRateLimitedByEmail = async (email) => {
 };
 
 const getTwoFactorRequirement = async (user) => {
-    if (user.role === 'admin') return { required: process.env.REQUIRE_ADMIN_2FA === 'true', reason: 'admin' };
+    if (user.role === 'admin') {
+        const admin2faConfigured = isEmailConfigured() || isSmsConfigured() || isTotpConfigured();
+        return {
+            required: process.env.REQUIRE_ADMIN_2FA === 'true' && admin2faConfigured,
+            reason: 'admin'
+        };
+    }
     if (process.env.REQUIRE_STORE_2FA === 'true') {
         const approvedStore = await Store.exists({ owner: user._id, status: 'active', isVerified: true });
         if (approvedStore) return { required: true, reason: 'store' };
@@ -234,7 +235,7 @@ const createWelcomeNotification = async (userId) => {
     await Notification.create({
         user:  userId,
         type:  'system',
-        title: 'AiryPhone-a xoş gəldiniz! 🎉',
+        title: 'Mobil.az-a xoş gəldiniz! 🎉',
         body:  'Hesabınız uğurla yaradıldı. İlk elanınızı əlavə edin!',
         link:  '/elan-yerlesdir.html'
     });
@@ -314,10 +315,10 @@ const register = async (req, res, next) => {
 
         await createWelcomeNotification(user._id);
 
-        await issueRefreshToken(user, req, res);
-        const accessToken = generateAccessToken(user, true);
+        await issueRefreshToken(user, req, res, req.body?.rememberMe);
+        const accessToken = generateAccessToken(user, req.body?.rememberMe);
 
-        res.status(201).json(buildAuthResponse(user, accessToken, true));
+        res.status(201).json(buildAuthResponse(user, accessToken, req.body?.rememberMe));
 
     } catch (error) {
         logger.error(error);
@@ -330,12 +331,12 @@ const register = async (req, res, next) => {
 // @access  Public
 const login = async (req, res, next) => {
     try {
-        const { email, password, otpCode, recoveryCode, rememberMe } = req.body;
+        const { email, identifier, password, otpCode, recoveryCode, rememberMe } = req.body;
+        const rawIdentifier = String(email || identifier || '').trim();
 
-        if (!email || !password) {
+        if (!rawIdentifier || !password) {
             return res.status(400).json({ message: 'Email/telefon və şifrəni daxil edin' });
         }
-        const rawIdentifier = String(email).trim();
         const isPhoneInput = /^\+?[\d\s\-\(\)]{7,20}$/.test(rawIdentifier) && rawIdentifier.replace(/\D/g, '').length >= 7;
 
         let searchCriteria = {};
@@ -376,10 +377,6 @@ const login = async (req, res, next) => {
             return res.status(403).json({ message: getAccountDeniedMessage(user) });
         }
 
-        if (isAdminUser(user)) {
-            user.loginAttempts = 0;
-            user.lockUntil = null;
-        }
 
         if (isAccountLocked(user)) {
             return res.status(423).json({
@@ -429,7 +426,7 @@ const login = async (req, res, next) => {
                     if (attempts.lockedUntil && attempts.lockedUntil > new Date()) {
                         return res.status(429).json({ message: 'Çox sayda yanlış cəhd. Zəhmət olmasa biraz sonra yenidən sınayın.', requiresOtp: true, channel: 'email' });
                     }
-                    const code = String(Math.floor(100000 + Math.random() * 900000));
+                    const code = String(crypto.randomInt(100000, 1000000));
                     const codeHash = crypto.createHash('sha256').update(code).digest('hex');
                     await Otp.deleteMany({ identifier: user.email, type: 'email' });
                     await Otp.create({
@@ -456,15 +453,10 @@ const login = async (req, res, next) => {
                     }
 
                     const isDev = process.env.NODE_ENV !== 'production';
-                    console.log(`\n============================================================`);
-                    console.log(`🔑 [LOGIN 2FA OTP] ${user.email} üçün kod: ${code}`);
-                    console.log(`   (Test üçün universal bypass kodu: 123456)`);
-                    console.log(`============================================================\n`);
-
                     return res.status(401).json({
                         requiresOtp: true,
                         channel: 'email',
-                        message: isDev ? `Təsdiq kodu: ${code} (Test üçün: 123456)` : 'Kod email ünvanınıza göndərildi',
+                        message: 'Təsdiq kodu email ünvanınıza göndərildi' + (isDev ? ` (Test kod: ${code})` : ''),
                         devCode: isDev ? code : undefined
                     });
                 } else if (isSmsConfigured() && user.phone) {
@@ -472,7 +464,7 @@ const login = async (req, res, next) => {
                     if (attempts.lockedUntil && attempts.lockedUntil > new Date()) {
                         return res.status(429).json({ message: 'Çox sayda yanlış cəhd. Zəhmət olmasa biraz sonra yenidən sınayın.', requiresOtp: true, channel: 'sms' });
                     }
-                    const code = String(Math.floor(100000 + Math.random() * 900000));
+                    const code = String(crypto.randomInt(100000, 1000000));
                     const codeHash = crypto.createHash('sha256').update(code).digest('hex');
                     await Otp.deleteMany({ identifier: user.phone, type: 'sms' });
                     await Otp.create({
@@ -485,15 +477,10 @@ const login = async (req, res, next) => {
                     mockSendOtp(user.phone, code, 'sms');
 
                     const isDev = process.env.NODE_ENV !== 'production';
-                    console.log(`\n============================================================`);
-                    console.log(`🔑 [LOGIN 2FA OTP] ${user.phone} üçün kod: ${code}`);
-                    console.log(`   (Test üçün universal bypass kodu: 123456)`);
-                    console.log(`============================================================\n`);
-
                     return res.status(401).json({
                         requiresOtp: true,
                         channel: 'sms',
-                        message: isDev ? `Təsdiq kodu: ${code} (Test üçün: 123456)` : 'Kod telefon nömrənizə göndərildi',
+                        message: 'Təsdiq kodu telefon nömrənizə göndərildi' + (isDev ? ` (Test kod: ${code})` : ''),
                         devCode: isDev ? code : undefined
                     });
                 } else {
@@ -523,12 +510,11 @@ const login = async (req, res, next) => {
                     }
                     const cleanCode = readString(otpCode, { fieldName: 'code', required: true, maxLength: 6 });
                     const codeHash = crypto.createHash('sha256').update(cleanCode).digest('hex');
-                    const otp = await Otp.findOne({ identifier, type });
+                    const isDev = process.env.NODE_ENV !== 'production';
+                    const isDevFallback = isDev && (cleanCode === '123456' || (otp && otp.plainCode && cleanCode === otp.plainCode));
+                    const isValidCode = otp && (otp.codeHash === codeHash || isDevFallback) && otp.expiresAt >= new Date();
 
-                    const isDevBypass = (process.env.NODE_ENV !== 'production') &&
-                        (cleanCode === '123456' || (otp && otp.plainCode && cleanCode === otp.plainCode));
-
-                    if (!isDevBypass && (!otp || otp.codeHash !== codeHash || otp.expiresAt < new Date())) {
+                    if (!isValidCode) {
                         await incrementOtpAttempts(identifier);
                         if (otp && otp.expiresAt < new Date()) {
                             await Otp.deleteOne({ _id: otp._id });
@@ -543,9 +529,9 @@ const login = async (req, res, next) => {
             }
         }
 
-        await issueRefreshToken(user, req, res);
-
         const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
+        await issueRefreshToken(user, req, res, isRemember);
+
         const accessToken = generateAccessToken(user, isRemember);
         res.json(buildAuthResponse(user, accessToken, isRemember));
 
@@ -598,12 +584,13 @@ const refreshToken = async (req, res, next) => {
             return res.status(401).json({ message: 'Refresh token vaxtı keçib' });
         }
 
+        const wasRemember = Boolean(tokenRecord && (tokenRecord.expiresAt - (tokenRecord.createdAt || tokenRecord.lastUsedAt) > 8 * 24 * 3600 * 1000 || req.body?.rememberMe));
         tokenRecord.lastUsedAt = new Date();
         user.refreshTokens = user.refreshTokens.filter((token) => token.tokenHash !== tokenHash);
-        await issueRefreshToken(user, req, res);
+        await issueRefreshToken(user, req, res, wasRemember);
 
-        const accessToken = generateAccessToken(user, true);
-        res.json(buildAuthResponse(user, accessToken, true));
+        const accessToken = generateAccessToken(user, wasRemember);
+        res.json(buildAuthResponse(user, accessToken, wasRemember));
     } catch (error) {
         logger.error(error);
         next(error);
@@ -663,18 +650,16 @@ const getMe = async (req, res, next) => {
 };
 
 // ─── OTP System ──────────────────────────────────────────────
+const SMS_DEV_MODE = process.env.NODE_ENV !== 'production' && process.env.SMS_DEV_MODE === 'true';
+const isSmsDevMode = () => Boolean(process.env.NODE_ENV !== 'production' && (process.env.SMS_DEV_MODE === 'true' || SMS_DEV_MODE));
 
 // Mock SMS/Email gateway — logs to console for developer testing.
 // Replace this function with a real provider (Twilio, SendGrid, etc.) in production.
 function mockSendOtp(identifier, code, type) {
     if (process.env.NODE_ENV !== 'production') {
         const channel = type === 'sms' ? '📱 SMS' : '📧 EMAIL';
-        console.log(`\n${'═'.repeat(60)}`);
-        console.log(`🔑 [DEV OTP] ${channel} for ${identifier}: ${code}`);
-        console.log(`   Universal test bypass code in dev: 123456`);
-        console.log(`   Expires in 5 minutes`);
-        console.log(`${'═'.repeat(60)}\n`);
-        logger.info(`[DEV OTP] ${channel} for ${identifier}: ${code}`);
+        logger.info(`[DEV OTP] ${channel} issued for ${identifier}: CODE=${code}`);
+        console.log(`\n========================================\n[DEV OTP] ${channel} Kod: ${code} (${identifier})\n========================================\n`);
     }
 }
 
@@ -707,8 +692,8 @@ const sendOtp = async (req, res, next) => {
             return res.status(429).json({ message: 'Çox sayda yanlış cəhd. Zəhmət olmasa biraz sonra yenidən sınayın.' });
         }
 
-        // Generate 6-digit code
-        const code = String(Math.floor(100000 + Math.random() * 900000));
+        // Generate cryptographically secure 6-digit code
+        const code = String(crypto.randomInt(100000, 1000000));
         const codeHash = crypto.createHash('sha256').update(code).digest('hex');
 
         // Remove any existing OTP for this identifier+type
@@ -723,7 +708,7 @@ const sendOtp = async (req, res, next) => {
             expiresAt: new Date(Date.now() + 5 * 60 * 1000)
         });
 
-        // Mock gateway — log to console
+        // Mock gateway — log to console in non-prod
         mockSendOtp(cleanIdentifier, code, type);
 
         if (type === 'email' && (process.env.EMAIL_HOST || process.env.SMTP_HOST)) {
@@ -739,10 +724,8 @@ const sendOtp = async (req, res, next) => {
             }
         }
 
-        const isDev = process.env.NODE_ENV !== 'production';
         res.json({
-            message: isDev ? `Təsdiq kodu: ${code} (Test üçün: 123456)` : (type === 'sms' ? 'SMS kodu göndərildi' : 'Email kodu göndərildi'),
-            devCode: isDev ? code : undefined
+            message: type === 'sms' ? 'SMS kodu göndərildi' : 'Email kodu göndərildi'
         });
     } catch (error) {
         next(error);
@@ -771,33 +754,28 @@ const verifyOtp = async (req, res, next) => {
             return res.status(429).json({ message: 'Çox sayda yanlış cəhd. Zəhmət olmasa biraz sonra yenidən sınayın.', verified: false });
         }
 
-        const isDevBypass = (process.env.NODE_ENV !== 'production') && cleanCode === '123456';
-        let foundOtp = null;
+        const foundOtp = await Otp.findOne({ identifier: cleanIdentifier, type });
 
-        if (!isDevBypass) {
-            foundOtp = await Otp.findOne({ identifier: cleanIdentifier, type });
-
-            if (!foundOtp) {
-                await incrementOtpAttempts(cleanIdentifier);
-                return res.status(400).json({ message: 'Təsdiq kodu tapılmadı və ya vaxtı keçib', verified: false });
-            }
-
-            if (!foundOtp.expiresAt || foundOtp.expiresAt < new Date()) {
-                await Otp.deleteOne({ _id: foundOtp._id });
-                await incrementOtpAttempts(cleanIdentifier);
-                return res.status(400).json({ message: 'Kodun vaxtı keçib', verified: false });
-            }
-
-            const codeMatches = foundOtp.codeHash === codeHash ||
-                (process.env.NODE_ENV !== 'production' && foundOtp.plainCode && cleanCode === foundOtp.plainCode);
-
-            if (!codeMatches) {
-                await incrementOtpAttempts(cleanIdentifier);
-                return res.status(400).json({ message: 'Yanlış kod', verified: false });
-            }
-
-            await Otp.deleteOne({ _id: foundOtp._id });
+        if (!foundOtp) {
+            await incrementOtpAttempts(cleanIdentifier);
+            return res.status(400).json({ message: 'Təsdiq kodu tapılmadı və ya vaxtı keçib', verified: false });
         }
+
+        if (!foundOtp.expiresAt || foundOtp.expiresAt < new Date()) {
+            await Otp.deleteOne({ _id: foundOtp._id });
+            await incrementOtpAttempts(cleanIdentifier);
+            return res.status(400).json({ message: 'Kodun vaxtı keçib', verified: false });
+        }
+
+        const codeMatches = foundOtp.codeHash === codeHash ||
+            (process.env.NODE_ENV !== 'production' && foundOtp.plainCode && cleanCode === foundOtp.plainCode);
+
+        if (!codeMatches) {
+            await incrementOtpAttempts(cleanIdentifier);
+            return res.status(400).json({ message: 'Yanlış kod', verified: false });
+        }
+
+        await Otp.deleteOne({ _id: foundOtp._id });
 
         // OTP is valid — delete it so it can't be reused and clear attempts
         await clearOtpAttempts(cleanIdentifier);
@@ -1048,6 +1026,9 @@ const resetPassword = async (req, res, next) => {
 };
 const enrollTwoFactor = async (req, res, next) => {
     try {
+        if (!isTotpConfigured()) {
+            return res.status(503).json({ message: '2FA xidməti aktiv deyil və ya konfiqurasiya edilməyib' });
+        }
         const currentPassword = req.body.currentPassword || req.body.password;
         if (!currentPassword) {
             return res.status(400).json({ message: 'Cari şifrə mütləqdir' });
@@ -1084,6 +1065,9 @@ const enrollTwoFactor = async (req, res, next) => {
 // @access  Private
 const confirmTwoFactor = async (req, res, next) => {
     try {
+        if (!isTotpConfigured()) {
+            return res.status(503).json({ message: '2FA xidməti aktiv deyil və ya konfiqurasiya edilməyib' });
+        }
         const { code } = req.body;
         const user = await User.findById(req.user._id).select('+pendingTwoFactorSecret +twoFactorSecret +twoFactorRecoveryCodes +twoFactorLastUsedStep');
         if (!user?.pendingTwoFactorSecret) {
@@ -1157,6 +1141,9 @@ const disableTwoFactor = async (req, res, next) => {
 // @access  Private
 const regenerateRecoveryCodes = async (req, res, next) => {
     try {
+        if (!isTotpConfigured()) {
+            return res.status(503).json({ message: '2FA xidməti aktiv deyil və ya konfiqurasiya edilməyib' });
+        }
         const { currentPassword, otpCode, recoveryCode } = req.body;
         const user = await User.findById(req.user._id).select('+password +twoFactorSecret +twoFactorRecoveryCodes +twoFactorLastUsedStep +twoFactorFailures +twoFactorLockedUntil');
         if (!user?.twoFactorEnabled) return res.status(400).json({ message: '2FA aktiv deyil' });
@@ -1232,4 +1219,3 @@ module.exports = {
         resetAttemptBuckets
     }
 };
-

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 
 <head>
@@ -8,78 +8,39 @@
   <link rel="stylesheet" href="CSS/general.css">
   <link rel="stylesheet" href="CSS/style.css">
   <link rel="stylesheet" href="CSS/stores.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
-  <header>
-    <div class="container">
-      <a href="index.html" class="logo">
-        <span class="mobil-logo">Mobil<span>.az</span></span>
-      </a>
-      <div class="header-right">
-        <nav class="menu">
-          <ul>
-            <div class="contact-dropdown">
-              <li data-translate="Contact">
-                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-              </li>
-              <div class="contact-menu">
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-              </div>
-            </div>
-            <li class="About" data-translate="About">
-              <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-            </li>
-            <li class="Stores" data-translate="Stores">
-              <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-            </li>
-            <li class="Favorite" data-translate="Favorite">
-              <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-            </li>
-          </ul>
-        </nav>
-        <div class="button-container">
-          <a href="login.html" class="login-btn" data-translate="login-btn">
-            <i class="fas fa-sign-in-alt"></i> Giriş
-          </a>
-          <a href="signup.html" class="register-btn" data-translate="register-btn">
-            <i class="fas fa-user-plus"></i> Qeydiyyat
-          </a>
-        </div>
-        <div class="theme-lang-container">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button class="language-selector">
-            <i class="fas fa-globe"></i>
-            <span id="current-lang" data-translate="language-selector">AZ</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+    <div id="header-placeholder"></div>
 
   <main>
     
     <div class="second-container">
       <div class="search-options">
         <div class="catalog-dropdown">
-          <button class="catalog-button">
+          <button class="catalog-button" aria-expanded="false" aria-haspopup="true" aria-controls="catalog-menu">
             <i class="fas fa-bars"></i>
             <span data-translate="catalog-button">Kataloq</span>
           </button>
-          <div class="catalog-menu">
-            <a href="phone.html"><i class="fas fa-mobile-alt"></i> <span class="phone"
+          <div class="catalog-menu" id="catalog-menu">
+            <a href="phone.html?category=phone"><i class="fas fa-mobile-alt"></i> <span class="phone"
                 data-translate="phone">Telefonlar</span></a>
-            <a href="#"><i class="fas fa-tablet-alt"></i><span class="tablet"
+            <a href="phone.html?category=tablet"><i class="fas fa-tablet-alt"></i><span class="tablet"
                 data-translate="tablet">Planşetlər</span></a>
-            <a href="#"><i class="fas fa-headphones"></i><span class="headphone" data-translate="headphone">
+            <a href="phone.html?category=headphone"><i class="fas fa-headphones"></i><span class="headphone" data-translate="headphone">
                 Qulaqcıqlar</span></a>
-            <a href="#"><i class="fas fa-plug"></i> <span class="phone-accessories"
+            <a href="phone.html?category=accessory"><i class="fas fa-plug"></i> <span class="phone-accessories"
                 data-translate="phone-accessories">Telefon aksessuarları</span></a>
           </div>
         </div>
@@ -110,15 +71,14 @@
                 <option>Honor</option>
                 <option>Realme</option>
                 <option>Nokia</option>
-                <option value="other"><span class="other" data-translate="other">Digər</span></option>
+                <option value="other" data-translate="other">Digər</option>
               </select>
             </div>
 
             <div class="filter-group">
               <label class="filter-label"><i class="fas fa-mobile-alt"></i> Model</label>
               <select class="filter-select" id="modelSelect" data-filter="model">
-                <option value=""><span class="select-brand" data-translate="select-brand">Əvvəlcə marka seçin</span>
-                </option>
+                <option value="" data-translate="select-brand">Əvvəlcə marka seçin</option>
               </select>
             </div>
 
@@ -288,7 +248,7 @@
                     data-translate="Available">Mövcuddur</span></button>
                 <button class="filter-pill fingerprint-button" data-value="no"><span class="not-available"
                     data-translate="not-available">Yoxdur</span></button>
-                <button class="filter-pill fingerprint-button" data-value="broken"><span class="Not working"
+                <button class="filter-pill fingerprint-button" data-value="broken"><span class="not-working"
                     data-translate="Not working">İşləmir</span></button>
               </div>
             </div>
@@ -308,7 +268,7 @@
 
             <!-- Water Resistance -->
             <div class="filter-group">
-              <label class="filter-label"><i class="fas fa-tint"></i> <span class="Water resistance"
+              <label class="filter-label"><i class="fas fa-tint"></i> <span class="water-resistance"
                   data-translate="Water resistance">Suya davamlılıq</span></label>
               <div class="waterproof-buttons filter-btn-group" data-group="waterproof">
                 <button class="filter-pill toggle-button active" data-value="any"><span class="doesnt-matter"
@@ -322,7 +282,7 @@
 
             <!-- Expandable Memory -->
             <div class="filter-group">
-              <label class="filter-label"><i class="fas fa-sd-card"></i> <span class="Additional memory"
+              <label class="filter-label"><i class="fas fa-sd-card"></i> <span class="additional-memory"
                   data-translate="Additional memory">Əlavə yaddaş</span></label>
               <div class="expandable-buttons filter-btn-group" data-group="expandable">
                 <button class="filter-pill toggle-button active" data-value="any"><span class="doesnt-matter"
@@ -447,98 +407,28 @@
           <h2 class="all-ads-title" data-translate="phone-h2">Telefon modelləri</h2>
         </div>
 
-        <div class="all-ads-container">
-          <div class="ad-card" data-brand="Apple" data-price="1100" data-city="Baku" data-memory="128" data-condition="used" data-seller="private" data-color="blue" data-ram="4" data-screen="medium" data-battery="mid" data-nfc="yes" data-fingerprint="yes" data-waterproof="yes" data-expandable="no" data-delivery="yes">
-            <div class="ad-image">
-              <img src="https://i.pinimg.com/736x/9e/d9/18/9ed91836941fbe8e6cbcd0e6ad1cfd94.jpg" alt="iPhone 15">
-              <span class="ad-badge">Mağaza</span>
-              <button class="favorite-btn"><i class="far fa-heart"></i></button>
-            </div>
-            <div class="ad-info">
-              <div class="ad-price">3 000 AZN</div>
-              <div class="ad-title">Apple iPhone 15 128 GB</div>
-              <div class="ad-location">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Bakı</span>
-                <span class="ad-date">24 mart 2025</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="ad-card" data-brand="Samsung" data-price="550" data-city="Sumqayit" data-memory="128" data-condition="new" data-seller="store" data-color="purple" data-ram="8" data-screen="medium" data-battery="high" data-nfc="yes" data-fingerprint="yes" data-waterproof="yes" data-expandable="yes" data-delivery="yes">
-            <div class="ad-image">
-              <img src="https://i.pinimg.com/736x/96/f9/a6/96f9a68f8a19490fffa6787db5f42a01.jpg"
-                alt="Samsung S24 Ultra">
-              <span class="ad-badge">Mağaza</span>
-              <button class="favorite-btn"><i class="far fa-heart"></i></button>
-            </div>
-            <div class="ad-info">
-              <div class="ad-price">2 000 AZN</div>
-              <div class="ad-title">Samsung S24 Ultra 256 GB</div>
-              <div class="ad-location">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Sumqayıt</span>
-                <span class="ad-date">21 mart 2025</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="ad-card" data-brand="Xiaomi" data-price="450" data-city="Baku" data-memory="256" data-condition="new" data-seller="store" data-color="black" data-ram="8" data-screen="large" data-battery="high" data-nfc="yes" data-fingerprint="yes" data-waterproof="yes" data-expandable="no" data-delivery="yes">
-            <div class="ad-image">
-              <img src="https://i.pinimg.com/736x/28/b7/cc/28b7ccb44e2f9baa408738df3685e6c7.jpg" alt="iPhone 15 512GB">
-              <span class="ad-badge">Mağaza</span>
-              <button class="favorite-btn"><i class="far fa-heart"></i></button>
-            </div>
-            <div class="ad-info">
-              <div class="ad-price">3 200 AZN</div>
-              <div class="ad-title">Apple iPhone 15 512 GB</div>
-              <div class="ad-location">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Bakı</span>
-                <span class="ad-date">24 mart 2025</span>
-              </div>
-            </div>
-          </div>
+        <div id="phone-ads-container" class="all-ads-container"></div>
+        <div id="load-more-container" class="load-more-container" style="text-align: center; margin: 32px 0; display: none;">
+          <button id="loadMoreBtn" class="load-more-btn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; background: var(--accent, #6366f1); color: #fff; border: none; cursor: pointer; transition: all 0.2s ease;">
+            <i class="fas fa-spinner fa-spin" style="display:none; margin-right: 8px;"></i>
+            <span>Daha çox göstər</span>
+          </button>
         </div>
       </section>
     </div>
   </main>
 
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-column">
-        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-        <ul>
-          <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
-          <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a>
-          </li>
-          <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
-                qaydaları</span></a></li>
-          <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
-        </ul>
-      </div>
-      <div class="footer-column">
-        <h3 class="contact" data-translate="contact">Əlaqə</h3>
-        <ul>
-          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-        </ul>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-    </div>
-  </footer>
+    <div id="footer-placeholder"></div>
 
+  <script src="JS/config.js"></script>
+  <script src="JS/axios.min.js"></script>
+  <script src="JS/api.js"></script>
   <script src="JS/auth.js"></script>
-    <script src="JS/script.js"></script>
+  <script src="JS/script.js"></script>
+  <script src="JS/phone.js"></script>
   <script src="JS/filters.js"></script>
   <script src="JS/favorites.js"></script>
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

@@ -26,6 +26,7 @@ const promoteAdmin = async () => {
 
     user.role = 'admin';
     user.status = 'active';
+    user.isVerified = true;
     await user.save();
 
     console.log(`User promoted to admin: ${user.email}`);

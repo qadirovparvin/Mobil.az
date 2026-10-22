@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#e0e0eb"/>
+  <path d="M40,80 L160,80 L150,160 L50,160 Z" fill="#b0b0bb"/>
+  <path d="M30,80 L170,80 L170,60 L30,60 Z" fill="#90909b"/>
+  <text x="100" y="125" font-family="sans-serif" font-size="20" fill="#e0e0eb" text-anchor="middle" dominant-baseline="middle">Mağaza</text>
+</svg>

@@ -1,18 +1,11 @@
 {
   "name": "front-end",
   "version": "1.0.0",
-  "description": "",
+  "description": "Mobil.az Frontend",
   "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "check:encoding": "node fix-encoding.js"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "typescript": "^5.9.3"
-  }
+  "type": "commonjs"
 }

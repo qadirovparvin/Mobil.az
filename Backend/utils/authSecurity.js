@@ -4,17 +4,42 @@ const { toSafeUser } = require('./userSerializer');
 
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '15m';
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
+const REFRESH_TOKEN_REMEMBER_EXPIRES_IN = process.env.REFRESH_TOKEN_REMEMBER_EXPIRES_IN || '30d';
 const REFRESH_COOKIE_NAME = process.env.REFRESH_COOKIE_NAME || 'refreshToken';
 const REFRESH_COOKIE_PATH = '/api/auth';
 
-const getRefreshTokenSecret = () => process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
+const getAccessTokenExpiresIn = () => process.env.ACCESS_TOKEN_EXPIRES_IN || ACCESS_TOKEN_EXPIRES_IN || '15m';
+const getRefreshTokenExpiresIn = (rememberMe = false) => {
+    const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
+    if (isRemember) {
+        return process.env.REFRESH_TOKEN_REMEMBER_EXPIRES_IN || REFRESH_TOKEN_REMEMBER_EXPIRES_IN || '30d';
+    }
+    return process.env.REFRESH_TOKEN_EXPIRES_IN || REFRESH_TOKEN_EXPIRES_IN || '7d';
+};
+
+const getRefreshTokenSecret = () => {
+    if (!process.env.REFRESH_TOKEN_SECRET) {
+        throw new Error('REFRESH_TOKEN_SECRET required - must be different from JWT_SECRET');
+    }
+    return process.env.REFRESH_TOKEN_SECRET;
+};
 const ACTIVE_JWT_KID = process.env.JWT_ACTIVE_KID || 'primary';
 
 const getAccessSigningKeys = () => {
     const keys = {};
     if (process.env.JWT_ACCESS_KEYS) {
-        const parsed = JSON.parse(process.env.JWT_ACCESS_KEYS);
-        Object.assign(keys, parsed);
+        try {
+            const parsed = JSON.parse(process.env.JWT_ACCESS_KEYS);
+            if (typeof parsed === 'object' && parsed !== null) {
+                Object.assign(keys, parsed);
+            }
+        } catch (e) {
+            // Comma-separated format fallback: key1,key2,key3
+            const parts = String(process.env.JWT_ACCESS_KEYS).split(',');
+            parts.forEach((k, idx) => {
+                if (k && k.trim()) keys[`key_${idx}`] = k.trim();
+            });
+        }
     }
     if (process.env.JWT_SECRET) keys[ACTIVE_JWT_KID] = process.env.JWT_SECRET;
     return keys;
@@ -35,8 +60,7 @@ const hashToken = (token) =>
 const generateAccessToken = (user, rememberMe = false) => {
     const { kid, secret } = getActiveAccessKey();
     const id = user._id || user.id || user;
-    const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
-    const expires = isRemember ? '30d' : '7d';
+    const expiresIn = getAccessTokenExpiresIn();
     return jwt.sign(
         {
             id,
@@ -45,13 +69,14 @@ const generateAccessToken = (user, rememberMe = false) => {
             sessionVersion: user.sessionVersion || 0
         },
         secret,
-        { expiresIn: expires, header: { kid } }
+        { expiresIn, header: { kid } }
     );
 };
 
-const generateRefreshToken = (user) => {
+const generateRefreshToken = (user, rememberMe = false) => {
     const id = user._id || user.id || user;
     const sessionId = crypto.randomBytes(16).toString('hex');
+    const expiresIn = getRefreshTokenExpiresIn(rememberMe);
     const token = jwt.sign(
         {
             id,
@@ -60,7 +85,7 @@ const generateRefreshToken = (user) => {
             sessionVersion: user.sessionVersion || 0
         },
         getRefreshTokenSecret(),
-        { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+        { expiresIn }
     );
 
     const decoded = jwt.decode(token);
@@ -133,7 +158,10 @@ const parseCookies = (cookieHeader = '') => cookieHeader
     }, {});
 
 const getRefreshTokenFromRequest = (req) => {
-    return parseCookies(req.headers.cookie)[REFRESH_COOKIE_NAME];
+    const cookieHeader = req.headers && req.headers.cookie ? req.headers.cookie : '';
+    const parsed = parseCookies(cookieHeader);
+    const cookieToken = parsed[REFRESH_COOKIE_NAME] || (req.cookies && req.cookies[REFRESH_COOKIE_NAME]);
+    return cookieToken || (req.body && req.body.refreshToken) || (req.headers && req.headers['x-refresh-token']);
 };
 
 const validatePasswordStrength = (password) => {
@@ -175,22 +203,28 @@ const validatePasswordStrength = (password) => {
 
 const buildAuthResponse = (user, accessToken, rememberMe = false) => {
     const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
-    const expires = isRemember ? '30d' : '7d';
+    const accessExpires = getAccessTokenExpiresIn();
+    const refreshExpires = getRefreshTokenExpiresIn(isRemember);
     const safeUser = toSafeUser(user);
     return {
         ...safeUser,
         user: safeUser,
         token: accessToken,
         accessToken,
-        accessTokenExpiresIn: expires,
-        expiresIn: expires,
+        accessTokenExpiresIn: accessExpires,
+        expiresIn: accessExpires,
+        refreshTokenExpiresIn: refreshExpires,
         rememberMe: isRemember
     };
 };
 
 module.exports = {
     ACCESS_TOKEN_EXPIRES_IN,
+    REFRESH_TOKEN_EXPIRES_IN,
+    REFRESH_TOKEN_REMEMBER_EXPIRES_IN,
     REFRESH_COOKIE_NAME,
+    getAccessTokenExpiresIn,
+    getRefreshTokenExpiresIn,
     clearRefreshTokenCookie,
     generateAccessToken,
     generateRefreshToken,

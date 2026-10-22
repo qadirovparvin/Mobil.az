@@ -3,6 +3,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
+    const DEFAULT_AD_IMAGE = "assets/images/default-ad.svg";
 
     const vipContainer = document.querySelector(".vip-ads-container");
     const allAdsContainer = document.querySelector(".all-ads-container");
@@ -21,25 +22,33 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getImageUrl(image) {
-        if (!image) {
-            return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800";
-        }
+        if (!image) return DEFAULT_AD_IMAGE;
 
-        if (image.startsWith("http://") || image.startsWith("https://")) {
-            return image;
-        }
+        const value = String(image).trim().replace(/\\/g, "/");
+        if (!value) return DEFAULT_AD_IMAGE;
+        if (/^(https?:)?\/\//i.test(value) || /^(data:image\/|blob:)/i.test(value)) return value;
 
-        if (image.includes("Front end/") || image.includes("Front-end/")) {
-            return image.replace(/.*?\/Front[- ]end\//gi, "");
-        }
+        const frontendPath = value.match(/(?:^|\/)Front[- ]end\/(.*)$/i);
+        const normalized = (frontendPath ? frontendPath[1] : value).replace(/^\/+/, "");
+        if (!normalized) return DEFAULT_AD_IMAGE;
 
-        if (image.includes("Photo/")) {
-            return image.substring(image.indexOf("Photo/"));
-        }
+        if (/^(assets|Photo)\//i.test(normalized)) return normalized;
+        if (/^(uploads|images)\//i.test(normalized)) return `${API_ORIGIN}/${normalized}`;
 
-        const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-        const cleanPath = image.startsWith('/') ? image : '/' + image;
-        return origin + cleanPath;
+        return `${API_ORIGIN}/${normalized}`;
+    }
+
+    function attachImageFallbacks(container) {
+        container.querySelectorAll(".ad-image img").forEach((img) => {
+            if (img.dataset.fallbackAttached) return;
+            img.dataset.fallbackAttached = "true";
+            img.addEventListener("error", function handleImageError() {
+                img.removeEventListener("error", handleImageError);
+                if (img.getAttribute("src") !== DEFAULT_AD_IMAGE) {
+                    img.src = DEFAULT_AD_IMAGE;
+                }
+            }, { once: true });
+        });
     }
 
     function formatPrice(price) {
@@ -107,9 +116,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function createCardMarkup(ad) {
+        const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
         const city = escapeHtml(ad.city || "");
         const title = escapeHtml([ad.brand, ad.modelName].filter(Boolean).join(" "));
+        const altText = hasRealImage ? title : "Elan şəkli yoxdur";
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
 
         return `
@@ -134,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data-expandable="${ad.specs?.features?.expandable ? "yes" : "no"}"
                     data-delivery="${ad.specs?.features?.delivery ? "yes" : "no"}">
                     <div class="ad-image">
-                        <img src="${escapeHtml(imageUrl)}" alt="${title}">
+                        <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(altText)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
                         ${getBadgeHtml(ad)}
                         <button class="favorite-btn"><i class="far fa-heart"></i></button>
                     </div>
@@ -187,22 +198,36 @@ document.addEventListener("DOMContentLoaded", function () {
         
         try {
             const params = new URLSearchParams(window.location.search);
-            const sellerId = params.get('seller');
-            const searchQ = params.get('q') || params.get('search'); // Fallback if old link
+            const sellerParam = params.get('seller');
+            const searchQ = params.get('q') || params.get('search');
             
             let apiUrl = new URL(`${API_BASE}/ads`);
-            apiUrl.searchParams.set('limit', limit);
-            apiUrl.searchParams.set('page', currentPage);
-            apiUrl.searchParams.set('sortBy', 'newest');
+            apiUrl.searchParams.set('limit', '20');
+            apiUrl.searchParams.set('page', String(currentPage));
+            apiUrl.searchParams.set('sortBy', params.get('sortBy') || params.get('sort') || 'newest');
             
-            if (sellerId) apiUrl.searchParams.set('author', sellerId);
-            if (currentQuery || searchQ) apiUrl.searchParams.set('q', currentQuery || searchQ);
+            if (sellerParam) {
+                if (['store', 'personal', 'private'].includes(sellerParam)) {
+                    apiUrl.searchParams.set('seller', sellerParam);
+                } else {
+                    apiUrl.searchParams.set('author', sellerParam);
+                }
+            }
+            if (currentQuery || searchQ) {
+                apiUrl.searchParams.set('q', currentQuery || searchQ);
+            }
             
             // Forward existing URL filters to the backend
-            const filterKeys = ['category', 'brand', 'city', 'condition', 'minPrice', 'maxPrice', 'nfc', 'waterproof', 'fingerprint', 'memory', 'ram', 'color'];
+            const filterKeys = [
+                'category', 'brand', 'model', 'city', 'condition',
+                'minPrice', 'maxPrice', 'storage', 'memory', 'ram',
+                'color', 'screen', 'battery', 'nfc', 'waterproof',
+                'fingerprint', 'expandable', 'delivery', 'seller',
+                'sellerType', 'promotionType'
+            ];
             filterKeys.forEach(key => {
                 const val = params.get(key);
-                if (val && val !== 'any' && val !== 'both') {
+                if (val && val !== 'any' && val !== 'both' && val !== 'Infinity' && val !== '0') {
                     apiUrl.searchParams.set(key, val);
                 }
             });
@@ -223,6 +248,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now
                 ).slice(0, 8);
                 vipContainer.innerHTML = vipAds.length ? vipAds.map(createCardMarkup).join("") : "";
+                attachImageFallbacks(vipContainer);
                 if (!vipAds.length) renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.");
                 
                 if (window.removeSkeletons) window.removeSkeletons(allAdsContainer);
@@ -235,11 +261,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderEmpty(allAdsContainer, currentQuery ? `"${currentQuery}" üçün nəticə tapılmadı.` : "Hazırda aktiv elan yoxdur.");
             } else {
                 allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
+                attachImageFallbacks(allAdsContainer);
             }
 
             // Show/hide load more button
             if (loadMoreContainer) {
-                if (!data.pagination || data.pagination.hasNextPage === false || ads.length < limit) {
+                const hasNext = data.hasNextPage !== undefined ? data.hasNextPage : (data.pagination?.hasNextPage ?? (ads.length >= 20));
+                if (!hasNext || ads.length < 20) {
                     loadMoreContainer.style.display = 'none';
                 } else {
                     loadMoreContainer.style.display = 'block';
@@ -249,7 +277,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (window.initializeFavoriteButtons) window.initializeFavoriteButtons();
 
             if (window.restoreAndApplyFilters) {
-                window.restoreAndApplyFilters();
+                window.restoreAndApplyFilters(false);
             }
         } catch (error) {
             if (isInitial) {
@@ -257,6 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderEmpty(allAdsContainer, "Elanlar yüklənmədi.");
             }
             console.error("Home ads load error:", error);
+            throw error;
         } finally {
             isLoadingAds = false;
         }
@@ -270,13 +299,15 @@ document.addEventListener("DOMContentLoaded", function () {
         await fetchAndAppendAds(true);
     }
 
-    window.searchAdsFromAPI = async function (query) {
-        if (!query || !query.trim()) {
-            loadAds();
-            return;
-        }
+    window.searchAdsFromAPI = async function (filterArg) {
         currentPage = 1;
-        currentQuery = query.trim();
+        if (typeof filterArg === 'string') {
+            currentQuery = filterArg.trim();
+        } else if (filterArg && typeof filterArg === 'object') {
+            currentQuery = filterArg.q ? filterArg.q.trim() : '';
+        } else {
+            currentQuery = '';
+        }
         if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         
         await fetchAndAppendAds(true);
@@ -291,4 +322,3 @@ document.addEventListener("DOMContentLoaded", function () {
     allAdsContainer.innerHTML = ``;
     loadAds();
 });
-

@@ -5,6 +5,7 @@ const User        = require('../models/User');
 const Store       = require('../models/Store');
 const Transaction = require('../models/Transaction');
 const Notification = require('../models/Notification');
+const BoostIdempotency = require('../models/BoostIdempotency');
 const { DELETED_AD_STATUS, softDeleteAd } = require('../utils/adLifecycle');
 const {
     ALLOWED_FEATURE_FIELDS,
@@ -50,37 +51,79 @@ const getApprovedOwnedStore = async (storeId, userId) => {
 const getAds = async (req, res, next) => {
     try {
         validateAllowedFields(req.query, [
-            'q', 'category', 'brand', 'city', 'condition',
-            'minPrice', 'maxPrice', 'promotionType',
-            'sellerType', 'nfc', 'waterproof', 'fingerprint',
-            'memory', 'ram', 'color', 'author',
-            'sortBy', 'page', 'limit'
+            'q', 'search', 'category', 'brand', 'model', 'city', 'condition',
+            'minPrice', 'maxPrice', 'storage', 'memory', 'ram', 'color',
+            'screen', 'battery', 'nfc', 'waterproof', 'fingerprint',
+            'expandable', 'delivery', 'seller', 'sellerType', 'promotionType',
+            'author', 'sort', 'sortBy', 'page', 'limit'
         ], 'query');
         const {
-            q, category, brand, city, condition,
-            minPrice, maxPrice, promotionType,
-            sellerType, nfc, waterproof, fingerprint,
-            memory, ram, color, author,
-            sortBy = 'newest', page = 1, limit = 20
+            q, search, category, brand, model, city, condition,
+            minPrice, maxPrice, storage, memory, ram, color,
+            screen, battery, nfc, waterproof, fingerprint,
+            expandable, delivery, seller, sellerType, promotionType,
+            author, sort: querySort, sortBy = 'newest',
+            page = 1, limit = 20
         } = req.query;
 
         const { page: normalizedPage, limit: normalizedLimit, skip } = safePageLimit({ page, limit }, { defaultLimit: 20, maxLimit: 100 });
         const now = new Date();
         const filter = activeListingFilter(now);
-        const cleanSearch = readString(q || '', { fieldName: 'q', maxLength: 100 });
+        const rawSearch = q || search || '';
+        const cleanSearch = readString(rawSearch, { fieldName: 'q', maxLength: 100 });
         const hasTextSearch = Boolean(cleanSearch);
 
         if (hasTextSearch) {
-            filter.$text = { $search: cleanSearch };
+            const escaped = cleanSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter.$or = [
+                { title: { $regex: escaped, $options: 'i' } },
+                { description: { $regex: escaped, $options: 'i' } },
+                { brand: { $regex: escaped, $options: 'i' } },
+                { modelName: { $regex: escaped, $options: 'i' } }
+            ];
         }
 
-        if (category)      filter.category      = readString(category, { fieldName: 'category', maxLength: 80 });
-        if (brand)         filter.brand         = readString(brand, { fieldName: 'brand', maxLength: 80 });
-        if (city)          filter.city          = readString(city, { fieldName: 'city', maxLength: 80 });
-        if (condition) {
-            const rawCond = String(condition).trim();
-            const condVal = (rawCond === 'yeni' || rawCond === 'Yeni') ? 'Yeni' : ((rawCond === 'islenmis' || rawCond === 'İşlənmiş') ? 'İşlənmiş' : ((rawCond === 'temir-olunub' || rawCond === 'Təmir olunub') ? 'Təmir olunub' : rawCond));
-            filter.condition = sanitizePlainText(condVal, { maxLength: 50 });
+        if (category && category !== 'any' && category !== 'both') {
+            const catVal = readString(category, { fieldName: 'category', maxLength: 80 });
+            const catMap = {
+                phone: '^(Telefon|Phone)$',
+                telefon: '^(Telefon|Phone)$',
+                tablet: '^(Planşet|Tablet|Planset)$',
+                'planşet': '^(Planşet|Tablet|Planset)$',
+                planset: '^(Planşet|Tablet|Planset)$',
+                headphone: '^(Qulaqlıq|Headphone|Qulaqliq)$',
+                'qulaqlıq': '^(Qulaqlıq|Headphone|Qulaqliq)$',
+                accessory: '^(Aksesuar|Accessory)$',
+                aksesuar: '^(Aksesuar|Accessory)$'
+            };
+            const mappedPattern = catMap[catVal.toLowerCase()];
+            if (mappedPattern) {
+                filter.category = { $regex: new RegExp(mappedPattern, 'i') };
+            } else {
+                filter.category = { $regex: new RegExp(`^${catVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
+            }
+        }
+        if (brand && brand !== 'any' && brand !== 'both') {
+            const cleanBrand = readString(brand, { fieldName: 'brand', maxLength: 80 });
+            const escapedBrand = cleanBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter.brand = { $regex: new RegExp(`^${escapedBrand}$`, 'i') };
+        }
+        if (model && model !== 'any' && model !== 'both') {
+            const cleanModel = readString(model, { fieldName: 'model', maxLength: 120 });
+            const escapedModel = cleanModel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter.modelName = { $regex: escapedModel, $options: 'i' };
+        }
+        if (city && city !== 'any' && city !== 'both') {
+            filter.city = readString(city, { fieldName: 'city', maxLength: 80 });
+        }
+        if (condition && condition !== 'any' && condition !== 'both') {
+            const rawCond = String(condition).trim().toLowerCase();
+            let condVal = 'Yeni';
+            if (rawCond === 'used' || rawCond === 'islenmis' || rawCond === 'işlənmiş') condVal = 'İşlənmiş';
+            else if (rawCond === 'new' || rawCond === 'yeni') condVal = 'Yeni';
+            else if (rawCond === 'temir-olunub' || rawCond === 'təmir olunub') condVal = 'Təmir olunub';
+            else condVal = condition;
+            filter.condition = { $regex: new RegExp(`^${condVal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') };
         }
         if (promotionType) {
             const cleanPromotionType = readEnum(promotionType, ['none', 'BumpUp', 'VIP', 'PRO', 'Urgent', 'Premium'], { fieldName: 'promotionType', required: true, maxLength: 20 });
@@ -90,20 +133,82 @@ const getAds = async (req, res, next) => {
                 filter.promotionType = cleanPromotionType;
             }
         }
-        if (sellerType)    filter.sellerType    = readEnum(sellerType, ['personal', 'store'], { fieldName: 'sellerType', required: true, maxLength: 20 });
-        if (author)        filter.author        = readObjectId(author, 'author');
-        if (minPrice || maxPrice) {
-            filter.price = {};
-            if (minPrice) filter.price.$gte = readNumber(minPrice, { fieldName: 'minPrice', min: 0, max: 1000000 });
-            if (maxPrice) filter.price.$lte = readNumber(maxPrice, { fieldName: 'maxPrice', min: 0, max: 1000000 });
+        const activeSeller = seller || sellerType;
+        if (activeSeller && activeSeller !== 'any' && activeSeller !== 'both') {
+            filter.sellerType = (activeSeller === 'store' || activeSeller === 'Mağaza') ? 'store' : 'personal';
         }
-        if (memory)      filter['specs.memory']      = readString(memory, { fieldName: 'memory', maxLength: 80 });
-        if (ram)         filter['specs.ram']         = readString(ram, { fieldName: 'ram', maxLength: 80 });
-        if (color)       filter['specs.color']       = readString(color, { fieldName: 'color', maxLength: 80 });
-        if (readBoolean(nfc, { fieldName: 'nfc' }) === true)                 filter['specs.features.nfc']         = true;
-        if (readBoolean(waterproof, { fieldName: 'waterproof' }) === true)   filter['specs.features.waterproof']  = true;
-        if (readBoolean(fingerprint, { fieldName: 'fingerprint' }) === true) filter['specs.features.fingerprint'] = true;
+        if (author) filter.author = readObjectId(author, 'author');
+        if (minPrice && minPrice !== '0' && minPrice !== 'null' && minPrice !== 'undefined') {
+            try {
+                const parsedMin = readNumber(minPrice, { fieldName: 'minPrice', min: 0, max: 1000000 });
+                filter.price = filter.price || {};
+                filter.price.$gte = parsedMin;
+            } catch (e) { /* ignore invalid minPrice */ }
+        }
+        if (maxPrice && maxPrice !== 'Infinity' && maxPrice !== 'null' && maxPrice !== 'undefined') {
+            try {
+                const parsedMax = readNumber(maxPrice, { fieldName: 'maxPrice', min: 0, max: 1000000 });
+                filter.price = filter.price || {};
+                filter.price.$lte = parsedMax;
+            } catch (e) { /* ignore invalid maxPrice */ }
+        }
+        const storageVal = storage || memory;
+        if (storageVal && storageVal !== 'any' && storageVal !== 'both') {
+            const cleanStorage = readString(storageVal, { fieldName: 'storage', maxLength: 80 });
+            const escapedStorage = cleanStorage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const storageRegex = { $regex: escapedStorage, $options: 'i' };
+            filter.$and = filter.$and || [];
+            filter.$and.push({
+                $or: [
+                    { 'specs.memory': storageRegex },
+                    { yaddas: storageRegex }
+                ]
+            });
+        }
+        if (ram && ram !== 'any' && ram !== 'both') {
+            const cleanRam = readString(ram, { fieldName: 'ram', maxLength: 80 });
+            const escapedRam = cleanRam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const ramRegex = { $regex: escapedRam, $options: 'i' };
+            filter.$and = filter.$and || [];
+            filter.$and.push({
+                $or: [
+                    { 'specs.ram': ramRegex },
+                    { ram: ramRegex }
+                ]
+            });
+        }
+        if (color && color !== 'any' && color !== 'both') {
+            const cleanColor = readString(color, { fieldName: 'color', maxLength: 80 });
+            const escapedColor = cleanColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter['specs.color'] = { $regex: escapedColor, $options: 'i' };
+        }
+        if (screen && screen !== 'any' && screen !== 'both') {
+            const cleanScreen = readString(screen, { fieldName: 'screen', maxLength: 80 });
+            const escapedScreen = cleanScreen.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter['specs.screenSize'] = { $regex: escapedScreen, $options: 'i' };
+        }
+        if (battery && battery !== 'any' && battery !== 'both') {
+            const cleanBattery = readString(battery, { fieldName: 'battery', maxLength: 80 });
+            const escapedBattery = cleanBattery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            filter['specs.battery'] = { $regex: escapedBattery, $options: 'i' };
+        }
+        if (expandable === 'yes' || expandable === 'true' || readBoolean(expandable, { fieldName: 'expandable' }) === true) {
+            filter['specs.features.expandable'] = true;
+        }
+        if (delivery === 'yes' || delivery === 'true' || readBoolean(delivery, { fieldName: 'delivery' }) === true) {
+            filter['specs.features.delivery'] = true;
+        }
+        if (nfc === 'yes' || nfc === 'true' || readBoolean(nfc, { fieldName: 'nfc' }) === true) {
+            filter['specs.features.nfc'] = true;
+        }
+        if (waterproof === 'yes' || waterproof === 'true' || readBoolean(waterproof, { fieldName: 'waterproof' }) === true) {
+            filter['specs.features.waterproof'] = true;
+        }
+        if (fingerprint === 'yes' || fingerprint === 'true' || readBoolean(fingerprint, { fieldName: 'fingerprint' }) === true) {
+            filter['specs.features.fingerprint'] = true;
+        }
 
+        const sortParam = querySort || sortBy || 'newest';
         const sortMap = {
             newest:      { createdAt: -1 },
             oldest:      { createdAt:  1 },
@@ -111,9 +216,7 @@ const getAds = async (req, res, next) => {
             price_desc:  { price:     -1 },
             popular:     { views:     -1 }
         };
-        const sort = hasTextSearch
-            ? { score: { $meta: 'textScore' }, ...(sortMap[sortBy] || sortMap.newest) }
-            : (sortMap[sortBy] || sortMap.newest);
+        const sort = sortMap[sortParam] || sortMap.newest;
 
         const isVIPQuery = promotionType === 'VIP' && normalizedPage === 1 && !hasTextSearch;
         let cacheKey = null;
@@ -129,9 +232,6 @@ const getAds = async (req, res, next) => {
         const total = await Ad.countDocuments(filter);
 
         const query = Ad.find(filter);
-        if (hasTextSearch) {
-            query.select({ score: { $meta: 'textScore' } });
-        }
 
         const ads = await query
             .sort(sort)
@@ -258,6 +358,7 @@ const createAd = async (req, res, next) => {
 
         const cleanImages = sanitizeUrlArray(rawImages || []);
         if (cleanImages === null) return res.status(400).json({ message: 'Şəkil URL-ləri düzgün deyil' });
+        if (!cleanImages || cleanImages.length < 1) return res.status(400).json({ message: 'Ən azı 1 şəkil yüklənməlidir' });
 
         let listingSellerType = 'personal';
         let listingStore = null;
@@ -349,11 +450,23 @@ const updateAd = async (req, res, next) => {
         if (req.files && req.files.length > 0) {
             const uploadedUrls = req.files.map(f => `/uploads/${f.filename}`);
             let curImgs = req.body.images;
-            if (typeof curImgs === 'string') {
+            if (curImgs === undefined || curImgs === null) {
+                curImgs = ad.images || [];
+            } else if (typeof curImgs === 'string') {
                 try { curImgs = JSON.parse(curImgs); } catch (e) { curImgs = [curImgs]; }
             }
             if (!Array.isArray(curImgs)) curImgs = curImgs ? [curImgs] : [];
             req.body.images = curImgs.concat(uploadedUrls);
+        } else if (req.file) {
+            const uploadedUrl = `/uploads/${req.file.filename}`;
+            let curImgs = req.body.images;
+            if (curImgs === undefined || curImgs === null) {
+                curImgs = ad.images || [];
+            } else if (typeof curImgs === 'string') {
+                try { curImgs = JSON.parse(curImgs); } catch (e) { curImgs = [curImgs]; }
+            }
+            if (!Array.isArray(curImgs)) curImgs = curImgs ? [curImgs] : [];
+            req.body.images = curImgs.concat([uploadedUrl]);
         }
         if (typeof req.body.specs === 'string') {
             try { req.body.specs = JSON.parse(req.body.specs); } catch (e) {}
@@ -379,7 +492,7 @@ const updateAd = async (req, res, next) => {
                 } else if (field === 'images') {
                     const cleanImages = sanitizeUrlArray(req.body.images || []);
                     if (cleanImages === null) throw httpError(400, { message: 'Şəkil URL-ləri düzgün deyil' });
-                    ad.images = cleanImages;
+                    ad.images = (cleanImages.length > 0) ? cleanImages : ad.images;
                 } else if (field === 'specs') {
                     ad.specs = sanitizeSpecs(req.body.specs);
                     if (ad.specs?.memory) ad.yaddas = ad.specs.memory;
@@ -493,44 +606,97 @@ const getMyAds = async (req, res, next) => {
 // @access  Private
 const boostAd = async (req, res, next) => {
     try {
-        validateAllowedFields(req.body, ['promotionType'], 'body');
+        validateAllowedFields(req.body, ['promotionType', 'idempotencyKey'], 'body');
         const { promotionType } = req.body;
+        const id = req.params.id;
+
+        const idempotencyKey = readString(req.body?.idempotencyKey || req.get('Idempotency-Key') || req.get('X-Idempotency-Key') || '', {
+            fieldName: 'idempotencyKey',
+            maxLength: 120
+        });
+
+        // 1. ƏVVƏLDƏ CLAIM (sətir 620-dən əvvəl):
+        if (idempotencyKey) {
+            const existingClaim = await BoostIdempotency.findOne({ user: req.user._id, ad: id, idempotencyKey });
+            if (existingClaim) {
+                if (existingClaim.status === 'processing' || existingClaim.status === 'completed') {
+                    const resp = existingClaim.response || existingClaim.responsePayload || { message: 'Bu əməliyyat artıq icra olunur' };
+                    return res.json({ ...resp, idempotent: true });
+                }
+                if (existingClaim.status === 'failed') {
+                    await BoostIdempotency.deleteOne({ _id: existingClaim._id });
+                }
+            }
+            // Atomik claim yarat
+            try {
+                await BoostIdempotency.create({
+                    user: req.user._id,
+                    ad: id,
+                    idempotencyKey,
+                    status: 'processing'
+                });
+            } catch (claimErr) {
+                if (claimErr.code === 11000) {
+                    const concurrentClaim = await BoostIdempotency.findOne({ user: req.user._id, ad: id, idempotencyKey });
+                    const resp = concurrentClaim?.response || concurrentClaim?.responsePayload || { message: 'Bu əməliyyat artıq icra olunur' };
+                    return res.json({ ...resp, idempotent: true });
+                }
+                throw claimErr;
+            }
+        }
 
         if (!BOOST_PRICES[promotionType]) {
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
             return res.status(400).json({ message: 'Yanlış promosyon növü' });
         }
 
-        const existingAd = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } }).select('_id author');
-        if (!existingAd) return res.status(404).json({ message: 'Elan tapılmadı' });
+        const oldAd = await Ad.findOne({ _id: id, status: { $ne: DELETED_AD_STATUS } }).select(
+            '_id author status isBoosted promotionType promotionStartedAt promotionExpiresAt boostedAt boostCount publishedAt expiresAt brand modelName'
+        );
+        if (!oldAd) {
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            return res.status(404).json({ message: 'Elan tapılmadı' });
+        }
 
-        if (existingAd.author.toString() !== req.user._id.toString()) {
+        if (oldAd.author.toString() !== req.user._id.toString()) {
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
             return res.status(403).json({ message: 'İcazəniz yoxdur' });
         }
 
-        const runBoost = async (session) => {
-            const sessionOption = session ? { session } : {};
-            const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } }, null, sessionOption);
-            if (!ad) throw httpError(404, { message: 'Elan tapılmadı' });
+        if (oldAd.status !== 'active') {
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            return res.status(400).json({ message: 'Yalnız aktiv elanlar reklam edilə bilər' });
+        }
 
+        const cost = BOOST_PRICES[promotionType];
+        const days = BOOST_DAYS[promotionType];
+
+        let responsePayload;
+        let session = null;
+        try {
+            session = await mongoose.startSession();
+            session.startTransaction();
+
+            const user = await User.findById(req.user._id).session(session);
+            if (!user || user.walletBalance < cost) {
+                throw httpError(400, {
+                    message: 'Balans kifayət deyil',
+                    required: cost,
+                    current: user?.walletBalance || 0
+                });
+            }
+
+            const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } }).session(session);
+            if (!ad) throw httpError(404, { message: 'Elan tapılmadı' });
             if (ad.status !== 'active') {
                 throw httpError(400, { message: 'Yalnız aktiv elanlar reklam edilə bilər' });
             }
 
-            const cost  = BOOST_PRICES[promotionType];
-            const days  = BOOST_DAYS[promotionType];
+            // Deduct user wallet balance with session
+            user.walletBalance -= cost;
+            await user.save({ session });
 
-            // Atomic deduct from wallet (only if balance is sufficient)
-            const user = await User.findOneAndUpdate(
-                { _id: req.user._id, walletBalance: { $gte: cost } },
-                { $inc: { walletBalance: -cost } },
-                { new: true, ...sessionOption }
-            );
-
-            if (!user) {
-                const currentUser = await User.findById(req.user._id, 'walletBalance', sessionOption);
-                throw httpError(400, { message: 'Balans kifayət deyil', required: cost, current: currentUser?.walletBalance || 0 });
-            }
-
+            // Update ad promotion with session
             const now = new Date();
             const currentPromoBase = ad.promotionExpiresAt && ad.promotionExpiresAt > now
                 ? new Date(ad.promotionExpiresAt)
@@ -538,49 +704,83 @@ const boostAd = async (req, res, next) => {
             const expiresAt = new Date(currentPromoBase);
             expiresAt.setDate(expiresAt.getDate() + days);
 
-            ad.promotionType      = promotionType;
-            ad.promotionStartedAt = ad.promotionStartedAt || now;
-            ad.promotionExpiresAt = expiresAt;
+            const updateData = {
+                isBoosted: true,
+                promotionType: promotionType || 'premium',
+                promotionStartedAt: ad.promotionStartedAt || now,
+                promotionExpiresAt: expiresAt,
+                boostedAt: now,
+                boostCount: (oldAd.boostCount || ad.boostCount || 0) + 1
+            };
+            if (!ad.publishedAt) updateData.publishedAt = now;
+            if (!ad.expiresAt) updateData.expiresAt = new Date(now.getTime() + Number(process.env.NORMAL_LISTING_LIFETIME_DAYS || 30) * 24 * 60 * 60 * 1000);
 
-            if (!ad.publishedAt) ad.publishedAt = now;
-            if (!ad.expiresAt) ad.expiresAt = new Date(now.getTime() + Number(process.env.NORMAL_LISTING_LIFETIME_DAYS || 30) * 24 * 60 * 60 * 1000);
-            await ad.save(sessionOption);
+            const updatedAd = await Ad.findOneAndUpdate(
+                { _id: id },
+                { $set: updateData },
+                { new: true, session }
+            );
 
-            // Log transaction
+            // Log transaction with session
             await Transaction.create([{
                 user:        user._id,
                 amount:      -cost,
                 type:        'ad_boost',
-                description: `${promotionType} promosyonu — ${ad.brand} ${ad.modelName}`,
-                ad:          ad._id,
+                description: `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
+                ad:          updatedAd._id,
                 balanceAfter: user.walletBalance
-            }], sessionOption);
+            }], { session });
 
-            // Notification
+            // Notification with session
             await Notification.create([{
-                user:      user._id,
-                type:      'promo',
-                title:     `${promotionType} aktivləşdirildi! ⚡`,
-                body:      `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
-                link:      `/cabinet.html#my-ads`,
-                relatedId:   ad._id,
+                user:        user._id,
+                type:        'promo',
+                title:       `${promotionType} aktivləşdirildi! ⚡`,
+                body:        `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
+                link:        `/cabinet.html#my-ads`,
+                relatedId:   updatedAd._id,
                 relatedType: 'Ad'
-            }], sessionOption);
+            }], { session });
 
-            return { message: `${promotionType} uğurla aktivləşdirildi`, ad, walletBalance: user.walletBalance };
-        };
+            responsePayload = {
+                message: `${promotionType} uğurla aktivləşdirildi`,
+                ad: updatedAd,
+                walletBalance: user.walletBalance
+            };
 
-        let responsePayload;
-        try {
-            const session = await mongoose.startSession();
-            try {
-                await session.withTransaction(async () => {
-                    responsePayload = await runBoost(session);
-                });
-            } finally {
-                await session.endSession();
+            // Save idempotency key record with session
+            if (idempotencyKey) {
+                await BoostIdempotency.updateOne(
+                    { user: user._id, ad: updatedAd._id, idempotencyKey },
+                    {
+                        status: 'completed',
+                        promotionType,
+                        cost,
+                        response: responsePayload,
+                        responsePayload
+                    },
+                    { session }
+                );
             }
+
+            await session.commitTransaction();
         } catch (error) {
+            if (session) {
+                await session.abortTransaction().catch(() => {});
+            }
+
+            // If concurrent duplicate idempotency key arrived:
+            if (error.code === 11000 && idempotencyKey) {
+                const existing = await BoostIdempotency.findOne({ user: req.user._id, idempotencyKey });
+                if (existing && existing.responsePayload) {
+                    return res.status(200).json({
+                        ...existing.responsePayload,
+                        idempotent: true
+                    });
+                }
+            }
+
+            // Fallback for standalone MongoDB environments without replica set
             const isTxUnsupported = Boolean(
                 error &&
                 (error.message?.includes('replica set member') ||
@@ -589,12 +789,158 @@ const boostAd = async (req, res, next) => {
                  error.codeName === 'IllegalOperation')
             );
             if (isTxUnsupported) {
-                logger.warn('MongoDB transactions not supported on current topology; executing boost without transaction');
-                responsePayload = await runBoost(null);
+                logger.warn('MongoDB transactions not supported on current topology; executing boost with compensating rollback');
+                let userDeducted = false;
+                let transactionId = null;
+                let notificationId = null;
+                try {
+                    const user = await User.findById(req.user._id);
+                    if (!user || user.walletBalance < cost) {
+                        throw httpError(400, { message: 'Balans kifayət deyil', required: cost, current: user?.walletBalance || 0 });
+                    }
+                    user.walletBalance -= cost;
+                    await user.save();
+                    userDeducted = true;
+
+                    const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } });
+                    if (!ad) throw httpError(404, { message: 'Elan tapılmadı' });
+                    if (ad.status !== 'active') throw httpError(400, { message: 'Yalnız aktiv elanlar reklam edilə bilər' });
+
+                    const now = new Date();
+                    const currentPromoBase = ad.promotionExpiresAt && ad.promotionExpiresAt > now ? new Date(ad.promotionExpiresAt) : now;
+                    const expiresAt = new Date(currentPromoBase);
+                    expiresAt.setDate(expiresAt.getDate() + days);
+
+                    const updateData = {
+                        isBoosted: true,
+                        promotionType: promotionType || 'premium',
+                        promotionStartedAt: ad.promotionStartedAt || now,
+                        promotionExpiresAt: expiresAt,
+                        boostedAt: now,
+                        boostCount: (oldAd.boostCount || ad.boostCount || 0) + 1
+                    };
+                    if (!ad.publishedAt) updateData.publishedAt = now;
+                    if (!ad.expiresAt) updateData.expiresAt = new Date(now.getTime() + Number(process.env.NORMAL_LISTING_LIFETIME_DAYS || 30) * 24 * 60 * 60 * 1000);
+
+                    const updatedAd = await Ad.findOneAndUpdate(
+                        { _id: id },
+                        { $set: updateData },
+                        { new: true }
+                    );
+
+                    const transaction = await Transaction.create({
+                        user: user._id,
+                        amount: -cost,
+                        type: 'ad_boost',
+                        description: `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
+                        ad: updatedAd._id,
+                        balanceAfter: user.walletBalance
+                    });
+                    transactionId = transaction?._id;
+
+                    const notification = await Notification.create({
+                        user: user._id,
+                        type: 'promo',
+                        title: `${promotionType} aktivləşdirildi! ⚡`,
+                        body: `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
+                        link: `/cabinet.html#my-ads`,
+                        relatedId: updatedAd._id,
+                        relatedType: 'Ad'
+                    });
+                    notificationId = notification?._id;
+
+                    responsePayload = {
+                        message: `${promotionType} uğurla aktivləşdirildi`,
+                        ad: updatedAd,
+                        walletBalance: user.walletBalance
+                    };
+
+                    // 3. SUCCESS-də:
+                    if (idempotencyKey) {
+                        await BoostIdempotency.updateOne(
+                            { user: user._id, ad: updatedAd._id, idempotencyKey },
+                            {
+                                status: 'completed',
+                                promotionType,
+                                cost,
+                                response: responsePayload,
+                                responsePayload
+                            }
+                        );
+                    }
+                } catch (fallbackErr) {
+                    // 2. FALLBACK CATCH BLOK: FULL COMPENSATION
+                    if (userDeducted) {
+                        try {
+                            await User.updateOne({ _id: req.user._id }, { $inc: { walletBalance: cost } });
+                        } catch (e) {
+                            console.error('CRITICAL rollback User failed', e);
+                        }
+                    }
+                    try {
+                        await Ad.updateOne(
+                            { _id: id },
+                            { 
+                                $set: { 
+                                    isBoosted: Boolean(oldAd.isBoosted),
+                                    promotionType: oldAd.promotionType || 'none',
+                                    promotionStartedAt: oldAd.promotionStartedAt || null,
+                                    promotionExpiresAt: oldAd.promotionExpiresAt || null,
+                                    boostedAt: oldAd.boostedAt || null,
+                                    boostCount: oldAd.boostCount || 0,
+                                    publishedAt: oldAd.publishedAt,
+                                    expiresAt: oldAd.expiresAt
+                                } 
+                            }
+                        );
+                    } catch (e) {
+                        console.error('CRITICAL Ad rollback failed', e);
+                    }
+                    try {
+                        if (transactionId) {
+                            await Transaction.deleteOne({ _id: transactionId });
+                        }
+                    } catch (e) {
+                        console.error('CRITICAL rollback Transaction failed', e);
+                    }
+                    try {
+                        if (notificationId) {
+                            await Notification.deleteOne({ _id: notificationId });
+                        }
+                    } catch (e) {
+                        console.error('CRITICAL rollback Notification failed', e);
+                    }
+                    if (idempotencyKey) {
+                        try {
+                            await BoostIdempotency.updateOne(
+                                { user: req.user._id, ad: id, idempotencyKey },
+                                { status: 'failed', error: fallbackErr.message }
+                            );
+                        } catch (e) {
+                            console.error('CRITICAL idempotency failed status error', e);
+                        }
+                    }
+                    throw fallbackErr;
+                }
             } else {
+                if (idempotencyKey) {
+                    try {
+                        await BoostIdempotency.updateOne(
+                            { user: req.user._id, ad: id, idempotencyKey },
+                            { status: 'failed', error: error.message }
+                        );
+                    } catch (e) {
+                        console.error('CRITICAL idempotency failed status error', e);
+                    }
+                }
                 throw error;
             }
+        } finally {
+            if (session) {
+                await session.endSession().catch(() => {});
+            }
         }
+
         await invalidateCache('ads:VIP:cache:*');
         if (responsePayload) res.json(responsePayload);
 

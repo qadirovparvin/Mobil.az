@@ -276,8 +276,10 @@
             if (window.loginFormSubmitted) return;
 
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('expired') || urlParams.has('reason')) {
-                // Expired ilə gəlmisənsə, köhnə tokenləri sil və bu səhifədə qal
+            const reason = urlParams.get('reason');
+            const isExplicitExpired = urlParams.has('expired') || reason === 'session_expired' || reason === 'unauthorized';
+            if (isExplicitExpired) {
+                // Yalnız sessiya bitibsə (401), köhnə tokenləri sil və bu səhifədə qal
                 ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
                     try { localStorage.removeItem(k); } catch(e){}
                     try { sessionStorage.removeItem(k); } catch(e){}
@@ -288,35 +290,69 @@
                 return;
             }
 
+            if (reason === 'network_error') {
+                if (typeof window.showToast === 'function') {
+                    window.showToast('Serverlə əlaqə qurulmadı. Zəhmət olmasa backend serverinin aktiv olduğunu yoxlayın.', 'error');
+                }
+                if (!window.loginFormSubmitted) {
+                    try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+                }
+                return;
+            }
+
             const lastRedirect = sessionStorage.getItem('lastRedirectTime');
             const now = Date.now();
             if (lastRedirect && (now - parseInt(lastRedirect, 10)) < 3000) {
-                console.warn('Redirect loop detected, clearing tokens');
-                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                    try { localStorage.removeItem(k); } catch(e){}
-                    try { sessionStorage.removeItem(k); } catch(e){}
-                });
+                console.warn('Redirect loop prevented: suppressing auto-redirect, keeping credentials');
                 sessionStorage.removeItem('lastRedirectTime');
+                sessionStorage.setItem('preventAutoRedirect', 'true');
+                return;
+            }
+
+            if (sessionStorage.getItem('preventAutoRedirect') === 'true') {
+                sessionStorage.removeItem('preventAutoRedirect');
                 return;
             }
 
             // Normal auto-login check (yalnız expired/reason yoxdursa)
-            const token = (localStorage.getItem('token') || sessionStorage.getItem('token') || '').trim().replace(/^["']+|["']+$/g, '');
+            const token = (typeof window.getToken === 'function' 
+                ? window.getToken() 
+                : (localStorage.getItem('token') || sessionStorage.getItem('token') || localStorage.getItem('adminToken') || sessionStorage.getItem('adminToken') || '')
+            ).trim().replace(/^["']+|["']+$/g, '');
+
             if (token && token.length > 30 && token.split('.').length === 3) {
-                const apiBase = window.API_URL || 'http://localhost:5000/api';
+                const apiBase = window.API_URL || window.API_BASE || 'http://localhost:5000/api';
                 fetch(apiBase + '/auth/me', {
                     headers: { Authorization: 'Bearer ' + token }
                 }).then(r => {
                     if (r.ok && !window.loginFormSubmitted) {
-                        sessionStorage.setItem('lastRedirectTime', Date.now().toString());
-                        window.location.href = 'cabinet.html';
-                    } else if (!r.ok) {
+                        return r.json().then(userData => {
+                            if (window.loginFormSubmitted) return;
+                            sessionStorage.setItem('lastRedirectTime', Date.now().toString());
+                            const role = userData?.role || (userData?.user && userData.user.role);
+                            if (role === 'admin') {
+                                window.location.href = 'admin.html';
+                            } else {
+                                window.location.href = 'cabinet.html';
+                            }
+                        }).catch(() => {
+                            if (!window.loginFormSubmitted) {
+                                sessionStorage.setItem('lastRedirectTime', Date.now().toString());
+                                window.location.href = 'cabinet.html';
+                            }
+                        });
+                    } else if (r.status === 401) {
+                        // Yalnız 401 Unauthorized olduqda tokenləri sil
                         ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
                             try { localStorage.removeItem(k); } catch(e){}
                             try { sessionStorage.removeItem(k); } catch(e){}
                         });
                     }
-                }).catch(() => {});
+                    // 403, 500 və digər server hallarında tokenlər silinmir
+                }).catch(err => {
+                    // Şəbəkə xətası (məs. port 5000 bağlı olduqda) tokenləri silmə və dövrə yaratma
+                    console.warn('Auto-login check network error (server may be offline):', err);
+                });
             }
         });
     </script>

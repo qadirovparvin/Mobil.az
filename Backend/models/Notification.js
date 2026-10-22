@@ -14,6 +14,7 @@ const notificationSchema = new mongoose.Schema({
     body:  { type: String, required: true },
 
     isRead: { type: Boolean, default: false },
+    readAt: { type: Date, default: null },
 
     // Optional deep-link for the frontend (e.g. `/cabinet.html#messages`)
     link: { type: String, default: '' },

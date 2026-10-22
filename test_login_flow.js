@@ -5,7 +5,7 @@ const path = require('path');
 
 (async () => {
   console.log('[*] Connecting to MongoDB...');
-  await mongoose.connect('mongodb://127.0.0.1:27017/airyphone_db');
+  await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/mobilaz_db');
   
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ ignoreHTTPSErrors: true });
@@ -38,9 +38,9 @@ const path = require('path');
   await page.goto(filePath);
 
   console.log('[*] Filling credentials...');
-  await page.fill('#loginIdentifier', 'mobil@gmail.com');
+  await page.fill('#loginEmail', 'Mobil@gmail.com');
   await page.fill('#loginPassword', 'Mobil.az!1921021418');
-  await page.click('#passwordLoginBtn');
+  await page.click('#loginBtn');
 
   console.log('[*] Waiting for backend to create OTP...');
   await page.waitForTimeout(2000); // Wait for the first request to finish

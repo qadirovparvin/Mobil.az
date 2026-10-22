@@ -16,7 +16,21 @@ Backend/node_modules/
 Back end/node_modules/
 Front end/node_modules/
 Backend/uploads/
+Backend/logs/
 
 # Editor files
 .vscode/
 .idea/
+
+# Scratch and migration scripts
+*.py
+*.txt
+scratch/
+updateAuth*.js
+Frontend/
+Front end/diff*.txt
+Front end/fix_*
+Front end/find_classes.js
+Front end/inject_theme.py
+Front end/test.js
+Backend/fix_airyphone.js

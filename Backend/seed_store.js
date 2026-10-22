@@ -6,7 +6,7 @@ const Store = require('./models/Store');
 const Ad = require('./models/Ad');
 
 async function seed() {
-  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/airyphone_db';
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mobilaz_db';
   await mongoose.connect(mongoUri);
   console.log('✅ MongoDB bağlıdır:', mongoUri);
 

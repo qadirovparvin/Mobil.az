@@ -47,6 +47,9 @@ const adSchema = new mongoose.Schema({
         enum: ['none', 'BumpUp', 'VIP', 'PRO', 'Urgent', 'Premium'],
         default: 'none'
     },
+    isBoosted: { type: Boolean, default: false },
+    boostedAt: { type: Date, default: null },
+    boostCount: { type: Number, default: 0 },
     promotionStartedAt: { type: Date, default: null },
     promotionExpiresAt: { type: Date, default: null },
 

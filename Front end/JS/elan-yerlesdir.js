@@ -1140,12 +1140,13 @@ async function initStoreOption(){
     const token = window.getToken ? window.getToken() : (localStorage.getItem('token') || localStorage.getItem('accessToken') || sessionStorage.getItem('token') || '');
     if (token) {
       const res = await fetch(`${base}/stores/my`, { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
-      // try alternative endpoints if 404
       let data = null;
-      if (res.ok) data = await res.json();
-      else {
-        const res2 = await fetch(`${base}/stores/mine`, { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
-        if (res2.ok) data = await res2.json();
+      if (res.ok) {
+        data = await res.json();
+      } else if (res.status === 404) {
+        console.info('Mağazanız yoxdur');
+        storeId = null;
+        storeName = '';
       }
       // data can be {store: {...}} or {...} or [...]
       const storeObj = data?.store || data?.data || (Array.isArray(data)? data[0] : data) || null;

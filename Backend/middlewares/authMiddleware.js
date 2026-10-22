@@ -4,25 +4,84 @@ const { isAccountAllowed, getAccountDeniedMessage } = require('../utils/accountS
 const { verifyAccessToken } = require('../utils/authSecurity');
 const logger = require('../utils/logger');
 
-const secretsToTry = [
-    process.env.JWT_SECRET,
-    'mobilaz_final_secret_2024_do_not_change_ever_12345',
-    'airyphone_super_secret_jwt_key_2024_change_in_production',
-    'mobilaz_secret_key_2024_secure',
-    'secret_fallback_key_12345'
-].filter(Boolean);
+function getEnvJwtSecrets() {
+    const secrets = [];
+    if (process.env.JWT_SECRET) {
+        secrets.push(process.env.JWT_SECRET);
+    }
+    if (process.env.JWT_ACCESS_KEYS) {
+        try {
+            const parsed = JSON.parse(process.env.JWT_ACCESS_KEYS);
+            if (typeof parsed === 'object' && parsed !== null) {
+                Object.values(parsed).forEach(val => {
+                    if (val && typeof val === 'string') secrets.push(val.trim());
+                });
+            }
+        } catch (e) {
+            // Comma-separated format fallback: key1,key2,key3
+            process.env.JWT_ACCESS_KEYS.split(',').forEach(val => {
+                if (val && val.trim()) secrets.push(val.trim());
+            });
+        }
+    }
+    return [...new Set(secrets)];
+}
+
+// ── Legacy Hardcoded Fallback Secrets (Temporary Grace Period) ──
+// These exist strictly to prevent logging out active sessions during secret migration.
+const LEGACY_KEYS = [];
+const LEGACY_FALLBACK_SECRETS = LEGACY_KEYS;
 
 const tryDecodeToken = (token) => {
-    for (const sec of secretsToTry) {
+    // 1. First priority: verify using standard active kid via authSecurity
+    try {
+        const d = verifyAccessToken(token);
+        if (d && (d.id || d._id)) return d;
+    } catch (e) {}
+
+    // 2. Second priority: verify using any environment-defined secrets (JWT_SECRET, JWT_ACCESS_KEYS)
+    const envSecrets = getEnvJwtSecrets();
+    for (const sec of envSecrets) {
         try {
             const d = jwt.verify(token, sec);
             if (d && (d.id || d._id)) return d;
         } catch (e) {}
     }
+
+    // 3. Staged migration fallback
+    let legacyKeys = [];
+    if (process.env.NODE_ENV === 'production') {
+        legacyKeys = [];
+        logger.error('LEGACY FALLBACK DISABLED IN PROD');
+    } else if (process.env.DISABLE_LEGACY_JWT_FALLBACK === 'true') {
+        legacyKeys = [];
+    } else {
+        legacyKeys = LEGACY_KEYS;
+        logger.warn('DEPRECATED_JWT_FALLBACK_USED: Legacy fallback is deprecated and disabled');
+    }
+
+    for (const sec of legacyKeys) {
+        try {
+            const d = jwt.verify(token, sec);
+            if (d && (d.id || d._id)) {
+                logger.warn('DEPRECATED_JWT_FALLBACK_USED kid=old: Token verified using legacy secret. Active session preserved during migration.');
+                return d;
+            }
+        } catch (e) {}
+    }
+
     try {
-        const d = verifyAccessToken(token);
-        if (d && (d.id || d._id)) return d;
+        if (process.env.REFRESH_TOKEN_SECRET) {
+            const d = jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+            if (d && (d.id || d._id)) return d;
+        }
     } catch (e) {}
+
+    try {
+        const unverified = jwt.decode(token);
+        if (unverified && unverified.type === 'refresh') return unverified;
+    } catch (e) {}
+
     return null;
 };
 
@@ -45,6 +104,14 @@ const protect = async (req, res, next) => {
         const decoded = tryDecodeToken(token);
 
         if (!decoded) {
+            return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
+        }
+
+        if (!decoded.type || decoded.type !== 'access') {
+            return res.status(401).json({ message: 'Invalid token type' });
+        }
+
+        if (!decoded.id) {
             return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
         }
 
@@ -111,7 +178,15 @@ const optionalProtect = async (req, res, next) => {
         const decoded = tryDecodeToken(token);
 
         if (!decoded) {
-            return next();
+            return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
+        }
+
+        if (!decoded.type || decoded.type !== 'access') {
+            return res.status(401).json({ message: 'Invalid token type' });
+        }
+
+        if (!decoded.id) {
+            return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
         }
 
         const userId = decoded.id || decoded._id;

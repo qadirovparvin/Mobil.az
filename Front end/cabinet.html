@@ -446,6 +446,7 @@
                                             <span>Cari paket: <b id="billingCurrentPackageName">Standart</b></span>
                                             <span>Balans: <b id="billingCurrentBalance">0.00 AZN</b></span>
                                             <button id="billingTopUpBtn" type="button" class="btn-topup-simple">Balansı artır</button>
+                                            <button id="cashOutBtn" type="button" class="btn-cashout-simple">Vəsaiti Çıxar</button>
                                         </div>
 
                                         <!-- ORTA: 2 sütun - SOL paketlər, SAĞ ödəniş+xülasə -->
@@ -486,6 +487,38 @@
                                                 </div>
                                             </div>
 
+                                        </div>
+
+                                        <!-- Tranzaksiya Tarixçəsi -->
+                                        <div class="billing-history-card cab-glass" style="margin-top: 24px; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color, rgba(255,255,255,0.08));">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                                <h3 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                                    <i class="fas fa-history" style="color: #10b981;"></i> Tranzaksiya Tarixçəsi
+                                                </h3>
+                                                <button type="button" id="refreshTransactionsBtn" class="btn-secondary" style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-color, #334155); color: inherit;">
+                                                    <i class="fas fa-sync-alt"></i> Yenilə
+                                                </button>
+                                            </div>
+                                            <!-- Filters: type, date range -->
+                                            <div id="txFilterBar" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;">
+                                                <select id="txFilterType" class="form-select" style="padding: 6px 12px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;">
+                                                    <option value="">Bütün növlər</option>
+                                                    <option value="deposit">Balans artımı</option>
+                                                    <option value="package_purchase">Paket alışı</option>
+                                                    <option value="ad_boost">VIP/PRO xidməti</option>
+                                                    <option value="withdrawal">Vəsait çıxarışı</option>
+                                                    <option value="referral_credit">Referral qazancı</option>
+                                                    <option value="refund">Geri qaytarılma</option>
+                                                </select>
+                                                <input type="date" id="txFilterStartDate" style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;" title="Başlanğıc tarixi">
+                                                <input type="date" id="txFilterEndDate" style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;" title="Son tarix">
+                                                <button type="button" id="txFilterApplyBtn" class="btn-primary" style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: #10b981; border: none; color: #fff;">
+                                                    <i class="fas fa-filter"></i> Filterlə
+                                                </button>
+                                            </div>
+                                            <div id="billingHistoryList" class="billing-history-list">
+                                                <!-- JS dolduracaq (GET /api/wallet/transactions) -->
+                                            </div>
                                         </div>
                                     </div>
                                 </section>
@@ -562,9 +595,75 @@
         </div>
     </div>
 
-    <script src="JS/config.js"></script>
-    <script src="JS/auth.js"></script>
-    <script src="JS/script.js?v=2"></script>
+    <!-- Top-Up Modal -->
+    <div id="topUpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="topup-modal-title" style="display:none;">
+        <div class="modal-card cab-glass" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2 id="topup-modal-title"><i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i> Balansı Artır</h2>
+                <button class="btn-close-modal" id="closeTopUpModalBtn" aria-label="Bağla"><i class="fas fa-times"></i></button>
+            </div>
+            <div style="padding: 15px 0;">
+                <label style="display:block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">Məbləğ seçin:</label>
+                <div class="topup-presets" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+                    <button type="button" class="btn-preset active" data-amount="5" style="padding: 10px; border-radius: 8px; border: 1px solid #10b981; background: rgba(16,185,129,0.12); color: inherit; font-weight: 600; cursor: pointer;">5 ₼</button>
+                    <button type="button" class="btn-preset" data-amount="10" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">10 ₼</button>
+                    <button type="button" class="btn-preset" data-amount="20" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">20 ₼</button>
+                    <button type="button" class="btn-preset" data-amount="50" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">50 ₼</button>
+                </div>
+                <label for="customTopUpAmount" style="display:block; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 6px;">Və ya digər məbləğ daxil edin:</label>
+                <div style="position: relative; margin-bottom: 16px;">
+                    <input type="number" id="customTopUpAmount" min="1" max="10000" step="1" value="5" placeholder="Məs: 15" style="width: 100%; padding: 12px 42px 12px 14px; border-radius: 10px; border: 1px solid var(--border-color, #334155); background: var(--input-bg, rgba(15,23,42,0.5)); color: inherit; font-size: 16px; box-sizing: border-box;">
+                    <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #10b981;">AZN</span>
+                </div>
+                <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-shield-alt" style="color: #10b981; font-size: 18px;"></i>
+                    <span>Payriff 3D Secure təhlükəsiz ödəniş. Visa və MasterCard dəstəklənir.</span>
+                </div>
+                <button type="button" id="btnSubmitTopUp" class="btn-primary w-100" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer;">
+                    <i class="fas fa-credit-card"></i> Payriff ilə Ödənişə Keç
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cashOutModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cashout-modal-title" style="display:none;">
+        <div class="modal-card cab-glass cashout-modal-card">
+            <div class="modal-header">
+                <h2 id="cashout-modal-title"><i class="fas fa-money-bill-transfer" aria-hidden="true"></i> Vəsaiti çıxar</h2>
+                <button type="button" class="btn-close-modal" id="closeCashOutModalBtn" aria-label="Bağla"><i class="fas fa-times" aria-hidden="true"></i></button>
+            </div>
+            <form id="cashOutForm" class="cashout-form">
+                <label for="cashOutAmount">Məbləğ (AZN)</label>
+                <input id="cashOutAmount" name="amount" type="number" min="1" max="5000" step="0.01" inputmode="decimal" required>
+
+                <label for="cashOutMethod">Çıxarış üsulu</label>
+                <select id="cashOutMethod" name="method" required>
+                    <option value="bank_account">Bank hesabı (IBAN)</option>
+                    <option value="card">Kart (tokenləşdirilmiş)</option>
+                </select>
+
+                <label id="cashOutDetailsLabel" for="cashOutDetails">IBAN</label>
+                <input id="cashOutDetails" name="accountHolderDetails" type="text" maxlength="500" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AZ00 XXXX 0000 0000 0000 0000 0000" required>
+                <p id="cashOutDetailsHint" class="cashout-hint">IBAN boşluqsuz 15–34 simvol olmalıdır. Sorğu təsdiq üçün göndəriləcək.</p>
+
+                <div class="cashout-actions">
+                    <button type="button" class="btn-secondary" id="cancelCashOutBtn">Ləğv et</button>
+                    <button type="submit" class="btn-primary" id="confirmCashOutBtn">Çıxarış sorğusu göndər</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payriff Redirect Loading Overlay -->
+    <div id="topUpRedirectOverlay" class="topup-redirect-overlay" style="display:none; position: fixed; inset: 0; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
+        <div style="width: 60px; height: 60px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: #10b981; border-radius: 50%; animation: topup-spin 0.8s linear infinite; margin-bottom: 20px;"></div>
+        <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 10px 0; color: #ffffff;">Payriff-ə yönləndirilir...</h3>
+        <p style="font-size: 15px; color: #94a3b8; max-width: 380px; margin: 0; line-height: 1.5;">Zəhmət olmasa gözləyin, təhlükəsiz ödəniş səhifəsi açılır.</p>
+    </div>
+    <style>
+    @keyframes topup-spin { to { transform: rotate(360deg); } }
+    </style>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
@@ -656,9 +755,14 @@
             }
         };
     </script>
+    <script src="JS/config.js"></script>
     <script>
         document.write('<script src="' + (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '') + '/socket.io/socket.io.js"><\/script>');
     </script>
+    <script src="JS/axios.min.js"></script>
+    <script src="JS/api.js"></script>
+    <script src="JS/auth.js"></script>
+    <script src="JS/script.js"></script>
     <script src="JS/cabinet.js"></script>
     <script src="JS/favorites.js"></script>
   <script src="JS/components.js"></script>

@@ -4,90 +4,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haqqımızda - Mobil.az</title>
+    <title data-translate-title="about-page-title">Haqqımızda - Mobil.az</title>
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/about.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <span class="mobil-logo">Mobil<span>.az</span></span>
-            </a>
-            <div class="header-right">
-                <nav class="menu">
-                    <ul>
-                        <div class="contact-dropdown">
-                            <li data-translate="Contact">
-                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-                            </li>
-                            <div class="contact-menu">
-                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
-                                    Instagram</a>
-                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
-                                    Facebook</a>
-                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
-                                    WhatsApp</a>
-                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-                            </div>
-                        </div>
-                        <li class="About" data-translate="About">
-                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-                        </li>
-                        <li class="Stores" data-translate="Stores">
-                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-                        </li>
-                        <li class="Favorite" data-translate="Favorite">
-                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="button-container">
-                    <a href="login.html" class="login-btn" data-translate="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş
-                    </a>
-                    <a href="signup.html" class="register-btn" data-translate="register-btn">
-                        <i class="fas fa-user-plus"></i> Qeydiyyat
-                    </a>
-                </div>
-                <div class="theme-lang-container">
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span id="current-lang" data-translate="language-selector">AZ</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+      <div id="header-placeholder"></div>
 
     <main>
         <div class="about-container">
             <div class="about-header">
-                <h1 data-translate="about-h1">"Mobil.az" Azərbaycanda Mobil Cihazların Yeni və Etibarlı Ticarət
-                    Platforması</h1>
-                <p class="subtitle" data-translate="about-sub">Rəqəmsal dünyanın ehtiyaclarına uyğunlaşdırılmış
-                    ixtisaslaşmış bazar yeri</p>
+                <h1 data-translate="about-h1">"Mobil.az" Azərbaycanda Mobil Cihazların Yeni və Etibarlı Ticarət Platforması</h1>
+                <p class="subtitle" data-translate="about-sub">Mobil cihazlar və aksesuarları üzrə ixtisaslaşmış ticarət platforması</p>
             </div>
 
             <div class="about-intro">
                 <p data-translate="about-p1">Azərbaycanın elektron ticarət sektorunda <b
-                        style="color: blueviolet;">Mobil.az</b> sırf mobil cihazlar və aksesuarları üzrə ixtisaslaşmış
-                    ilk innovativ platformalardan biridir. Ənənəvi elan saytlarından fərqli olaraq, biz yalnız
-                    telekommunikasiya məhsullarına köklənməklə həm alıcılar, həm də satıcılar üçün daha sürətli,
-                    təhlükəsiz və məqsədyönlü ticarət mühiti yaradırıq.</p>
-                <p><strong data-translate="about-p2">Platformamız vasitəsilə həm fiziki şəxslər, həm də korporativ
-                        mağazalar yeni və ya ikinci əl mobil cihazların alqı-satqısını rahatlıqla həyata keçirə
-                        bilərlər.</strong></p>
-                <p data-translate="about-p3">Hər büdcəyə uyğun geniş çeşiddə məhsulları bir araya gətirən Mobil.az,
-                    təklif edilən cihazların ətraflı texniki göstəricilərini, qiymət analizi və vəziyyətini şəffaf
-                    şəkildə istifadəçilərə təqdim edir. Bizim əsas məqsədimiz bazardakı ən optimal seçimləri bir
-                    platformada cəmləşdirərək istifadəçi təcrübəsini maksimum dərəcədə sadələşdirməkdir.</p>
+                        style="color: blueviolet;">Mobil.az</b> smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarları üzrə ixtisaslaşmış innovativ platformadır. Ənənəvi elan saytlarından fərqli olaraq, sırf mobil texnologiyalara fokuslanaraq həm alıcılar, həm də satıcılar üçün sürətli, təhlükəsiz və məqsədyönlü ticarət mühiti yaradırıq.</p>
+                <p><strong data-translate="about-p2">Platformamız vasitəsilə həm fərdi istifadəçilər, həm də mağazalar yeni və ya işlənmiş mobil cihaz və aksesuarların alqı-satqısını rahatlıqla həyata keçirə bilərlər.</strong></p>
+                <p data-translate="about-p3">Hər büdcəyə uyğun geniş çeşiddə məhsulları bir araya gətirən Mobil.az, təklif edilən cihazların ətraflı texniki göstəricilərini, qiymətini və vəziyyətini (yeni/işlənmiş) şəffaf şəkildə təqdim edir. Əsas məqsədimiz bazardakı optimal seçimləri bir platformada cəmləşdirərək axtarış prosesini sadələşdirməkdir.</p>
             </div>
 
             <div class="about-section">
@@ -104,7 +52,7 @@
                     </li>
                     <li><i class="fas fa-plug"></i> <strong data-translate="phone-accessories">Telefon
                             aksesuarları</strong> - <span data-translate="about-ul1-4">Adapterlər, qoruyucu örtüklər,
-                            ekran qoruyucuları və daha çoxu</span></li>
+                            ekran qoruyucuları və digər mobil aksesuarlar</span></li>
                 </ul>
                 <p class="category-summary" data-translate="about-category-summary"
                     style="margin-top: 20px; font-weight: 500;">Həm alıcılar, həm də satıcılar Mobil.az-da işlərini
@@ -115,116 +63,66 @@
                 <h2 data-translate="about-h2-2">Niyə Mobil.az Platformasını Seçməlisiniz?</h2>
                 <ul class="benefits-list">
                     <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-1">İxtisaslaşmış Bazar:
-                            Yalnız rəqəmsal cihazlar və onların aksesuarlarına xidmət göstərən tək profilli
-                            ekosistem.</span></li>
-                    <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-2">İnnovativ Axtarış:
-                            Qabaqcıl filtrasiya sistemləri sayəsində axtarılan hər hansı detalı saniyələr içində tapmaq
-                            imkanı.</span></li>
+                            Smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarlar üzrə ixtisaslaşmış ticarət ekosistemi.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-2">Rahat Axtarış və Filtrlər:
+                            Qabaqcıl kateqoriya, marka, qiymət və vəziyyət filtrləri sayəsində istənilən modeli saniyələr içində tapmaq imkanı.</span></li>
                     <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-3">Etibarlı Ticarət Mühiti:
-                            Satıcılar üçün tam şəffaf reytinq və real müştəri rəylərinə əsaslanan qiymətləndirmə
-                            sistemi.</span></li>
-                    <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-4">Elastik Təşviqat
-                            Paketləri: Hər bir istifadəçinin və mağazanın hədəflərinə uyğunlaşdırılmış Standart, PRO və
-                            VIP elan paketləri.</span></li>
+                            Satıcı və mağazalar üçün şəffaf reytinq və real müştəri rəyləri sistemi.</span></li>
+                    <li><i class="fas fa-check-circle"></i> <span data-translate="about-ul2-4">Elastik Elan Paketləri:
+                            İstifadəçi və mağazaların tələblərinə uyğunlaşdırılmış Standart, PRO və VIP elan paketləri.</span></li>
                 </ul>
             </div>
 
             <div class="about-section">
                 <h2 data-translate="about-h2-3">Mobil.az-ın İş Mexanizmi</h2>
-                <p data-translate="about-p4">Sistemimiz istər fərdi satıcıların, istərsə də rəsmi mağazaların
-                    məhsullarını birbaşa hədəf kütləsinə çatdırması üçün optimallaşdırılmışdır.</p>
+                <p data-translate="about-p4">Platformamız həm fərdi satıcılar, həm də rəsmi mağazalar üçün əlverişli və təhlükəsiz satış mühiti yaradır.</p>
                 <div class="user-types">
                     <div class="user-type">
                         <h3 data-translate="about-h3-1">1. Fərdi Satıcılar Üçün</h3>
                         <ul>
-                            <li><i class="fas fa-user"></i><span data-translate="about-ul3-1">Sürətli Satış: Hər bir
-                                    şəxs saniyələr içində ödənişsiz və ya ödənişli əsaslarla öz cihazının elanını
-                                    minlərlə potensial alıcıya təqdim edə bilər.</span></li>
-                            <li><i class="fas fa-comments"></i><span data-translate="about-ul3-2">Birbaşa Kommunikasiya:
-                                    Daxili mesajlaşma sistemi və ya birbaşa nömrə vasitəsilə alıcı-satıcı mühitində
-                                    sürətli əlaqə.</span></li>
-                            <li><i class="fas fa-search"></i><span data-translate="about-ul3-3">Hədəfli Təqdimat:
-                                    İstifadəçilər büdcə və xüsusiyyətlər üzrə detallı axtarışlar apararaq ən düzgün
-                                    elanlara yönəldilirlər.</span></li>
+                            <li><i class="fas fa-user"></i><span data-translate="about-ul3-1">Sürətli Satış: Cihaz və ya aksesuarlarınızı pulsuz və ya təşviqat paketləri ilə asanlıqla satışa çıxara bilərsiniz.</span></li>
+                            <li><i class="fas fa-comments"></i><span data-translate="about-ul3-2">Birbaşa Əlaqə:
+                                    Daxili mesajlaşma sistemi və ya əlaqə nömrəsi vasitəsilə alıcılarla operativ ünsiyyət.</span></li>
+                            <li><i class="fas fa-search"></i><span data-translate="about-ul3-3">Hədəfli Axtarış:
+                                    Alıcılar elanları kateqoriya, qiymət, marka və vəziyyət üzrə dəqiqliklə seçə bilirlər.</span></li>
                         </ul>
                     </div>
                     <div class="user-type">
                         <h3 data-translate="about-h3-2">2. Korporativ Mağazalar Üçün</h3>
                         <ul>
-                            <li><i class="fas fa-store"></i><span data-translate="about-ul4-1">Virtual Filiallar:
-                                    Şirkətlər asanlıqla özlərinin rəsmi virtual mağazalarını yaradaraq bizneslərini
-                                    rəqəmsallaşdıra bilərlər.</span></li>
-                            <li><i class="fas fa-crown"></i><span data-translate="about-ul4-2">B2B Həllər və Təşviqat:
-                                    Mağazalar üçün xüsusi olaraq dizayn edilmiş idarəetmə paneli və premium reklam
-                                    xidmətləri.</span></li>
-                            <li><i class="fas fa-shopping-bag"></i><span data-translate="about-ul4-3">Korporativ Vitrin:
-                                    Müəssisələr bütün ehtiyatlarını məhz bu seqmentlə maraqlanan ixtisaslaşmış, geniş
-                                    alıcı kütləsinə nümayiş etdirə bilirlər.</span></li>
+                            <li><i class="fas fa-store"></i><span data-translate="about-ul4-1">Rəsmi Mağaza Profili:
+                                    Texnologiya mağazaları Mobil.az-da qeydiyyatdan keçərək öz mağaza səhifələrini aça bilərlər.</span></li>
+                            <li><i class="fas fa-crown"></i><span data-translate="about-ul4-2">Mağaza İdarəetməsi və Təşviqat:
+                                    Mağazalar üçün xüsusi panel və PRO/VIP paketlərlə elanları önə çıxarma imkanı.</span></li>
+                            <li><i class="fas fa-shopping-bag"></i><span data-translate="about-ul4-3">Geniş Vitrin:
+                                    Mağazalar mobil cihaz və aksesuarlarını birbaşa maraqlanan hədəf auditoriyaya nümayiş etdirirlər.</span></li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div class="about-section">
-                <h2 data-translate="about-h2-4">Davamlı İnkişaf və Gələcək Hədəflərimiz</h2>
+                <h2 data-translate="about-h2-4">Gələcək Hədəflər və İnkişaf Planları</h2>
                 <ul class="future-plans">
-                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-1">Tətbiq Ekosistemi: Həm iOS, həm
-                            də Android istifadəçiləri üçün istifadəçi məmnuniyyətini zirvəyə qaldıracaq Mobil.az
-                            tətbiqinin tezliklə istifadəyə verilməsi.</span></li>
-                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-2">Süni İntellekt (AI)
-                            İnteqrasiyası: Alqoritmlər vasitəsilə istifadəçilərə ən uyğun məhsulların tövsiyə edilməsi
-                            və ağıllı qiymət analizatoru.</span></li>
-                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-3">Avtomatlaşdırılmış Moderasiya:
-                            Həm maşın öyrənməsi, həm də canlı moderatorlar vasitəsilə saxta və etibarsız elanların
-                            anında aşkarlanaraq bloklanması.</span></li>
+                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-1">Mobil Tətbiq (Gələcək plan): iOS və Android əməliyyat sistemləri üçün Mobil.az mobil tətbiqinin istifadəyə verilməsi.</span></li>
+                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-2">Süni İntellekt (AI) İnteqrasiyası (Gələcək plan): Ağıllı axtarış və istifadəçilərə uyğun cihazların tövsiyə edilməsi alqoritmləri.</span></li>
+                    <li><i class="fas fa-rocket"></i> <span data-translate="about-ul5-3">Avtomatlaşdırılmış Elan Moderasiyası (Gələcək plan): Saxta elanların aşkarlanması üçün maşın öyrənməsi həlləri (hazırda elanlar moderatorlar tərəfindən yoxlanılır).</span></li>
                 </ul>
             </div>
 
             <div class="about-conclusion">
-                <p data-translate="about-p5">Mobil.az olaraq məqsədimiz, Azərbaycan bazarında telekommunikasiya
-                    cihazlarının ticarətini beynəlxalq standartlara çatdırmaq və bu sahədə etibarlılıq simvolu olmaqdır.
-                </p>
-                <p class="tagline"><i class="fas fa-mobile-alt"></i> <span data-translate="about-tagline">Mobil.az
-                        Rəqəmsal Dünyanın Etibarlı Ticarət Mərkəzi.</span> <i class="fas fa-rocket"></i></p>
+                <p data-translate="about-p5">Mobil.az — Azərbaycanda smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarların alqı-satqısını sadə və etibarlı edən ixtisaslaşmış elan platformasıdır.</p>
+                <p class="tagline"><i class="fas fa-mobile-alt"></i> <span data-translate="about-tagline">Mobil.az — Mobil texnologiyalar və aksesuarların etibarlı ticarət məkanı.</span> <i class="fas fa-rocket"></i></p>
             </div>
         </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-                <ul>
-                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
-                    </li>
-                    <li><a href="#"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
-                                Təhlükəsizlik</span></a></li>
-                    <li><a href="#"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə
-                                qaydaları</span></a></li>
-                    <li><a href="#"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
-                                siyasəti</span></a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3 class="contact" data-translate="contact">Əlaqə</h3>
-                <ul>
-                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-                </ul>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-        </div>
-    </footer>
+      <div id="footer-placeholder"></div>
 
+    <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js?v=2"></script>
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

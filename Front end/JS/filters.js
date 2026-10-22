@@ -27,20 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Filter Application Logic
     const applyBtn = document.querySelector('.btn-apply');
-    const searchBtn = document.querySelector('.search-btn');
+    const searchBtn = document.getElementById('searchBtn') || document.querySelector('.search-btn');
     const resetBtn = document.querySelector('.btn-reset');
-    const searchInput = document.querySelector('.search-options > input[type="text"]');
+    const searchInput = document.getElementById('searchInput') || document.querySelector('.search-options > input[type="text"]');
     
     // Read current active filters
     function getActiveFilters() {
         const filters = {
-            search: searchInput ? searchInput.value.toLowerCase().trim() : '',
-            category: document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active')?.getAttribute('data-value') || '',
+            q: searchInput ? searchInput.value.trim() : '',
+            category: (document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active')?.getAttribute('data-value')) ?? (new URLSearchParams(window.location.search).get('category') || ''),
             brand: document.getElementById('brandSelect')?.value || '',
             model: document.getElementById('modelSelect')?.value || '',
             minPrice: parseFloat(document.getElementById('priceMin')?.value) || 0,
             maxPrice: parseFloat(document.getElementById('priceMax')?.value) || Infinity,
             city: document.querySelector('select[data-filter="city"]')?.value || '',
+            storage: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
             memory: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
             ram: document.querySelector('.filter-btn-group[data-group="ram"] .filter-pill.active')?.getAttribute('data-value') || '',
             screen: document.querySelector('.filter-btn-group[data-group="screen"] .filter-pill.active')?.getAttribute('data-value') || '',
@@ -52,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             condition: document.querySelector('.filter-btn-group[data-group="condition"] .filter-pill.active')?.getAttribute('data-value') || 'both',
             delivery: document.querySelector('.filter-btn-group[data-group="delivery"] .filter-pill.active')?.getAttribute('data-value') || 'any',
             seller: document.querySelector('.filter-btn-group[data-group="seller"] .filter-pill.active')?.getAttribute('data-value') || 'any',
-            colors: Array.from(document.querySelectorAll('.filter-btn-group[data-group="color"] .filter-pill.active')).map(btn => btn.getAttribute('data-value'))
+            colors: Array.from(document.querySelectorAll('.filter-btn-group[data-group="color"] .filter-pill.active')).map(btn => btn.getAttribute('data-value')).filter(Boolean)
         };
         return filters;
     }
@@ -60,6 +61,39 @@ document.addEventListener('DOMContentLoaded', () => {
     // Apply Filter Function
     function applyFilters() {
         const filters = getActiveFilters();
+        const urlParams = new URLSearchParams();
+
+        if (filters.q) urlParams.set('q', filters.q);
+        Object.keys(filters).forEach(key => {
+            if (key === 'q' || key === 'colors') return;
+            let val = filters[key];
+            if (val && val !== 'any' && val !== 'both' && val !== '0' && val !== 'Infinity') {
+                urlParams.set(key, val);
+            }
+        });
+        if (filters.colors && filters.colors.length) {
+            urlParams.set('color', filters.colors.join(','));
+        }
+        
+        const paramStr = urlParams.toString();
+        window.history.pushState({}, '', `${window.location.pathname}${paramStr ? '?' + paramStr : ''}`);
+
+        // If there's an API search function available, fetch from API first; fallback to client-side only on failure
+        if (typeof window.searchAdsFromAPI === 'function') {
+            window.searchAdsFromAPI(filters).then(() => {
+                // Server-side filtering succeeded, DOM already updated with server data
+            }).catch((err) => {
+                console.warn('Server search failed, applying client-side fallback:', err);
+                applyClientFilters(filters);
+            });
+            return;
+        }
+
+        applyClientFilters(filters);
+    }
+
+    // Client-side filtering of rendered cards
+    function applyClientFilters(filters) {
         const adCards = document.querySelectorAll('.ad-card');
         
         let visibleCount = 0;
@@ -68,15 +102,35 @@ document.addEventListener('DOMContentLoaded', () => {
             let matches = true;
             
             // Category check
-            if (matches && filters.category) {
-                const cardCategory = card.getAttribute('data-category') || '';
-                if (cardCategory.toLowerCase() !== filters.category.toLowerCase()) matches = false;
+            if (matches && filters.category && filters.category !== 'any' && filters.category !== 'both') {
+                const cardCat = (card.getAttribute('data-category') || '').toLowerCase().trim();
+                const filterCat = filters.category.toLowerCase().trim();
+                const catAliases = {
+                    phone: ['phone', 'telefon'],
+                    telefon: ['phone', 'telefon'],
+                    tablet: ['tablet', 'planşet', 'planset'],
+                    'planşet': ['tablet', 'planşet', 'planset'],
+                    planset: ['tablet', 'planşet', 'planset'],
+                    headphone: ['headphone', 'qulaqlıq', 'qulaqliq'],
+                    'qulaqlıq': ['headphone', 'qulaqlıq', 'qulaqliq'],
+                    qulaqliq: ['headphone', 'qulaqlıq', 'qulaqliq'],
+                    accessory: ['accessory', 'aksesuar'],
+                    aksesuar: ['accessory', 'aksesuar']
+                };
+                const allowed = catAliases[filterCat] || [filterCat];
+                if (!allowed.includes(cardCat) && cardCat !== filterCat) matches = false;
             }
             
-            // Keyword search check against title
-            const titleElem = card.querySelector('.ad-title');
-            if (filters.search && titleElem && !titleElem.textContent.toLowerCase().includes(filters.search)) {
-                matches = false;
+            // Keyword search check against full card content
+            const q = (filters.q || '').toLowerCase().trim();
+            if (q) {
+                const searchText = card.textContent.toLowerCase();
+                if (!searchText.includes(q)) {
+                    card.style.display = 'none';
+                    const targetItem = card.closest('a') || card;
+                    targetItem.style.display = 'none';
+                    return;
+                }
             }
             
             // Helper function to check equality if filter is provided
@@ -120,11 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Display toggle
+            const targetItem = card.closest('a') || card;
             if (matches) {
-                card.style.display = ''; 
+                targetItem.style.display = ''; 
                 visibleCount++;
             } else {
-                card.style.display = 'none';
+                targetItem.style.display = 'none';
             }
         });
         
@@ -196,14 +251,110 @@ document.addEventListener('DOMContentLoaded', () => {
         const allCatBtn = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill[data-value=""]');
         if (allCatBtn) allCatBtn.classList.add('active');
         
-        applyFilters();
+        // Reload all ads from API and reset client-side filters
+        if (window.reloadAllAds) {
+            window.reloadAllAds();
+        } else {
+            applyFilters();
+        }
     }
 
+    function debounce(fn, ms) {
+        let t;
+        return (...args) => {
+            clearTimeout(t);
+            t = setTimeout(() => fn(...args), ms);
+        };
+    }
+
+    const debouncedApply = debounce(() => { applyFilters(); }, 400);
+
     // Attach events
-    if (applyBtn) applyBtn.addEventListener('click', applyFilters);
-    if (searchBtn) searchBtn.addEventListener('click', applyFilters);
-    if (resetBtn) resetBtn.addEventListener('click', resetFilters);
-    if (searchInput) searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') applyFilters();
-    });
+    if (applyBtn) applyBtn.addEventListener('click', (e) => { e.preventDefault(); applyFilters(); });
+    if (searchBtn) searchBtn.addEventListener('click', (e) => { e.preventDefault(); applyFilters(); });
+    if (resetBtn) resetBtn.addEventListener('click', (e) => { e.preventDefault(); resetFilters(); });
+    if (searchInput) {
+        searchInput.addEventListener('input', debouncedApply);
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFilters();
+            }
+        });
+    }
+
+    const priceMin = document.getElementById('priceMin');
+    const priceMax = document.getElementById('priceMax');
+    const brandSelect = document.getElementById('brandSelect');
+    const modelSelect = document.getElementById('modelSelect');
+
+    if (priceMin) priceMin.addEventListener('input', debouncedApply);
+    if (priceMax) priceMax.addEventListener('input', debouncedApply);
+    if (brandSelect) brandSelect.addEventListener('change', debouncedApply);
+    if (modelSelect) modelSelect.addEventListener('change', debouncedApply);
+
+    // Catalog helpers
+    window.loadCatalog = async function() {
+        const dd = document.getElementById('catalogDropdown');
+        if (!dd) return;
+        try {
+            const API_BASE = window.API_URL || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : '/api');
+            const res = await fetch(`${API_BASE}/categories`);
+            const json = await res.json();
+            const cats = json.data || json;
+            if (Array.isArray(cats) && cats.length > 0) {
+                dd.innerHTML = cats.map(cat => `<div class="cat-item" onclick="filterByCat('${cat._id || cat.name}')">${cat.name}</div>`).join('');
+            }
+        } catch(e) {
+            console.warn('loadCatalog fallback error:', e);
+        }
+    };
+
+    window.filterByCat = function(catId) {
+        const map = {
+            'phone': 'Telefon',
+            'tablet': 'Planşet',
+            'headphone': 'Qulaqlıq',
+            'accessory': 'Aksesuar'
+        };
+        const catName = map[catId] || catId;
+        window.location.href = `phone.html?category=${encodeURIComponent(catName)}`;
+    };
+
+    window.restoreAndApplyFilters = function(shouldFilterClient = false) {
+        const params = new URLSearchParams(window.location.search);
+        
+        if (params.has('q') && searchInput) searchInput.value = params.get('q');
+        if (params.has('search') && searchInput && !params.has('q')) searchInput.value = params.get('search');
+        if (params.has('brand') && document.getElementById('brandSelect')) document.getElementById('brandSelect').value = params.get('brand');
+        if (params.has('model') && document.getElementById('modelSelect')) document.getElementById('modelSelect').value = params.get('model');
+        if (params.has('minPrice') && document.getElementById('priceMin')) document.getElementById('priceMin').value = params.get('minPrice');
+        if (params.has('maxPrice') && document.getElementById('priceMax')) document.getElementById('priceMax').value = params.get('maxPrice');
+        if (params.has('city') && document.querySelector('select[data-filter="city"]')) document.querySelector('select[data-filter="city"]').value = params.get('city');
+
+        ['category', 'memory', 'ram', 'screen', 'battery', 'fingerprint', 'nfc', 'waterproof', 'expandable', 'condition', 'delivery', 'seller'].forEach(group => {
+            if (params.has(group)) {
+                const val = params.get(group);
+                const pills = document.querySelectorAll(`.filter-btn-group[data-group="${group}"] .filter-pill`);
+                pills.forEach(p => {
+                    if (p.getAttribute('data-value') === val) p.classList.add('active');
+                    else p.classList.remove('active');
+                });
+            }
+        });
+
+        if (params.has('colors') || params.has('color')) {
+            const rawColors = params.get('colors') || params.get('color') || '';
+            const colors = rawColors.split(',');
+            const pills = document.querySelectorAll('.filter-btn-group[data-group="color"] .filter-pill');
+            pills.forEach(p => {
+                if (colors.includes(p.getAttribute('data-value'))) p.classList.add('active');
+                else p.classList.remove('active');
+            });
+        }
+        
+        if (shouldFilterClient) {
+            applyClientFilters(getActiveFilters());
+        }
+    };
 });

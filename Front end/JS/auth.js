@@ -5,17 +5,17 @@ function getToken() {
         return window.getToken();
     }
     const tryGet = (store, key) => {
-        try { 
+        try {
             let t = store.getItem(key);
             if (!t || t === 'null' || t === 'undefined' || t === '""' || t === "''") return null;
             t = t.trim().replace(/^["']+|["']+$/g, '');
             if (t.length < 30) return null;
             if (t.split('.').length !== 3) return null;
             return t;
-        } catch(e) { return null; }
+        } catch (e) { return null; }
     };
     const remember = localStorage.getItem('rememberMe') === 'true';
-    const sources = remember ? 
+    const sources = remember ?
         [() => [localStorage, 'token'], () => [sessionStorage, 'token'], () => [localStorage, 'accessToken'], () => [localStorage, 'authToken']] :
         [() => [sessionStorage, 'token'], () => [localStorage, 'token'], () => [sessionStorage, 'accessToken'], () => [sessionStorage, 'authToken']];
     for (let fn of sources) {
@@ -35,12 +35,12 @@ window.getAuthToken = getToken;
 
 function getUser() {
     const raw = localStorage.getItem('user') ||
-                localStorage.getItem('mobilaz_current_user') ||
-                localStorage.getItem('mobilaz_user') ||
-                sessionStorage.getItem('user') ||
-                sessionStorage.getItem('mobilaz_current_user') ||
-                localStorage.getItem('adminUser') ||
-                sessionStorage.getItem('adminUser');
+        localStorage.getItem('mobilaz_current_user') ||
+        localStorage.getItem('mobilaz_user') ||
+        sessionStorage.getItem('user') ||
+        sessionStorage.getItem('mobilaz_current_user') ||
+        localStorage.getItem('adminUser') ||
+        sessionStorage.getItem('adminUser');
     if (!raw) return null;
     try {
         return JSON.parse(raw);
@@ -75,6 +75,45 @@ window.isLoggedIn = isAuthenticated;
     }
 })();
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+if (typeof window !== 'undefined') {
+    window.escapeHtml = escapeHtml;
+}
+
+let _fetchingUnreadCount = false;
+let _lastUnreadCountFetch = 0;
+function fetchUnreadCount(token) {
+    if (!token || !getToken()) return;
+    const now = Date.now();
+    if (_fetchingUnreadCount || (now - _lastUnreadCountFetch < 5000)) return;
+    _fetchingUnreadCount = true;
+    _lastUnreadCountFetch = now;
+    fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/unread-count', {
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+            if (data && data.count > 0) {
+                document.querySelectorAll('#notifCount').forEach(badge => {
+                    badge.textContent = data.count > 99 ? '99+' : data.count;
+                    badge.style.display = 'inline-block';
+                });
+            }
+        })
+        .catch(() => { })
+        .finally(() => {
+            _fetchingUnreadCount = false;
+        });
+}
+
 // Header & Auth UI updater
 function updateHeader() {
     const currentUser = getUser();
@@ -86,7 +125,9 @@ function updateHeader() {
 
     buttonContainers.forEach((buttonContainer) => {
         if (loggedIn) {
-            const displayName = [currentUser.name || currentUser.firstName || '', currentUser.lastName || ''].filter(Boolean).join(' ') || currentUser.email || 'Kabinet';
+            const rawDisplayName = [currentUser.name || currentUser.firstName || '', currentUser.lastName || ''].filter(Boolean).join(' ') || currentUser.email || 'Kabinet';
+            const safeDisplayName = escapeHtml(rawDisplayName);
+            const safeEmail = escapeHtml(currentUser.email || '');
             const isAdmin = currentUser.role === 'admin';
 
             buttonContainer.innerHTML = `
@@ -116,15 +157,15 @@ function updateHeader() {
                 <!-- PROFİL - AYRI DROPDOWN -->
                 <div class="profile-wrapper" style="position:relative;">
                     <button id="profileBtn" class="cabinet-btn-header" type="button" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; box-shadow: 0 2px 6px rgba(108,92,231,0.3); cursor: pointer;">
-                        <i class="fas fa-user-circle"></i> <span>${displayName}</span>
+                        <i class="fas fa-user-circle"></i> <span>${safeDisplayName}</span>
                         <i class="fas fa-chevron-down" style="font-size: 10px; margin-left: 2px; opacity: 0.8;"></i>
                     </button>
                     <div id="profileDropdown" class="dropdown-panel profile-panel hidden">
                         <div class="profile-card-top">
                             <div class="avatar"><i class="fas fa-user"></i></div>
                             <div class="profile-user-details">
-                                <div class="profile-name">${displayName}</div>
-                                <div class="profile-email">${currentUser.email || ''}</div>
+                                <div class="profile-name">${safeDisplayName}</div>
+                                <div class="profile-email">${safeEmail}</div>
                                 <span class="role-badge">${isAdmin ? 'ADMİN HESAB' : 'STANDART HESAB'}</span>
                             </div>
                         </div>
@@ -139,6 +180,14 @@ function updateHeader() {
                     </div>
                 </div>
             `;
+
+            // Ensure profile textContent is safely bound
+            const profileBtnSpan = buttonContainer.querySelector('#profileBtn span');
+            if (profileBtnSpan) profileBtnSpan.textContent = rawDisplayName;
+            const profileNameEl = buttonContainer.querySelector('.profile-name');
+            if (profileNameEl) profileNameEl.textContent = rawDisplayName;
+            const profileEmailEl = buttonContainer.querySelector('.profile-email');
+            if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '';
 
             // Separate event listeners
             const notifBell = buttonContainer.querySelector('#notifBell');
@@ -177,7 +226,7 @@ function updateHeader() {
                     const badge = buttonContainer.querySelector('#notifCount');
                     if (badge) badge.style.display = 'none';
                     loadNotifications();
-                } catch (err) {}
+                } catch (err) { }
             });
 
             const logoutBtn = buttonContainer.querySelector('.header-logout-btn');
@@ -208,19 +257,7 @@ function updateHeader() {
     });
 
     if (loggedIn && token) {
-        fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/unread-count', {
-            headers: { 'Authorization': 'Bearer ' + token }
-        })
-        .then(res => res.ok ? res.json() : null)
-        .then(data => {
-            if (data && data.count > 0) {
-                document.querySelectorAll('#notifCount').forEach(badge => {
-                    badge.textContent = data.count > 99 ? '99+' : data.count;
-                    badge.style.display = 'inline-block';
-                });
-            }
-        })
-        .catch(() => {});
+        fetchUnreadCount(token);
     }
 }
 
@@ -250,15 +287,36 @@ async function loadNotifications() {
             listEl.innerHTML = '<div class="notif-empty-state">Bildiriş yoxdur</div>';
             return;
         }
-        listEl.innerHTML = items.map(n => {
+        listEl.replaceChildren();
+        items.forEach(n => {
             const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleDateString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : '';
-            return `
-                <div class="notif-item ${n.read ? '' : 'unread'}">
-                    <div>${n.title ? `<strong>${n.title}</strong><br>` : ''}${n.message || ''}</div>
-                    ${timeStr ? `<span class="notif-item-time">${timeStr}</span>` : ''}
-                </div>
-            `;
-        }).join('');
+            const title = (n.title || '').replace(/AiryPhone/gi, 'Mobil.az');
+            const content = (n.body || n.message || '').replace(/AiryPhone/gi, 'Mobil.az');
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `notif-item ${n.isRead || n.read ? '' : 'unread'}`;
+
+            const textDiv = document.createElement('div');
+            if (title) {
+                const strong = document.createElement('strong');
+                strong.textContent = title;
+                textDiv.appendChild(strong);
+                textDiv.appendChild(document.createElement('br'));
+            }
+            if (content) {
+                textDiv.appendChild(document.createTextNode(content));
+            }
+            itemDiv.appendChild(textDiv);
+
+            if (timeStr) {
+                const timeSpan = document.createElement('span');
+                timeSpan.className = 'notif-item-time';
+                timeSpan.textContent = timeStr;
+                itemDiv.appendChild(timeSpan);
+            }
+
+            listEl.appendChild(itemDiv);
+        });
     } catch (err) {
         listEl.innerHTML = '<div class="notif-empty-state">Bildirişlər yüklənə bilmədi</div>';
     }
@@ -298,7 +356,14 @@ document.addEventListener("DOMContentLoaded", function () {
             if (welcomeDisplay) {
                 const welcomeSpan = welcomeDisplay.querySelector("span");
                 if (welcomeSpan) {
-                    welcomeDisplay.innerHTML = `<span data-translate="cab-welcome">${welcomeSpan.textContent}</span> ${currentUser.name || currentUser.firstName || ''} ${currentUser.lastName || ''}!`;
+                    const welcomeText = welcomeSpan.textContent;
+                    welcomeDisplay.replaceChildren();
+                    const newSpan = document.createElement('span');
+                    newSpan.setAttribute('data-translate', 'cab-welcome');
+                    newSpan.textContent = welcomeText;
+                    welcomeDisplay.appendChild(newSpan);
+                    const userFullName = `${currentUser.name || currentUser.firstName || ''} ${currentUser.lastName || ''}`.trim();
+                    welcomeDisplay.appendChild(document.createTextNode(` ${userFullName || currentUser.email || ''}!`));
                 }
             }
 
@@ -329,9 +394,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (window.location.pathname.includes("login.html") || window.location.pathname.includes("signup.html")) {
             const isManualLogin = Boolean(window.loginFormSubmitted || sessionStorage.getItem('manualLoginInProgress'));
             if (!isManualLogin && (window.location.search.includes('expired') || window.location.search.includes('reason='))) {
-                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                    try { localStorage.removeItem(k); } catch(e){}
-                    try { sessionStorage.removeItem(k); } catch(e){}
+                ['token', 'accessToken', 'authToken', 'adminToken', 'jwt', 'user', 'mobilaz_current_user', 'adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch (e) { }
+                    try { sessionStorage.removeItem(k); } catch (e) { }
                 });
                 return;
             }

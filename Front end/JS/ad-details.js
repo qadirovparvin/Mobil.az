@@ -35,6 +35,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         return h;
     }
 
+    function escapeHtml(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[c]));
+    }
+
     // ── Always-reveal function (called in finally) ─────────────────
     function revealPage() {
         const skeleton = document.getElementById('adLoadingSkeleton');
@@ -52,9 +62,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="text-align:center;padding:80px 20px;font-size:17px;color:var(--text-secondary,#888);max-width:500px;margin:0 auto;">
                     <i class="fas fa-exclamation-triangle" style="font-size:52px;color:#dc3545;display:block;margin-bottom:18px;"></i>
                     <strong style="color:var(--text-primary,#111);font-size:20px;display:block;margin-bottom:10px;">Xəta baş verdi</strong>
-                    <p style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;text-align:left;word-break:break-word;">${msg}</p>
+                    <p class="error-msg-box" style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;text-align:left;word-break:break-word;"></p>
                     <a href="index.html" style="display:inline-block;margin-top:20px;padding:12px 28px;background:var(--airy-primary,#5e5ce6);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">← Ana Səhifəyə Qayıt</a>
                 </div>`;
+            const errP = wrapper.querySelector('.error-msg-box');
+            if (errP) errP.textContent = String(msg ?? '');
         }
     }
 
@@ -198,28 +210,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ── 6. Quick Spec Chips ────────────────────────────────────
         const quickSpecsEl = document.querySelector('.quick-specs');
         if (quickSpecsEl) {
-            quickSpecsEl.innerHTML = '';
-            if (ad.specs?.memory)   quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-memory"></i> ${ad.specs.memory} Yaddaş</span>`;
-            if (ad.specs?.ram)      quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-microchip"></i> ${ad.specs.ram} RAM</span>`;
-            if (ad.specs?.color)    quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-palette"></i> ${ad.specs.color}</span>`;
-            if (ad.specs?.screenSize) quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-expand-arrows-alt"></i> ${ad.specs.screenSize}"</span>`;
-            if (ad.condition)       quickSpecsEl.innerHTML += `<span class="spec-chip"><i class="fas fa-box-open"></i> ${ad.condition}</span>`;
+            quickSpecsEl.replaceChildren();
+            const addChip = (iconClass, text) => {
+                const chip = document.createElement('span');
+                chip.className = 'spec-chip';
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                chip.append(icon, document.createTextNode(' ' + text));
+                quickSpecsEl.appendChild(chip);
+            };
+            if (ad.specs?.memory)     addChip('fas fa-memory', `${ad.specs.memory} Yaddaş`);
+            if (ad.specs?.ram)        addChip('fas fa-microchip', `${ad.specs.ram} RAM`);
+            if (ad.specs?.color)      addChip('fas fa-palette', String(ad.specs.color));
+            if (ad.specs?.screenSize) addChip('fas fa-expand-arrows-alt', `${ad.specs.screenSize}"`);
+            if (ad.condition)         addChip('fas fa-box-open', String(ad.condition));
         }
 
         // ── 7. Full Specs Grid ─────────────────────────────────────
         const specsGrid = document.querySelector('.specs-grid');
         if (specsGrid) {
-            specsGrid.innerHTML = `
-                <div class="spec-row"><span class="spec-label">Marka</span><span class="spec-value">${ad.brand || '-'}</span></div>
-                <div class="spec-row"><span class="spec-label">Model</span><span class="spec-value">${ad.modelName || '-'}</span></div>
-                <div class="spec-row"><span class="spec-label">Yaddaş</span><span class="spec-value">${ad.specs?.memory || '-'}</span></div>
-                <div class="spec-row"><span class="spec-label">RAM</span><span class="spec-value">${ad.specs?.ram || '-'}</span></div>
-                <div class="spec-row"><span class="spec-label">Rəng</span><span class="spec-value">${ad.specs?.color || '-'}</span></div>
-                <div class="spec-row"><span class="spec-label">Vəziyyəti</span><span class="spec-value">${ad.condition || '-'}</span></div>
-            `;
-            if (ad.specs?.features?.nfc)         specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">NFC</span><span class="spec-value">✓ Var</span></div>`;
-            if (ad.specs?.features?.waterproof)  specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">Suya davamlılıq</span><span class="spec-value">✓ Var</span></div>`;
-            if (ad.specs?.features?.fingerprint) specsGrid.innerHTML += `<div class="spec-row"><span class="spec-label">Barmaq izi</span><span class="spec-value">✓ Var</span></div>`;
+            specsGrid.replaceChildren();
+            const addSpecRow = (label, val) => {
+                const row = document.createElement('div');
+                row.className = 'spec-row';
+                const lblSpan = document.createElement('span');
+                lblSpan.className = 'spec-label';
+                lblSpan.textContent = label;
+                const valSpan = document.createElement('span');
+                valSpan.className = 'spec-value';
+                valSpan.textContent = String(val || '-');
+                row.append(lblSpan, valSpan);
+                specsGrid.appendChild(row);
+            };
+            addSpecRow('Marka', ad.brand);
+            addSpecRow('Model', ad.modelName);
+            addSpecRow('Yaddaş', ad.specs?.memory);
+            addSpecRow('RAM', ad.specs?.ram);
+            addSpecRow('Rəng', ad.specs?.color);
+            addSpecRow('Vəziyyəti', ad.condition);
+
+            if (ad.specs?.features?.nfc)         addSpecRow('NFC', '✓ Var');
+            if (ad.specs?.features?.waterproof)  addSpecRow('Suya davamlılıq', '✓ Var');
+            if (ad.specs?.features?.fingerprint) addSpecRow('Barmaq izi', '✓ Var');
         }
 
         // ── 8. Location & Condition rows ───────────────────────────
@@ -230,7 +262,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ── 9. Category tag ────────────────────────────────────────
         const catTag = document.querySelector('.ad-category-tag');
-        if (catTag) catTag.innerHTML = `<i class="fas fa-mobile-alt"></i> ${ad.category || 'Telefon'} · ${ad.brand || ''}`;
+        if (catTag) {
+            catTag.replaceChildren();
+            const catIcon = document.createElement('i');
+            catIcon.className = 'fas fa-mobile-alt';
+            catTag.append(catIcon, document.createTextNode(` ${ad.category || 'Telefon'} · ${ad.brand || ''}`));
+        }
 
         // ── 10. Seller Info ────────────────────────────────────────
         const isStore = ad.sellerType === 'store' && !!ad.store;
@@ -600,8 +637,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const revRes  = await fetch(`${API_BASE}/reviews/${ad.author._id}`);
                     const revData = await revRes.json();
                     if (revRes.ok) renderReviews(revData.reviews || []);
+                    else renderReviews([]);
                 } catch (e) {
                     console.warn('Reviews fetch failed:', e.message);
+                    renderReviews([]);
+                    const realRatingEl = document.getElementById('realRating');
+                    if (realRatingEl) realRatingEl.textContent = 'Hələ rəy yoxdur';
                 }
             };
 
@@ -658,12 +699,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                         } catch (e) {
                             showToast('Şəbəkə xətası baş verdi.');
+                            renderReviews([]);
                         } finally {
                             submitBtn.innerHTML = btnText;
                         }
                     });
                 });
             }
+        } else {
+            renderReviews([]);
         }
 
         // ── 15. Related Ads (non-blocking) ──────────────────────────
@@ -810,21 +854,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── renderReviews helper ────────────────────────────────────────
     function renderReviews(reviews) {
+        reviews = Array.isArray(reviews) ? reviews : [];
         let total = 0;
         const counts = [0, 0, 0, 0, 0];
         reviews.forEach(r => {
-            total += r.rating;
-            if (r.rating >= 1 && r.rating <= 5) counts[5 - r.rating]++;
+            const val = Number(r.rating) || 0;
+            total += val;
+            if (val >= 1 && val <= 5) counts[5 - val]++;
         });
-        const avg = reviews.length ? (total / reviews.length).toFixed(1) : '0.0';
+        const avg = reviews.length ? (total / reviews.length).toFixed(1) : '-';
+
+        const realRatingEl = document.getElementById('realRating');
+        if (realRatingEl) {
+            realRatingEl.textContent = reviews.length ? `${avg} ★` : 'Hələ rəy yoxdur';
+        }
+        const avgSpan = document.getElementById('avgRating');
+        if (avgSpan) avgSpan.textContent = avg;
+        const countSpan = document.getElementById('reviewCount');
+        if (countSpan) countSpan.textContent = String(reviews.length);
 
         const summaryEl = document.querySelector('.review-rating-summary');
         if (summaryEl) {
             summaryEl.innerHTML = `
                 <div>
-                    <div class="rating-big">${avg}</div>
-                    <div class="rating-stars-lg">${getStarsHtml(Math.round(avg))}</div>
-                    <div class="rating-count">${reviews.length} rəy əsasında</div>
+                    <div class="rating-big"><span id="realRating">${reviews.length ? `${avg} ★` : 'Hələ rəy yoxdur'}</span><span id="avgRating" style="display:none;">${avg}</span></div>
+                    <div class="rating-stars-lg">${reviews.length ? getStarsHtml(Math.round(Number(avg))) : '☆☆☆☆☆'}</div>
+                    <div class="rating-count"><span id="reviewCount">${reviews.length}</span> rəy əsasında</div>
                 </div>
                 <div class="rating-bars" style="flex:1">
                     ${[5,4,3,2,1].map((star, idx) => {
@@ -843,41 +898,97 @@ document.addEventListener('DOMContentLoaded', async () => {
         const section = document.querySelector('.reviews-section');
         if (section) {
             section.querySelectorAll('.review-card-full').forEach(e => e.remove());
+            section.querySelectorAll('.no-reviews-empty').forEach(e => e.remove());
             const writeBlock = section.querySelector('.write-review-main');
-            reviews.slice(0, 10).forEach(r => {
-                const div  = document.createElement('div');
-                div.className = 'review-card-full';
-                const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
-                const date = new Date(r.createdAt).toLocaleDateString('az-AZ');
-                div.innerHTML = `
-                    <div class="rc-header">
-                        <div class="rc-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">${char}</div>
-                        <div>
-                            <div class="rc-name">${r.author?.name || r.author?.email || 'İstifadəçi'}</div>
-                            <div class="rc-date">${date}</div>
-                        </div>
-                        <div class="rc-stars">${getStarsHtml(r.rating)}</div>
-                    </div>
-                    <p class="rc-text">${r.comment || ''}</p>`;
-                section.insertBefore(div, writeBlock || null);
-            });
+
+            if (!reviews.length) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'no-reviews-empty';
+                emptyDiv.style.cssText = 'padding: 24px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 14px;';
+                emptyDiv.textContent = 'Hələ rəy yoxdur';
+                section.insertBefore(emptyDiv, writeBlock || null);
+            } else {
+                reviews.slice(0, 10).forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'review-card-full';
+                    const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
+                    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('az-AZ') : '';
+
+                    const header = document.createElement('div');
+                    header.className = 'rc-header';
+
+                    const avatar = document.createElement('div');
+                    avatar.className = 'rc-avatar';
+                    avatar.style.background = 'linear-gradient(135deg,#5e5ce6,#a78bfa)';
+                    avatar.textContent = char;
+
+                    const info = document.createElement('div');
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'rc-name';
+                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
+                    const dateDiv = document.createElement('div');
+                    dateDiv.className = 'rc-date';
+                    dateDiv.textContent = date;
+                    info.append(nameDiv, dateDiv);
+
+                    const starsDiv = document.createElement('div');
+                    starsDiv.className = 'rc-stars';
+                    starsDiv.innerHTML = getStarsHtml(r.rating);
+
+                    header.append(avatar, info, starsDiv);
+
+                    const textP = document.createElement('p');
+                    textP.className = 'rc-text';
+                    textP.textContent = r.comment || '';
+
+                    div.append(header, textP);
+                    section.insertBefore(div, writeBlock || null);
+                });
+            }
         }
 
         const miniContainer = document.querySelector('.mini-reviews');
         if (miniContainer) {
-            miniContainer.innerHTML = '';
-            reviews.slice(0, 3).forEach(r => {
-                const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
-                miniContainer.innerHTML += `
-                    <div class="mini-review-item">
-                        <div class="mini-review-top">
-                            <div class="mini-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">${char}</div>
-                            <div class="mini-name">${r.author?.name || 'İstifadəçi'}</div>
-                            <div class="mini-stars">${getStarsHtml(r.rating)}</div>
-                        </div>
-                        <div class="mini-text">${r.comment || ''}</div>
-                    </div>`;
-            });
+            miniContainer.replaceChildren();
+            if (!reviews.length) {
+                const emptyMini = document.createElement('div');
+                emptyMini.className = 'no-reviews-empty';
+                emptyMini.style.cssText = 'padding: 12px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 13px;';
+                emptyMini.textContent = 'Hələ rəy yoxdur';
+                miniContainer.appendChild(emptyMini);
+            } else {
+                reviews.slice(0, 3).forEach(r => {
+                    const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
+
+                    const item = document.createElement('div');
+                    item.className = 'mini-review-item';
+
+                    const top = document.createElement('div');
+                    top.className = 'mini-review-top';
+
+                    const avatar = document.createElement('div');
+                    avatar.className = 'mini-avatar';
+                    avatar.style.background = 'linear-gradient(135deg,#5e5ce6,#a78bfa)';
+                    avatar.textContent = char;
+
+                    const nameDiv = document.createElement('div');
+                    nameDiv.className = 'mini-name';
+                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
+
+                    const starsDiv = document.createElement('div');
+                    starsDiv.className = 'mini-stars';
+                    starsDiv.innerHTML = getStarsHtml(r.rating);
+
+                    top.append(avatar, nameDiv, starsDiv);
+
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'mini-text';
+                    textDiv.textContent = r.comment || '';
+
+                    item.append(top, textDiv);
+                    miniContainer.appendChild(item);
+                });
+            }
         }
 
         // Dynamically show personal seller rating stat if reviews exist

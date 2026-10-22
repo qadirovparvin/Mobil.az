@@ -10,8 +10,8 @@ const {
     deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds
 } = require('../controllers/adController');
 
-// Public
-router.get('/',    adListLimiter, getAds);
+// Public (optional authentication; rejects invalid/refresh tokens if Bearer auth header is passed)
+router.get('/',    adListLimiter, optionalProtect, getAds);
 
 // Protected — must come before /:id to avoid route clash
 router.get('/my',  protect, getMyAds);

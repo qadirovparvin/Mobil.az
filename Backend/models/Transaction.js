@@ -25,10 +25,27 @@ const transactionSchema = new mongoose.Schema({
     // Linked ad (if transaction is ad-related)
     ad: { type: mongoose.Schema.Types.ObjectId, ref: 'Ad', default: null },
 
+    // Package purchase metadata
+    packageType: { type: String, default: null },
+    packageDurationDays: { type: Number, default: null },
+    priceSnapshot: {
+        productId: { type: String, default: '' },
+        packageCode: { type: String, default: '' },
+        packageName: { type: String, default: '' },
+        durationDays: { type: Number, default: null },
+        baseAmount: { type: Number, default: null },
+        discountAmount: { type: Number, default: 0 },
+        finalAmount: { type: Number, default: null },
+        currency: { type: String, default: '' },
+        calculatedAt: { type: Date, default: null }
+    },
+    paymentProvider: { type: String, default: '' },
+    paymentId: { type: String, default: '' },
+
     status: {
         type: String,
         enum: ['pending', 'completed', 'failed'],
-        default: 'completed'
+        default: 'pending'
     },
 
     // Balance snapshot after this transaction
@@ -37,5 +54,14 @@ const transactionSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 transactionSchema.index({ user: 1, createdAt: -1 });
+transactionSchema.index({ type: 1, status: 1, createdAt: -1 });
+transactionSchema.index({ paymentId: 1 });
+transactionSchema.index(
+    { reference: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { reference: { $type: 'string', $gt: '' } }
+    }
+);
 
 module.exports = mongoose.model('Transaction', transactionSchema);

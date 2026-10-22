@@ -1,12 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const { upload, processImage } = require('../middlewares/uploadMiddleware');
+const {
+    MAX_UPLOAD_FILES,
+    upload,
+    uploadKycDocuments,
+    processImage,
+    processKycDocuments,
+    uploadErrorHandler
+} = require('../middlewares/uploadMiddleware');
 const { protect } = require('../middlewares/authMiddleware');
+const { csrfProtection } = require('../middlewares/csrfProtection');
 
 // @desc    Upload single image
 // @route   POST /api/upload
 // @access  Private
-router.post('/', protect, upload.single('image'), processImage, (req, res) => {
+router.post('/', protect, csrfProtection, upload.single('image'), processImage, (req, res) => {
     if (!req.file) {
         return res.status(400).json({ message: 'Şəkil seçilməyib' });
     }
@@ -21,7 +29,7 @@ router.post('/', protect, upload.single('image'), processImage, (req, res) => {
 // @desc    Upload multiple images (max 10)
 // @route   POST /api/upload/multiple
 // @access  Private
-router.post('/multiple', protect, upload.array('images', 10), processImage, (req, res) => {
+router.post('/multiple', protect, csrfProtection, upload.array('images', MAX_UPLOAD_FILES), processImage, (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ message: 'Şəkillər seçilməyib' });
     }
@@ -33,5 +41,35 @@ router.post('/multiple', protect, upload.array('images', 10), processImage, (req
         urls: fileUrls 
     });
 });
+
+// @desc    Upload private KYC documents for store application
+// @route   POST /api/upload/kyc
+// @access  Private
+router.post(
+    '/kyc',
+    protect,
+    csrfProtection,
+    uploadKycDocuments.fields([
+        { name: 'taxDocument', maxCount: 1 },
+        { name: 'identityDocument', maxCount: 1 }
+    ]),
+    processKycDocuments,
+    (req, res) => {
+        const docs = req.kycDocuments || {};
+        if (!docs.taxDocument || !docs.identityDocument) {
+            return res.status(400).json({ message: 'VÖEN/vergi sənədi və şəxsiyyət sənədi tələb olunur' });
+        }
+
+        res.status(201).json({
+            message: 'KYC sənədləri qəbul edildi',
+            documents: {
+                taxDocument: docs.taxDocument,
+                identityDocument: docs.identityDocument
+            }
+        });
+    }
+);
+
+router.use(uploadErrorHandler);
 
 module.exports = router;

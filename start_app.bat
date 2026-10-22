@@ -1,28 +1,31 @@
 @echo off
-title AiryPhone Launcher
+title Mobil.az Launcher
 color 0A
 
 echo ============================================
-echo   AiryPhone - Starting up...
+echo   Mobil.az - Starting up...
 echo ============================================
 echo.
 
-:: Start the backend server in a new window
 echo [1/3] Starting backend server (port 5000)...
-start "AiryPhone Backend" cmd /k "cd /d "%~dp0Backend" && node server.js"
+cd /d "%~dp0Backend"
+start /B node server.js
+timeout /t 3 >nul
+cd /d "%~dp0"
+echo Backend 5000-de basladildi.
 
-:: Wait 3 seconds for the server to boot
-echo [2/3] Waiting for server to initialize...
-timeout /t 3 /nobreak >nul
+echo.
+echo [2/3] Checking backend readiness...
+node Backend/ensure_backend.js
 
-:: Open the frontend in the default browser
-echo [3/3] Opening AiryPhone in your browser...
+echo.
+echo [3/3] Opening Mobil.az in your browser...
 start "" "%~dp0Front end\index.html"
 
 echo.
 echo ============================================
-echo   Done! Backend is running in the other
-echo   window. Close it to stop the server.
+echo   Done! Backend is running on port 5000.
+echo   Mobil.az web app is open in browser.
 echo ============================================
 echo.
 pause

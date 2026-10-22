@@ -7,7 +7,7 @@
     <title>Mobil.az - Qaydalar və Təhlükəsizlik</title>
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
         .rules-container {
             max-width: 900px;
@@ -200,63 +200,20 @@
             border-color: var(--airy-primary);
         }
     </style>
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <span class="mobil-logo">Mobil<span>.az</span></span>
-            </a>
-
-            <div class="header-right">
-                <nav class="menu">
-                    <ul>
-                        <div class="contact-dropdown">
-                            <li data-translate="Contact">
-                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-                            </li>
-                            <div class="contact-menu">
-                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
-                                    Instagram</a>
-                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
-                                    Facebook</a>
-                                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i>
-                                    WhatsApp</a>
-                                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-                            </div>
-                        </div>
-                        <li class="About" data-translate="About">
-                            <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-                        </li>
-                        <li class="Stores" data-translate="Stores">
-                            <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-                        </li>
-                        <li class="Favorite" data-translate="Favorite">
-                            <a href="favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="button-container">
-                    <a href="login.html" class="login-btn" data-translate="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş
-                    </a>
-                    <a href="signup.html" class="register-btn" data-translate="register-btn">
-                        <i class="fas fa-user-plus"></i> Qeydiyyat
-                    </a>
-                </div>
-                <div class="theme-lang-container">
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span id="current-lang" data-translate="language-selector">AZ</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+      <div id="header-placeholder"></div>
 
     <main>
         <div class="rules-container">
@@ -443,41 +400,12 @@
         </div>
     </main>
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-                <ul>
-                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
-                    </li>
-                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
-                                Təhlükəsizlik</span></a></li>
-                    <li><a href="rules.html#posting-rules"><span class="posting-rules"
-                                data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
-                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
-                                siyasəti</span></a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3 class="contact" data-translate="contact">Əlaqə</h3>
-                <ul>
-                    <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-                </ul>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-        </div>
-    </footer>
+      <div id="footer-placeholder"></div>
 
+    <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js"></script>
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

@@ -705,9 +705,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const history = getBillingHistory(user);
         if (!history.length) {
             historyList.innerHTML = `
-                <div class="billing-history-empty">
-                    <i class="fas fa-receipt"></i>
-                    <span>${escapeHtml(billingText('historyEmpty', 'No payment activity yet.'))}</span>
+                <div class="billing-history-empty" style="text-align: center; padding: 25px; color: var(--text-muted, #94a3b8);">
+                    <i class="fas fa-receipt" style="font-size: 26px; margin-bottom: 8px; opacity: 0.6; display: block;"></i>
+                    <span>${escapeHtml(billingText('historyEmpty', 'Hələlik heç bir əməliyyat aparılmayıb.'))}</span>
                 </div>
             `;
             return;
@@ -721,21 +721,167 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtitle = `${formatDate(item.date)} - ${billingText('historyMethod', 'Method')}: ${billingText(method.nameKey, method.id)}`;
 
             return `
-                <div class="billing-history-item">
-                    <div class="billing-history-main">
-                        <i class="fas ${method.icon}"></i>
+                <div class="billing-history-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 6px; border-bottom:1px solid var(--border-color, rgba(255,255,255,0.05));">
+                    <div class="billing-history-main" style="display:flex; align-items:center; gap:12px;">
+                        <i class="fas ${method.icon}" style="font-size:18px; color:#10b981;"></i>
                         <div>
                             <strong>${escapeHtml(title)}</strong>
-                            <span>${escapeHtml(subtitle)}</span>
+                            <div style="font-size:12px; color:var(--text-muted, #94a3b8);">${escapeHtml(subtitle)}</div>
                         </div>
                     </div>
-                    <div class="billing-history-amount">
-                        <strong>${escapeHtml(formatCurrency(item.amount || 0))}</strong>
-                        <small>${escapeHtml(isPaid ? billingText('historyPaid', 'Paid') : billingText('historyPending', 'Pending'))}</small>
+                    <div class="billing-history-amount" style="text-align:right;">
+                        <strong style="color:#10b981;">${escapeHtml(formatCurrency(item.amount || 0))}</strong>
+                        <div style="font-size:12px;">${escapeHtml(isPaid ? billingText('historyPaid', 'Paid') : billingText('historyPending', 'Pending'))}</div>
                     </div>
                 </div>
             `;
         }).join('');
+    }
+
+    let currentTxPage = 1;
+    let loadedTransactions = [];
+    let hasMoreTxPages = true;
+
+    async function loadTransactions(force = false, page = 1) {
+        const historyList = document.getElementById('billingHistoryList');
+        if (!historyList) return;
+
+        if (force || page === 1) {
+            currentTxPage = 1;
+            loadedTransactions = [];
+            hasMoreTxPages = true;
+        } else {
+            currentTxPage = page;
+        }
+
+        const token = getToken();
+        if (!token) {
+            renderBillingHistory(getStoredUser());
+            return;
+        }
+
+        try {
+            const typeFilter = document.getElementById('txFilterType')?.value || '';
+            const startDate = document.getElementById('txFilterStartDate')?.value || '';
+            const endDate = document.getElementById('txFilterEndDate')?.value || '';
+
+            let queryUrl = `${API_BASE}/wallet/transactions?page=${currentTxPage}&limit=10`;
+            if (typeFilter) queryUrl += `&type=${encodeURIComponent(typeFilter)}`;
+            if (startDate) queryUrl += `&startDate=${encodeURIComponent(startDate)}`;
+            if (endDate) queryUrl += `&endDate=${encodeURIComponent(endDate)}`;
+
+            const res = await fetch(queryUrl, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!res.ok) {
+                if (currentTxPage === 1) renderBillingHistory(getStoredUser());
+                return;
+            }
+
+            const data = await res.json();
+            const txList = Array.isArray(data) ? data : (data.transactions || []);
+            hasMoreTxPages = Boolean(data.hasNextPage || (txList.length === 10));
+
+            if (currentTxPage === 1) {
+                loadedTransactions = txList;
+            } else {
+                loadedTransactions = loadedTransactions.concat(txList);
+            }
+
+            if (!loadedTransactions.length) {
+                renderBillingHistory(getStoredUser());
+                return;
+            }
+
+            const typeLabels = {
+                'wallet_topup': 'Balans artımı',
+                'topup': 'Balans artımı',
+                'deposit': 'Balans artımı',
+                'package_purchase': 'Paket alışı',
+                'package_wallet': 'Paket alışı',
+                'cash_out': 'Vəsait çıxarışı',
+                'admin_adjustment': 'Admin düzəlişi'
+            };
+
+            const statusBadges = {
+                'completed': '<span style="color:#10b981; font-weight:600; font-size:12px; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:999px;">✓ Uğurlu</span>',
+                'paid': '<span style="color:#10b981; font-weight:600; font-size:12px; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:999px;">✓ Ödənildi</span>',
+                'approved': '<span style="color:#10b981; font-weight:600; font-size:12px; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:999px;">✓ Təsdiqləndi</span>',
+                'pending': '<span style="color:#f59e0b; font-weight:600; font-size:12px; background:rgba(245,158,11,0.12); padding:2px 8px; border-radius:999px;">⌛ Gözləmədə</span>',
+                'failed': '<span style="color:#ef4444; font-weight:600; font-size:12px; background:rgba(239,68,68,0.12); padding:2px 8px; border-radius:999px;">✗ Uğursuz</span>',
+                'cancelled': '<span style="color:#ef4444; font-weight:600; font-size:12px; background:rgba(239,68,68,0.12); padding:2px 8px; border-radius:999px;">✗ Ləğv edildi</span>'
+            };
+
+            let html = loadedTransactions.map((tx) => {
+                const isPositive = tx.type === 'wallet_topup' || tx.type === 'topup' || tx.type === 'deposit';
+                const iconClass = isPositive ? 'fa-arrow-down' : (tx.type === 'cash_out' ? 'fa-arrow-up' : 'fa-box');
+                const iconColor = isPositive ? '#10b981' : (tx.type === 'cash_out' ? '#f59e0b' : '#3b82f6');
+                const label = typeLabels[tx.type] || tx.description || 'Əməliyyat';
+                const dateStr = formatDate(tx.createdAt || tx.date);
+                const statusHtml = statusBadges[tx.status] || `<span style="font-size:12px;">${escapeHtml(tx.status || '')}</span>`;
+                const amountFormatted = `${isPositive ? '+' : '-'}${Number(tx.amount || 0).toFixed(2)} ${tx.currency || 'AZN'}`;
+                const refText = tx.reference || tx.paymentId || tx._id || '';
+
+                return `
+                    <div class="billing-history-item" style="display:flex; justify-content:space-between; align-items:center; padding:12px 6px; border-bottom:1px solid var(--border-color, rgba(255,255,255,0.05));">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:36px; height:36px; border-radius:8px; background:${iconColor}15; color:${iconColor}; display:flex; align-items:center; justify-content:center; font-size:15px;">
+                                <i class="fas ${iconClass}"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600; font-size:14px; color:var(--text-primary);">${escapeHtml(label)}</div>
+                                <div style="font-size:12px; color:var(--text-muted, #94a3b8); display:flex; gap:8px;">
+                                    <span>${dateStr}</span>
+                                    ${refText ? `<span style="opacity:0.7;">#${escapeHtml(refText.substring(0, 10))}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; font-size:14px; color:${isPositive ? '#10b981' : 'inherit'};">${amountFormatted}</div>
+                            <div>${statusHtml}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (hasMoreTxPages) {
+                html += `
+                    <div style="text-align:center; padding:12px 0;">
+                        <button id="loadMoreTransactionsBtn" class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-color, rgba(255,255,255,0.12)); color:var(--text-primary); padding:7px 18px; border-radius:8px; font-size:13px; cursor:pointer;">
+                            <i class="fas fa-chevron-down" style="margin-right:6px;"></i> Daha çox göstər
+                        </button>
+                    </div>
+                `;
+            }
+
+            historyList.innerHTML = html;
+
+            const loadMoreBtn = document.getElementById('loadMoreTransactionsBtn');
+            if (loadMoreBtn) {
+                loadMoreBtn.addEventListener('click', () => {
+                    loadMoreBtn.disabled = true;
+                    loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i> Yüklənir...';
+                    loadTransactions(false, currentTxPage + 1);
+                });
+            }
+        } catch (err) {
+            console.warn('Error fetching live transactions:', err);
+            if (currentTxPage === 1) renderBillingHistory(getStoredUser());
+        }
+    }
+
+    const txFilterApplyBtn = document.getElementById('txFilterApplyBtn');
+    if (txFilterApplyBtn) {
+        txFilterApplyBtn.addEventListener('click', () => {
+            loadTransactions(true, 1);
+        });
+    }
+    const txFilterType = document.getElementById('txFilterType');
+    if (txFilterType) {
+        txFilterType.addEventListener('change', () => {
+            loadTransactions(true, 1);
+        });
     }
 
     function renderBillingPanel(user = getStoredUser()) {
@@ -761,7 +907,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBillingPackages(user || {});
         renderBillingMethods(user || {});
         renderBillingSummary(user || {});
-        renderBillingHistory(user || {});
+        loadTransactions();
 
         document.querySelectorAll('.billing-duration-btn, .dur-btn').forEach((button) => {
             button.classList.toggle('active', Number(button.dataset.duration) === billingState.duration);
@@ -859,17 +1005,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const topUpHandler = () => {
-            toast.show(t('walletRedirect', 'Cüzdana keçirilir...'), 'info');
-            // Navigate to wallet tab in settings
-            const walletTabBtn = document.querySelector('.settings-nav button[onclick*="panel-wallet"]');
-            if (walletTabBtn && window.showSettingsPanel) {
-                const settingsTabLink = document.querySelector('.tab-link[data-target="tab-settings"]');
-                const settingsTab = document.getElementById('tab-settings');
-                document.querySelectorAll('.tab-link:not(.logout-link)').forEach((t) => t.classList.remove('active'));
-                document.querySelectorAll('.cabinet-tab').forEach((c) => { c.style.display = 'none'; c.classList.remove('active'); });
-                if (settingsTabLink) settingsTabLink.classList.add('active');
-                if (settingsTab) { settingsTab.style.display = 'block'; settingsTab.classList.add('active'); }
-                window.showSettingsPanel('panel-wallet', walletTabBtn);
+            if (typeof window.openTopUpModal === 'function') {
+                window.openTopUpModal();
+            } else {
+                openBillingPanel();
             }
         };
 
@@ -932,7 +1071,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ productId, idempotencyKey })
                     });
 
-                    const data = await response.json();
+                    const _text1 = await response.text();
+                    let data;
+                    try { data = JSON.parse(_text1); } catch { throw new Error('Server xətası, zəhmət olmasa yenidən cəhd edin'); }
 
                     if (!response.ok) {
                         let errMsg = data.message || billingText('insufficientBalance', 'Ödəniş uğursuz oldu');
@@ -1005,7 +1146,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ productId, provider: methodId, idempotencyKey })
                 });
 
-                const data = await response.json();
+                const _text2 = await response.text();
+                let data;
+                try { data = JSON.parse(_text2); } catch { throw new Error('Server xətası, zəhmət olmasa yenidən cəhd edin'); }
                 if (!response.ok) throw new Error(data.message || 'Sessiya yaradıla bilmədi');
 
                 appendBillingHistory(user, {
@@ -1023,6 +1166,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         : billingText('redirectTransfer', 'Opening invoice and transfer instructions.'),
                     'info'
                 );
+
+                const checkoutTarget = data.checkoutUrl || data.paymentUrl || data.hostedUrl;
+                if (checkoutTarget && typeof checkoutTarget === 'string') {
+                    setTimeout(() => {
+                        window.location.href = checkoutTarget;
+                    }, 600);
+                }
             } catch (err) {
                 toast.show(err.message || 'Ödəniş sessiyası yaradıla bilmədi', 'error');
             } finally {
@@ -1223,9 +1373,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const now = Date.now();
             if (last401 && (now - parseInt(last401, 10)) < 5000) {
                 console.warn('401 loop detected, clearing all tokens');
-                ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                    try { localStorage.removeItem(k); } catch(e){}
-                    try { sessionStorage.removeItem(k); } catch(e){}
+                ['token', 'accessToken', 'authToken', 'adminToken', 'jwt', 'user', 'mobilaz_current_user', 'adminUser'].forEach(k => {
+                    try { localStorage.removeItem(k); } catch (e) { }
+                    try { sessionStorage.removeItem(k); } catch (e) { }
                 });
                 sessionStorage.removeItem('last401Time');
                 window.location.href = 'login.html?reason=loop_break';
@@ -1237,14 +1387,14 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const me = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${curToken}` } });
                 if (me.status === 401) {
-                    ['token','accessToken','authToken','adminToken','jwt','user','mobilaz_current_user','adminUser'].forEach(k => {
-                        try { localStorage.removeItem(k); } catch(e){}
-                        try { sessionStorage.removeItem(k); } catch(e){}
+                    ['token', 'accessToken', 'authToken', 'adminToken', 'jwt', 'user', 'mobilaz_current_user', 'adminUser'].forEach(k => {
+                        try { localStorage.removeItem(k); } catch (e) { }
+                        try { sessionStorage.removeItem(k); } catch (e) { }
                     });
                     window.location.href = 'login.html?expired=1';
                     return;
                 }
-            } catch(e) {}
+            } catch (e) { }
             isCabinetRedirecting = false;
         }
 
@@ -1292,16 +1442,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const DEFAULT_AD_IMAGE = 'assets/images/default-ad.svg';
+
     function getImageUrl(image) {
-        if (!image) {
-            return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800';
-        }
+        if (!image) return DEFAULT_AD_IMAGE;
 
-        if (image.startsWith('http://') || image.startsWith('https://')) {
-            return image;
-        }
+        const value = String(image).trim().replace(/\\/g, '/');
+        if (/^(https?:)?\/\//i.test(value) || /^(data:image\/|blob:)/i.test(value)) return value;
 
-        return API_BASE.replace(/\/api\/?$/, '') + image;
+        const frontendPath = value.match(/(?:^|\/)Front[- ]end\/(.*)$/i);
+        const normalized = (frontendPath ? frontendPath[1] : value).replace(/^\/+/, '');
+
+        if (/^(assets|Photo)\//i.test(normalized)) return normalized;
+        const apiOrigin = API_BASE.replace(/\/api\/?$/, '');
+        return `${apiOrigin}/${normalized}`;
     }
 
     function getUiStatus(status) {
@@ -1382,7 +1536,7 @@ document.addEventListener('DOMContentLoaded', () => {
         list.innerHTML = ads.map((ad) => `
             <div class="my-ad-item cab-glass" data-status="${getUiStatus(ad.status)}" data-id="${escapeHtml(ad._id)}">
                 <span class="ad-status-badge">${escapeHtml(getStatusBadge(ad.status))}</span>
-                <img src="${escapeHtml(getImageUrl(ad.images?.[0]))}" class="my-ad-img" alt="${escapeHtml(ad.brand)}">
+                <img src="${escapeHtml(getImageUrl(ad.images?.[0]))}" class="my-ad-img" alt="${escapeHtml(ad.brand)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
                 <div class="my-ad-details">
                     <h4>${escapeHtml(ad.brand)} ${escapeHtml(ad.modelName)}</h4>
                     <div class="ad-meta">
@@ -1528,8 +1682,11 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => {
                 const actionKey = btn.getAttribute('data-translate');
                 if (actionKey === 'cab-increase') {
-                    toast.show(t('walletRedirect', 'Ödəniş sisteminə yönləndirilir...'), 'info');
-                    openBillingPanel();
+                    if (typeof window.openTopUpModal === 'function') {
+                        window.openTopUpModal();
+                    } else {
+                        openBillingPanel();
+                    }
                 } else if (actionKey === 'cab-buy-package') {
                     openBillingPanel();
                 }
@@ -1594,10 +1751,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnSaveProfile = document.getElementById('btnSaveProfile');
         if (btnSaveProfile) {
             btnSaveProfile.addEventListener('click', async () => {
-                const name     = document.getElementById('profileFirstName')?.value.trim();
+                const name = document.getElementById('profileFirstName')?.value.trim();
                 const lastName = document.getElementById('profileLastName')?.value.trim();
-                const email    = document.getElementById('profileEmail')?.value.trim();
-                const phone    = document.getElementById('profilePhone')?.value.trim();
+                const email = document.getElementById('profileEmail')?.value.trim();
+                const phone = document.getElementById('profilePhone')?.value.trim();
 
                 if (!name) { toast.show(t('nameRequired', 'Ad boş ola bilməz.'), 'error'); return; }
 
@@ -1732,9 +1889,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnSavePrivacy) {
             btnSavePrivacy.addEventListener('click', async () => {
                 const body = {
-                    showPhone:        document.getElementById('privacyShowPhone')?.checked        ?? true,
-                    allowMessages:    document.getElementById('privacyAllowMessages')?.checked    ?? true,
-                    showOnlineStatus: document.getElementById('privacyShowOnline')?.checked       ?? true
+                    showPhone: document.getElementById('privacyShowPhone')?.checked ?? true,
+                    allowMessages: document.getElementById('privacyAllowMessages')?.checked ?? true,
+                    showOnlineStatus: document.getElementById('privacyShowOnline')?.checked ?? true
                 };
                 if (!setButtonLoading(btnSavePrivacy, true)) return;
                 try {
@@ -1758,7 +1915,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     await apiPost('user/freeze');
                     toast.show(t('accountFrozen', 'Hesabınız donduruldu. Sistemdən çıxış edilir...'), 'warning', 2500);
                     setTimeout(() => {
-                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
                         window.location.href = 'login.html';
                     }, 2500);
                 } catch (err) {
@@ -1779,7 +1936,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     await apiDelete('user/delete');
                     toast.show(t('accountDeleted', 'Hesabınız silindi. Yönləndirilirsiniz...'), 'error', 2500);
                     setTimeout(() => {
-                        ['token','user','mobilaz_current_user','adminToken','adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
+                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
                         window.location.href = 'index.html';
                     }, 2500);
                 } catch (err) {
@@ -1799,19 +1956,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = getToken();
         const storedUser = getStoredUser();
         const myId = storedUser ? (storedUser.id || storedUser._id) : '';
-        
+
         if (typeof io !== 'function' || !token || !myId) return null;
-        
+
         const socketUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
         try {
             cabinetSocket = io(socketUrl, {
                 auth: { token }
             });
-            
+
             cabinetSocket.on('connect', () => {
                 cabinetSocket.emit('join_chat', myId);
             });
-            
+
             cabinetSocket.on('receive_message', (msg) => {
                 handleCabinetIncomingMessage(msg, myId);
             });
@@ -1825,17 +1982,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const msgSenderId = msg.sender?._id || msg.sender;
         const msgAdId = msg.ad?._id || msg.ad;
         const isMine = msgSenderId === myId;
-        
+
         // If current open conversation matches this message, append it
         if (currentConversation) {
             const curAdId = currentConversation._id?.ad || currentConversation.lastMessage?.ad?._id || currentConversation.lastMessage?.ad;
             const curOtherId = currentConversation._id?.other;
-            
+
             if (msgAdId === curAdId && (msgSenderId === curOtherId || isMine)) {
                 appendCabinetMessage(msg, isMine);
             }
         }
-        
+
         // Update or reload conversations list to reflect last message and unread count
         loadConversations({ preserveSelection: true });
     }
@@ -1843,15 +2000,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendCabinetMessage(msg, isMine) {
         const messagesArea = document.querySelector('.chat-messages');
         if (!messagesArea) return;
-        
+
         // Clear empty state illustration if present
         if (messagesArea.querySelector('.fa-comments') || messagesArea.querySelector('.fa-spinner')) {
             messagesArea.innerHTML = '';
         }
-        
+
         const bubble = document.createElement('div');
         bubble.className = `bubble ${isMine ? 'bubble-sent' : 'bubble-received'}`;
-        
+
         let timeStr = '';
         if (msg.createdAt) {
             const date = new Date(msg.createdAt);
@@ -1859,31 +2016,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 timeStr = date.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
             }
         }
-        
+
         bubble.innerHTML = `
             <div>${escapeHtml(msg.text || '')}</div>
             ${timeStr ? `<span class="bubble-time">${escapeHtml(timeStr)}</span>` : ''}
         `;
-        
+
         messagesArea.appendChild(bubble);
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
     async function openConversationInCabinet(conv) {
         currentConversation = conv;
-        
+
         const ad = conv.lastMessage?.ad || {};
         const other = conv._id?.other;
         const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
         const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
         const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : (conv.adTitle || 'Elan');
-        
+
         // Update header info
         const headerName = document.querySelector('.chat-header-info h3');
         const headerAd = document.querySelector('.chat-header-info p');
         if (headerName) headerName.textContent = otherName;
         if (headerAd) headerAd.innerHTML = `<i class="fas fa-tag"></i> <span>${escapeHtml(adTitle)}</span>`;
-        
+
         // Highlight active item in list
         document.querySelectorAll('.chat-list-item').forEach(el => {
             el.classList.remove('active');
@@ -1896,26 +2053,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const unreadBadge = activeItem.querySelector('.unread-badge');
             if (unreadBadge) unreadBadge.remove();
         }
-        
+
         // Load messages history
         const messagesArea = document.querySelector('.chat-messages');
         if (messagesArea) {
             messagesArea.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
         }
-        
+
         const token = getToken();
         const storedUser = getStoredUser();
         const myId = storedUser ? (storedUser.id || storedUser._id) : '';
         const adId = conv._id?.ad;
-        
+
         if (!adId || !other) return;
-        
+
         try {
             const res = await fetch(`${API_BASE}/messages/${adId}?with=${other}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            
+
             if (messagesArea) {
                 messagesArea.innerHTML = '';
                 if (res.ok && Array.isArray(data.messages)) {
@@ -1945,25 +2102,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!input) return;
         const text = input.value.trim();
         if (!text) return;
-        
+
         if (!currentConversation) {
             toast.show(t('selectConversationFirst', 'Zəhmət olmasa əvvəlcə bir söhbət seçin'), 'warning');
             return;
         }
-        
+
         const token = getToken();
         const storedUser = getStoredUser();
         const myId = storedUser ? (storedUser.id || storedUser._id) : '';
         const otherId = currentConversation._id?.other;
         const adId = currentConversation._id?.ad;
-        
+
         if (!otherId || !adId) return;
-        
+
         input.value = '';
-        
+
         const socket = initCabinetSocket();
         let sentViaSocket = false;
-        
+
         if (socket && socket.connected) {
             socket.emit('send_message', {
                 sender: myId,
@@ -2004,14 +2161,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sendBtn = document.querySelector('.chat-input .btn-send');
         const chatInput = document.querySelector('.chat-input input');
         const searchInput = document.querySelector('.chat-search input');
-        
+
         if (sendBtn) {
             sendBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 sendCabinetMessage();
             });
         }
-        
+
         if (chatInput) {
             chatInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -2020,13 +2177,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-        
+
         if (searchInput) {
             searchInput.addEventListener('input', () => {
                 const query = searchInput.value.trim().toLowerCase();
                 const items = document.querySelectorAll('.chat-list .chat-list-item');
                 let visibleCount = 0;
-                
+
                 items.forEach(item => {
                     const text = (item.textContent || '').toLowerCase();
                     if (!query || text.includes(query)) {
@@ -2036,7 +2193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         item.style.display = 'none';
                     }
                 });
-                
+
                 const noResultMsg = document.getElementById('chat-search-no-result');
                 if (visibleCount === 0 && query) {
                     if (!noResultMsg) {
@@ -2056,41 +2213,41 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadConversations(options = {}) {
         const chatList = document.querySelector('.chat-list');
         if (!chatList) return;
-        
+
         if (!options.preserveSelection) {
             chatList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Yüklənir...</div>';
         }
-        
+
         try {
             const response = await fetch(`${API_BASE}/messages/conversations`, {
                 headers: { 'Authorization': `Bearer ${getToken()}` }
             });
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.message || 'Söhbətlər yüklənmədi');
             }
-            
+
             const conversations = Array.isArray(data.conversations)
                 ? data.conversations
                 : [];
             allCabinetConversations = conversations;
-            
+
             chatList.innerHTML = '';
-            
+
             if (conversations.length === 0) {
                 chatList.innerHTML = '<div class="empty-state" style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);"><span data-translate="cab-msg-empty">Mesaj qutunuz boşdur.</span></div>';
                 return;
             }
-            
+
             conversations.forEach(conv => {
                 const ad = conv.lastMessage?.ad || {};
                 const other = conv._id?.other;
                 const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
-                
+
                 const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
                 const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : 'Elan';
-                
+
                 const item = document.createElement('div');
                 item.className = 'chat-list-item cab-glass';
                 item.setAttribute('data-ad-id', conv._id?.ad || '');
@@ -2099,16 +2256,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 item.style.borderBottom = '1px solid var(--border-color)';
                 item.style.cursor = 'pointer';
                 item.style.transition = 'background 0.2s';
-                
+
                 const isSelected = currentConversation && (currentConversation._id?.ad === conv._id?.ad) && (currentConversation._id?.other === other);
                 if (isSelected) {
                     item.classList.add('active');
                     item.style.borderLeft = '3px solid var(--airy-primary)';
                 }
-                
+
                 item.onmouseover = () => { if (!item.classList.contains('active')) item.style.background = 'var(--bg-secondary)'; };
                 item.onmouseout = () => { if (!item.classList.contains('active')) item.style.background = 'transparent'; };
-                
+
                 item.innerHTML = `
                     <div style="display: flex; gap: 12px; align-items: center;">
                         <img src="${otherUser?.avatar || 'Photo/avatar.png'}" alt="${escapeHtml(otherName)} profil şəkli" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
@@ -2120,19 +2277,385 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${conv.unread > 0 ? `<div class="unread-badge" style="background: var(--airy-primary); color: white; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">${conv.unread}</div>` : ''}
                     </div>
                 `;
-                
+
                 item.addEventListener('click', () => {
                     openConversationInCabinet(conv);
                 });
-                
+
                 chatList.appendChild(item);
             });
-            
+
             initCabinetSocket();
-            
+
         } catch (error) {
             console.error('Error fetching conversations:', error);
             chatList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Xəta baş verdi</div>';
+        }
+    }
+
+    function initTopUpModal() {
+        const modal = document.getElementById('topUpModal');
+        const closeBtn = document.getElementById('closeTopUpModalBtn');
+        const submitBtn = document.getElementById('btnSubmitTopUp');
+        const customInput = document.getElementById('customTopUpAmount');
+        const overlay = document.getElementById('topUpRedirectOverlay');
+        const refreshBtn = document.getElementById('refreshTransactionsBtn');
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                refreshBtn.disabled = true;
+                refreshBtn.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Yenilənir...';
+                loadTransactions(true).finally(() => {
+                    refreshBtn.disabled = false;
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Yenilə';
+                });
+            });
+        }
+
+        if (!modal) return;
+
+        let currentPaymentAttemptKey = null;
+        function getIdempotencyKey() {
+            if (!currentPaymentAttemptKey) {
+                currentPaymentAttemptKey = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                    ? crypto.randomUUID()
+                    : (`topup-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`);
+            }
+            return currentPaymentAttemptKey;
+        }
+
+        window.openTopUpModal = function () {
+            currentPaymentAttemptKey = null;
+            modal.style.display = 'flex';
+            modal.classList.add('active');
+            if (customInput) customInput.focus();
+        };
+
+        window.closeTopUpModal = function () {
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+        };
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', window.closeTopUpModal);
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) window.closeTopUpModal();
+        });
+
+        // Preset amount buttons (5, 10, 20, 50 AZN)
+        document.querySelectorAll('.topup-presets .btn-preset').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.topup-presets .btn-preset').forEach((b) => {
+                    b.classList.remove('active');
+                    b.style.border = '1px solid var(--border-color, #334155)';
+                    b.style.background = 'transparent';
+                });
+                btn.classList.add('active');
+                btn.style.border = '1px solid #10b981';
+                btn.style.background = 'rgba(16,185,129,0.12)';
+                if (customInput) customInput.value = btn.getAttribute('data-amount') || '5';
+            });
+        });
+
+        if (customInput) {
+            customInput.addEventListener('input', () => {
+                const val = customInput.value;
+                document.querySelectorAll('.topup-presets .btn-preset').forEach((b) => {
+                    const isMatch = b.getAttribute('data-amount') === val;
+                    b.classList.toggle('active', isMatch);
+                    b.style.border = isMatch ? '1px solid #10b981' : '1px solid var(--border-color, #334155)';
+                    b.style.background = isMatch ? 'rgba(16,185,129,0.12)' : 'transparent';
+                });
+            });
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', async () => {
+                if (submitBtn.disabled) return;
+
+                const amount = parseFloat(customInput?.value || 0);
+                if (!amount || isNaN(amount) || amount < 1 || amount > 10000) {
+                    currentPaymentAttemptKey = null;
+                    toast.show('Zəhmət olmasa 1 - 10,000 AZN arası məbləğ daxil edin', 'warning');
+                    return;
+                }
+
+                const token = getToken();
+                if (!token) {
+                    currentPaymentAttemptKey = null;
+                    toast.show('Zəhmət olmasa hesabınıza daxil olun', 'warning');
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                const originalBtnHtml = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Keçid edilir...';
+
+                window.closeTopUpModal();
+                if (overlay) {
+                    overlay.style.display = 'flex';
+                }
+
+                try {
+                    let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+                    let signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+                    if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+                        try { csrfToken = await window.fetchCsrfToken(); signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || ''; } catch (e) { }
+                    }
+
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    };
+                    if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+                    if (signedCsrf) headers['X-CSRF-Signed-Token'] = signedCsrf;
+
+                    const idempotencyKey = getIdempotencyKey();
+                    const response = await fetch(`${API_BASE}/wallet/topup`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers,
+                        body: JSON.stringify({ amount, currency: 'AZN', idempotencyKey })
+                    });
+
+                    const _text3 = await response.text();
+                    let data;
+                    try { data = JSON.parse(_text3); } catch { throw new Error('Server xətası, zəhmət olmasa yenidən cəhd edin'); }
+                    if (!response.ok) {
+                        currentPaymentAttemptKey = null;
+                        throw new Error(data.message || 'Ödəniş sessiyası yaradılmadı');
+                    }
+
+                    currentPaymentAttemptKey = null;
+                    const checkoutUrl = data.checkoutUrl || data.paymentUrl || data.hostedUrl;
+                    if (checkoutUrl) {
+                        window.location.href = checkoutUrl;
+                    } else {
+                        throw new Error('Ödəniş sisteminə keçid linki tapılmadı');
+                    }
+                } catch (err) {
+                    if (overlay) overlay.style.display = 'none';
+                    toast.show(err.message || 'Xəta baş verdi', 'error');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+            });
+        }
+    }
+
+    function initCashOutModal() {
+        const modal = document.getElementById('cashOutModal');
+        const form = document.getElementById('cashOutForm');
+        const amountInput = document.getElementById('cashOutAmount');
+        const methodInput = document.getElementById('cashOutMethod');
+        const detailsInput = document.getElementById('cashOutDetails');
+        const detailsLabel = document.getElementById('cashOutDetailsLabel');
+        const detailsHint = document.getElementById('cashOutDetailsHint');
+        const submitBtn = document.getElementById('confirmCashOutBtn');
+        if (!modal || !form || !amountInput || !methodInput || !detailsInput || !submitBtn) return;
+
+        let activeAttempt = null;
+
+        function openCashOutModal() {
+            const user = (typeof getStoredUser === 'function' ? getStoredUser() : null) || {};
+            const bal = typeof user.walletBalance === 'number' ? user.walletBalance : parseFloat(user.walletBalance || 0);
+            if (amountInput) {
+                amountInput.max = bal > 0 ? bal.toFixed(2) : '5000';
+            }
+            modal.style.display = 'flex';
+            modal.classList.add('active');
+            amountInput.focus();
+        }
+
+        function closeCashOutModal() {
+            if (submitBtn.disabled) return;
+            modal.style.display = 'none';
+            modal.classList.remove('active');
+            (document.getElementById('cashOutBtn') || document.getElementById('billingCashOutBtn'))?.focus();
+        }
+
+        async function confirmCashOut(event) {
+            event?.preventDefault();
+            if (submitBtn.disabled) return;
+            if (!form.reportValidity()) return;
+
+            const amount = Number(amountInput.value);
+            const destination = methodInput.value;
+            const accountHolderDetails = detailsInput.value.trim();
+            if (!Number.isFinite(amount) || amount < 1 || amount > 5000) {
+                toast.show('Çıxarış məbləği 1–5,000 AZN arasında olmalıdır.', 'warning');
+                return;
+            }
+
+            if (destination === 'bank_account') {
+                const normalizedIban = accountHolderDetails.replace(/\s+/g, '').toUpperCase();
+                if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(normalizedIban)) {
+                    toast.show('Düzgün IBAN daxil edin (15–34 simvol).', 'warning');
+                    detailsInput.focus();
+                    return;
+                }
+            } else {
+                const compactDetails = accountHolderDetails.replace(/[\s-]/g, '');
+                if (/\b(cvv|cvc|pin)\b/i.test(accountHolderDetails) || /^\d{13,19}$/.test(compactDetails) || /\b\d{13,19}\b/.test(compactDetails)) {
+                    toast.show('Kart nömrəsi, CVV/CVC və ya PIN daxil etməyin; yalnız tokenləşdirilmiş payout məlumatı qəbul edilir.', 'warning');
+                    detailsInput.focus();
+                    return;
+                }
+            }
+
+            const fingerprint = JSON.stringify({
+                amount: Number(amount.toFixed(2)),
+                destination,
+                details: destination === 'bank_account'
+                    ? accountHolderDetails.replace(/\s+/g, '').toUpperCase()
+                    : accountHolderDetails
+            });
+            if (!activeAttempt || activeAttempt.fingerprint !== fingerprint) {
+                const idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID)
+                    ? crypto.randomUUID()
+                    : `cashout-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+                activeAttempt = { fingerprint, idempotencyKey };
+            }
+
+            const token = getToken();
+            if (!token) {
+                toast.show('Çıxarış sorğusu üçün hesabınıza daxil olun.', 'warning');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            const originalButtonHtml = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Göndərilir...';
+            try {
+                let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+                let signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+                if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+                    try {
+                        csrfToken = await window.fetchCsrfToken();
+                        signedCsrf = window.CSRF_SIGNED_TOKEN || localStorage.getItem('csrfSignedToken') || sessionStorage.getItem('csrfSignedToken') || '';
+                    } catch (_) { }
+                }
+
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Idempotency-Key': activeAttempt.idempotencyKey
+                };
+                if (csrfToken) headers['X-CSRF-Token'] = csrfToken;
+                if (signedCsrf) headers['X-CSRF-Signed-Token'] = signedCsrf;
+
+                const response = await fetch(`${API_BASE}/wallet/cash-out`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers,
+                    body: JSON.stringify({
+                        amount,
+                        destination,
+                        accountHolderDetails: destination === 'bank_account'
+                            ? accountHolderDetails.replace(/\s+/g, '').toUpperCase()
+                            : accountHolderDetails,
+                        idempotencyKey: activeAttempt.idempotencyKey
+                    })
+                });
+
+                const _cashOutText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(_cashOutText);
+                } catch {
+                    throw new Error('Server xətası, zəhmət olmasa yenidən cəhd edin');
+                }
+                if (!response.ok) throw new Error(data.message || 'Çıxarış sorğusu göndərilmədi.');
+
+                activeAttempt = null;
+                toast.show(data.message || 'Çıxarış sorğusu göndərildi.', 'success');
+                form.reset();
+                submitBtn.disabled = false;
+                closeCashOutModal();
+                if (typeof loadWallet === 'function') {
+                    try { loadWallet(); } catch (_) { }
+                }
+                loadTransactions(true);
+                hydrateCurrentUser();
+            } catch (error) {
+                toast.show(error.message || 'Çıxarış sorğusu göndərilərkən xəta baş verdi.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonHtml;
+            }
+        }
+
+        window.openCashOutModal = openCashOutModal;
+        window.confirmCashOut = confirmCashOut;
+        document.getElementById('cashOutBtn')?.addEventListener('click', openCashOutModal);
+        document.getElementById('billingCashOutBtn')?.addEventListener('click', openCashOutModal);
+        document.getElementById('closeCashOutModalBtn')?.addEventListener('click', closeCashOutModal);
+        document.getElementById('cancelCashOutBtn')?.addEventListener('click', closeCashOutModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closeCashOutModal();
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.classList.contains('active')) closeCashOutModal();
+        });
+        methodInput.addEventListener('change', () => {
+            const isBankAccount = methodInput.value === 'bank_account';
+            detailsLabel.textContent = isBankAccount ? 'IBAN' : 'Tokenləşdirilmiş payout məlumatı';
+            detailsInput.placeholder = isBankAccount ? 'AZ00 XXXX 0000 0000 0000 0000 0000' : 'Provayderin tokenləşdirilmiş payout identifikatoru';
+            detailsInput.autocapitalize = isBankAccount ? 'characters' : 'off';
+            detailsHint.textContent = isBankAccount
+                ? 'IBAN boşluqsuz 15–34 simvol olmalıdır. Sorğu təsdiq üçün göndəriləcək.'
+                : 'Kart nömrəsi, CVV/CVC və ya PIN daxil etməyin. Yalnız tokenləşdirilmiş məlumat qəbul edilir.';
+            detailsInput.value = '';
+        });
+        form.addEventListener('submit', confirmCashOut);
+    }
+
+    async function checkPaymentReturn() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const payment = urlParams.get('payment');
+        const sessionId = urlParams.get('sessionId') || urlParams.get('paymentId');
+        const errorReason = urlParams.get('reason') || urlParams.get('error');
+
+        if (payment === 'success' || sessionId) {
+            if (sessionId) {
+                try {
+                    const token = window.getToken ? window.getToken() : localStorage.getItem('token');
+                    const API_BASE = window.API_URL || 'http://localhost:5000/api';
+                    const res = await fetch(`${API_BASE}/wallet/payment-session/${encodeURIComponent(sessionId)}`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.status === 'completed' || data.status === 'paid') {
+                            toast.show('Ödəniş uğurlu oldu! Balansınız artırıldı.', 'success');
+                        } else if (data.status === 'pending' || data.status === 'processing') {
+                            toast.show('Ödəniş təsdiqi gözlənilir. Balansınız qısa zamanda yenilənəcək.', 'warning');
+                        } else {
+                            toast.show('Ödəniş baş tutmadı və ya ləğv edildi.', 'error');
+                        }
+                    } else {
+                        toast.show('Ödəniş statusu təsdiqlənmədi.', 'warning');
+                    }
+                } catch (e) {
+                    toast.show('Ödəniş statusu yoxlanıla bilmədi, cabinet-i yeniləyin', 'warning');
+                }
+            } else {
+                toast.show('Ödəniş sessiyası tapılmadı.', 'warning');
+            }
+            loadTransactions(true);
+            try {
+                const cleanUrl = window.location.pathname + window.location.hash;
+                window.history.replaceState({}, document.title, cleanUrl);
+            } catch (e) { }
+        } else if (payment === 'failed' || errorReason) {
+            toast.show('Ödəniş baş tutmadı və ya ləğv edildi.', 'warning');
+            try {
+                const cleanUrl = window.location.pathname + window.location.hash;
+                window.history.replaceState({}, document.title, cleanUrl);
+            } catch (e) { }
         }
     }
 
@@ -2143,6 +2666,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupCabinetChatEvents();
     loadConversations();
     renderBillingPanel(getStoredUser() || {});
+    initTopUpModal();
+    initCashOutModal();
+    checkPaymentReturn();
     hydrateCurrentUser();
     loadMyAds();
 
@@ -2204,6 +2730,10 @@ window.confirmPromotion = async function () {
         return;
     }
 
+    // Double-click guard: if button is already disabled, a request is in-flight
+    const payBtn = document.getElementById('btnPayPromo');
+    if (payBtn && payBtn.disabled) return;
+
     const token = typeof getAuthToken === 'function'
         ? getAuthToken()
         : (window.getAuthToken ? window.getAuthToken() : (typeof getToken === 'function' ? getToken() : (sessionStorage.getItem('token') || localStorage.getItem('token'))));
@@ -2212,14 +2742,16 @@ window.confirmPromotion = async function () {
         return;
     }
 
-    const payBtn = document.getElementById('btnPayPromo');
     if (payBtn) {
         payBtn.disabled = true;
-        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> İşlənir...';
+        payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gözləyin...';
     }
 
     try {
         const base = window.API_URL || window.API_BASE || (typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:5000/api');
+
+        // Idempotency key to prevent duplicate charges on retry/double-click
+        const idempotencyKey = `promo-${Date.now()}-${currentPromoAdId}`;
 
         // Retrieve CSRF token from memory or storage
         let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
@@ -2249,7 +2781,7 @@ window.confirmPromotion = async function () {
             method: 'POST',
             credentials: 'include',
             headers,
-            body: JSON.stringify({ promotionType: selectedPkg })
+            body: JSON.stringify({ promotionType: selectedPkg, idempotencyKey })
         });
 
         const data = await response.json();

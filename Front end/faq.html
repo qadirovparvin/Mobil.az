@@ -10,70 +10,24 @@
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
     <link rel="stylesheet" href="CSS/faq.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    
     <!-- Font Awesome linki -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
     <!-- Header hissəsi -->
-    <header>
-        <div class="container">
-            <a href="index.html" class="logo">
-                <span class="mobil-logo">Mobil<span>.az</span></span>
-            </a>
-
-            <div class="header-right">
-                <nav class="menu">
-                    <ul>
-                        <div class="contact-dropdown">
-                            <li data-translate="Contact">
-                                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-                            </li>
-
-                            <div class="contact-menu">
-                                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i>
-                                    Instagram</a>
-                                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i>
-                                    Facebook</a>
-                                <a href="https://wa.me/yourphonenumber" target="_blank"><i class="fab fa-whatsapp"></i>
-                                    WhatsApp</a>
-                                <a href="qadirovparvin@gmail.com"><i class="fas fa-envelope"></i> Email</a>
-                            </div>
-                        </div>
-                        </li>
-                        <li class="About" data-translate="About">
-                            <a href="About.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-                        </li>
-                        <li class="Stores" data-translate="Stores">
-                            <a href="Stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-                        </li>
-                        <li class="Favorite" data-translate="Favorite">
-                            <a href="Favorite.html"><i class="fas fa-heart"></i> Seçilmişlər</a>
-                        </li>
-                    </ul>
-                </nav>
-                <div class="button-container">
-                    <a href="login.html" class="login-btn" data-translate="login-btn">
-                        <i class="fas fa-sign-in-alt"></i> Giriş
-                    </a>
-                    <a href="signup.html" class="register-btn" data-translate="register-btn">
-                        <i class="fas fa-user-plus"></i> Qeydiyyat
-                    </a>
-                </div>
-                <div class="theme-lang-container">
-                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-                        <i class="fas fa-moon"></i>
-                    </button>
-                    <button class="language-selector">
-                        <i class="fas fa-globe"></i>
-                        <span id="current-lang" data-translate="language-selector">AZ</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+      <div id="header-placeholder"></div>
 
     <!-- FAQ Section -->
     <main class="faq-container">
@@ -83,7 +37,7 @@
 
         <div class="faq-content">
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q1">Mobil.az-da elan yerləşdirmək ödənişlidir?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -92,7 +46,7 @@
                 </div>
             </div>
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q2">Necə qeydiyyatdan keçə bilərəm?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -102,7 +56,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q3">Yeni elan necə əlavə edilir?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -112,7 +66,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q4">Bir elana maksimum neçə şəkil əlavə etmək olar?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -122,7 +76,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q5">Elanım nə vaxt saytda aktiv olacaq?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -132,7 +86,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q6">Bəyəndiyim cihazın satıcısı ilə necə əlaqə yarada bilərəm?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -142,7 +96,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q7">Öz elanımda dəyişiklik edə bilərəmmi?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -152,7 +106,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q8">Elanlar saytda neçə gün aktiv qalır?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -162,7 +116,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q9">Şübhəli və ya qaydaları pozan elanla rastlaşsam nə etməliyəm?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -172,7 +126,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-question" onclick="toggleFAQ(this)">
+                <div class="faq-question">
                     <span data-translate="faq-q10">VIP elanın hansı üstünlükləri var?</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
@@ -180,43 +134,12 @@
                     <p data-translate="faq-a10">VIP elanlar axtarış nəticələrində həmişə ən üst sıralarda yer alır, xüsusi rənglə vurğulanmış formada görünüşlə fərqlənir və əsas səhifədə nümayiş olunur. Bu isə cihazınızın dəfələrlə daha tez satılmasına kömək edir.</p>
                 </div>
             </div>
+        </div>
     </main>
 
 
 
-    <footer class="site-footer">
-        <div class="footer-container">
-            <div class="footer-column">
-                <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-                <ul>
-                    <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a>
-                    </li>
-                    <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və
-                                Təhlükəsizlik</span></a></li>
-                    <li><a href="rules.html#posting-rules"><span class="posting-rules"
-                                data-translate="posting-rules">Elan yerləşdirmə
-                                qaydaları</span></a></li>
-                    <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik
-                                siyasəti</span></a></li>
-                </ul>
-            </div>
-            <div class="footer-column">
-                <h3 class="contact" data-translate="contact">Əlaqə</h3>
-                <ul>
-                    <li><a href="tel:+994501234567"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-                    <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-                </ul>
-                <div class="social-icons">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Mobil.az. Bütün hüquqlar qorunur.</p>
-        </div>
-    </footer>
+      <div id="footer-placeholder"></div>
 
     <script>
         // FAQ Accordion JavaScript
@@ -256,8 +179,10 @@
             });
         });
     </script>
+    <script src="JS/config.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js?v=2"></script>
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 /* ============================================================
-   AiryPhone – Premium Login / Signup Styles
+   Mobil.az – Premium Login / Signup Styles
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -45,7 +45,7 @@
     width: 520px;
     height: 520px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     top: -160px;
     right: -160px;
     pointer-events: none;
@@ -57,7 +57,7 @@
     width: 320px;
     height: 320px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     bottom: -100px;
     left: -80px;
     pointer-events: none;
@@ -113,7 +113,7 @@
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,17 +132,44 @@
 .blob {
     position: absolute;
     border-radius: 50%;
-    background: rgba(255,255,255,0.07);
+    background: rgba(255, 255, 255, 0.07);
     animation: blobFloat 8s ease-in-out infinite;
 }
 
-.blob-1 { width: 200px; height: 200px; top: 10%; left: 5%; animation-delay: 0s; }
-.blob-2 { width: 140px; height: 140px; bottom: 20%; right: 8%; animation-delay: 3s; }
-.blob-3 { width: 90px; height: 90px; top: 55%; left: 45%; animation-delay: 1.5s; }
+.blob-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 5%;
+    animation-delay: 0s;
+}
+
+.blob-2 {
+    width: 140px;
+    height: 140px;
+    bottom: 20%;
+    right: 8%;
+    animation-delay: 3s;
+}
+
+.blob-3 {
+    width: 90px;
+    height: 90px;
+    top: 55%;
+    left: 45%;
+    animation-delay: 1.5s;
+}
 
 @keyframes blobFloat {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50%       { transform: translateY(-18px) scale(1.05); }
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-18px) scale(1.05);
+    }
 }
 
 /* ── RIGHT form panel ─────────────────────────────────── */
@@ -200,13 +227,13 @@
 .auth-tab-btn.active {
     background: #fff;
     color: #5b21b6;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
 }
 
 [data-theme="dark"] body .auth-tab-btn.active {
     background: #1e1e22;
     color: #a78bfa;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.40);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.40);
 }
 
 /* ── Section headings ─────────────────────────────────── */
@@ -330,10 +357,21 @@
     border-color: #3a3a44;
 }
 
-.social-btn.google i { color: #DB4437; }
-.social-btn.facebook i { color: #1877F2; }
-.social-btn.apple i { color: #333; }
-[data-theme="dark"] body .social-btn.apple i { color: #ddd; }
+.social-btn.google i {
+    color: #DB4437;
+}
+
+.social-btn.facebook i {
+    color: #1877F2;
+}
+
+.social-btn.apple i {
+    color: #333;
+}
+
+[data-theme="dark"] body .social-btn.apple i {
+    color: #ddd;
+}
 
 /* ── Divider ──────────────────────────────────────────── */
 .auth-divider {
@@ -426,8 +464,8 @@
     box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.12);
 }
 
-.input-group input:focus + .input-icon,
-.input-group input:focus ~ .input-icon {
+.input-group input:focus+.input-icon,
+.input-group input:focus~.input-icon {
     color: #7c3aed;
 }
 
@@ -699,7 +737,9 @@
     color: #a78bfa;
 }
 
-.terms-row a:hover { text-decoration: underline; }
+.terms-row a:hover {
+    text-decoration: underline;
+}
 
 /* ── Primary action button ────────────────────────────── */
 .auth-submit-btn {
@@ -723,12 +763,14 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), transparent);
     opacity: 0;
     transition: opacity 0.25s;
 }
 
-.auth-submit-btn:hover::before { opacity: 1; }
+.auth-submit-btn:hover::before {
+    opacity: 1;
+}
 
 .auth-submit-btn:hover {
     transform: translateY(-2px);
@@ -749,18 +791,25 @@
     display: none;
     width: 18px;
     height: 18px;
-    border: 2.5px solid rgba(255,255,255,0.4);
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     margin: 0 auto;
 }
 
-.auth-submit-btn.loading .btn-text { display: none; }
-.auth-submit-btn.loading .btn-spinner { display: block; }
+.auth-submit-btn.loading .btn-text {
+    display: none;
+}
+
+.auth-submit-btn.loading .btn-spinner {
+    display: block;
+}
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ── Secondary link ───────────────────────────────────── */
@@ -786,7 +835,9 @@
     color: #a78bfa;
 }
 
-.auth-switch-link a:hover { text-decoration: underline; }
+.auth-switch-link a:hover {
+    text-decoration: underline;
+}
 
 /* ── Step indicator (for multi-step) ─────────────────── */
 .step-indicator {
@@ -805,7 +856,9 @@
     transition: all 0.3s ease;
 }
 
-[data-theme="dark"] body .step-dot { background: var(--border-color); }
+[data-theme="dark"] body .step-dot {
+    background: var(--border-color);
+}
 
 .step-dot.active {
     width: 24px;
@@ -813,9 +866,13 @@
     background: #7c3aed;
 }
 
-[data-theme="dark"] body .step-dot.active { background: #a78bfa; }
+[data-theme="dark"] body .step-dot.active {
+    background: #a78bfa;
+}
 
-.step-dot.done { background: #a78bfa; }
+.step-dot.done {
+    background: #a78bfa;
+}
 
 /* ── Password strength ────────────────────────────────── */
 .password-strength {
@@ -838,10 +895,25 @@
     transition: width 0.4s ease, background 0.4s ease;
 }
 
-.strength-fill.weak   { width: 25%; background: #ef4444; }
-.strength-fill.fair   { width: 50%; background: #f97316; }
-.strength-fill.good   { width: 75%; background: #eab308; }
-.strength-fill.strong { width: 100%; background: #22c55e; }
+.strength-fill.weak {
+    width: 25%;
+    background: #ef4444;
+}
+
+.strength-fill.fair {
+    width: 50%;
+    background: #f97316;
+}
+
+.strength-fill.good {
+    width: 75%;
+    background: #eab308;
+}
+
+.strength-fill.strong {
+    width: 100%;
+    background: #22c55e;
+}
 
 .strength-text {
     font-size: 0.78rem;
@@ -862,7 +934,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transform: translateY(80px);
     opacity: 0;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -875,14 +947,29 @@
     opacity: 1;
 }
 
-.auth-toast.success { border-left: 4px solid #22c55e; }
-.auth-toast.error   { border-left: 4px solid #ef4444; }
-.auth-toast.info    { border-left: 4px solid #7c3aed; }
+.auth-toast.success {
+    border-left: 4px solid #22c55e;
+}
+
+.auth-toast.error {
+    border-left: 4px solid #ef4444;
+}
+
+.auth-toast.info {
+    border-left: 4px solid #7c3aed;
+}
 
 /* ── Animations ───────────────────────────────────────── */
 @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-form-box {
@@ -891,19 +978,51 @@
 
 /* ── Responsive ───────────────────────────────────────── */
 @media (max-width: 900px) {
-    .auth-brand { display: none; }
-    .auth-form-panel { padding: 2rem 1.5rem; }
-    .auth-shell { min-height: auto; }
+    .auth-brand {
+        display: none;
+    }
+
+    .auth-form-panel {
+        padding: 2rem 1.5rem;
+    }
+
+    .auth-shell {
+        min-height: auto;
+    }
 }
 
 @media (max-width: 480px) {
-    .social-row { flex-direction: column; }
-    .input-row  { flex-direction: column; gap: 0; }
-    .phone-combo { flex-direction: column; }
-    .phone-combo .prefix-wrap { flex: none; width: 100%; }
-    .verify-method-tabs { flex-direction: column; }
-    .otp-digit { width: 44px; height: 52px; font-size: 1.25rem; }
-    .auth-form-panel { padding: 1.5rem 1rem; }
+    .social-row {
+        flex-direction: column;
+    }
+
+    .input-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .phone-combo {
+        flex-direction: column;
+    }
+
+    .phone-combo .prefix-wrap {
+        flex: none;
+        width: 100%;
+    }
+
+    .verify-method-tabs {
+        flex-direction: column;
+    }
+
+    .otp-digit {
+        width: 44px;
+        height: 52px;
+        font-size: 1.25rem;
+    }
+
+    .auth-form-panel {
+        padding: 1.5rem 1rem;
+    }
 }
 
 /* --- Added Dark Mode Overrides to Match Main Site --- */

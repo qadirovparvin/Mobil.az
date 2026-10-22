@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödəniş Uğurlu Oldu — Mobil.az</title>
+    <link rel="stylesheet" href="CSS/general.css">
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary, #f8fafc);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-primary, #0f172a);
+        }
+        [data-theme="dark"] body {
+            background: #0b1120;
+            color: #f1f5f9;
+        }
+        .status-container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg, #ffffff);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            border: 1px solid var(--border-color, #e2e8f0);
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        [data-theme="dark"] .status-container {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .status-header {
+            text-align: center;
+            padding: 40px 30px 20px;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, transparent 100%);
+        }
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            color: #ffffff;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.4);
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .status-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary, #0f172a);
+            margin: 20px 0 8px 0;
+        }
+        [data-theme="dark"] .status-title { color: #f8fafc; }
+        .status-desc {
+            font-size: 15px;
+            color: var(--text-secondary, #64748b);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .details-card {
+            margin: 20px 30px;
+            background: var(--bg-secondary, #f8fafc);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 14px;
+            padding: 18px;
+        }
+        [data-theme="dark"] .details-card {
+            background: #0f172a;
+            border-color: #334155;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-color, #e2e8f0);
+            font-size: 14px;
+        }
+        [data-theme="dark"] .detail-row {
+            border-color: #334155;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .detail-label {
+            color: var(--text-secondary, #64748b);
+        }
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-primary, #0f172a);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        [data-theme="dark"] .detail-value { color: #f8fafc; }
+        .detail-value.highlight {
+            color: #10b981;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .copy-btn {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 2px 4px;
+            font-size: 12px;
+            transition: color 0.2s;
+        }
+        .copy-btn:hover { color: #2563eb; }
+        .actions-block {
+            padding: 10px 30px 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #2563eb;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            color: var(--text-secondary, #64748b);
+            font-weight: 500;
+            font-size: 14px;
+            padding: 10px 20px;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .btn-secondary:hover {
+            color: var(--text-primary, #0f172a);
+        }
+        .badge-verified {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .loader-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 50%;
+            border-top-color: #10b981;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="status-container">
+        <div class="status-header">
+            <div class="icon-circle" id="statusIcon">
+                <i class="fas fa-spinner fa-spin" id="iconElement"></i>
+            </div>
+            <h1 class="status-title" id="statusTitle">Ödəniş yoxlanılır...</h1>
+            <p class="status-desc" id="statusDesc">Zəhmət olmasa gözləyin, ödənişin statusu təsdiqlənir.</p>
+        </div>
+
+        <div class="details-card">
+            <div class="detail-row">
+                <span class="detail-label">Status</span>
+                <span class="badge-pending" id="statusBadge"><span class="loader-spinner"></span> Yoxlanılır...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Cari Balansınız</span>
+                <span class="detail-value highlight" id="balanceValue"><span class="loader-spinner"></span></span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Tranzaksiya / Sessiya ID</span>
+                <span class="detail-value">
+                    <span id="txIdValue">—</span>
+                    <button class="copy-btn" id="copyTxBtn" title="Kopyala"><i class="far fa-copy"></i></button>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Tarix</span>
+                <span class="detail-value" id="txDateValue">—</span>
+            </div>
+        </div>
+
+        <div class="actions-block">
+            <a href="cabinet.html#wallet" class="btn-primary" id="btnReturnCabinet">
+                <i class="fas fa-wallet"></i> Şəxsi Kabinetə Qayıt
+            </a>
+            <a href="index.html" class="btn-secondary">
+                <i class="fas fa-home"></i> Əsas Səhifəyə Keç
+            </a>
+        </div>
+    </div>
+
+    <script src="JS/config.js"></script>
+    <script>
+        (async function initSuccessPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sessionId = urlParams.get('sessionId') || urlParams.get('paymentId') || urlParams.get('orderId') || '';
+            const statusTitleEl = document.getElementById('statusTitle');
+            const statusDescEl = document.getElementById('statusDesc');
+            const statusBadgeEl = document.getElementById('statusBadge');
+            const statusIconEl = document.getElementById('statusIcon');
+            const txIdEl = document.getElementById('txIdValue');
+            const balanceEl = document.getElementById('balanceValue');
+            const dateEl = document.getElementById('txDateValue');
+            const copyBtn = document.getElementById('copyTxBtn');
+
+            dateEl.textContent = new Date().toLocaleString('az-AZ', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            if (!sessionId) {
+                // Heç bir sessionId yoxdursa: saxta ID uydurma, 'Ödəniş tapılmadı' göstər
+                statusTitleEl.textContent = 'Ödəniş tapılmadı';
+                statusDescEl.textContent = 'Ödəniş sessiya identifikatoru qeyd olunmayıb.';
+                statusBadgeEl.className = 'badge-failed';
+                statusBadgeEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Ödəniş tapılmadı';
+                statusIconEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                statusIconEl.style.color = '#ef4444';
+                statusIconEl.innerHTML = '<i class="fas fa-times"></i>';
+                txIdEl.textContent = 'Yoxdur';
+                balanceEl.textContent = '—';
+                return;
+            }
+
+            txIdEl.textContent = sessionId.length > 20 ? sessionId.substring(0, 18) + '...' : sessionId;
+            txIdEl.setAttribute('title', sessionId);
+
+            copyBtn.addEventListener('click', () => {
+                const fullText = txIdEl.getAttribute('title') || txIdEl.textContent;
+                navigator.clipboard.writeText(fullText).then(() => {
+                    copyBtn.innerHTML = '<i class="fas fa-check" style="color:#10b981"></i>';
+                    setTimeout(() => { copyBtn.innerHTML = '<i class="far fa-copy"></i>'; }, 2000);
+                });
+            });
+
+            const token = window.getToken ? window.getToken() : localStorage.getItem('token');
+            const API_BASE = window.API_URL || 'http://localhost:5000/api';
+
+            async function fetchLiveBalance() {
+                if (!token) {
+                    balanceEl.textContent = 'Mövcuddur (Kabinetdə baxın)';
+                    return;
+                }
+                try {
+                    const balRes = await fetch(`${API_BASE}/wallet/balance`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (balRes.ok) {
+                        const balData = await balRes.json();
+                        const b = Number(balData.walletBalance || 0);
+                        balanceEl.textContent = b.toFixed(2) + ' AZN';
+                    } else {
+                        balanceEl.textContent = 'Yeniləndi';
+                    }
+                } catch (_) {
+                    balanceEl.textContent = 'Yeniləndi';
+                }
+            }
+
+            let retryCount = 0;
+            const maxRetries = 5;
+
+            async function checkStatus() {
+                try {
+                    const res = await fetch(`${API_BASE}/wallet/payment-session/${encodeURIComponent(sessionId)}`, {
+                        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        const status = data.status;
+
+                        if (data.txId) {
+                            txIdEl.textContent = data.txId.length > 20 ? data.txId.substring(0, 18) + '...' : data.txId;
+                            txIdEl.setAttribute('title', data.txId);
+                        }
+
+                        if (status === 'completed' || status === 'paid') {
+                            // Completed -> Təsdiqləndi + balans
+                            statusTitleEl.textContent = 'Ödəniş uğurlu oldu!';
+                            statusDescEl.textContent = 'Balansınız artırıldı və xidmətlər dərhal aktivləşdirildi.';
+                            statusBadgeEl.className = 'badge-verified';
+                            statusBadgeEl.innerHTML = '<i class="fas fa-check-circle"></i> Təsdiqləndi';
+                            statusIconEl.style.background = 'rgba(16, 185, 129, 0.15)';
+                            statusIconEl.style.color = '#10b981';
+                            statusIconEl.innerHTML = '<i class="fas fa-check"></i>';
+                            await fetchLiveBalance();
+                            return;
+                        } else if (status === 'pending' || status === 'processing') {
+                            // Pending -> Gözlənilir... + 3 saniyədən bir retry 5 dəfə
+                            statusTitleEl.textContent = 'Ödəniş yoxlanılır...';
+                            statusDescEl.textContent = 'Ödəniş şlüzündən təsdiq gözlənilir, zəhmət olmasa gözləyin...';
+                            statusBadgeEl.className = 'badge-pending';
+                            statusBadgeEl.innerHTML = '<span class="loader-spinner"></span> Gözlənilir...';
+                            statusIconEl.style.background = 'rgba(245, 158, 11, 0.15)';
+                            statusIconEl.style.color = '#f59e0b';
+                            statusIconEl.innerHTML = '<i class="fas fa-clock"></i>';
+
+                            if (retryCount < maxRetries) {
+                                retryCount++;
+                                setTimeout(checkStatus, 3000);
+                            } else {
+                                statusTitleEl.textContent = 'Ödəniş icradadır';
+                                statusDescEl.textContent = 'Ödəniş hələ tamamlanmayıb. Balansınız təsdiq edildikdən sonra yenilənəcək.';
+                                statusBadgeEl.className = 'badge-pending';
+                                statusBadgeEl.innerHTML = '<i class="fas fa-hourglass-half"></i> Gözlənilir...';
+                                balanceEl.textContent = 'Gözlənilir';
+                            }
+                            return;
+                        } else {
+                            // Failed
+                            statusTitleEl.textContent = 'Ödəniş uğursuz oldu';
+                            statusDescEl.textContent = 'Ödəniş baş tutmadı və ya ləğv edildi.';
+                            statusBadgeEl.className = 'badge-failed';
+                            statusBadgeEl.innerHTML = '<i class="fas fa-times-circle"></i> Uğursuz';
+                            statusIconEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                            statusIconEl.style.color = '#ef4444';
+                            statusIconEl.innerHTML = '<i class="fas fa-times"></i>';
+                            balanceEl.textContent = 'Dəyişmədi';
+                            return;
+                        }
+                    } else if (res.status === 404) {
+                        statusTitleEl.textContent = 'Ödəniş tapılmadı';
+                        statusDescEl.textContent = 'Göstərilən sessiya üzrə ödəniş tapılmadı.';
+                        statusBadgeEl.className = 'badge-failed';
+                        statusBadgeEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Ödəniş tapılmadı';
+                        statusIconEl.style.background = 'rgba(239, 68, 68, 0.15)';
+                        statusIconEl.style.color = '#ef4444';
+                        statusIconEl.innerHTML = '<i class="fas fa-times"></i>';
+                        balanceEl.textContent = '—';
+                        return;
+                    } else {
+                        throw new Error('Status fetch failed');
+                    }
+                } catch (err) {
+                    console.warn('Status check error:', err);
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        setTimeout(checkStatus, 3000);
+                    } else {
+                        statusTitleEl.textContent = 'Ödəniş yoxlanıla bilmədi';
+                        statusDescEl.textContent = 'Statusu kabinetinizdən yoxlaya bilərsiniz.';
+                        statusBadgeEl.className = 'badge-pending';
+                        statusBadgeEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Gözlənilir...';
+                        await fetchLiveBalance();
+                    }
+                }
+            }
+
+            checkStatus();
+        })();
+    </script>
+</body>
+</html>

@@ -4,19 +4,32 @@
  * This file sets the global API base URL used by all frontend scripts.
  * Update this value when deploying to staging or production.
  */
-const isLocal = ['localhost', '127.0.0.1', '', '0.0.0.0'].includes(window.location.hostname) ||
-    window.location.hostname.startsWith('192.168.') ||
-    window.location.hostname.startsWith('10.') ||
-    Boolean(window.location.port) ||
-    window.location.protocol === 'file:';
+var hostname = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname) ||
+    hostname.startsWith('192.168.') ||
+    hostname.startsWith('10.') ||
+    (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:');
 
-window.API_URL = window.API_URL || (isLocal ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
-window.API_BASE = window.API_URL;
-window.API_BASE_URL = window.API_URL;
+function resolveDefaultApiUrl() {
+    if (!hostname) console.warn('config.js hostname undefined');
+    if (!isLocal) return 'https://api.mobil.az/api';
+    if (hostname && !['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'].includes(hostname)) {
+        const proto = (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') ? 'https:' : 'http:';
+        return `${proto}//${hostname}:5000/api`;
+    }
+    return 'http://localhost:5000/api';
+}
+
+var resolvedApi = (typeof window !== 'undefined' && typeof window.API_URL === 'string' && window.API_URL.trim()) ? window.API_URL : (resolveDefaultApiUrl() || 'http://localhost:5000/api');
+if (typeof window !== 'undefined') {
+    window.API_URL = resolvedApi;
+    window.API_BASE = resolvedApi;
+    window.API_BASE_URL = resolvedApi;
+}
 if (typeof globalThis !== 'undefined') {
-    globalThis.API_URL = window.API_URL;
-    globalThis.API_BASE = window.API_URL;
-    globalThis.API_BASE_URL = window.API_URL;
+    globalThis.API_URL = resolvedApi;
+    globalThis.API_BASE = resolvedApi;
+    globalThis.API_BASE_URL = resolvedApi;
 }
 
 if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
@@ -159,14 +172,21 @@ window.clearAuthSession = window.clearAuthSession || function clearAuthSession()
 
 class ToastNotifier {
     constructor() {
-        this.container = document.querySelector('.cab-toast-container');
-        if (!this.container) {
-            this.container = document.createElement('div');
-            this.container.className = 'cab-toast-container';
-            document.body.appendChild(this.container);
-        }
+        this.container = null;
         this.lastToastMessage = null;
         this.lastToastTime = 0;
+    }
+
+    getContainer() {
+        if (!this.container && typeof document !== 'undefined') {
+            this.container = document.querySelector('.cab-toast-container');
+            if (!this.container && document.body) {
+                this.container = document.createElement('div');
+                this.container.className = 'cab-toast-container';
+                document.body.appendChild(this.container);
+            }
+        }
+        return this.container;
     }
 
     show(message, type = 'info') {
@@ -176,6 +196,9 @@ class ToastNotifier {
         }
         this.lastToastMessage = message;
         this.lastToastTime = now;
+
+        const container = this.getContainer();
+        if (!container) return;
 
         const iconClass = type === 'success' ? 'fas fa-check-circle' :
                           type === 'error' ? 'fas fa-times-circle' :

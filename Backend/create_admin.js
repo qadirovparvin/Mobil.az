@@ -35,7 +35,8 @@ const createAdmin = async () => {
         password: password,
         phone: '+994000000000',
         role: 'admin',
-        status: 'active'
+        status: 'active',
+        isVerified: true
     });
 
     console.log('Admin created successfully.');

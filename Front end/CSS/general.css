@@ -1,7 +1,9 @@
 /* Bütün sayta aid ümumi stillər - Mobil.az | Apple Design & Dark Mode Variables */
 :root {
-    /* Apple Light Mode Palette */
-    --bg-primary: #f5f5f7;
+    /* Apple Light Mode Palette - Pure White Background */
+    --bg-page: #FFFFFF;
+    --bg-header: #FFFFFF;
+    --bg-primary: #FFFFFF;
     --bg-secondary: #ffffff;
     --text-primary: #1d1d1f;
     --text-secondary: #86868b;
@@ -9,7 +11,7 @@
     /* Apple Blue */
     --accent-hover: #0077ed;
     --border-color: #d2d2d7;
-    --header-bg: rgba(255, 255, 255, 0.72);
+    --header-bg: #FFFFFF;
     --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
     --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.08);
     --input-bg: #f5f5f7;
@@ -23,6 +25,8 @@
 
 [data-theme="dark"] {
     /* Apple Dark Mode Palette */
+    --bg-page: #000000;
+    --bg-header: #1c1c1e;
     --bg-primary: #000000;
     --bg-secondary: #1c1c1e;
     --text-primary: #f5f5f7;
@@ -52,12 +56,19 @@ body {
     font-family: var(--font-family);
     margin: 0;
     padding: 0;
-    background-color: var(--bg-primary);
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
     color: var(--text-primary);
     line-height: 1.6;
     height: 100%;
     transition: background-color 0.4s ease, color 0.4s ease;
     -webkit-font-smoothing: antialiased;
+}
+
+[data-theme="dark"] body {
+    background: #000000 !important;
+    background-color: #000000 !important;
+    color: var(--text-primary);
 }
 
 button {
@@ -85,9 +96,9 @@ ul {
 .mobil-logo {
     font-family: var(--font-family);
     font-size: 26px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--airy-primary);
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    color: #111827 !important;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -97,12 +108,20 @@ ul {
 }
 
 .mobil-logo span {
-    color: var(--accent-color);
-    font-weight: 700;
+    color: #4F46E5 !important;
+    font-weight: 800 !important;
 }
 
 .mobil-logo:hover {
-    opacity: 0.82;
+    opacity: 0.85;
+}
+
+[data-theme="dark"] .mobil-logo {
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .mobil-logo span {
+    color: #818CF8 !important;
 }
 
 img {
@@ -191,7 +210,7 @@ textarea:focus {
     border: 1px solid var(--border-color);
     padding: 15px 20px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     display: flex;
     align-items: center;
     gap: 12px;
@@ -217,15 +236,37 @@ textarea:focus {
     color: white;
 }
 
-.cab-toast-success { border-left: 4px solid #10b981; }
-.cab-toast-error { border-left: 4px solid #ef4444; }
-.cab-toast-warning { border-left: 4px solid #f59e0b; }
-.cab-toast-info { border-left: 4px solid var(--accent-color); }
+.cab-toast-success {
+    border-left: 4px solid #10b981;
+}
 
-.cab-toast-success .cab-toast-icon { background: #10b981; }
-.cab-toast-error .cab-toast-icon { background: #ef4444; }
-.cab-toast-warning .cab-toast-icon { background: #f59e0b; }
-.cab-toast-info .cab-toast-icon { background: var(--accent-color); }
+.cab-toast-error {
+    border-left: 4px solid #ef4444;
+}
+
+.cab-toast-warning {
+    border-left: 4px solid #f59e0b;
+}
+
+.cab-toast-info {
+    border-left: 4px solid var(--accent-color);
+}
+
+.cab-toast-success .cab-toast-icon {
+    background: #10b981;
+}
+
+.cab-toast-error .cab-toast-icon {
+    background: #ef4444;
+}
+
+.cab-toast-warning .cab-toast-icon {
+    background: #f59e0b;
+}
+
+.cab-toast-info .cab-toast-icon {
+    background: var(--accent-color);
+}
 
 [data-theme="dark"] .cab-toast {
     background: rgba(30, 32, 40, 0.95);
@@ -250,7 +291,7 @@ textarea:focus {
     transition: opacity 0.2s, transform 0.2s;
     pointer-events: none;
     z-index: 1000;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .tooltip-wrapper::before {
@@ -278,8 +319,8 @@ textarea:focus {
 
 /* ─── AUTOFILL SAFE STYLING ─── */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--bg-secondary) inset !important;
     -webkit-text-fill-color: var(--text-color) !important;
@@ -308,9 +349,11 @@ input:-webkit-autofill:active {
     border-radius: 8px;
     transition: background 0.2s ease, color 0.2s ease;
 }
+
 .icon-btn:hover {
     background: rgba(0, 0, 0, 0.05);
 }
+
 [data-theme="dark"] .icon-btn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
@@ -328,6 +371,7 @@ input:-webkit-autofill:active {
     z-index: 10000;
     overflow: hidden;
 }
+
 .dropdown-panel.hidden {
     display: none !important;
 }
@@ -347,12 +391,26 @@ input:-webkit-autofill:active {
 
 /* Notification Dropdown */
 .notif-panel {
-    right: -60px;
-    width: 380px;
+    right: 10px;
+    max-width: 90vw;
+    width: 360px;
     max-height: 420px;
     display: flex;
     flex-direction: column;
 }
+
+@media (max-width: 768px) {
+    .notif-panel {
+        width: 90vw;
+        right: 5vw;
+        left: auto;
+    }
+    header .container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
 .dropdown-header {
     display: flex;
     justify-content: space-between;
@@ -361,13 +419,16 @@ input:-webkit-autofill:active {
     border-bottom: 1px solid var(--border-color, #e5e5e7);
     background: rgba(0, 0, 0, 0.02);
 }
+
 [data-theme="dark"] .dropdown-header {
     background: rgba(255, 255, 255, 0.03);
 }
+
 .dropdown-title {
     font-size: 14px;
     font-weight: 700;
 }
+
 .btn-mark-all-read {
     background: transparent;
     border: none;
@@ -378,14 +439,17 @@ input:-webkit-autofill:active {
     padding: 4px 8px;
     border-radius: 6px;
 }
+
 .btn-mark-all-read:hover {
     background: rgba(108, 92, 231, 0.1);
 }
+
 .notif-list-container {
     overflow-y: auto;
     max-height: 350px;
     padding: 4px 0;
 }
+
 .notif-item {
     padding: 10px 16px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
@@ -393,28 +457,35 @@ input:-webkit-autofill:active {
     line-height: 1.4;
     transition: background 0.15s;
 }
+
 [data-theme="dark"] .notif-item {
     border-bottom-color: rgba(255, 255, 255, 0.08);
 }
+
 .notif-item:last-child {
     border-bottom: none;
 }
+
 .notif-item:hover {
     background: rgba(0, 0, 0, 0.03);
 }
+
 [data-theme="dark"] .notif-item:hover {
     background: rgba(255, 255, 255, 0.05);
 }
+
 .notif-item.unread {
     background: rgba(108, 92, 231, 0.08);
     font-weight: 600;
 }
+
 .notif-item-time {
     display: block;
     font-size: 11px;
     color: var(--text-secondary, #71717a);
     margin-top: 3px;
 }
+
 .notif-empty-state {
     padding: 24px 16px;
     text-align: center;
@@ -427,6 +498,7 @@ input:-webkit-autofill:active {
     right: 0;
     width: 280px;
 }
+
 .profile-card-top {
     padding: 16px;
     display: flex;
@@ -435,9 +507,11 @@ input:-webkit-autofill:active {
     border-bottom: 1px solid var(--border-color, #e5e5e7);
     background: rgba(0, 0, 0, 0.02);
 }
+
 [data-theme="dark"] .profile-card-top {
     background: rgba(255, 255, 255, 0.03);
 }
+
 .profile-card-top .avatar {
     width: 44px;
     height: 44px;
@@ -450,10 +524,12 @@ input:-webkit-autofill:active {
     font-size: 20px;
     flex-shrink: 0;
 }
+
 .profile-user-details {
     min-width: 0;
     flex: 1;
 }
+
 .profile-user-details .profile-name {
     font-size: 14px;
     font-weight: 700;
@@ -461,6 +537,7 @@ input:-webkit-autofill:active {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .profile-user-details .profile-email {
     font-size: 12px;
     color: var(--text-secondary, #71717a);
@@ -468,6 +545,7 @@ input:-webkit-autofill:active {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 .profile-user-details .role-badge {
     display: inline-block;
     margin-top: 4px;
@@ -479,9 +557,11 @@ input:-webkit-autofill:active {
     color: #6c5ce7;
     text-transform: uppercase;
 }
+
 .profile-menu-links {
     padding: 8px 0;
 }
+
 .profile-menu-links a {
     display: flex;
     align-items: center;
@@ -493,25 +573,31 @@ input:-webkit-autofill:active {
     font-weight: 500;
     transition: background 0.15s, color 0.15s;
 }
+
 .profile-menu-links a:hover {
     background: rgba(108, 92, 231, 0.08);
     color: #6c5ce7;
 }
+
 .profile-menu-links a i {
     width: 16px;
     text-align: center;
     color: var(--text-secondary);
 }
+
 .profile-menu-links a:hover i {
     color: #6c5ce7;
 }
+
 .profile-menu-links a.text-danger {
     color: #ef4444;
 }
+
 .profile-menu-links a.text-danger:hover {
     background: rgba(239, 68, 68, 0.08);
     color: #ef4444;
 }
+
 .profile-menu-links a.text-danger i {
     color: #ef4444;
 }

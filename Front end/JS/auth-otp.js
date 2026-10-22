@@ -4,9 +4,40 @@
    auth-otp.js  –  Shared helpers for login & signup OTP flows
    ============================================================ */
 
-window.API_URL = window.API_URL || 'http://localhost:5000/api';
+if (typeof window !== 'undefined') {
+    window.API_URL = window.API_URL || 'http://localhost:5000/api';
+}
 
-const SMS_DEV_MODE = true; // TODO: false when SMS paid
+// Safe token extractor supporting token, sessionStorage token, and adminToken
+function getStoredToken() {
+    if (typeof window !== 'undefined' && typeof window.getToken === 'function') {
+        const tok = window.getToken();
+        if (tok) return tok;
+    }
+    if (typeof localStorage === 'undefined') return '';
+    const token = localStorage.getItem('token') || 
+                  sessionStorage.getItem('token') || 
+                  localStorage.getItem('adminToken') || 
+                  sessionStorage.getItem('adminToken') || '';
+    return token.trim().replace(/^["']+|["']+$/g, '');
+}
+if (typeof window !== 'undefined') {
+    window.getStoredToken = getStoredToken;
+    if (typeof window.getToken !== 'function') {
+        window.getToken = getStoredToken;
+    }
+}
+
+let SMS_DEV_MODE = true; // TODO: false when SMS paid
+if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'production' || process.env?.SMS_DEV_MODE === 'false')) {
+    SMS_DEV_MODE = false;
+}
+if (typeof window !== 'undefined' && window.location?.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1' && !window.location.hostname.endsWith('.local')) {
+    SMS_DEV_MODE = false;
+}
+if (typeof window !== 'undefined') {
+    window.SMS_DEV_MODE = SMS_DEV_MODE;
+}
 const SMS_DEV_WARNING = 'SMS xidməti hazırda texniki profilaktikadadır. Zəhmət olmasa şifrə ilə daxil olun.';
 
 // Dual-write session persistence across all keys to guarantee header and API sync
@@ -381,7 +412,14 @@ function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
     if (!timerEl || !resendEl) return;
     let s = seconds;
     resendEl.disabled = true;
-    resendEl.innerHTML = `${authT('auth-resend', 'Yenidən göndər')} (<span class="otp-timer" id="${timerSpanId}">${s}</span>s)`;
+    resendEl.replaceChildren();
+    resendEl.appendChild(document.createTextNode(`${authT('auth-resend', 'Yenidən göndər')} (`));
+    const span = document.createElement('span');
+    span.className = 'otp-timer';
+    span.id = timerSpanId;
+    span.textContent = s;
+    resendEl.appendChild(span);
+    resendEl.appendChild(document.createTextNode('s)'));
     const iv = setInterval(() => {
         s--;
         const t = document.getElementById(timerSpanId);
@@ -709,7 +747,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (!res.ok) {
                     if (data.requiresOtp || data.requiresTwoFactor) {
-                        document.getElementById('twoFactorMessage').textContent = data.message || 'Kodu daxil edin';
+                        const msgEl = document.getElementById('twoFactorMessage');
+                        if (msgEl) {
+                            msgEl.textContent = data.message || 'Kodu daxil edin';
+                            if (data.devCode) {
+                                msgEl.innerHTML = (data.message || 'Kodu daxil edin') +
+                                    '<br><div style="margin-top:8px;padding:6px 12px;background:rgba(124,58,237,0.1);color:#7c3aed;border-radius:6px;font-weight:600;font-size:0.95rem;">Giriş kodu: <strong>' + data.devCode + '</strong></div>';
+                            }
+                        }
+                        const codeInput = document.getElementById('twoFactorCode');
+                        if (codeInput) {
+                            codeInput.value = data.devCode || '';
+                            setTimeout(() => codeInput.focus(), 100);
+                        }
                         document.getElementById('twoFactorModal').style.display = 'flex';
                         
                         const twoFactorForm = document.getElementById('twoFactorForm');
@@ -910,7 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const btn = document.getElementById('forgotSubmitBtn');
-            if (!setLoading(btn, true)) return;
+            setLoading(btn, true);
 
             try {
                 const res = await fetch(`${window.API_URL}/auth/forgot-password`, {
@@ -965,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const btn = document.getElementById('resetSubmitBtn');
-            if (!setLoading(btn, true)) return;
+            setLoading(btn, true);
 
             try {
                 const res = await fetch(`${window.API_URL}/auth/reset-password`, {
@@ -992,3 +1042,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        SMS_DEV_MODE,
+        getStoredToken,
+        persistSession
+    };
+}

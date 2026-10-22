@@ -1,5 +1,7 @@
 const crypto = require('crypto');
-const { isOriginAllowed } = require('../utils/corsPolicy');
+const { isOriginAllowed, getAllowedOrigins } = require('../utils/corsPolicy');
+
+const isProd = process.env.NODE_ENV === 'production';
 
 const CSRF_COOKIE_NAME = process.env.CSRF_COOKIE_NAME || 'csrfToken';
 const CSRF_HEADER_NAME = 'x-csrf-token';
@@ -20,7 +22,25 @@ const parseCookies = (cookieHeader = '') => cookieHeader
         return cookies;
     }, {});
 
-const getCsrfSecret = () => process.env.CSRF_SECRET || process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
+const getCsrfSecret = () => {
+    const isProduction = isProd || process.env.NODE_ENV === 'production';
+    if (!process.env.CSRF_SECRET) {
+        if (isProduction) {
+            throw new Error('CSRF_SECRET is required in production - set CSRF_SECRET env');
+        }
+        console.warn('⚠️ CSRF_SECRET missing, using fallback (DEV ONLY)');
+        return process.env.JWT_SECRET || 'dev-only-csrf-fallback-not-for-prod';
+    }
+    return process.env.CSRF_SECRET;
+};
+
+// Validate on startup
+getCsrfSecret();
+
+const allowedOrigins = getAllowedOrigins();
+if ((isProd || process.env.NODE_ENV === 'production') && !allowedOrigins.length) {
+    console.warn('⚠️ WARNING: Allowed origins list is empty in production');
+}
 
 const signToken = (token) =>
     crypto.createHmac('sha256', getCsrfSecret()).update(token).digest('hex');
@@ -86,13 +106,23 @@ const getRequestOrigin = (req) => {
 const validateOrigin = (req, res, next) => {
     if (SAFE_METHODS.has(req.method)) return next();
 
-    const origin = getRequestOrigin(req);
-    const allowNoOrigin = process.env.CSRF_ALLOW_NO_ORIGIN === undefined
-        ? process.env.NODE_ENV !== 'production'
-        : process.env.CSRF_ALLOW_NO_ORIGIN === 'true';
+    const isProduction = isProd || process.env.NODE_ENV === 'production';
+    const currentAllowedOrigins = getAllowedOrigins();
 
-    if (!origin && allowNoOrigin) return next();
-    if (origin && isOriginAllowed(origin)) return next();
+    if (isProduction && !currentAllowedOrigins.length) {
+        console.warn('⚠️ WARNING: Allowed origins list is empty in production');
+        return res.status(403).json({ message: 'Sorğu mənbəyi icazəli deyil' });
+    }
+
+    const origin = getRequestOrigin(req);
+    const allowNoOrigin = !isProduction && process.env.CSRF_ALLOW_NO_ORIGIN === 'true';
+
+    if (!origin) {
+        if (allowNoOrigin) return next();
+        return res.status(403).json({ message: 'Sorğu mənbəyi icazəli deyil' });
+    }
+
+    if (isOriginAllowed(origin)) return next();
 
     return res.status(403).json({ message: 'Sorğu mənbəyi icazəli deyil' });
 };
@@ -133,6 +163,7 @@ module.exports = {
     buildCsrfCookieOptions,
     csrfProtection,
     csrfTokenHandler,
+    getCsrfSecret,
     issueCsrfToken,
     parseCookies,
     signToken,

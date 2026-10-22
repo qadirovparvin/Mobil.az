@@ -1,36 +1,48 @@
+if (process.env.NODE_ENV === 'production') { console.error('BLOCKED in prod'); process.exit(1); }
+
 /**
  * seed_admin.js
  * ─────────────────────────────────────────────────────────────
- * Creates (or re-confirms) the permanent admin account in MongoDB.
+ * Creates the permanent admin account in MongoDB.
  *
  * Usage:
- *   node seed_admin.js
- *
- * Run from the Backend directory:
- *   cd "c:\Users\Gadirov\Desktop\AiryPhone - COPY\Backend"
  *   node seed_admin.js
  */
 
 'use strict';
 
-const mongoose = require('mongoose');
-const bcrypt   = require('bcryptjs');
+const path     = require('path');
 const dotenv   = require('dotenv');
 
-dotenv.config();  // loads .env → MONGODB_URI, JWT_SECRET
+dotenv.config({ path: path.join(__dirname, '.env') });
+dotenv.config();
+
+if (process.env.NODE_ENV === 'production') {
+    console.error('BLOCKED in prod');
+    process.exit(1);
+}
+
+const mongoose = require('mongoose');
+const bcrypt   = require('bcryptjs');
 
 const User      = require('./models/User');
 const connectDB = require('./config/db');
+const { generateTotpSecret, encryptSecret, generateRecoveryCodes, hashRecoveryCode } = require('./utils/totp');
 
 /* ── Admin credentials ─────────────────────────────────────── */
-const ADMIN_EMAIL    = 'mobil@gmail.com';
-const ADMIN_PASSWORD = 'Mobil.az!1921021418';
-const ADMIN_NAME     = 'Admin';
-const ADMIN_LASTNAME = 'Mobil.az';
-const ADMIN_PHONE    = '+994000000000';
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PHONE    = process.env.ADMIN_PHONE;
+const ADMIN_NAME     = process.env.ADMIN_NAME || 'Admin';
+const ADMIN_LASTNAME = process.env.ADMIN_LASTNAME || 'Mobil.az';
 
 /* ── Main ──────────────────────────────────────────────────── */
 async function seedAdmin() {
+    if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+        console.error('❌ Missing ADMIN_EMAIL or ADMIN_PASSWORD in environment variables (.env).');
+        process.exit(1);
+    }
+
     await connectDB();
 
     const email = ADMIN_EMAIL.trim().toLowerCase();
@@ -39,63 +51,53 @@ async function seedAdmin() {
     const existing = await User.findOne({ email });
 
     if (existing) {
-        if (existing.role !== 'admin') {
-            /* Exists but not admin — promote + update password */
-            const hashed = await bcrypt.hash(ADMIN_PASSWORD, 12);
-            existing.role     = 'admin';
-            existing.password = hashed;
-            existing.status   = 'active';
-            await existing.save();
-            console.log('✅ Existing user promoted to admin and password updated.');
-        } else {
-            /* Already an admin — just refresh the password to be safe */
-            const isMatch = await bcrypt.compare(ADMIN_PASSWORD, existing.password);
-            if (!isMatch) {
-                const hashed = await bcrypt.hash(ADMIN_PASSWORD, 12);
-                existing.password = hashed;
-                existing.status   = 'active';
-                await existing.save();
-                console.log('✅ Admin already exists — password refreshed.');
-            } else {
-                console.log('✅ Admin account already exists with correct credentials. Nothing to do.');
-            }
-        }
-    } else {
-        /* Create fresh admin account */
-        const hashed = await bcrypt.hash(ADMIN_PASSWORD, 12);
-
-        await User.create({
-            name:      ADMIN_NAME,
-            lastName:  ADMIN_LASTNAME,
-            email:     email,
-            password:  hashed,
-            phone:     ADMIN_PHONE,
-            role:      'admin',
-            status:    'active',
-            walletBalance: 0,
-            activePackage: 'none'
-        });
-
-        console.log('✅ Admin account created successfully!');
+        console.warn(`⚠️ Warning: Admin account already exists (${email}). Skipping admin creation.`);
+        await mongoose.disconnect();
+        return;
     }
 
-    console.log('');
-    console.log('──────────────────────────────────────────────');
-    console.log(' Admin credentials');
-    console.log('──────────────────────────────────────────────');
-    console.log(` Email   : ${ADMIN_EMAIL}`);
-    console.log(` Password: ${ADMIN_PASSWORD}`);
-    console.log(` Role    : admin`);
-    console.log('──────────────────────────────────────────────');
-    console.log('');
-    console.log('You can now log in at login.html → you will be');
-    console.log('automatically redirected to admin.html.');
+    /* Create fresh admin account */
+    const adminData = {
+        name:      ADMIN_NAME,
+        lastName:  ADMIN_LASTNAME,
+        email:     email,
+        password:  await bcrypt.hash(ADMIN_PASSWORD, 12),
+        role:      'admin',
+        status:    'active',
+        isVerified: true,
+        unverifiedExpiresAt: null,
+        walletBalance: 0,
+        activePackage: 'none'
+    };
+
+    if (ADMIN_PHONE) {
+        adminData.phone = ADMIN_PHONE;
+    }
+
+    const userRecord = new User(adminData);
+
+    if (process.env.TOTP_2FA_ENABLED === 'true') {
+        const secret = generateTotpSecret();
+        userRecord.twoFactorSecret = encryptSecret(secret);
+        const rawRecoveryCodes = generateRecoveryCodes(10);
+        userRecord.twoFactorRecoveryCodes = await Promise.all(rawRecoveryCodes.map(c => hashRecoveryCode(c)));
+        userRecord.twoFactorEnabled = true;
+    } else {
+        userRecord.twoFactorEnabled = false;
+        userRecord.twoFactorSecret = null;
+        userRecord.twoFactorRecoveryCodes = [];
+    }
+
+    await userRecord.save();
+
+    console.log(`Admin created: ${userRecord.email}`);
 
     await mongoose.disconnect();
-    process.exit(0);
 }
 
-seedAdmin().catch((err) => {
+seedAdmin().then(() => {
+    process.exit(0);
+}).catch((err) => {
     console.error('❌ Error seeding admin:', err.message);
     process.exit(1);
 });

@@ -129,38 +129,39 @@ document.addEventListener("DOMContentLoaded", function () {
             "signup-and": "və",
             "signup-has-account": "Artıq hesabınız var?",
             "signup-login-link": "Daxil olun",
-            "about-h1": "Mobil.az — Azərbaycanda Telefon Elanlarının Yeni Ünvanı!",
-            "about-sub": "Yalnız telefonlar üçün ixtisaslaşmış bazar yeri!",
-            "about-p1": "Azərbaycan Respublikasının elektron ticarət sektorunda <b style=\"color: blueviolet;\">Mobil.az</b> adlı innovativ platforma yeni bir inkişaf mərhələsinin başlanğıcını təşkil edir. Bu müasir elektron ticarət həlli, ənənəvi elan saytlarından fərqli olaraq, özünün ixtisaslaşdırılmış yanaşması ilə diqqəti cəlb edir. Mobil.az platforması spesifik olaraq mobil telefon və onların aksesuarlarının alqı-satqısı üzərində fokuslanır.",
-            "about-p2": "İstifadəçilər həm yeni, həm də işlənmiş cihazlar üçün elanlar yerləşdirə bilərlər.",
-            "about-p3": "Platformamız müxtəlif qiymət aralığında olan məhsulları əhatə edir və hər büdcəyə uyğun seçimlər təqdim edir. Mobil.az-da siz həmçinin telefonların texniki xüsusiyyətlərini, qiymətini, vəziyyətini (yeni/işlənmiş) və digər ətraflı məlumatları görə bilərsiniz.",
-            "about-h2-1": "Mobil.az-da Nə Satıla Bilər?",
+            "about-page-title": "Haqqımızda - Mobil.az",
+            "about-h1": "Mobil.az — Azərbaycanda Mobil Cihazların Yeni və Etibarlı Ticarət Platforması",
+            "about-sub": "Mobil cihazlar və aksesuarları üzrə ixtisaslaşmış ticarət platforması",
+            "about-p1": "Azərbaycanın elektron ticarət sektorunda <b style=\"color: blueviolet;\">Mobil.az</b> smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarlar üzrə ixtisaslaşmış innovativ platformadır. Ənənəvi elan saytlarından fərqli olaraq, sırf mobil texnologiyalara fokuslanaraq həm alıcılar, həm də satıcılar üçün sürətli, təhlükəsiz və məqsədyönlü ticarət mühiti yaradırıq.",
+            "about-p2": "Platformamız vasitəsilə həm fərdi istifadəçilər, həm də mağazalar yeni və ya işlənmiş mobil cihaz və aksesuarların alqı-satqısını rahatlıqla həyata keçirə bilərlər.",
+            "about-p3": "Hər büdcəyə uyğun geniş çeşiddə məhsulları bir araya gətirən Mobil.az, təklif edilən cihazların ətraflı texniki göstəricilərini, qiymətini və vəziyyətini (yeni/işlənmiş) şəffaf şəkildə təqdim edir. Əsas məqsədimiz bazardakı optimal seçimləri bir platformada cəmləşdirərək axtarış prosesini sadələşdirməkdir.",
+            "about-h2-1": "Platformamızda Hansı Məhsullar Təqdim Olunur?",
             "about-ul1-1": "Yeni və işlənmiş smartfonlar, bütün marka və qiymət aralıqları",
             "about-ul1-2": "Apple, Samsung, Xiaomi və digər istehsalçılardan planşet modelləri",
             "about-ul1-3": "Simli və simsiz qulaqlıqlar, audio aksesuarlar",
-            "about-ul1-4": "Adapterlər, qoruyucu örtüklər, ekran qoruyucuları və daha çoxu",
+            "about-ul1-4": "Adapterlər, qoruyucu örtüklər, ekran qoruyucuları və digər mobil aksesuarlar",
             "about-category-summary": "Həm alıcılar, həm də satıcılar Mobil.az-da işlərini asanlıqla həll edirlər. Elanınızı pulsuz yerləşdirin, alıcı tapın.",
             "about-h2-2": "Niyə məhz Mobil.az?",
-            "about-ul2-1": "Ixtisaslaşmış bazar – Platforma yalnız mobil telefon və telefon aksesuarlarının alqı-satqısına həsr olunmuşdur.",
-            "about-ul2-2": "İstifadəçilər üçün rahatlıq – Axtarış və filtr sistemləri sayəsində istənilən modeli tapmaq mümkündür.",
-            "about-ul2-3": "Ən müasir və təhlükəsiz alqı-satqı – Satıcılar üçün reytinq və şərh sistemi mövcuddur.",
-            "about-ul2-4": "Müxtəlif elan paketləri – İstifadəçilər tələbatlarına uyğun olaraq standart, PRO və VIP elan paketlərindən istifadə edə bilərlər",
+            "about-ul2-1": "İxtisaslaşmış bazar: Smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarlar üzrə ixtisaslaşmış ticarət ekosistemi.",
+            "about-ul2-2": "Rahat axtarış və filtrlər: Qabaqcıl kateqoriya, marka, qiymət və vəziyyət filtrləri sayəsində istənilən modeli saniyələr içində tapmaq imkanı.",
+            "about-ul2-3": "Etibarlı ticarət mühiti: Satıcı və mağazalar üçün şəffaf reytinq və real müştəri rəyləri sistemi.",
+            "about-ul2-4": "Elastik elan paketləri: İstifadəçi və mağazaların tələblərinə uyğunlaşdırılmış Standart, PRO və VIP elan paketləri.",
             "about-h2-3": "Mobil.az Necə İşləyir?",
-            "about-p4": "Platformamız həm fərdi satıcılar, həm də mağazalar üçün əlverişli satış mühiti yaradır.",
+            "about-p4": "Platformamız həm fərdi satıcılar, həm də rəsmi mağazalar üçün əlverişli və təhlükəsiz satış mühiti yaradır.",
             "about-h3-1": "1. Fərdi Satıcılar Üçün",
-            "about-ul3-1": "İstənilən şəxs – öz telefonunu satmaq istəyən hər kəs pulsuz və ya PRO elan yerləşdirə bilər.",
-            "about-ul3-2": "Birbaşa alıcı ilə əlaqə – Satıcılar telefon nömrəsi və ya platforma içi mesajlaşma ilə alıcılarla danışa bilərlər.",
-            "about-ul3-3": "Geniş axtarış imkanları – Alıcılar telefon modellərinə, qiymət aralığına və vəziyyətinə görə filtr edə bilərlər.",
-            "about-h3-2": "2. Mağazalar Üçün",
-            "about-ul4-1": "Telefon mağazaları – Mobil.az-da qeydiyyatdan keçərək öz brend mağazalarını aça bilərlər.",
-            "about-ul4-2": "Şirkətlər üçün premium funksiyalar – Mağazalar üçün xüsusi reklam və VIP elan imkanları mövcuddur.",
-            "about-ul4-3": "Brend vitrini – Şirkətlər məhsullarını daha geniş auditoriyaya təqdim edə bilərlər.",
-            "about-h2-4": "Gələcək Planlar və İnkişaf",
-            "about-ul5-1": "Mobil.az mobil tətbiqi istifadəyə veriləcək ki, istifadəçilər mobil cihazlarından daha rahat elan yerləşdirə və axtarış edə bilsinlər.",
-            "about-ul5-2": "Süni intellekt (AI) inteqrasiyası ilə ağıllı elan yerləşdirmə və təkmilləşdirilmiş axtarış sistemi yaradılacaq.",
-            "about-ul5-3": "Avtomatik elan yoxlama sistemi – Süni intellekt vasitəsilə yalnız real elanların dərc olunması təmin ediləcək.",
-            "about-p5": "Mobil.az, Azərbaycanda yalnız telefon və aksesuar satışına yönəlmiş yeni elan platformasıdır.",
-            "about-tagline": "Mobil.az – Telefon alqı-satqısının yeni ünvanı!",
+            "about-ul3-1": "Sürətli satış: Cihaz və ya aksesuarlarınızı pulsuz və ya təşviqat paketləri ilə asanlıqla satışa çıxara bilərsiniz.",
+            "about-ul3-2": "Birbaşa əlaqə: Daxili mesajlaşma sistemi və ya əlaqə nömrəsi vasitəsilə alıcılarla operativ ünsiyyət.",
+            "about-ul3-3": "Hədəfli axtarış: Alıcılar elanları kateqoriya, qiymət, marka və vəziyyət üzrə dəqiqliklə seçə bilirlər.",
+            "about-h3-2": "2. Korporativ Mağazalar Üçün",
+            "about-ul4-1": "Rəsmi mağaza profili: Texnologiya mağazaları Mobil.az-da qeydiyyatdan keçərək öz mağaza səhifələrini aça bilərlər.",
+            "about-ul4-2": "Mağaza idarəetməsi və təşviqat: Mağazalar üçün xüsusi panel və PRO/VIP paketlərlə elanları önə çıxarma imkanı.",
+            "about-ul4-3": "Geniş vitrin: Mağazalar mobil cihaz və aksesuarlarını birbaşa maraqlanan alıcı kütləsinə nümayiş etdirirlər.",
+            "about-h2-4": "Gələcək Hədəflər və İnkişaf Planları",
+            "about-ul5-1": "Mobil tətbiq (Gələcək plan): iOS və Android əməliyyat sistemləri üçün Mobil.az mobil tətbiqinin istifadəyə verilməsi.",
+            "about-ul5-2": "Süni İntellekt (AI) inteqrasiyası (Gələcək plan): Ağıllı axtarış və istifadəçilərə uyğun cihazların tövsiyə edilməsi alqoritmləri.",
+            "about-ul5-3": "Avtomatlaşdırılmış elan moderasiyası (Gələcək plan): Saxta elanların aşkarlanması üçün maşın öyrənməsi həlləri (hazırda elanlar moderatorlar tərəfindən yoxlanılır).",
+            "about-p5": "Mobil.az — Azərbaycanda smartfonlar, planşetlər, qulaqlıqlar və mobil aksesuarların alqı-satqısını sadə və etibarlı edən ixtisaslaşmış elan platformasıdır.",
+            "about-tagline": "Mobil.az — Mobil texnologiyalar və aksesuarların etibarlı ticarət məkanı.",
             "stores-h1": "Sevdiyiniz mağazaları kəşf edin",
             "stores-p": "Sizin üçün ən yaxşı mağazaları bir araya gətirdik",
             "stores-search-placeholder": "Mağaza axtar...",
@@ -452,38 +453,39 @@ document.addEventListener("DOMContentLoaded", function () {
             "signup-and": "and",
             "signup-has-account": "Already have an account?",
             "signup-login-link": "Log in",
-            "about-h1": "Mobil.az — The New Address for Phone Ads in Azerbaijan!",
-            "about-sub": "Specialized marketplace only for phones!",
-            "about-p1": "In the e-commerce sector of the Republic of Azerbaijan, an innovative platform named <b style=\"color: blueviolet;\">Mobil.az</b> marks the beginning of a new stage of development. This modern e-commerce solution attracts attention with its specialized approach, unlike traditional ad sites. The Mobil.az platform specifically focuses on the buying and selling of mobile phones and their accessories.",
-            "about-p2": "Users can post ads for both new and used devices.",
-            "about-p3": "Our platform covers products in various price ranges and offers options for every budget. On Mobil.az, you can also see the technical specifications, price, condition (new/used), and other detailed information of the phones.",
-            "about-h2-1": "What can be sold on Mobil.az?",
-            "about-ul1-1": "New and used smartphones, all brands and price ranges",
+            "about-page-title": "About Us - Mobil.az",
+            "about-h1": "Mobil.az — Modern and Reliable Tech Marketplace in Azerbaijan",
+            "about-sub": "Specialized marketplace for mobile devices and accessories",
+            "about-p1": "In Azerbaijan's e-commerce sector, <b style=\"color: blueviolet;\">Mobil.az</b> is an innovative marketplace specialized in smartphones, tablets, headphones, and mobile accessories. Focusing specifically on mobile technology provides buyers and sellers with a fast, secure, and targeted trading environment.",
+            "about-p2": "Through our platform, individuals and stores can easily buy and sell new and used mobile devices and accessories.",
+            "about-p3": "Bringing together products across all price points, Mobil.az transparently displays technical specifications, prices, and condition (new/used) to simplify your search experience.",
+            "about-h2-1": "What Products Are Featured on Mobil.az?",
+            "about-ul1-1": "New and used smartphones across all brands and price ranges",
             "about-ul1-2": "Tablet models from Apple, Samsung, Xiaomi and other manufacturers",
             "about-ul1-3": "Wired and wireless headphones, audio accessories",
-            "about-ul1-4": "Adapters, protective covers, screen protectors and more",
-            "about-category-summary": "Both buyers and sellers do their job easily on Mobil.az. Place your ad for free, find a buyer.",
-            "about-h2-2": "Why exactly Mobil.az?",
-            "about-ul2-1": "Specialized market - The platform is dedicated only to buying and selling mobile phones and phone accessories.",
-            "about-ul2-2": "Convenience for users - Thanks to search and filter systems, you can find any model.",
-            "about-ul2-3": "The most modern and safe trade - There is a rating and comment system for sellers.",
-            "about-ul2-4": "Various ad packages - Users can use standard, PRO and VIP ad packages according to their needs",
-            "about-h2-3": "How does Mobil.az work?",
-            "about-p4": "Our platform creates a favorable sales environment for both individual sellers and shops.",
+            "about-ul1-4": "Adapters, protective covers, screen protectors and other accessories",
+            "about-category-summary": "Both buyers and sellers manage their deals easily on Mobil.az. Post your ad for free and find buyers.",
+            "about-h2-2": "Why Choose Mobil.az?",
+            "about-ul2-1": "Specialized market: Ecosystem focused on smartphones, tablets, headphones, and mobile accessories.",
+            "about-ul2-2": "Easy search and filters: Find desired models in seconds with filters for category, brand, price range, and condition.",
+            "about-ul2-3": "Reliable trading environment: Transparent seller and store ratings backed by real customer reviews.",
+            "about-ul2-4": "Flexible listing packages: Standard, PRO, and VIP listing packages tailored to individual and store needs.",
+            "about-h2-3": "How Does Mobil.az Work?",
+            "about-p4": "Our platform creates a convenient and safe sales environment for both individual sellers and verified stores.",
             "about-h3-1": "1. For Individual Sellers",
-            "about-ul3-1": "Anyone - anyone who wants to sell their phone can post a free or PRO ad.",
-            "about-ul3-2": "Direct contact with buyer - Sellers can talk to buyers via phone number or in-platform messaging.",
-            "about-ul3-3": "Extensive search options - Buyers can filter by phone models, price range and condition.",
+            "about-ul3-1": "Quick selling: Post your devices or accessories easily for free or with promotion packages.",
+            "about-ul3-2": "Direct contact: Fast communication with buyers through in-app messaging or direct phone calls.",
+            "about-ul3-3": "Targeted search: Buyers can pinpoint listings by category, brand, condition, and price.",
             "about-h3-2": "2. For Stores",
-            "about-ul4-1": "Phone stores - By registering on Mobil.az, they can open their brand stores.",
-            "about-ul4-2": "Premium features for companies - Special advertising and VIP advertising opportunities are available for stores.",
-            "about-ul4-3": "Brand showcase - Companies can present their products to a wider audience.",
-            "about-h2-4": "Future Plans and Development",
-            "about-ul5-1": "The Mobil.az mobile application will be put into use so that users can place ads and search more comfortably from their mobile devices.",
-            "about-ul5-2": "Smart ad placement and enhanced search system will be created with artificial intelligence (AI) integration.",
-            "about-ul5-3": "Automatic ad review system - through artificial intelligence, only real ads will be published.",
-            "about-p5": "Mobil.az is a new classified ads platform in Azerbaijan focused only on phone and accessory sales.",
-            "about-tagline": "Mobil.az – The new address of phone trading!",
+            "about-ul4-1": "Official store profile: Electronics stores can register and build their branded store storefronts.",
+            "about-ul4-2": "Store management & promotions: Dedicated store dashboard with PRO and VIP listing exposure tools.",
+            "about-ul4-3": "Targeted showcase: Showcase inventory directly to customers specifically searching for mobile devices.",
+            "about-h2-4": "Future Goals & Roadmap",
+            "about-ul5-1": "Mobile App (Roadmap): Launching dedicated iOS and Android apps for mobile browsing and ad posting.",
+            "about-ul5-2": "AI Integration (Roadmap): Smart search and recommendation algorithms tailored to user preferences.",
+            "about-ul5-3": "Automated moderation (Roadmap): Machine learning fraud detection models (ads are currently reviewed by moderators).",
+            "about-p5": "Mobil.az is a specialized marketplace making the buying and selling of smartphones, tablets, headphones, and mobile accessories in Azerbaijan simple and reliable.",
+            "about-tagline": "Mobil.az — Your Reliable Mobile Technology Marketplace.",
             "stores-h1": "Discover your favorite stores",
             "stores-p": "We have brought together the best stores for you",
             "stores-search-placeholder": "Search store...",
@@ -775,38 +777,39 @@ document.addEventListener("DOMContentLoaded", function () {
             "signup-and": "и",
             "signup-has-account": "Уже есть аккаунт?",
             "signup-login-link": "Войти",
-            "about-h1": "Mobil.az — Новый адрес телефонных объявлений в Азербайджане!",
-            "about-sub": "Специализированный маркетплейс только для телефонов!",
-            "about-p1": "Инновационная платформа под названием <b style=\"color: blueviolet;\">Mobil.az</b> знаменует собой начало нового этапа развития сектора электронной коммерции Азербайджанской Республики. Это современное решение, в отличие от традиционных досок, привлекает внимание своим специализированным подходом.",
-            "about-p2": "Пользователи могут размещать объявления как о новых, так и о бывших в употреблении устройствах.",
-            "about-p3": "Наша платформа охватывает товары в разных ценовых категориях и предлагает варианты на любой бюджет.",
-            "about-h2-1": "Что можно продавать на Mobil.az?",
-            "about-ul1-1": "Новые и б/у смартфоны, все бренды и ценовые категории",
-            "about-ul1-2": "Модели планшетов от Apple, Samsung, Xiaomi и других производителей",
+            "about-page-title": "О нас - Mobil.az",
+            "about-h1": "Mobil.az — Новая и надежная торговая платформа мобильных устройств в Азербайджане",
+            "about-sub": "Специализированный маркетплейс мобильных устройств и аксессуаров",
+            "about-p1": "В секторе электронной коммерции Азербайджана платформа <b style=\"color: blueviolet;\">Mobil.az</b> специализируется на смартфонах, планшетах, наушниках и мобильных аксессуарах. Узкая направленность на мобильные технологии создает быструю, безопасную и удобную среду для покупателей и продавцов.",
+            "about-p2": "На нашей платформе как частные лица, так и магазины могут легко покупать и продавать новые и б/у устройства и аксессуары.",
+            "about-p3": "Объединяя широкий ассортимент на любой бюджет, Mobil.az прозрачно отображает технические характеристики, цены и состояние (новый/б/у), делая подбор устройства максимально простым.",
+            "about-h2-1": "Какие товары представлены на Mobil.az?",
+            "about-ul1-1": "Новые и б/у смартфоны всех брендов и ценовых категорий",
+            "about-ul1-2": "Планшеты от Apple, Samsung, Xiaomi и других производителей",
             "about-ul1-3": "Проводные и беспроводные наушники, аудиоаксессуары",
-            "about-ul1-4": "Адаптеры, защитные чехлы, защитные стекла и многое другое",
-            "about-category-summary": "И покупатели, и продавцы легко решают свои задачи на Mobil.az. Разместите объявление бесплатно, найдите покупателя.",
+            "about-ul1-4": "Адаптеры, защитные чехлы, защитные стекла и другие аксессуары",
+            "about-category-summary": "И покупатели, и продавцы легко решают свои задачи на Mobil.az. Размещайте объявления бесплатно и находите клиентов.",
             "about-h2-2": "Почему именно Mobil.az?",
-            "about-ul2-1": "Специализированный рынок - платформа посвящена только купле-продаже мобильных телефонов и аксессуаров.",
-            "about-ul2-2": "Удобство для пользователей - благодаря системам поиска и фильтров вы можете найти любую модель.",
-            "about-ul2-3": "Самая современная и безопасная торговля - существует система рейтингов и комментариев для продавцов.",
-            "about-ul2-4": "Различные рекламные пакеты - пользователи могут использовать стандарты PRO и VIP в соответствии со своими потребностями.",
+            "about-ul2-1": "Специализированный рынок: Экосистема для смартфонов, планшетов, наушников и мобильных аксессуаров.",
+            "about-ul2-2": "Удобный поиск и фильтры: Быстрый подбор моделей с фильтрами по категории, марке, цене и состоянию.",
+            "about-ul2-3": "Надежная торговая среда: Прозрачный рейтинг и реальные отзывы покупателей о продавцах и магазинах.",
+            "about-ul2-4": "Гибкие пакеты объявлений: Пакеты Стандарт, PRO и VIP для эффективного продвижения объявлений.",
             "about-h2-3": "Как работает Mobil.az?",
-            "about-p4": "Наша платформа создает благоприятную среду продаж как для индивидуальных продавцов, так и для магазинов.",
-            "about-h3-1": "1. Для индивидуальных продавцов",
-            "about-ul3-1": "Любой - каждый, кто хочет продать свой телефон, может разместить бесплатное или PRO объявление.",
-            "about-ul3-2": "Прямой контакт с покупателем - продавцы могут общаться с покупателями.",
-            "about-ul3-3": "Широкие возможности поиска.",
+            "about-p4": "Наша платформа создает удобную и безопасную среду для индивидуальных продавцов и магазинов.",
+            "about-h3-1": "1. Для частных продавцов",
+            "about-ul3-1": "Быстрая продажа: Размещайте устройства или аксессуары бесплатно или с пакетами продвижения.",
+            "about-ul3-2": "Прямая связь: Быстрое общение с покупателями через внутренние сообщения или по телефону.",
+            "about-ul3-3": "Точный поиск: Покупатели легко находят объявления по категориям, брендам, состоянию и цене.",
             "about-h3-2": "2. Для магазинов",
-            "about-ul4-1": "Магазины телефонов - зарегистрировавшись на Mobil.az, они могут открывать свои брендовые магазины.",
-            "about-ul4-2": "Премиум функции для компаний.",
-            "about-ul4-3": "Бренд витрина - компании могут представить свою продукцию более широкой аудитории.",
+            "about-ul4-1": "Профиль магазина: Магазины электроники могут зарегистрироваться и открыть свою витрину.",
+            "about-ul4-2": "Управление и продвижение: Панель управления магазином и возможности продвижения объявлений PRO/VIP.",
+            "about-ul4-3": "Целевая аудитория: Показ ассортимента покупателям, заинтересованным именно в мобильной технике.",
             "about-h2-4": "Планы на будущее и развитие",
-            "about-ul5-1": "Будет запущено мобильное приложение Mobil.az.",
-            "about-ul5-2": "Интеллектуальное размещение объявлений и улучшенная система поиска будут созданы с интеграцией искусственного интеллекта (ИИ).",
-            "about-ul5-3": "Система автоматической проверки рекламы.",
-            "about-p5": "Mobil.az — новая платформа объявлений в Азербайджане, ориентированная только на продажу телефонов и аксессуаров.",
-            "about-tagline": "Mobil.az – Новый адрес торговли телефонами!",
+            "about-ul5-1": "Мобильное приложение (в планах): Запуск приложений для iOS и Android для удобной публикации и поиска.",
+            "about-ul5-2": "Интеграция искусственного интеллекта (в планах): Умные рекомендации и улучшенный поиск на базе машинного обучения.",
+            "about-ul5-3": "Автоматическая модерация (в планах): Алгоритмы выявления подозрительных объявлений (в настоящее время объявления проверяются модераторами).",
+            "about-p5": "Mobil.az — специализированная платформа, делающая покупку и продажу смартфонов, планшетов, наушников и аксессуаров в Азербайджане простой и надежной.",
+            "about-tagline": "Mobil.az — Надежный центр торговли мобильной техникой.",
             "stores-h1": "Откройте для себя любимые магазины",
             "stores-p": "Мы собрали для вас лучшие магазины",
             "stores-search-placeholder": "Поиск магазина...",
@@ -1196,121 +1199,157 @@ document.addEventListener("DOMContentLoaded", function () {
         Object.assign(translations[lang], authTranslations[lang]);
     }
     window.translations = translations;
+
     // ─── LANGUAGE SWITCHER ────────────────────────────────────────────────────
-    const langSwitcher = document.querySelector(".language-selector");
-    const currentLangElement = document.getElementById("current-lang");
-    function changeLanguage() {
-        if (!currentLangElement)
-            return;
-        let currentLang = currentLangElement.innerText.trim();
-        // Normalise RUS display label back to key
-        if (currentLang === "РУС")
-            currentLang = "RUS";
-        let newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
-        currentLangElement.innerText = translations[newLang]["language-selector"];
-        localStorage.setItem("lang", newLang);
-        document.documentElement.lang = newLang === "ENG" ? "en" : newLang === "RUS" ? "ru" : "az";
-        document.querySelectorAll("[data-translate]").forEach((element) => {
-            let key = element.getAttribute("data-translate");
-            if (!key || !translations[newLang][key])
-                return;
-            if (element.tagName === "LI") {
-                const link = element.querySelector("a");
-                if (link) {
-                    const icon = link.querySelector("i");
-                    link.innerHTML = icon
+    function setupLanguageSwitcher() {
+        const langSwitcher = document.querySelector(".language-selector");
+        const currentLangElement = document.getElementById("current-lang");
+
+        if (langSwitcher && !langSwitcher.dataset.langListenerAttached) {
+            langSwitcher.dataset.langListenerAttached = "true";
+            langSwitcher.addEventListener("click", changeLanguage);
+        }
+
+        function changeLanguage() {
+            const currentLangElem = document.getElementById("current-lang");
+            if (!currentLangElem) return;
+            let currentLang = currentLangElem.innerText.trim();
+            // Normalise RUS display label back to key
+            if (currentLang === "РУС")
+                currentLang = "RUS";
+            let newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
+
+            if (translations[newLang] && translations[newLang]["language-selector"]) {
+                currentLangElem.innerText = translations[newLang]["language-selector"];
+            }
+            localStorage.setItem("lang", newLang);
+            document.documentElement.lang = newLang === "ENG" ? "en" : newLang === "RUS" ? "ru" : "az";
+
+            document.querySelectorAll("[data-translate]").forEach((element) => {
+                if (!element) return;
+                let key = element.getAttribute("data-translate");
+                if (!key || !translations[newLang] || !translations[newLang][key])
+                    return;
+                if (element.tagName === "LI") {
+                    const link = element.querySelector("a");
+                    if (link) {
+                        const icon = link.querySelector("i");
+                        link.innerHTML = icon
+                            ? icon.outerHTML + " " + translations[newLang][key]
+                            : translations[newLang][key];
+                    }
+                }
+                else if (element.classList.contains("login-btn") ||
+                    element.classList.contains("register-btn")) {
+                    const icon = element.querySelector("i");
+                    element.innerHTML = icon
                         ? icon.outerHTML + " " + translations[newLang][key]
                         : translations[newLang][key];
                 }
-            }
-            else if (element.classList.contains("login-btn") ||
-                element.classList.contains("register-btn")) {
-                const icon = element.querySelector("i");
-                element.innerHTML = icon
-                    ? icon.outerHTML + " " + translations[newLang][key]
-                    : translations[newLang][key];
-            }
-            else {
-                const text = translations[newLang][key];
-                if (text.includes("<") && text.includes(">")) {
-                    element.innerHTML = text;
-                }
                 else {
-                    element.textContent = text;
-                }
-            }
-        });
-        const searchInput = document.querySelector(".search-options input");
-        if (searchInput) {
-            searchInput.placeholder = translations[newLang]["search-placeholder"];
-        }
-        // Logic for placeholder attributes and select list text
-        document.querySelectorAll("[data-translate-placeholder]").forEach((el) => {
-            let element = el;
-            let key = element.getAttribute("data-translate-placeholder");
-            if (key && translations[newLang][key]) {
-                if (element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.tagName === "SELECT") {
-                    if ("placeholder" in element) {
-                        element.placeholder = translations[newLang][key];
+                    const text = translations[newLang][key];
+                    if (text && text.includes("<") && text.includes(">")) {
+                        element.innerHTML = text;
                     }
-                    if (element.tagName === "SELECT") {
-                        const selectEl = element;
-                        const firstOption = selectEl.options[0];
-                        if (firstOption && firstOption.disabled) {
-                            firstOption.textContent = translations[newLang][key];
+                    else if (text) {
+                        element.textContent = text;
+                    }
+                }
+            });
+            const searchInput = document.querySelector(".search-options input");
+            if (searchInput && translations[newLang] && translations[newLang]["search-placeholder"]) {
+                searchInput.placeholder = translations[newLang]["search-placeholder"];
+            }
+            // Logic for placeholder attributes and select list text
+            document.querySelectorAll("[data-translate-placeholder]").forEach((el) => {
+                let element = el;
+                if (!element) return;
+                let key = element.getAttribute("data-translate-placeholder");
+                if (key && translations[newLang] && translations[newLang][key]) {
+                    if (element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.tagName === "SELECT") {
+                        if ("placeholder" in element) {
+                            element.placeholder = translations[newLang][key];
+                        }
+                        if (element.tagName === "SELECT") {
+                            const selectEl = element;
+                            const firstOption = selectEl.options[0];
+                            if (firstOption && firstOption.disabled) {
+                                firstOption.textContent = translations[newLang][key];
+                            }
                         }
                     }
                 }
-            }
-        });
-        // Also update document.title
-        const titleElements = document.querySelectorAll("[data-translate-title]");
-        titleElements.forEach(el => {
-            let key = el.getAttribute("data-translate-title");
-            if (key && translations[newLang][key]) {
-                document.title = translations[newLang][key];
-            }
-        });
-        document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
-    }
-    // Restore saved language on page load
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang && savedLang !== "AZ") {
-        // Temporarily set currentLangElement to trigger correct transition
-        if (currentLangElement) {
-            if (savedLang === "ENG") {
-                currentLangElement.innerText = "AZ";
-                changeLanguage(); // AZ → ENG
-            }
-            else if (savedLang === "RUS") {
-                currentLangElement.innerText = "AZ";
-                changeLanguage(); // AZ → ENG
-                changeLanguage(); // ENG → RUS
+            });
+            // Also update document.title
+            const titleElements = document.querySelectorAll("[data-translate-title]");
+            titleElements.forEach(el => {
+                if (!el) return;
+                let key = el.getAttribute("data-translate-title");
+                if (key && translations[newLang] && translations[newLang][key]) {
+                    document.title = translations[newLang][key];
+                }
+            });
+            document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
+        }
+
+        // Restore saved language on page load
+        const savedLang = localStorage.getItem("lang");
+        if (savedLang && savedLang !== "AZ") {
+            if (currentLangElement) {
+                if (savedLang === "ENG") {
+                    currentLangElement.innerText = "AZ";
+                    changeLanguage(); // AZ → ENG
+                }
+                else if (savedLang === "RUS") {
+                    currentLangElement.innerText = "AZ";
+                    changeLanguage(); // AZ → ENG
+                    changeLanguage(); // ENG → RUS
+                }
             }
         }
     }
-    if (langSwitcher) {
-        langSwitcher.addEventListener("click", changeLanguage);
-    }
+
+    setupLanguageSwitcher();
+    document.addEventListener('componentsLoaded', function () {
+        setupLanguageSwitcher();
+    });
+
     // ─── FILTER TOGGLE ────────────────────────────────────────────────────────
-    const filterToggle = document.getElementById("filterToggle");
-    const filterBody = document.getElementById("filterBody");
+    const filterToggle = document.getElementById("filterToggle") || document.querySelector(".filter-toggle");
+    const filterBody = document.getElementById("filterBody") || document.getElementById("filterPanel");
     if (filterToggle && filterBody) {
-        filterToggle.addEventListener("click", function () {
+        filterToggle.addEventListener("click", function (e) {
+            e.stopPropagation();
             filterBody.classList.toggle("active");
+            filterBody.classList.toggle("open");
         });
     }
+
+    // ─── NEW AD BUTTON ────────────────────────────────────────────────────────
+    const newAdBtn = document.getElementById("newAdBtn");
+    if (newAdBtn) {
+        newAdBtn.addEventListener("click", function () {
+            window.location.href = "elan-yerlesdir.html";
+        });
+    }
+
     // ─── FILTER BUTTON GROUPS ─────────────────────────────────────────────────
     const buttonGroups = document.querySelectorAll(".memory-buttons, .fingerprint-buttons, .nfc-buttons, .waterproof-buttons, .expandable-buttons, .delivery-buttons, .condition-buttons, .color-buttons");
-    buttonGroups.forEach((group) => {
-        const buttons = group.querySelectorAll("button");
-        buttons.forEach((button) => {
-            button.addEventListener("click", function () {
-                buttons.forEach((btn) => btn.classList.remove("active"));
-                this.classList.add("active");
-            });
+    if (buttonGroups && buttonGroups.length > 0) {
+        buttonGroups.forEach((group) => {
+            if (!group) return;
+            const buttons = group.querySelectorAll("button");
+            if (buttons && buttons.length > 0) {
+                buttons.forEach((button) => {
+                    if (!button) return;
+                    button.addEventListener("click", function () {
+                        buttons.forEach((btn) => btn?.classList.remove("active"));
+                        this.classList.add("active");
+                    });
+                });
+            }
         });
-    });
+    }
     // ─── SORTING ──────────────────────────────────────────────────────────────
     const sortingSelect = document.getElementById("sortingOptions");
     if (sortingSelect) {
@@ -1322,21 +1361,23 @@ document.addEventListener("DOMContentLoaded", function () {
         const adsContainer = document.querySelector(".all-ads-container");
         if (!adsContainer)
             return;
-        const ads = Array.from(adsContainer.querySelectorAll(".ad-card"));
+        const ads = Array.from(adsContainer.children);
         ads.sort((a, b) => {
+            const cardA = a.querySelector(".ad-card") || a;
+            const cardB = b.querySelector(".ad-card") || b;
             if (sortType === "date") {
-                const dateA = new Date(a.querySelector(".ad-date")?.textContent || 0);
-                const dateB = new Date(b.querySelector(".ad-date")?.textContent || 0);
+                const dateA = new Date(cardA.dataset.date || 0);
+                const dateB = new Date(cardB.dataset.date || 0);
                 return dateB.getTime() - dateA.getTime();
             }
             else if (sortType === "price-high") {
-                const priceA = parseInt((a.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
-                const priceB = parseInt((b.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+                const priceA = parseInt((cardA.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+                const priceB = parseInt((cardB.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
                 return priceB - priceA;
             }
             else if (sortType === "price-low") {
-                const priceA = parseInt((a.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
-                const priceB = parseInt((b.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+                const priceA = parseInt((cardA.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+                const priceB = parseInt((cardB.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
                 return priceA - priceB;
             }
             return 0;
@@ -1344,79 +1385,144 @@ document.addEventListener("DOMContentLoaded", function () {
         adsContainer.innerHTML = "";
         ads.forEach((ad) => adsContainer.appendChild(ad));
     }
-    // ─── FAVORITES ────────────────────────────────────────────────────────────
-    function getFavorites() {
-        try {
-            return JSON.parse(localStorage.getItem("mobilaz_favorites") || "[]");
-        }
-        catch {
-            return [];
-        }
-    }
-    function saveFavorites(favs) {
-        localStorage.setItem("mobilaz_favorites", JSON.stringify(favs));
-    }
-    function getAdId(card) {
-        // Use title + price as a stable ID
-        const title = card.querySelector(".ad-title")?.textContent.trim() || "";
-        const price = card.querySelector(".ad-price")?.textContent.trim() || "";
-        return `${title}__${price}`;
-    }
-    function initFavoriteButtons() {
-        const favs = getFavorites();
-        document.querySelectorAll(".favorite-btn").forEach((btn) => {
-            const card = btn.closest(".ad-card");
-            if (!card)
-                return;
-            const id = getAdId(card);
-            // Restore saved state
-            if (favs.includes(id)) {
-                btn.classList.add("favorited");
-                const icon = btn.querySelector("i");
-                if (icon) {
-                    icon.classList.remove("far");
-                    icon.classList.add("fas");
+
+    // ─── CATALOG DROPDOWN CLOSE ON OUTSIDE CLICK ─────────────────────────────
+    const catBtn = document.getElementById("catalogBtn") || document.querySelector(".catalog-button");
+    const catDd = document.getElementById("catalogDropdown") || document.querySelector(".catalog-dropdown");
+    if (catBtn && catDd) {
+        catBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            catDd.classList.toggle("hidden");
+            catDd.classList.toggle("active");
+            catDd.classList.toggle("open");
+            if (!catDd.dataset.loaded) {
+                if (typeof window.loadCatalog === "function") {
+                    window.loadCatalog();
                 }
+                catDd.dataset.loaded = "1";
             }
-            btn.addEventListener("click", function (e) {
-                e.stopPropagation();
-                const currentFavs = getFavorites();
-                const adId = getAdId(card);
-                const icon = this.querySelector("i");
-                if (currentFavs.includes(adId)) {
-                    // Remove from favorites
-                    const updated = currentFavs.filter((f) => f !== adId);
-                    saveFavorites(updated);
-                    this.classList.remove("favorited");
-                    if (icon) {
-                        icon.classList.remove("fas");
-                        icon.classList.add("far");
-                    }
-                }
-                else {
-                    // Add to favorites
-                    currentFavs.push(adId);
-                    saveFavorites(currentFavs);
-                    this.classList.add("favorited");
-                    if (icon) {
-                        icon.classList.remove("far");
-                        icon.classList.add("fas");
-                    }
-                }
+        });
+    }
+
+    document.addEventListener("click", function (e) {
+        const dd = document.getElementById("catalogDropdown");
+        const btn = document.getElementById("catalogBtn");
+        if (dd && !dd.contains(e.target) && (!btn || !btn.contains(e.target))) {
+            dd.classList.add("hidden");
+            dd.classList.remove("active");
+            dd.classList.remove("open");
+        }
+    });
+
+    // ─── HAMBURGER MENU TOGGLE (MOBILE) ──────────────────────────────────────
+    const hamburgerBtn = document.querySelector(".hamburger") || document.getElementById("hamburgerBtn");
+    const headerRight = document.querySelector(".header-right");
+    if (hamburgerBtn && headerRight) {
+        hamburgerBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            const isOpen = headerRight.classList.toggle("open");
+            headerRight.classList.toggle("active", isOpen);
+            headerRight.classList.toggle("hidden", !isOpen);
+            hamburgerBtn.classList.toggle("active", isOpen);
+            hamburgerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!headerRight.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                headerRight.classList.remove("open");
+                headerRight.classList.remove("active");
+                headerRight.classList.add("hidden");
+                hamburgerBtn.classList.remove("active");
+                hamburgerBtn.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        headerRight.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                headerRight.classList.remove("open");
+                headerRight.classList.remove("active");
+                headerRight.classList.add("hidden");
+                hamburgerBtn.classList.remove("active");
+                hamburgerBtn.setAttribute("aria-expanded", "false");
             });
         });
     }
-    initFavoriteButtons();
-    // ─── CATALOG DROPDOWN CLOSE ON OUTSIDE CLICK ─────────────────────────────
+
+    // ─── FAVORITE BUTTON HANDLER ─────────────────────────────────────────────
+    function getFavorites() {
+        try {
+            return JSON.parse(localStorage.getItem("mobilaz_favorites") || "[]");
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveFavorites(favs) {
+        try {
+            localStorage.setItem("mobilaz_favorites", JSON.stringify(favs));
+        } catch (e) {}
+    }
+
+    function updateFavoriteButtons() {
+        const favs = getFavorites();
+        document.querySelectorAll(".favorite-btn").forEach((btn) => {
+            const card = btn.closest(".ad-card, [data-id]");
+            const id = card ? card.getAttribute("data-id") : null;
+            const icon = btn.querySelector("i");
+            if (!icon) return;
+            if (id && favs.includes(id)) {
+                icon.classList.remove("far");
+                icon.classList.add("fas");
+                btn.classList.add("favorited");
+            } else if (id) {
+                icon.classList.remove("fas");
+                icon.classList.add("far");
+                btn.classList.remove("favorited");
+            }
+        });
+    }
+
     document.addEventListener("click", function (e) {
-        const catalogDropdown = document.querySelector(".catalog-dropdown");
-        const target = e.target;
-        if (catalogDropdown && target && !target.closest(".catalog-dropdown")) {
-            const menu = catalogDropdown.querySelector(".catalog-menu");
-            if (menu)
-                menu.style.display = "";
+        const favBtn = e.target.closest(".favorite-btn");
+        if (!favBtn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const icon = favBtn.querySelector("i");
+        if (!icon) return;
+
+        const card = favBtn.closest(".ad-card, [data-id]");
+        const id = card ? card.getAttribute("data-id") : null;
+        let favs = getFavorites();
+
+        const isFavorited = icon.classList.contains("fas");
+        if (isFavorited) {
+            icon.classList.remove("fas");
+            icon.classList.add("far");
+            favBtn.classList.remove("favorited");
+            if (id) {
+                favs = favs.filter((favId) => favId !== id);
+                saveFavorites(favs);
+            }
+        } else {
+            icon.classList.remove("far");
+            icon.classList.add("fas");
+            favBtn.classList.add("favorited");
+            if (id) {
+                if (!favs.includes(id)) {
+                    favs.push(id);
+                    saveFavorites(favs);
+                }
+            }
         }
     });
+
+    updateFavoriteButtons();
+    document.addEventListener("componentsLoaded", updateFavoriteButtons);
+    const favObserver = new MutationObserver(updateFavoriteButtons);
+    favObserver.observe(document.body, { childList: true, subtree: true });
+
     // ─── DARK MODE / LIGHT MODE THEME INITIALIZER ────────────────────────────
     function initTheme() {
         const savedTheme = localStorage.getItem("mobilaz_theme");
@@ -1425,7 +1531,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         // Theme toggle button logic
         const themeToggleBtn = document.getElementById("themeToggle");
-        if (themeToggleBtn) {
+        if (themeToggleBtn && !themeToggleBtn.dataset.themeListenerAttached) {
+            themeToggleBtn.dataset.themeListenerAttached = "true";
             themeToggleBtn.addEventListener("click", function () {
                 const currentTheme = document.documentElement.getAttribute("data-theme");
                 let newTheme = "light";
@@ -1440,5 +1547,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
     }
+
     initTheme();
+    document.addEventListener('componentsLoaded', function () {
+        initTheme();
+    });
 });
+

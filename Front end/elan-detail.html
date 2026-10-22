@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="CSS/general.css">
   <link rel="stylesheet" href="CSS/style.css">
   <link rel="stylesheet" href="CSS/elan-detail.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
 
@@ -767,61 +767,23 @@
       .write-review-main { padding: 16px; }
     }
   </style>
+    <script>
+        (function() {
+            try {
+                const theme = localStorage.getItem('mobilaz_theme');
+                if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
 </head>
 
 <body>
 
   <!-- ══════════════════ HEADER ══════════════════ -->
-  <header>
-    <div class="container">
-      <a href="index.html" class="logo">
-        <span class="mobil-logo">Mobil<span>.az</span></span>
-      </a>
-      <div class="header-right">
-        <nav class="menu">
-          <ul>
-            <div class="contact-dropdown">
-              <li data-translate="Contact">
-                <a href=""><i class="fa-solid fa-phone"></i> Əlaqə</a>
-              </li>
-              <div class="contact-menu">
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
-              </div>
-            </div>
-            <li class="About" data-translate="About">
-              <a href="about.html"><i class="fas fa-info-circle"></i> Haqqımızda</a>
-            </li>
-            <li class="Stores" data-translate="Stores">
-              <a href="stores.html"><i class="fas fa-store"></i> Mağazalar</a>
-            </li>
-            <li class="Favorite" data-translate="Favorite">
-              <a href="favorite.html"><i class="fas fa-heart"></i> Seçimlər</a>
-            </li>
-          </ul>
-        </nav>
-        <div class="button-container">
-          <a href="login.html" class="login-btn" data-translate="login-btn">
-            <i class="fas fa-sign-in-alt"></i> Giriş
-          </a>
-          <a href="signup.html" class="register-btn" data-translate="register-btn">
-            <i class="fas fa-user-plus"></i> Qeydiyyat
-          </a>
-        </div>
-        <div class="theme-lang-container">
-          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
-            <i class="fas fa-moon"></i>
-          </button>
-          <button class="language-selector">
-            <i class="fas fa-globe"></i>
-            <span id="current-lang" data-translate="language-selector">AZ</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+    <!-- MVP: <a href="stores.html">Mağazalar</a> -->
+    <div id="header-placeholder"></div>
 
   <!-- ══════════════════ BREADCRUMB ══════════════════ -->
   <nav class="breadcrumb" aria-label="breadcrumb">
@@ -869,8 +831,8 @@
 
           <!-- Badges -->
           <div class="gallery-badges">
-            <span class="badge-vip"><i class="fas fa-crown"></i> VIP</span>
-            <span class="badge-new"><i class="fas fa-star"></i> <span data-translate="det-badge-new">Yeni</span></span>
+            <span class="badge-vip hidden" style="display: none;"><i class="fas fa-crown"></i> VIP</span>
+            <span class="badge-new hidden" style="display: none;"><i class="fas fa-star"></i> <span data-translate="det-badge-new">Yeni</span></span>
           </div>
 
           <!-- Favorite -->
@@ -915,7 +877,7 @@
           </span>
           <div class="ad-date-views">
             <span><i class="fas fa-clock"></i> Bugün, 14:32</span>
-            <span><i class="fas fa-eye"></i> 512 baxış</span>
+            <span><i class="fas fa-eye"></i> <span id="ad-views-count">--</span> baxış</span>
           </div>
         </div>
 
@@ -1054,59 +1016,25 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
       <!-- ── Reviews Section (main content) ── -->
       <div class="reviews-section">
-        <h3 class="section-head"><i class="fas fa-star"></i> <span data-translate="det-reviews-title">Satıcı haqqında rəylər</span></h3>
+        <h3 class="section-head"><i class="fas fa-star"></i> <span data-translate="det-reviews-title">Satıcı rəyləri</span></h3>
+        <p class="reviews-seller-note" style="color:var(--text-secondary, #8e8e93);font-size:13.5px;margin:-6px 0 16px 0;">Bu satıcının bütün rəyləri</p>
 
         <div class="review-rating-summary">
           <div>
-            <div class="rating-big">4.8</div>
-            <div class="rating-stars-lg">★★★★★</div>
-            <div class="rating-count">24 rəy əsasında</div>
+            <div class="rating-big"><span id="realRating">Yüklənir...</span><span id="avgRating" style="display:none;">-</span></div>
+            <div class="rating-stars-lg">☆☆☆☆☆</div>
+            <div class="rating-count"><span id="reviewCount">0</span> rəy əsasında</div>
           </div>
           <div class="rating-bars">
-            <div class="rbar"><span class="rbar-label">5★</span><div class="rbar-track"><div class="rbar-fill" style="width:83%"></div></div><span class="rbar-count">20</span></div>
-            <div class="rbar"><span class="rbar-label">4★</span><div class="rbar-track"><div class="rbar-fill" style="width:12%"></div></div><span class="rbar-count">3</span></div>
-            <div class="rbar"><span class="rbar-label">3★</span><div class="rbar-track"><div class="rbar-fill" style="width:4%"></div></div><span class="rbar-count">1</span></div>
+            <div class="rbar"><span class="rbar-label">5★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
+            <div class="rbar"><span class="rbar-label">4★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
+            <div class="rbar"><span class="rbar-label">3★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
             <div class="rbar"><span class="rbar-label">2★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
             <div class="rbar"><span class="rbar-label">1★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
           </div>
         </div>
 
-        <!-- Review cards -->
-        <div class="review-card-full">
-          <div class="rc-header">
-            <div class="rc-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">T</div>
-            <div>
-              <div class="rc-name">Tural A.</div>
-              <div class="rc-date">7 Aprel 2026</div>
-            </div>
-            <div class="rc-stars">★★★★★</div>
-          </div>
-          <p class="rc-text">Elçin müəllimdən telefon aldım — çatdırılma super sürətli idi, həm telefon həm qiymət çox dürüst idi. Şəxsi elanda gözlənilməzdir belə peşəkarlıq. Tam tövsiyə edirəm!</p>
-        </div>
-
-        <div class="review-card-full">
-          <div class="rc-header">
-            <div class="rc-avatar" style="background:linear-gradient(135deg,#34c759,#28a745)">S</div>
-            <div>
-              <div class="rc-name">Sevinc M.</div>
-              <div class="rc-date">2 Aprel 2026</div>
-            </div>
-            <div class="rc-stars">★★★★★</div>
-          </div>
-          <p class="rc-text">Telefonun vəziyyəti elanda yazıldığı kimi tam yeni idi. Satıcı çox nəzakətli, vaxtında gəldi. Qiyməti də çox münasib idi. Bir daha alardım!</p>
-        </div>
-
-        <div class="review-card-full">
-          <div class="rc-header">
-            <div class="rc-avatar" style="background:linear-gradient(135deg,#ff9f0a,#e67e22)">K</div>
-            <div>
-              <div class="rc-name">Kənan R.</div>
-              <div class="rc-date">28 Mart 2026</div>
-            </div>
-            <div class="rc-stars">★★★★<span style="color:var(--border-color)">★</span></div>
-          </div>
-          <p class="rc-text">Görüş yeri biraz uzaq idi amma telefon çox yaxşı vəziyyətdədir. Satıcı namusludur, heç bir problem olmadı. Tövsiyə edirəm.</p>
-        </div>
+        <div class="no-reviews-empty" style="padding: 24px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 14px;">Hələ rəy yoxdur</div>
 
         <!-- Write a Review -->
         <div class="write-review-main">
@@ -1120,7 +1048,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
           </div>
           <input type="text" class="review-name-input" id="mainReviewName" data-translate-placeholder="det-review-name-ph" placeholder="Adınız (məs. Əli M.)">
           <textarea class="review-textarea" id="mainReviewText" data-translate-placeholder="det-review-text-ph" placeholder="Satıcı ilə təcrübənizi paylaşın..."></textarea>
-          <button class="btn-submit-review" onclick="submitReview('main')">
+          <button class="btn-submit-review">
             <i class="fas fa-paper-plane"></i> <span data-translate="det-review-submit">Rəy Göndər</span>
           </button>
         </div>
@@ -1143,35 +1071,25 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
         <div class="personal-seller-card">
           <div class="personal-seller-hero">
             <div class="personal-avatar-wrap">
-              <div class="personal-avatar">E</div>
+              <div class="personal-avatar" id="sellerAvatar"></div>
               <div class="online-dot" title="İndi onlayn"></div>
             </div>
             <div class="personal-meta">
-              <div class="personal-name">Elçin Məmmədov</div>
-              <div class="personal-tag">
+              <div class="personal-name" id="sellerName"></div>
+              <div class="personal-tag" id="sellerTypeTag">
                 <i class="fas fa-user-circle"></i> <span data-translate="det-seller-personal">Şəxsi hesab</span>
               </div>
-              <div class="personal-tag" style="margin-top:4px">
-                <i class="fas fa-map-marker-alt"></i> Bakı, Nərimanov
+              <div class="personal-tag" id="sellerLocationTag" style="margin-top:4px">
+                <i class="fas fa-map-marker-alt"></i> <span id="sellerLocationText"></span>
               </div>
+              <a href="#" id="storeProfileLink" class="hidden" style="display:none;align-items:center;gap:5px;font-size:12.5px;color:var(--airy-primary);text-decoration:none;margin-top:6px;font-weight:600;">
+                <i class="fas fa-store"></i> <span>Mağazaya bax</span>
+              </a>
             </div>
           </div>
 
           <!-- Stats -->
-          <div class="personal-stats">
-            <div class="p-stat">
-              <span class="val">18</span>
-              <span class="lbl" data-translate="det-ads-shared">Paylaşılan elan</span>
-            </div>
-            <div class="p-stat">
-              <span class="val">4.8</span>
-              <span class="lbl" data-translate="det-rating">★ Reytinq</span>
-            </div>
-            <div class="p-stat">
-              <span class="val">96%</span>
-              <span class="lbl" data-translate="det-positive">Müsbət rəy</span>
-            </div>
-          </div>
+          <div class="personal-stats hidden" id="sellerStats" style="display:none;"></div>
 
           <!-- Contacts -->
           <div class="contact-btn-group">
@@ -1179,7 +1097,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
               <i class="fas fa-phone-alt"></i>
               <span id="phoneText" data-translate="det-btn-call">Nömrəni Göstər</span>
             </button>
-            <a href="https://wa.me/994501234567" target="_blank" class="btn-whatsapp">
+            <a href="#" target="_blank" class="btn-whatsapp hidden" style="display: none;">
               <i class="fab fa-whatsapp"></i> <span data-translate="det-btn-whatsapp">WhatsApp ilə Yazın</span>
             </a>
             <button class="btn-message">
@@ -1187,8 +1105,8 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
             </button>
           </div>
 
-          <p class="seller-since-row">
-            <i class="fas fa-calendar-alt"></i> <span data-translate="det-seller-since">Üzv olub:</span> Fevral 2024
+          <p class="seller-since-row hidden" id="sellerSinceRow" style="display:none;">
+            <i class="fas fa-calendar-alt"></i> <span data-translate="det-seller-since">Üzv olub:</span> <span id="sellerSinceText"></span>
           </p>
         </div>
 
@@ -1206,28 +1124,13 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
           <textarea class="review-textarea" id="sideReviewText" data-translate-placeholder="det-sidebar-review-ph" placeholder="Bu satıcı haqqında rəyiniz..."></textarea>
 
-          <button class="btn-submit-review" onclick="submitReview('side')">
+          <button class="btn-submit-review">
             <i class="fas fa-paper-plane"></i> <span data-translate="det-review-submit">Rəy Göndər</span>
           </button>
 
           <!-- Mini reviews -->
           <div class="mini-reviews">
-            <div class="mini-review-item">
-              <div class="mini-review-top">
-                <div class="mini-avatar" style="background:linear-gradient(135deg,#5e5ce6,#a78bfa)">T</div>
-                <div class="mini-name">Tural A.</div>
-                <div class="mini-stars">★★★★★</div>
-              </div>
-              <div class="mini-text">Çox dürüst satıcı, telefon tam yeni idi!</div>
-            </div>
-            <div class="mini-review-item">
-              <div class="mini-review-top">
-                <div class="mini-avatar" style="background:linear-gradient(135deg,#34c759,#28a745)">S</div>
-                <div class="mini-name">Sevinc M.</div>
-                <div class="mini-stars">★★★★★</div>
-              </div>
-              <div class="mini-text">Vaxtında gəldi, çox nəzakətli idi.</div>
-            </div>
+            <div class="no-reviews-empty" style="padding: 12px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 13px;">Hələ rəy yoxdur</div>
           </div>
         </div>
 
@@ -1260,100 +1163,11 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
   <!-- ══════════════════ RELATED ADS ══════════════════ -->
   <section class="related-section">
     <h2><i class="fas fa-th-large"></i> <span data-translate="det-related-title">Oxşar Elanlar</span></h2>
-    <div class="related-grid">
-
-      <div class="ad-card" style="cursor:pointer" onclick="location.href='elan-detail.html'">
-        <div class="ad-image">
-          <img src="https://images.unsplash.com/photo-1611406560410-09b9eb210c4f?q=80&w=400" alt="iPhone 15 Pro Max">
-          <span class="ad-badge">Mağaza</span>
-        </div>
-        <div class="ad-info">
-          <div class="ad-price">2 450 AZN</div>
-          <div class="ad-title">Apple iPhone 15 Pro Max 256GB Titan Qara</div>
-          <div class="ad-location">
-            <span><i class="fas fa-map-marker-alt"></i> Bakı</span>
-            <span>Bugün</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="ad-card" style="cursor:pointer" onclick="location.href='elan-detail.html'">
-        <div class="ad-image">
-          <img src="https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=400" alt="iPhone 15 Pro">
-          <span class="ad-badge" style="background:#e67e22">Şəxsi</span>
-        </div>
-        <div class="ad-info">
-          <div class="ad-price">2 100 AZN</div>
-          <div class="ad-title">Apple iPhone 15 Pro 128GB Titan Ağ</div>
-          <div class="ad-location">
-            <span><i class="fas fa-map-marker-alt"></i> Sumqayıt</span>
-            <span>Dünən</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="ad-card" style="cursor:pointer" onclick="location.href='elan-detail.html'">
-        <div class="ad-image">
-          <img src="https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=400" alt="Xiaomi 14 Ultra">
-          <span class="ad-badge">Mağaza</span>
-        </div>
-        <div class="ad-info">
-          <div class="ad-price">1 750 AZN</div>
-          <div class="ad-title">Xiaomi 14 Ultra 16/512GB Ağ</div>
-          <div class="ad-location">
-            <span><i class="fas fa-map-marker-alt"></i> Bakı</span>
-            <span>2 gün əvvəl</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="ad-card" style="cursor:pointer" onclick="location.href='elan-detail.html'">
-        <div class="ad-image">
-          <img src="https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=400" alt="S23 Ultra">
-          <span class="ad-badge" style="background:#e67e22">Şəxsi</span>
-        </div>
-        <div class="ad-info">
-          <div class="ad-price">1 600 AZN</div>
-          <div class="ad-title">Samsung Galaxy S23 Ultra 256GB Phantom Black</div>
-          <div class="ad-location">
-            <span><i class="fas fa-map-marker-alt"></i> Gəncə</span>
-            <span>3 gün əvvəl</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    <div class="related-grid"></div>
   </section>
 
   <!-- ══════════════════ FOOTER ══════════════════ -->
-  <footer class="site-footer">
-    <div class="footer-container">
-      <div class="footer-column">
-        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
-        <ul>
-          <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
-          <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
-          <li><a href="rules.html#posting-rules"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
-          <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
-        </ul>
-      </div>
-      <div class="footer-column">
-        <h3 class="contact" data-translate="contact">Əlaqə</h3>
-        <ul>
-          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
-        </ul>
-        <div class="social-icons">
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 Mobil.az. Bütün hüquqlar qorunur.</p>
-    </div>
-  </footer>
+    <div id="footer-placeholder"></div>
 
   <!-- Toast notification -->
   <div class="toast" id="toast">
@@ -1455,11 +1269,14 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
 
 
+  <script src="JS/config.js"></script>
+  <script src="JS/axios.min.js"></script>
+  <script src="JS/api.js"></script>
   <script src="JS/auth.js"></script>
   <script src="JS/script.js"></script>
   <script src="JS/favorites.js"></script>
   <script src="JS/ad-details.js"></script>
-
+  <script src="JS/components.js"></script>
 </body>
 
 </html>

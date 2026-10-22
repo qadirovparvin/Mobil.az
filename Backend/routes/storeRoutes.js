@@ -9,7 +9,7 @@ const {
 } = require('../controllers/storeController');
 
 // Public
-router.get('/',    getStores);
+router.get('/', getStores);
 
 // Protected — must come before /:id
 router.get('/my',  protect, getMyStore);
@@ -20,7 +20,7 @@ router.get('/:id/listings', validateObjectIdParam('id'), getStoreListings);
 router.get('/:id/reviews',  validateObjectIdParam('id'), getReviews);
 
 // Protected
-router.post('/',              protect, csrfProtection, createStore);
+router.post('/', protect, csrfProtection, createStore);
 router.put('/:id',            protect, csrfProtection, validateObjectIdParam('id'), updateStore);
 router.post('/:id/reviews',   protect, csrfProtection, validateObjectIdParam('id'), addReview);
 router.delete('/:id',         protect, csrfProtection, validateObjectIdParam('id'), deleteStore);

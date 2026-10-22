@@ -1,9 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = window.API_URL || 'http://localhost:5000/api';
+    const API_URL = window.API_URL;
     let userFavorites = []; // Array of ad IDs from MongoDB
     
     function getToken() {
-        return localStorage.getItem('token');
+        return window.getAuthToken ? window.getAuthToken() : (sessionStorage.getItem('token') || '');
+    }
+
+    function getImageUrl(image) {
+        if (!image) {
+            return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800";
+        }
+
+        if (image.startsWith("http://") || image.startsWith("https://")) {
+            return image;
+        }
+
+        if (image.includes("Front end/") || image.includes("Front-end/")) {
+            return image.replace(/.*?\/Front[- ]end\//gi, "");
+        }
+
+        if (image.includes("Photo/")) {
+            return image.substring(image.indexOf("Photo/"));
+        }
+
+        const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        const cleanPath = image.startsWith('/') ? image : '/' + image;
+        return origin + cleanPath;
     }
 
     async function fetchUserFavorites() {
@@ -28,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     async function toggleFavoriteAPI(adId) {
         const token = getToken();
         if (!token) {
-            if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+            if(window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
             else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
             return null;
         }
@@ -42,11 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (res.ok) {
                 return data.favorites; // Returns updated array of favorite IDs
             }
-            if(typeof showToast === 'function') showToast(data.message || 'Xəta baş verdi', 'error');
+            if(window.toast) window.toast.show(data.message || 'Xəta baş verdi', 'error');
             return null;
         } catch (e) {
             console.error('Error toggling favorite:', e);
-            if(typeof showToast === 'function') showToast('Serverlə əlaqə yaradılmadı', 'error');
+            if(window.toast) window.toast.show('Serverlə əlaqə yaradılmadı', 'error');
             return null;
         }
     }
@@ -81,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 e.stopPropagation();
                 
                 if (!getToken()) {
-                    if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+                    if(window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
                     else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
                     return;
                 }
@@ -97,12 +119,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         newBtn.classList.add('favorited'); 
                         updatedIcon.className = 'fas fa-heart';
                         updatedIcon.style.color = '#e74c3c';
-                        if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə edildi!', 'success');
+                        if(window.toast) window.toast.show('Seçilmişlərə əlavə edildi!', 'success');
                     } else {
                         newBtn.classList.remove('favorited');
                         updatedIcon.className = 'far fa-heart';
                         updatedIcon.style.color = '';
-                        if(typeof showToast === 'function') showToast('Seçilmişlərdən çıxarıldı!', 'info');
+                        if(window.toast) window.toast.show('Seçilmişlərdən çıxarıldı!', 'info');
                         
                         // If we are on the favorites page, remove the card dynamically
                         if (document.getElementById('favorites-grid')) {
@@ -144,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             
             if (!getToken()) {
-                if(typeof showToast === 'function') showToast('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+                if(window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
                 else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
                 return;
             }
@@ -163,8 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 newDetailFavBtn.style.transform = 'scale(1.3)';
                 setTimeout(() => newDetailFavBtn.style.transform = '', 200);
 
-                if(typeof showToast === 'function') {
-                    showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!', isFaved ? 'success' : 'info');
+                if(window.toast) {
+                    window.toast.show(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!', isFaved ? 'success' : 'info');
                 }
             }
         });
@@ -196,46 +218,102 @@ document.addEventListener("DOMContentLoaded", () => {
                 showEmptyFavorites();
                 updateFavoritesPageCount(0);
             } else {
-                const API_ORIGIN = API_URL.replace(/\\/api\\/?$/, "");
-                
                 data.ads.forEach(ad => {
-                    const imageUrl = ad.images && ad.images.length > 0 ? (ad.images[0].startsWith('http') ? ad.images[0] : `${API_ORIGIN}${ad.images[0]}`) : "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800";
+                    const imageUrl = getImageUrl(ad.images?.[0]);
                     const city = ad.city || "";
                     const title = [ad.brand, ad.modelName].filter(Boolean).join(" ");
                     const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
-                    const date = new Date(ad.createdAt).toLocaleDateString("az-AZ", { day: "2-digit", month: "short", year: "numeric" });
+                    const date = new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
                     
                     const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
-                    const badgeStyle = ad.sellerType === "store" ? "" : ' style="background:var(--accent-hover);"';
                     const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
                     
                     const aTag = document.createElement('a');
                     aTag.href = detailUrl;
                     aTag.style.cssText = "text-decoration:none;color:inherit;position:relative;display:block;";
                     
-                    aTag.innerHTML = `
-                        <div class="ad-card" data-id="${ad._id}" style="position:relative;">
-                            <div class="ad-image">
-                                <img src="${imageUrl}" alt="${title}">
-                                <span class="ad-badge"${badgeStyle}>${sellerType}</span>
-                                <button class="favorite-btn favorited"><i class="fas fa-heart" style="color:#e74c3c;"></i></button>
-                            </div>
-                            <div class="ad-info">
-                                <div class="ad-price">${price}</div>
-                                <div class="ad-title">${title}</div>
-                                <div class="ad-location">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>${city}</span>
-                                    <span class="ad-date">${date}</span>
-                                </div>
-                            </div>
-                            
-                            <!-- Inject selection checkbox for bulk edit -->
-                            <label class="fav-card-checkbox" style="position:absolute; top:12px; left:12px; z-index:10; background:rgba(255,255,255,0.9); padding:6px; border-radius:6px; cursor:pointer; display:flex; box-shadow: 0 2px 5px rgba(0,0,0,0.2);" onclick="event.stopPropagation(); event.preventDefault();">
-                                <input type="checkbox" class="card-select-cb" data-id="${ad._id}" style="width:20px;height:20px;cursor:pointer;" onclick="event.stopPropagation();">
-                            </label>
-                        </div>
-                    `;
+                    const card = document.createElement('div');
+                    card.className = 'ad-card';
+                    card.setAttribute('data-id', ad._id);
+                    card.style.position = 'relative';
+
+                    const adImage = document.createElement('div');
+                    adImage.className = 'ad-image';
+
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = title;
+
+                    const badge = document.createElement('span');
+                    badge.className = 'ad-badge';
+                    if (ad.sellerType !== 'store') {
+                        badge.style.background = 'var(--accent-hover)';
+                    }
+                    badge.textContent = sellerType;
+
+                    const favBtn = document.createElement('button');
+                    favBtn.className = 'favorite-btn favorited';
+                    const favIcon = document.createElement('i');
+                    favIcon.className = 'fas fa-heart';
+                    favIcon.style.color = '#e74c3c';
+                    favBtn.appendChild(favIcon);
+
+                    adImage.appendChild(img);
+                    adImage.appendChild(badge);
+                    adImage.appendChild(favBtn);
+
+                    const adInfo = document.createElement('div');
+                    adInfo.className = 'ad-info';
+
+                    const priceDiv = document.createElement('div');
+                    priceDiv.className = 'ad-price';
+                    priceDiv.textContent = price;
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'ad-title';
+                    titleDiv.textContent = title;
+
+                    const locDiv = document.createElement('div');
+                    locDiv.className = 'ad-location';
+
+                    const marker = document.createElement('i');
+                    marker.className = 'fas fa-map-marker-alt';
+
+                    const citySpan = document.createElement('span');
+                    citySpan.textContent = city;
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'ad-date';
+                    dateSpan.textContent = date;
+
+                    locDiv.appendChild(marker);
+                    locDiv.appendChild(citySpan);
+                    locDiv.appendChild(dateSpan);
+
+                    adInfo.appendChild(priceDiv);
+                    adInfo.appendChild(titleDiv);
+                    adInfo.appendChild(locDiv);
+
+                    // Selection checkbox for bulk edit
+                    const cbLabel = document.createElement('label');
+                    cbLabel.className = 'fav-card-checkbox';
+                    cbLabel.style.cssText = 'position:absolute; top:12px; left:12px; z-index:10; background:rgba(255,255,255,0.9); padding:6px; border-radius:6px; cursor:pointer; display:flex; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
+                    cbLabel.onclick = (e) => { e.stopPropagation(); e.preventDefault(); };
+
+                    const cbInput = document.createElement('input');
+                    cbInput.type = 'checkbox';
+                    cbInput.className = 'card-select-cb';
+                    cbInput.setAttribute('data-id', ad._id);
+                    cbInput.style.cssText = 'width:20px;height:20px;cursor:pointer;';
+                    cbInput.onclick = (e) => { e.stopPropagation(); };
+
+                    cbLabel.appendChild(cbInput);
+
+                    card.appendChild(adImage);
+                    card.appendChild(adInfo);
+                    card.appendChild(cbLabel);
+
+                    aTag.appendChild(card);
                     grid.appendChild(aTag);
                 });
                 
