@@ -44,6 +44,16 @@ const isOriginAllowed = (origin) => {
         }
     }
 
+    // Allow production Render and custom domains
+    if (origin && (
+        origin === 'https://mobilim-az.onrender.com' ||
+        origin.endsWith('.onrender.com') ||
+        origin === 'https://mobilim.az' ||
+        origin === 'https://www.mobilim.az'
+    )) {
+        return true;
+    }
+
     const allowedOrigins = getAllowedOrigins();
     return allowedOrigins.includes(origin);
 };

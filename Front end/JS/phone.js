@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const container = document.getElementById("phone-ads-container") || document.querySelector(".all-ads-container");
     if (!container) return;
 
-    const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobilim.az/api');
+    const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : (window.location.origin ? window.location.origin + '/api' : 'https://mobilim-az.onrender.com/api'));
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
     const DEFAULT_AD_IMAGE = "assets/images/default-ad.svg";
 

@@ -5,13 +5,15 @@
  * Update this value when deploying to staging or production.
  */
 var hostname = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+var origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+
 var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname) ||
     hostname.startsWith('192.168.') ||
     hostname.startsWith('10.') ||
     (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:');
 
-var backendHost = isLocal ? 'http://localhost:5000' : 'https://api.mobilim.az';
-var resolvedApi = isLocal ? 'http://localhost:5000/api' : 'https://api.mobilim.az/api';
+var backendHost = isLocal ? 'http://localhost:5000' : (origin || 'https://mobilim-az.onrender.com');
+var resolvedApi = isLocal ? 'http://localhost:5000/api' : `${backendHost}/api`;
 
 if (typeof window !== 'undefined') {
     window.BASE_URL = backendHost;

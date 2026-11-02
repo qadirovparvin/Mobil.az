@@ -14,10 +14,13 @@
 
     // 1. Resolve API Base URL
     function getApiBase() {
-        if (typeof window !== 'undefined' && (window.API_URL || window.API_BASE)) {
-            return (window.API_URL || window.API_BASE).replace(/\/+$/, '');
+        if (typeof window !== 'undefined' && (window.API_URL || window.API_BASE || window.API_BASE_URL)) {
+            return (window.API_URL || window.API_BASE || window.API_BASE_URL).replace(/\/+$/, '');
         }
-        return 'http://localhost:5000/api';
+        const origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+        const hostname = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
+        const isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname);
+        return isLocal ? 'http://localhost:5000/api' : (origin ? `${origin}/api` : 'https://mobilim-az.onrender.com/api');
     }
 
     // 2. Token Helpers
