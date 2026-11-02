@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script src="JS/config.js"></script>
     <script>
         (function() {
             try {
@@ -23,7 +24,6 @@
             } catch (e) {}
         })();
     </script>
-    <script src="JS/config.js"></script>
 </head>
 
 <body class="auth-page">
@@ -183,8 +183,7 @@
                             <input type="password" id="signupPassword" placeholder="••••••••" autocomplete="new-password"
                                    oninput="checkPasswordStrength(this.value)" required>
                             <i class="fas fa-lock input-icon"></i>
-                            <i class="fas fa-eye toggle-password" id="toggleSignupPwd"
-                               onclick="togglePwd('signupPassword','toggleSignupPwd')"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupPwd" data-target="signupPassword"></i>
                         </div>
                         <div class="password-strength">
                             <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
@@ -195,8 +194,7 @@
                             <label for="signupConfirm" data-translate="auth-pwd-confirm">Şifrəni təsdiqlə</label>
                             <input type="password" id="signupConfirm" placeholder="••••••••" autocomplete="new-password" required>
                             <i class="fas fa-lock input-icon"></i>
-                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirm"
-                               onclick="togglePwd('signupConfirm','toggleSignupConfirm')"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirm" data-target="signupConfirm"></i>
                         </div>
 
                         <div class="terms-row">
@@ -284,8 +282,7 @@
                             <input type="password" id="signupPasswordE" placeholder="••••••••" autocomplete="new-password"
                                    oninput="checkPasswordStrength(this.value)" required>
                             <i class="fas fa-lock input-icon"></i>
-                            <i class="fas fa-eye toggle-password" id="toggleSignupPwdE"
-                               onclick="togglePwd('signupPasswordE','toggleSignupPwdE')"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupPwdE" data-target="signupPasswordE"></i>
                         </div>
                         <div class="password-strength">
                             <div class="strength-bar"><div class="strength-fill" id="strengthFillE"></div></div>
@@ -296,8 +293,7 @@
                             <label for="signupConfirmE" data-translate="auth-pwd-confirm">Şifrəni təsdiqlə</label>
                             <input type="password" id="signupConfirmE" placeholder="••••••••" autocomplete="new-password" required>
                             <i class="fas fa-lock input-icon"></i>
-                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirmE"
-                               onclick="togglePwd('signupConfirmE','toggleSignupConfirmE')"></i>
+                            <i class="fas fa-eye toggle-password" id="toggleSignupConfirmE" data-target="signupConfirmE"></i>
                         </div>
 
                         <div class="terms-row">

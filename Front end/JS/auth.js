@@ -1,5 +1,27 @@
 "use strict";
 
+document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[id^="toggle"]');
+    if (!btn) return;
+    e.preventDefault();
+    const targetId = btn.dataset.target || btn.id.replace('toggle','').toLowerCase();
+    const input = document.getElementById(targetId) || document.getElementById('loginPassword') || document.querySelector('input[type="password"], input[type="text"]');
+    if (input) {
+      input.type = input.type === 'password' ? 'text' : 'password';
+      if (btn.classList.contains('fa-eye')) {
+        btn.classList.remove('fa-eye');
+        btn.classList.add('fa-eye-slash');
+      } else if (btn.classList.contains('fa-eye-slash')) {
+        btn.classList.remove('fa-eye-slash');
+        btn.classList.add('fa-eye');
+      }
+    }
+  });
+});
+
+
+
 function getToken() {
     if (typeof window.getToken === 'function' && window.getToken !== getToken) {
         return window.getToken();

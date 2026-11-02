@@ -7,25 +7,22 @@
 var hostname = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
 var origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
 
-var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname) ||
-    hostname.startsWith('192.168.') ||
-    hostname.startsWith('10.') ||
-    (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:');
-
-var backendHost = isLocal ? 'http://localhost:5000' : (origin || 'https://mobilim-az.onrender.com');
-var resolvedApi = isLocal ? 'http://localhost:5000/api' : `${backendHost}/api`;
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
+var backendHost = API_URL.replace(/\/api\/?$/, '');
+var resolvedApi = API_URL;
+var isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 if (typeof window !== 'undefined') {
     window.BASE_URL = backendHost;
-    window.API_URL = resolvedApi;
-    window.API_BASE = resolvedApi;
-    window.API_BASE_URL = resolvedApi;
+    window.API_URL = API_URL;
+    window.API_BASE = API_URL;
+    window.API_BASE_URL = API_URL;
 }
 if (typeof globalThis !== 'undefined') {
     globalThis.BASE_URL = backendHost;
-    globalThis.API_URL = resolvedApi;
-    globalThis.API_BASE = resolvedApi;
-    globalThis.API_BASE_URL = resolvedApi;
+    globalThis.API_URL = API_URL;
+    globalThis.API_BASE = API_URL;
+    globalThis.API_BASE_URL = API_URL;
 }
 
 if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
@@ -40,7 +37,7 @@ if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
 }
 
 // Global password visibility toggler (safe against strict CSP and works immediately)
-window.togglePwd = function(inputId, iconId) {
+window.togglePwd = function (inputId, iconId) {
     let inp = inputId ? document.getElementById(inputId) : null;
     let icon = iconId ? document.getElementById(iconId) : null;
     if (!inp && icon) {
@@ -71,7 +68,7 @@ window.togglePwd = function(inputId, iconId) {
 };
 
 if (typeof document !== 'undefined') {
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         const icon = e.target && e.target.closest ? e.target.closest('.toggle-password, #toggleLoginPwd, #toggleSignupPwd, #toggleSignupConfirm, #toggleResetPwd, #toggleConfirmResetPwd') : null;
         if (!icon) return;
         const group = icon.closest('.input-group') || icon.parentElement;
@@ -81,24 +78,24 @@ if (typeof document !== 'undefined') {
 }
 
 
-window.getToken = function() {
+window.getToken = function () {
     const tryGet = (store, key) => {
-        try { 
+        try {
             let t = store.getItem(key);
             if (!t || t === 'null' || t === 'undefined' || t === '""' || t === "''") return null;
             t = t.trim().replace(/^["']+|["']+$/g, '');
             if (t.startsWith('{')) {
-                try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch(e) {}
+                try { const o = JSON.parse(t); t = o.token || o.accessToken || ''; } catch (e) { }
             }
             if (t.length < 30) return null;
             // JWT format check: 3 parts with dots
             if (t.split('.').length !== 3) return null;
             return t;
-        } catch(e) { return null; }
+        } catch (e) { return null; }
     };
 
     const remember = localStorage.getItem('rememberMe') === 'true';
-    const sources = remember ? 
+    const sources = remember ?
         [() => [localStorage, 'token'], () => [sessionStorage, 'token'], () => [localStorage, 'accessToken'], () => [localStorage, 'authToken']] :
         [() => [sessionStorage, 'token'], () => [localStorage, 'token'], () => [sessionStorage, 'accessToken'], () => [sessionStorage, 'authToken']];
 
@@ -119,12 +116,12 @@ window.getAuthToken = window.getToken;
 
 window.getUser = window.getUser || function getUser() {
     const raw = localStorage.getItem('user') ||
-                localStorage.getItem('mobilaz_current_user') ||
-                localStorage.getItem('mobilaz_user') ||
-                sessionStorage.getItem('user') ||
-                sessionStorage.getItem('mobilaz_current_user') ||
-                localStorage.getItem('adminUser') ||
-                sessionStorage.getItem('adminUser');
+        localStorage.getItem('mobilaz_current_user') ||
+        localStorage.getItem('mobilaz_user') ||
+        sessionStorage.getItem('user') ||
+        sessionStorage.getItem('mobilaz_current_user') ||
+        localStorage.getItem('adminUser') ||
+        sessionStorage.getItem('adminUser');
     if (!raw) return null;
     try { return JSON.parse(raw); } catch (e) { return null; }
 };
@@ -148,63 +145,63 @@ window.persistAuthSession = function persistAuthSession(data, token, rememberMeP
 
     const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach(k => {
-        try { localStorage.removeItem(k); } catch(e) {}
-        try { sessionStorage.removeItem(k); } catch(e) {}
+        try { localStorage.removeItem(k); } catch (e) { }
+        try { sessionStorage.removeItem(k); } catch (e) { }
     });
 
     const userStr = JSON.stringify(userPayload);
     const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
 
     if (rememberMe) {
-        if (accessToken) try { localStorage.setItem('token', accessToken); } catch(e) {}
-        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
-        userKeys.forEach((key) => { try { localStorage.setItem(key, userStr); } catch (e) {} });
+        if (accessToken) try { localStorage.setItem('token', accessToken); } catch (e) { }
+        try { localStorage.setItem('rememberMe', 'true'); } catch (e) { }
+        userKeys.forEach((key) => { try { localStorage.setItem(key, userStr); } catch (e) { } });
         if (userPayload?.email) {
-            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) {}
-            try { localStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) { }
+            try { localStorage.setItem('userEmail', userPayload.email); } catch (e) { }
         }
-        if (userPayload?.role) try { localStorage.setItem('userRole', userPayload.role); } catch (e) {}
+        if (userPayload?.role) try { localStorage.setItem('userRole', userPayload.role); } catch (e) { }
         if (userPayload?.role === 'admin' && accessToken) {
-            try { localStorage.setItem('adminToken', accessToken); } catch (e) {}
-            try { localStorage.setItem('adminUser', userStr); } catch (e) {}
+            try { localStorage.setItem('adminToken', accessToken); } catch (e) { }
+            try { localStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     } else {
-        if (accessToken) try { sessionStorage.setItem('token', accessToken); } catch(e) {}
-        try { localStorage.removeItem('rememberMe'); } catch(e) {}
-        userKeys.forEach((key) => { try { sessionStorage.setItem(key, userStr); } catch (e) {} });
+        if (accessToken) try { sessionStorage.setItem('token', accessToken); } catch (e) { }
+        try { localStorage.removeItem('rememberMe'); } catch (e) { }
+        userKeys.forEach((key) => { try { sessionStorage.setItem(key, userStr); } catch (e) { } });
         if (userPayload?.email) {
-            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) {}
-            try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) {}
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) { }
+            try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) { }
         }
-        if (userPayload?.role) try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) {}
+        if (userPayload?.role) try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) { }
         if (userPayload?.role === 'admin' && accessToken) {
-            try { sessionStorage.setItem('adminToken', accessToken); } catch (e) {}
-            try { sessionStorage.setItem('adminUser', userStr); } catch (e) {}
+            try { sessionStorage.setItem('adminToken', accessToken); } catch (e) { }
+            try { sessionStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     }
 
     if (typeof window.updateHeader === 'function') {
-        try { window.updateHeader(); } catch (e) {}
+        try { window.updateHeader(); } catch (e) { }
     }
     if (typeof window.updateAuthUI === 'function') {
-        try { window.updateAuthUI(); } catch (e) {}
+        try { window.updateAuthUI(); } catch (e) { }
     }
-    try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) { }
 };
 
 window.clearAuthSession = window.clearAuthSession || function clearAuthSession() {
     const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
     keys.forEach((key) => {
-        try { sessionStorage.removeItem(key); } catch (e) {}
-        try { localStorage.removeItem(key); } catch (e) {}
+        try { sessionStorage.removeItem(key); } catch (e) { }
+        try { localStorage.removeItem(key); } catch (e) { }
     });
     if (typeof window.updateHeader === 'function') {
-        try { window.updateHeader(); } catch (e) {}
+        try { window.updateHeader(); } catch (e) { }
     }
     if (typeof window.updateAuthUI === 'function') {
-        try { window.updateAuthUI(); } catch (e) {}
+        try { window.updateAuthUI(); } catch (e) { }
     }
-    try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) { }
 };
 
 var ToastNotifier = window.ToastNotifier || class ToastNotifier {
@@ -238,9 +235,9 @@ var ToastNotifier = window.ToastNotifier || class ToastNotifier {
         if (!container) return;
 
         const iconClass = type === 'success' ? 'fas fa-check-circle' :
-                          type === 'error' ? 'fas fa-times-circle' :
-                          type === 'warning' ? 'fas fa-exclamation-triangle' :
-                          'fas fa-info-circle';
+            type === 'error' ? 'fas fa-times-circle' :
+                type === 'warning' ? 'fas fa-exclamation-triangle' :
+                    'fas fa-info-circle';
 
         const toast = document.createElement('div');
         toast.className = `cab-toast cab-toast-${type}`;
@@ -376,7 +373,7 @@ function handleGenericApiError(status) {
                         } else {
                             handleGenericApiError(res.status);
                         }
-                    } catch(e) {
+                    } catch (e) {
                         handleGenericApiError(res.status);
                     }
                 }

@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script src="JS/config.js"></script>
     <script>
         (function() {
             try {
@@ -23,7 +24,6 @@
             } catch (e) {}
         })();
     </script>
-    <script src="JS/config.js"></script>
 </head>
 
 <body class="auth-page">
@@ -108,8 +108,7 @@
                         <input type="password" id="loginPassword" name="password" autocomplete="current-password"
                                placeholder="••••••••" required>
                         <i class="fas fa-lock input-icon"></i>
-                        <i class="fas fa-eye toggle-password" id="toggleLoginPwd"
-                           onclick="togglePwd('loginPassword','toggleLoginPwd')"></i>
+                        <i class="fas fa-eye toggle-password" id="toggleLoginPwd" data-target="loginPassword"></i>
                     </div>
 
                     <div class="form-options">
