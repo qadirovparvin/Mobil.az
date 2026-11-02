@@ -4,25 +4,38 @@
  * This file sets the global API base URL used by all frontend scripts.
  * Update this value when deploying to staging or production.
  */
-var hostname = (typeof window !== 'undefined' && window.location && window.location.hostname) ? window.location.hostname : '';
-var origin = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : '';
+function resolveDefaultApiUrl() {
+  if (typeof window === 'undefined') return 'http://localhost:5000/api';
+  var hostname = window.location.hostname || '';
+  var isLocal = ['localhost','127.0.0.1','::1','[::1]','','0.0.0.0'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.') || window.location.protocol === 'file:';
+  if (!isLocal) {
+    // Production on Render
+    if (hostname.includes('onrender.com')) {
+      return window.location.origin + '/api';
+    }
+    return 'https://api.mobilim.az/api';
+  }
+  // Local development
+  return 'http://localhost:5000/api';
+}
 
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : `${window.location.origin}/api`;
-var backendHost = API_URL.replace(/\/api\/?$/, '');
-var resolvedApi = API_URL;
-var isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+var resolvedApi = resolveDefaultApiUrl();
+var backendHost = resolvedApi.replace(/\/api\/?$/, '');
+var isLocal = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
 
 if (typeof window !== 'undefined') {
     window.BASE_URL = backendHost;
-    window.API_URL = API_URL;
-    window.API_BASE = API_URL;
-    window.API_BASE_URL = API_URL;
+    window.API_URL = resolvedApi;
+    window.API_BASE = resolvedApi;
+    window.API_BASE_URL = resolvedApi;
+    window.resolveDefaultApiUrl = resolveDefaultApiUrl;
 }
 if (typeof globalThis !== 'undefined') {
     globalThis.BASE_URL = backendHost;
-    globalThis.API_URL = API_URL;
-    globalThis.API_BASE = API_URL;
-    globalThis.API_BASE_URL = API_URL;
+    globalThis.API_URL = resolvedApi;
+    globalThis.API_BASE = resolvedApi;
+    globalThis.API_BASE_URL = resolvedApi;
+    globalThis.resolveDefaultApiUrl = resolveDefaultApiUrl;
 }
 
 if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
