@@ -23,6 +23,7 @@
             } catch (e) {}
         })();
     </script>
+    <script src="JS/config.js"></script>
 </head>
 
 <body class="auth-page">
@@ -321,7 +322,7 @@
             ).trim().replace(/^["']+|["']+$/g, '');
 
             if (token && token.length > 30 && token.split('.').length === 3) {
-                const apiBase = window.API_URL || window.API_BASE || 'http://localhost:5000/api';
+                const apiBase = window.API_URL || window.API_BASE || (window.location && window.location.origin ? window.location.origin + '/api' : 'http://localhost:5000/api');
                 fetch(apiBase + '/auth/me', {
                     headers: { Authorization: 'Bearer ' + token }
                 }).then(r => {
@@ -356,7 +357,6 @@
             }
         });
     </script>
-    <script src="JS/config.js"></script>
     <script src="JS/axios.min.js"></script>
     <script src="JS/api.js"></script>
     <script src="JS/auth.js"></script>

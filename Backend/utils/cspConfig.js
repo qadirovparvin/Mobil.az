@@ -37,19 +37,36 @@ const buildHelmetOptions = () => {
         "default-src": ["'self'"],
         "script-src": [
             "'self'",
+            "'unsafe-inline'",
             'https://cdnjs.cloudflare.com',
             apiOrigin,
-            ...splitEnvList(process.env.CSP_SCRIPT_SRC),
-            ...(isProduction ? [] : ["'unsafe-inline'"])
+            ...splitEnvList(process.env.CSP_SCRIPT_SRC)
         ].filter(Boolean),
+        "script-src-attr": ["'unsafe-inline'"],
         "style-src": [
             "'self'",
+            "'unsafe-inline'",
             'https://cdnjs.cloudflare.com',
             'https://fonts.googleapis.com',
-            ...splitEnvList(process.env.CSP_STYLE_SRC),
-            ...(isProduction ? [] : ["'unsafe-inline'"])
+            ...splitEnvList(process.env.CSP_STYLE_SRC)
         ],
-        "img-src": imageOrigins,
+        "img-src": [
+            "'self'",
+            'data:',
+            'blob:',
+            'https:',
+            'http:',
+            apiOrigin,
+            'https://mobilim-az.onrender.com',
+            'https://mobil-az.onrender.com',
+            'https://mobilim.az',
+            'https://www.mobilim.az',
+            ...allowedOrigins,
+            'https://images.unsplash.com',
+            'https://i.pinimg.com',
+            'https://ui-avatars.com',
+            ...splitEnvList(process.env.CSP_IMG_SRC)
+        ].filter(Boolean),
         "font-src": [
             "'self'",
             'data:',
@@ -57,13 +74,37 @@ const buildHelmetOptions = () => {
             'https://fonts.gstatic.com',
             ...splitEnvList(process.env.CSP_FONT_SRC)
         ],
-        "connect-src": connectOrigins,
+        "connect-src": [
+            "'self'",
+            'https://*.onrender.com',
+            'wss://*.onrender.com',
+            'https://mobilim-az.onrender.com',
+            'wss://mobilim-az.onrender.com',
+            'https://mobil-az.onrender.com',
+            'wss://mobil-az.onrender.com',
+            'https://mobilim.az',
+            'https://www.mobilim.az',
+            'https://api.mobilim.az',
+            apiOrigin,
+            ...allowedOrigins,
+            ...paymentOrigins,
+            ...splitEnvList(process.env.CSP_CONNECT_SRC)
+        ].filter(Boolean),
         "object-src": ["'none'"],
         "frame-ancestors": splitEnvList(process.env.CSP_FRAME_ANCESTORS).length
             ? splitEnvList(process.env.CSP_FRAME_ANCESTORS)
             : ["'none'"],
         "base-uri": ["'self'"],
-        "form-action": ["'self'", ...allowedOrigins, ...paymentOrigins],
+        "form-action": [
+            "'self'",
+            'https://*.onrender.com',
+            'https://mobilim-az.onrender.com',
+            'https://mobil-az.onrender.com',
+            'https://mobilim.az',
+            'https://www.mobilim.az',
+            ...allowedOrigins,
+            ...paymentOrigins
+        ],
         "upgrade-insecure-requests": isProduction ? [] : null
     };
 

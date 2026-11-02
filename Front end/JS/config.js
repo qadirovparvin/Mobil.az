@@ -39,6 +39,47 @@ if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
         });
 }
 
+// Global password visibility toggler (safe against strict CSP and works immediately)
+window.togglePwd = function(inputId, iconId) {
+    let inp = inputId ? document.getElementById(inputId) : null;
+    let icon = iconId ? document.getElementById(iconId) : null;
+    if (!inp && icon) {
+        const group = icon.closest('.input-group') || icon.parentElement;
+        if (group) inp = group.querySelector('input[type="password"], input[type="text"]');
+    }
+    if (!inp) return;
+
+    const now = Date.now();
+    if (inp._lastToggle && (now - inp._lastToggle < 250)) {
+        return;
+    }
+    inp._lastToggle = now;
+
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        if (icon) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+    } else {
+        inp.type = 'password';
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+};
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', function(e) {
+        const icon = e.target && e.target.closest ? e.target.closest('.toggle-password, #toggleLoginPwd, #toggleSignupPwd, #toggleSignupConfirm, #toggleResetPwd, #toggleConfirmResetPwd') : null;
+        if (!icon) return;
+        const group = icon.closest('.input-group') || icon.parentElement;
+        const inp = group ? group.querySelector('input[type="password"], input[type="text"]') : null;
+        window.togglePwd(inp ? inp.id : null, icon.id);
+    });
+}
+
 
 window.getToken = function() {
     const tryGet = (store, key) => {
@@ -166,7 +207,7 @@ window.clearAuthSession = window.clearAuthSession || function clearAuthSession()
     try { window.dispatchEvent(new Event('authChanged')); } catch (e) {}
 };
 
-class ToastNotifier {
+var ToastNotifier = window.ToastNotifier || class ToastNotifier {
     constructor() {
         this.container = null;
         this.lastToastMessage = null;

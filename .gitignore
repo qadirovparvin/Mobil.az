@@ -22,3 +22,4 @@ Front end/test.js
 updateAuth.js
 updateAuthOtp.js
 Backend/fix_airyphone.js
+.playwright-mcp/

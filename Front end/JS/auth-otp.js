@@ -5,7 +5,8 @@
    ============================================================ */
 
 if (typeof window !== 'undefined') {
-    window.API_URL = window.API_URL || 'http://localhost:5000/api';
+    const isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(window.location.hostname);
+    window.API_URL = window.API_URL || window.API_BASE || (isLocal ? 'http://localhost:5000/api' : `${window.location.origin}/api`);
 }
 
 // Safe token extractor supporting token, sessionStorage token, and adminToken
@@ -325,10 +326,13 @@ function setLoading(btn, on) {
 }
 
 /* ── Password visibility toggle ────────────────────────────── */
-function togglePwd(inputId, iconId) {
+window.togglePwd = function togglePwd(inputId, iconId) {
     const inp  = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     if (!inp) return;
+    const now = Date.now();
+    if (inp._lastToggle && (now - inp._lastToggle < 250)) return;
+    inp._lastToggle = now;
     if (inp.type === 'password') {
         inp.type = 'text';
         if (icon) { icon.classList.replace('fa-eye', 'fa-eye-slash'); }
@@ -738,7 +742,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const loginPayload = { email: identifier, password, rememberMe };
-                const res = await fetch(`${window.API_URL}/auth/login`, {
+                const apiBase = (window.API_URL || window.API_BASE || (window.location && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api')).replace(/\/+$/, '');
+                const res = await fetch(`${apiBase}/auth/login`, {
                     credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -774,7 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             const verifyBtn = document.getElementById('twoFactorVerifyBtn');
                             setLoading(verifyBtn, true);
                             try {
-                                const secondRes = await fetch(`${window.API_URL}/auth/login`, {
+                                const apiBase = (window.API_URL || window.API_BASE || (window.location && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api')).replace(/\/+$/, '');
+                                const secondRes = await fetch(`${apiBase}/auth/login`, {
                                     credentials: 'include',
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
