@@ -8,6 +8,13 @@ const adSchema = new mongoose.Schema({
     sellerType: { type: String, enum: ['personal', 'store'], default: 'personal' },
 
     // ── Core Info ─────────────────────────────────────────
+    adNumber: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+        default: () => `MOB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    },
     title:       { type: String, default: '' },
     category:    { type: String, required: true },
     brand:       { type: String, required: true },

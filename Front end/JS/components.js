@@ -82,9 +82,18 @@ const footerTemplate = `
           <li><a href="mailto:info@mobilim.az"><i class="fas fa-envelope"></i> info@mobilim.az</a></li>
         </ul>
         <div class="social-icons">
-          <a href="#"><i class="fab fa-facebook-f"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="https://wa.me/994703638808" target="_blank" rel="noopener noreferrer" class="social whatsapp" title="WhatsApp" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="https://instagram.com/mobilim.az" target="_blank" rel="noopener noreferrer" class="social instagram" title="Instagram" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://tiktok.com/@mobilim.az" target="_blank" rel="noopener noreferrer" class="social tiktok" title="TikTok" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+          <a href="https://youtube.com/@mobilim.az" target="_blank" rel="noopener noreferrer" class="social youtube" title="YouTube" aria-label="YouTube">
+            <i class="fab fa-youtube"></i>
+          </a>
         </div>
       </div>
     </div>
@@ -166,6 +175,24 @@ function loadFooter() {
       p.innerHTML = p.innerHTML.replace(/2025/g, currentYr);
     }
   });
+
+  // Fallback if FontAwesome icons are not loaded
+  setTimeout(() => {
+    const testIcon = document.querySelector('.social.whatsapp i');
+    if (testIcon) {
+      const beforeContent = window.getComputedStyle(testIcon, ':before').content;
+      if (!beforeContent || beforeContent === 'none' || beforeContent === '""') {
+        const fallbacks = { whatsapp: 'WA', instagram: 'IG', tiktok: 'TT', youtube: 'YT' };
+        document.querySelectorAll('.social').forEach(link => {
+          Object.keys(fallbacks).forEach(key => {
+            if (link.classList.contains(key) && !link.textContent.trim()) {
+              link.innerHTML = `<span style="font-size:12px;font-weight:700;letter-spacing:-0.5px;">${fallbacks[key]}</span>`;
+            }
+          });
+        });
+      }
+    }
+  }, 500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

@@ -794,3 +794,83 @@
   .breadcrumb { padding-left: 14px; }
   .related-section { padding: 0 14px; }
 }
+
+/* ── Seller Reviews Empty State ────────────────────────────── */
+.no-reviews-title {
+  font-size: 14px !important;
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  line-height: 1.5 !important;
+}
+
+.seller-reviews .empty-state,
+.reviews-section .empty-state,
+.no-reviews-empty,
+.no-reviews-summary {
+  padding: 16px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.rating-stars-lg.empty-stars {
+  color: #9ca3af !important;
+  font-size: 16px !important;
+  margin: 4px 0 6px !important;
+}
+
+/* ── Modern Footer Social Icons ── */
+.social-icons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.social-icons a.social,
+.social {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #333;
+  color: white !important;
+  text-decoration: none;
+  font-size: 18px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-right: 0 !important;
+  line-height: 1;
+}
+
+.social-icons a.social.whatsapp,
+.social.whatsapp {
+  background: #25D366;
+}
+
+.social-icons a.social.instagram,
+.social.instagram {
+  background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5);
+}
+
+.social-icons a.social.tiktok,
+.social.tiktok {
+  background: #000;
+}
+
+.social-icons a.social.youtube,
+.social.youtube {
+  background: #FF0000;
+}
+
+.social-icons a.social:hover,
+.social:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  color: white !important;
+}

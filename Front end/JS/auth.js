@@ -90,16 +90,31 @@ if (typeof window !== 'undefined') {
 
 let _fetchingUnreadCount = false;
 let _lastUnreadCountFetch = 0;
+let _unreadCount401Cooldown = 0;
 function fetchUnreadCount(token) {
-    if (!token || !getToken()) return;
+    const curToken = token || getToken();
+    if (!curToken) return;
     const now = Date.now();
+    if (_unreadCount401Cooldown && now < _unreadCount401Cooldown) return;
     if (_fetchingUnreadCount || (now - _lastUnreadCountFetch < 5000)) return;
     _fetchingUnreadCount = true;
     _lastUnreadCountFetch = now;
     fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/unread-count', {
-        headers: { 'Authorization': 'Bearer ' + token }
+        headers: { 'Authorization': 'Bearer ' + curToken },
+        credentials: 'include'
     })
-        .then(res => res.ok ? res.json() : null)
+        .then(res => {
+            if (res.status === 401) {
+                // Set 30s cooldown on 401 to prevent console loops
+                _unreadCount401Cooldown = Date.now() + 30000;
+                return null;
+            }
+            if (res.ok) {
+                _unreadCount401Cooldown = 0;
+                return res.json();
+            }
+            return null;
+        })
         .then(data => {
             if (data && data.count > 0) {
                 document.querySelectorAll('#notifCount').forEach(badge => {

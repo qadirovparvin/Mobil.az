@@ -28,12 +28,12 @@
     
     <div class="second-container">
       <div class="search-options">
-        <div class="catalog-dropdown">
-          <button class="catalog-button" aria-expanded="false" aria-haspopup="true" aria-controls="catalog-menu">
+        <div class="catalog-wrapper" style="position:relative;display:inline-block;">
+          <button class="catalog-button catalog-btn btn-katalog" id="catalogBtn" type="button" aria-expanded="false" aria-haspopup="true" aria-controls="catalogDropdown">
             <i class="fas fa-bars"></i>
             <span data-translate="catalog-button">Kataloq</span>
           </button>
-          <div class="catalog-menu" id="catalog-menu">
+          <div class="catalog-dropdown catalog-menu hidden" id="catalogDropdown">
             <a href="phone.html?category=phone"><i class="fas fa-mobile-alt"></i> <span class="phone"
                 data-translate="phone">Telefonlar</span></a>
             <a href="phone.html?category=tablet"><i class="fas fa-tablet-alt"></i><span class="tablet"
@@ -54,7 +54,8 @@
             <span class="filter-badge" id="filterBadge" style="display:none">0</span>
           </button>
 
-          <div id="filterBody" class="filter-body">
+          <div id="filterBody" class="filter-body filter-panel">
+            <button type="button" class="mobile-filter-close" id="mobileFilterClose" aria-label="Bağla">&times;</button>
 
             <!-- Brand & Model -->
             <div class="filter-group">
@@ -402,12 +403,20 @@
       </div>
     </div>
     <div class="third-container">
-      <section class="all-ads-section">
+      <section class="all-ads-section catalog-section">
+        <div id="search-results-info" style="padding:12px; background:#f3f4f6; border-radius:8px; margin:16px 0; display:none;"></div>
         <div class="all-ads-header">
           <h2 class="all-ads-title" data-translate="phone-h2">Telefon modelləri</h2>
+          <div class="sorting-dropdown">
+            <select id="sortingOptions">
+              <option value="date" data-translate="sort-by-date">Tarixə görə</option>
+              <option value="price-high" data-translate="sort-price-high">Bahadan ucuza</option>
+              <option value="price-low" data-translate="sort-price-low">Ucuzdan bahaya</option>
+            </select>
+          </div>
         </div>
 
-        <div id="phone-ads-container" class="all-ads-container"></div>
+        <div id="phone-ads-container" class="all-ads-container phone-grid"></div>
         <div id="load-more-container" class="load-more-container" style="text-align: center; margin: 32px 0; display: none;">
           <button id="loadMoreBtn" class="load-more-btn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; background: var(--accent, #6366f1); color: #fff; border: none; cursor: pointer; transition: all 0.2s ease;">
             <i class="fas fa-spinner fa-spin" style="display:none; margin-right: 8px;"></i>

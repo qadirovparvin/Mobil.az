@@ -30,9 +30,66 @@ if (redisClient && redisClient.status === 'ready') {
     console.warn('⚠️ Warning: Memory store used - rate limits are not shared across PM2 cluster workers!');
 }
 
-// Helper to check if the incoming request is from a verified authenticated admin session
+// Helper to check if the incoming request is from a verified or authenticated admin session, or admin credentials
+const isRequestFromAdmin = async (req) => {
+    if (!req) return false;
+
+    // 1. Admin IP whitelist via process.env.ADMIN_IPS
+    const rawIp = req.ip || req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || req.connection?.remoteAddress;
+    const adminIps = (process.env.ADMIN_IPS || '').split(',').map(s => s.trim()).filter(Boolean);
+    if (adminIps.length && (adminIps.includes(rawIp) || (req.ip && adminIps.includes(req.ip)))) {
+        return true;
+    }
+
+    // 2. Authenticated user with admin/superadmin role
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'superadmin')) {
+        return true;
+    }
+
+    // 3. Decoded Bearer JWT token in Authorization header
+    if (req.headers?.authorization && typeof req.headers.authorization === 'string' && req.headers.authorization.startsWith('Bearer ')) {
+        try {
+            const jwt = require('jsonwebtoken');
+            const token = req.headers.authorization.split(' ')[1];
+            const decoded = jwt.decode(token);
+            if (decoded && (decoded.role === 'admin' || decoded.role === 'superadmin')) {
+                return true;
+            }
+        } catch (_) {}
+    }
+
+    // 4. Request body check for login identifier/email
+    const rawIdentifier = req.body?.email || req.body?.identifier;
+    if (rawIdentifier) {
+        const cleanId = String(rawIdentifier).trim().toLowerCase();
+        const configuredAdminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
+        if (cleanId === configuredAdminEmail || cleanId === 'mobil@gmail.com') {
+            return true;
+        }
+
+        try {
+            const User = require('../models/User');
+            if (User && typeof User.findOne === 'function') {
+                const targetUser = await User.findOne({
+                    $or: [
+                        { email: cleanId },
+                        { phone: cleanId },
+                        { username: cleanId }
+                    ]
+                }).select('role isVerified').lean();
+
+                if (targetUser && (targetUser.role === 'admin' || targetUser.role === 'superadmin')) {
+                    return true;
+                }
+            }
+        } catch (_) {}
+    }
+
+    return false;
+};
+
 const isAdminRequest = (req) => {
-    return Boolean(req.user && req.user.role === 'admin' && req.user.isVerified);
+    return Boolean(req.user && (req.user.role === 'admin' || req.user.role === 'superadmin') && req.user.isVerified);
 };
 
 // Restrict each IP to a maximum of 5 failed login attempts per 15-minute window.
@@ -46,6 +103,13 @@ const loginFailedLimiter = rateLimit({
     skipSuccessfulRequests: true, // Only count failed attempts (status >= 400)
     standardHeaders: true,
     legacyHeaders: false,
+    skip: async (req) => {
+        try {
+            return await isRequestFromAdmin(req);
+        } catch (_) {
+            return false;
+        }
+    },
     handler(req, res, next, options) {
         logger.warn(`Failed login rate limit exceeded: ${req.method} ${req.originalUrl} ip=${req.ip}`);
         res.status(options.statusCode).json(options.message);
@@ -95,6 +159,13 @@ async function loginRateLimiter(req, res, next) {
     if (isDev || isLocalhost) {
         return next();
     }
+
+    try {
+        if (await isRequestFromAdmin(req)) {
+            console.warn(`[RATE LIMIT] Admin login rate limit bypassed for: ${req.body?.email || req.body?.identifier || rawIp}`);
+            return next();
+        }
+    } catch (_) {}
 
     try {
         await limiter.consume(rawIp);
@@ -195,12 +266,27 @@ if (redisClient) {
     });
 }
 
-const loginLimiter = (req, res, next) => currentLoginLimiter(req, res, next);
+const loginLimiter = async (req, res, next) => {
+    try {
+        const isAdmin = await isRequestFromAdmin(req);
+        if (isAdmin) {
+            console.warn(`[RATE LIMIT] Admin login rate limit bypassed for: ${req.body?.email || req.body?.identifier || req.ip}`);
+            logger.info(`Admin login rate limit bypassed for ip=${req.ip}`);
+            return next();
+        }
+    } catch (err) {
+        // Fall back to currentLoginLimiter if check throws
+    }
+    return currentLoginLimiter(req, res, next);
+};
+
 const adListLimiter = (req, res, next) => currentAdListLimiter(req, res, next);
 const passwordResetLimiter = (req, res, next) => currentPasswordResetLimiter(req, res, next);
 
 module.exports = {
     redisClient,
+    isRequestFromAdmin,
+    isAdminRequest,
     loginFailedLimiter,
     loginLimiter,
     loginRateLimiter,

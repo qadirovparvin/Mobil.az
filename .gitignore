@@ -7,8 +7,18 @@ private_uploads/
 *.log
 .vscode/
 .agents/
-.tmp/
 scratch/
 test-results/
 playwright-report/
 Frontend/
+*.txt
+*.png
+fix_*.py
+Front end/fix_*.py
+Front end/fix_*.js
+Front end/inject_theme.py
+Front end/find_classes.js
+Front end/test.js
+updateAuth.js
+updateAuthOtp.js
+Backend/fix_airyphone.js

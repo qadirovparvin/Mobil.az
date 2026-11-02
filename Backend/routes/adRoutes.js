@@ -3,7 +3,7 @@ const router  = express.Router();
 const { protect, optionalProtect } = require('../middlewares/authMiddleware');
 const { csrfProtection } = require('../middlewares/csrfProtection');
 const { adListLimiter } = require('../middlewares/rateLimiter');
-const { validateObjectIdParam } = require('../utils/securityValidation');
+const { validateObjectIdParam, validateAdIdOrNumberParam } = require('../utils/securityValidation');
 const { upload, processImage, MAX_UPLOAD_FILES } = require('../middlewares/uploadMiddleware');
 const {
     getAds, getAdById, createAd, updateAd,
@@ -19,7 +19,7 @@ router.get('/user', protect, getMyAds);
 router.get('/favorites', protect, getFavoriteAds);
 
 // Public
-router.get('/:id', adListLimiter, validateObjectIdParam('id'), optionalProtect, getAdById);
+router.get('/:id', adListLimiter, validateAdIdOrNumberParam('id'), optionalProtect, getAdById);
 
 // Protected
 router.post('/',          protect, csrfProtection, upload.array('images', MAX_UPLOAD_FILES), processImage, createAd);

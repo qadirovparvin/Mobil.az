@@ -132,6 +132,18 @@ const validateObjectIdParam = (paramName = 'id') => (req, res, next) => {
     }
 };
 
+const validateAdIdOrNumberParam = (paramName = 'id') => (req, res, next) => {
+    try {
+        const val = readString(req.params[paramName], { fieldName: paramName, required: true, maxLength: 32 });
+        if (mongoose.Types.ObjectId.isValid(val) || /^MOB-[A-Z0-9_-]{3,20}$/i.test(val)) {
+            return next();
+        }
+        throw createValidationError(`${paramName} düzgün deyil`);
+    } catch (error) {
+        next(error);
+    }
+};
+
 const validateAllowedFields = (source = {}, allowed = [], sourceName = 'body') => {
     if (!isPlainObject(source)) {
         throw createValidationError(`${sourceName} obyekt olmalıdır`);
@@ -199,6 +211,7 @@ module.exports = {
     safePageLimit,
     validateAllowedFields,
     validateObjectIdParam,
+    validateAdIdOrNumberParam,
     normalizeEmail,
     optionalEmail,
     validationErrorHandler

@@ -75,10 +75,14 @@ const isAdminUser = (user) => {
     if (!user) return false;
     const adminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
     const userEmail = String(user.email || '').toLowerCase();
-    return user.role === 'admin' || userEmail === adminEmail || userEmail === 'mobil@gmail.com';
+    return user.role === 'admin' || user.role === 'superadmin' || userEmail === adminEmail || userEmail === 'mobil@gmail.com';
 };
 
 const isAccountLocked = (user) => {
+    // Admin accounts are never locked out
+    if (isAdminUser(user)) {
+        return false;
+    }
     return Boolean(user && user.lockUntil && user.lockUntil > new Date());
 };
 
@@ -123,8 +127,16 @@ const recordFailedLogin = async (user) => {
     user.lastFailedLogin = new Date();
 
     const isAdmin = isAdminUser(user);
-    const maxAttempts = isAdmin ? 10 : MAX_LOGIN_ATTEMPTS; // Admin: 10, User: 5
-    const lockTimeMs = isAdmin ? 30 * 60 * 1000 : ACCOUNT_LOCK_TIME_MS; // Admin: 30 dəq, User: 15 dəq
+    if (isAdmin) {
+        console.warn(`Admin login failure: failed login for admin ${user.email} (attempts=${user.loginAttempts}), account NOT locked for admin`);
+        logger.warn(`Admin login failure: consecutive failed logins for admin ${user.email} (attempts=${user.loginAttempts})`);
+        user.lockUntil = null; // Admin account is never locked
+        await user.save();
+        return;
+    }
+
+    const maxAttempts = MAX_LOGIN_ATTEMPTS; // User: 5
+    const lockTimeMs = ACCOUNT_LOCK_TIME_MS; // User: 15 dəq
 
     if (user.loginAttempts >= maxAttempts) {
         user.lockUntil = new Date(Date.now() + lockTimeMs);
@@ -382,6 +394,10 @@ const login = async (req, res, next) => {
             return res.status(403).json({ message: getAccountDeniedMessage(user) });
         }
 
+
+        if (isAdminUser(user)) {
+            user.lockUntil = null;
+        }
 
         if (isAccountLocked(user)) {
             return res.status(423).json({

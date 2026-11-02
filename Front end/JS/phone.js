@@ -16,16 +16,17 @@ document.addEventListener("DOMContentLoaded", async function () {
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
     const DEFAULT_AD_IMAGE = "assets/images/default-ad.svg";
 
-    // Update title according to category
+    // Update title uniformly
     const titleEl = document.querySelector(".all-ads-title");
     if (titleEl) {
-        if (urlCat === 'tablet') {
-            titleEl.textContent = 'Planşet modelləri';
-        } else if (urlCat === 'headphone') {
-            titleEl.textContent = 'Qulaqlıq modelləri';
-        } else if (urlCat === 'accessory') {
-            titleEl.textContent = 'Telefon aksessuarları';
-        }
+        const catMap = {
+            tablet: 'Planşet modelləri',
+            headphone: 'Qulaqlıq modelləri',
+            accessory: 'Telefon aksessuarları',
+            phone: 'Telefon modelləri',
+            all: 'Bütün elanlar'
+        };
+        titleEl.textContent = catMap[urlCat] || 'Telefon modelləri';
     }
 
     function escapeHtml(value) {
@@ -139,6 +140,22 @@ document.addEventListener("DOMContentLoaded", async function () {
         `;
     }
 
+    function sortAds(adsArray, sortType) {
+        if (!Array.isArray(adsArray)) return [];
+        return adsArray.sort((a, b) => {
+            if (sortType === "price_desc" || sortType === "price-high") {
+                return Number(b.price || 0) - Number(a.price || 0);
+            } else if (sortType === "price_asc" || sortType === "price-low") {
+                return Number(a.price || 0) - Number(b.price || 0);
+            } else if (sortType === "date_asc" || sortType === "oldest") {
+                return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+            } else {
+                return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+            }
+        });
+    }
+    window.sortAdsList = sortAds;
+
     // Load More container setup
     let loadMoreContainer = document.getElementById("load-more-container");
     if (!loadMoreContainer) {
@@ -168,14 +185,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         page++;
         try {
+            const activeSort = params.get('sort') || params.get('sortBy') || 'newest';
+            const sortQuery = `&sort=${encodeURIComponent(activeSort)}&sortBy=${encodeURIComponent(activeSort)}`;
             let nextAds = [];
             let totalPages = 1;
             if (window.api && typeof window.api.get === 'function') {
-                const res = await window.api.get(`/ads?category=${cat}&page=${page}&limit=20`);
+                const res = await window.api.get(`/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
                 nextAds = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
                 totalPages = res.data?.totalPages || 1;
             } else {
-                const res = await fetch(`${API_BASE}/ads?category=${cat}&page=${page}&limit=20`);
+                const res = await fetch(`${API_BASE}/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
                 const data = await res.json();
                 nextAds = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
                 totalPages = data?.totalPages || 1;
@@ -219,14 +238,17 @@ document.addEventListener("DOMContentLoaded", async function () {
             container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Yüklənir...</div>';
         }
 
+        const activeSort = params.get('sort') || params.get('sortBy') || 'newest';
+        const sortQuery = `&sort=${encodeURIComponent(activeSort)}&sortBy=${encodeURIComponent(activeSort)}`;
+
         let ads = [];
         let totalPages = 1;
         if (window.api && typeof window.api.get === 'function') {
-            const res = await window.api.get(`/ads?category=${cat}&page=1&limit=20`);
+            const res = await window.api.get(`/ads?category=${cat}&page=1&limit=20${sortQuery}`);
             ads = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
             totalPages = res.data?.totalPages || 1;
         } else {
-            const res = await fetch(`${API_BASE}/ads?category=${cat}&page=1&limit=20`);
+            const res = await fetch(`${API_BASE}/ads?category=${cat}&page=1&limit=20${sortQuery}`);
             const data = await res.json();
             ads = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
             totalPages = data?.totalPages || 1;
@@ -235,12 +257,40 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (window.removeSkeletons) window.removeSkeletons(container);
 
         if (!ads || ads.length === 0) {
-            const catLabel = urlCat === 'tablet' ? 'planşet' : (urlCat === 'headphone' ? 'qulaqlıq' : (urlCat === 'accessory' ? 'aksesuar' : 'telefon'));
-            container.innerHTML = `<div class="cab-glass" style="grid-column: 1/-1; padding: 32px; text-align: center; color: var(--text-muted); border-radius: 16px;">Heç bir ${catLabel} elanı tapılmadı.</div>`;
+            container.innerHTML = '<div class="cab-glass" style="grid-column: 1/-1; padding: 32px; text-align: center; color: var(--text-muted); border-radius: 16px;">Heç bir elan tapılmadı.</div>';
             if (loadMoreContainer) loadMoreContainer.style.display = "none";
             return;
         }
 
+        // Apply numeric sort client-side as well
+        ads = sortAds(ads, activeSort);
+
+        container.style.display = 'grid';
+        container.innerHTML = ads.map(createCardMarkup).join('');
+
+        const sortingSelect = document.getElementById("sortingOptions");
+        if (sortingSelect) {
+            if (activeSort === "price_desc" || activeSort === "price-high") sortingSelect.value = "price-high";
+            else if (activeSort === "price_asc" || activeSort === "price-low") sortingSelect.value = "price-low";
+            else if (activeSort === "date" || activeSort === "date_desc" || activeSort === "newest") sortingSelect.value = "date";
+
+            sortingSelect.addEventListener("change", function () {
+                const chosen = sortingSelect.value;
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set("sort", chosen);
+                    url.searchParams.set("sortBy", chosen);
+                    window.history.replaceState({}, "", url.toString());
+                } catch (e) {}
+
+                if (typeof window.sortAds === "function") {
+                    window.sortAds(chosen);
+                } else {
+                    ads = sortAds(ads, chosen);
+                    container.innerHTML = ads.map(createCardMarkup).join('');
+                }
+            });
+        }
         container.innerHTML = ads.map(createCardMarkup).join('');
 
         if (ads.length >= 20 && totalPages > 1) {

@@ -1325,6 +1325,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    const mobileClose = document.getElementById("mobileFilterClose") || document.querySelector(".mobile-filter-close");
+    if (mobileClose && filterBody) {
+        mobileClose.addEventListener("click", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            filterBody.classList.remove("active");
+            filterBody.classList.remove("open");
+        });
+    }
+
     // ─── NEW AD BUTTON ────────────────────────────────────────────────────────
     const newAdBtn = document.getElementById("newAdBtn");
     if (newAdBtn) {
@@ -1354,30 +1364,60 @@ document.addEventListener("DOMContentLoaded", function () {
     const sortingSelect = document.getElementById("sortingOptions");
     if (sortingSelect) {
         sortingSelect.addEventListener("change", function () {
-            sortAds(sortingSelect.value);
+            const val = sortingSelect.value;
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.set("sort", val);
+                url.searchParams.set("sortBy", val);
+                window.history.replaceState({}, "", url.toString());
+            } catch (e) {}
+            sortAds(val);
         });
     }
     function sortAds(sortType) {
-        const adsContainer = document.querySelector(".all-ads-container");
+        const adsContainer = document.getElementById("phone-ads-container") || document.querySelector(".all-ads-container");
         if (!adsContainer)
             return;
         const ads = Array.from(adsContainer.children);
+
+        const getCardPrice = (card) => {
+            const rawAttr = card.getAttribute("data-price") || card.dataset?.price;
+            if (rawAttr !== undefined && rawAttr !== null && rawAttr !== "") {
+                const parsed = Number(rawAttr);
+                if (!isNaN(parsed)) return parsed;
+            }
+            const text = card.querySelector(".ad-price")?.textContent || "";
+            // Remove non-numeric characters (handles thousands separator like 1.200 AZN)
+            return Number(text.replace(/[^0-9]/g, "")) || 0;
+        };
+
+        const getCardDate = (card) => {
+            const rawAttr = card.getAttribute("data-date") || card.dataset?.date;
+            if (rawAttr) {
+                const d = new Date(rawAttr).getTime();
+                if (!isNaN(d)) return d;
+            }
+            return 0;
+        };
+
         ads.sort((a, b) => {
             const cardA = a.querySelector(".ad-card") || a;
             const cardB = b.querySelector(".ad-card") || b;
-            if (sortType === "date") {
-                const dateA = new Date(cardA.dataset.date || 0);
-                const dateB = new Date(cardB.dataset.date || 0);
-                return dateB.getTime() - dateA.getTime();
+            const priceA = getCardPrice(cardA);
+            const priceB = getCardPrice(cardB);
+            const dateA = getCardDate(cardA);
+            const dateB = getCardDate(cardB);
+
+            if (sortType === "date" || sortType === "date_desc" || sortType === "newest") {
+                return dateB - dateA;
             }
-            else if (sortType === "price-high") {
-                const priceA = parseInt((cardA.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
-                const priceB = parseInt((cardB.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+            else if (sortType === "date_asc" || sortType === "oldest") {
+                return dateA - dateB;
+            }
+            else if (sortType === "price-high" || sortType === "price_desc") {
                 return priceB - priceA;
             }
-            else if (sortType === "price-low") {
-                const priceA = parseInt((cardA.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
-                const priceB = parseInt((cardB.querySelector(".ad-price")?.textContent || "0").replace(/\s/g, ""));
+            else if (sortType === "price-low" || sortType === "price_asc") {
                 return priceA - priceB;
             }
             return 0;
@@ -1385,16 +1425,38 @@ document.addEventListener("DOMContentLoaded", function () {
         adsContainer.innerHTML = "";
         ads.forEach((ad) => adsContainer.appendChild(ad));
     }
+    window.sortAds = sortAds;
+
+    // ─── SOCIAL ICONS FONTAWESOME FALLBACK ─────────────────────────────────────
+    setTimeout(() => {
+        const testIcon = document.querySelector('.social.whatsapp i');
+        if (testIcon) {
+            const beforeContent = window.getComputedStyle(testIcon, ':before').content;
+            if (!beforeContent || beforeContent === 'none' || beforeContent === '""') {
+                const fallbacks = { whatsapp: 'WA', instagram: 'IG', tiktok: 'TT', youtube: 'YT' };
+                document.querySelectorAll('.social').forEach(link => {
+                    Object.keys(fallbacks).forEach(key => {
+                        if (link.classList.contains(key) && !link.textContent.trim()) {
+                            link.innerHTML = `<span style="font-size:12px;font-weight:700;letter-spacing:-0.5px;">${fallbacks[key]}</span>`;
+                        }
+                    });
+                });
+            }
+        }
+    }, 600);
 
     // ─── CATALOG DROPDOWN CLOSE ON OUTSIDE CLICK ─────────────────────────────
-    const catBtn = document.getElementById("catalogBtn") || document.querySelector(".catalog-button");
-    const catDd = document.getElementById("catalogDropdown") || document.querySelector(".catalog-dropdown");
+    const catBtn = document.getElementById("catalogBtn") || document.querySelector(".catalog-button, .catalog-btn, .btn-katalog");
+    const catDd = document.getElementById("catalogDropdown") || document.querySelector(".catalog-menu");
     if (catBtn && catDd) {
         catBtn.addEventListener("click", function (e) {
             e.stopPropagation();
             catDd.classList.toggle("hidden");
             catDd.classList.toggle("active");
             catDd.classList.toggle("open");
+            catBtn.style.display = 'inline-flex';
+            catBtn.style.visibility = 'visible';
+            catBtn.style.opacity = '1';
             if (!catDd.dataset.loaded) {
                 if (typeof window.loadCatalog === "function") {
                     window.loadCatalog();
@@ -1405,12 +1467,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     document.addEventListener("click", function (e) {
-        const dd = document.getElementById("catalogDropdown");
-        const btn = document.getElementById("catalogBtn");
+        const dd = document.getElementById("catalogDropdown") || document.querySelector(".catalog-menu");
+        const btn = document.getElementById("catalogBtn") || document.querySelector(".catalog-button, .catalog-btn, .btn-katalog");
         if (dd && !dd.contains(e.target) && (!btn || !btn.contains(e.target))) {
             dd.classList.add("hidden");
             dd.classList.remove("active");
             dd.classList.remove("open");
+        }
+        if (btn) {
+            btn.style.display = 'inline-flex';
+            btn.style.visibility = 'visible';
+            btn.style.opacity = '1';
         }
     });
 
@@ -1428,7 +1495,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         document.addEventListener("click", function (e) {
-            if (!headerRight.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+            if (window.innerWidth <= 768 && !headerRight.contains(e.target) && !hamburgerBtn.contains(e.target)) {
                 headerRight.classList.remove("open");
                 headerRight.classList.remove("active");
                 headerRight.classList.add("hidden");
@@ -1439,12 +1506,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         headerRight.querySelectorAll("a").forEach(function (link) {
             link.addEventListener("click", function () {
-                headerRight.classList.remove("open");
-                headerRight.classList.remove("active");
-                headerRight.classList.add("hidden");
-                hamburgerBtn.classList.remove("active");
-                hamburgerBtn.setAttribute("aria-expanded", "false");
+                if (window.innerWidth <= 768) {
+                    headerRight.classList.remove("open");
+                    headerRight.classList.remove("active");
+                    headerRight.classList.add("hidden");
+                    hamburgerBtn.classList.remove("active");
+                    hamburgerBtn.setAttribute("aria-expanded", "false");
+                }
             });
+        });
+
+        window.addEventListener("resize", function () {
+            if (window.innerWidth > 768) {
+                headerRight.classList.remove("hidden");
+                headerRight.classList.remove("open");
+            }
         });
     }
 
@@ -1552,5 +1628,126 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener('componentsLoaded', function () {
         initTheme();
     });
+
+    // ─── CATALOG & ADS FILTER LOGIC ──────────────────────────────────────────
+    function filterAds(category, brand, query) {
+        const catalog = document.getElementById('catalog') || 
+                        document.querySelector('.phone-grid') || 
+                        document.getElementById('phone-ads-container') || 
+                        document.querySelector('.all-ads-container');
+        
+        // Safety check: ensure container exists before operating
+        if (!catalog) return 0;
+
+        // Ensure catalog container display is always visible as grid
+        catalog.style.display = 'grid';
+
+        // Ensure Kataloq button and wrapper NEVER hide
+        const catalogBtns = document.querySelectorAll('#catalogBtn, .catalog-btn, .catalog-button, .btn-katalog');
+        catalogBtns.forEach(b => {
+            b.style.display = 'inline-flex';
+            b.style.visibility = 'visible';
+            b.style.opacity = '1';
+            const wrapper = b.closest('.catalog-wrapper, .catalog-dropdown');
+            if (wrapper) {
+                wrapper.style.display = 'inline-block';
+                wrapper.style.visibility = 'visible';
+                wrapper.style.opacity = '1';
+            }
+        });
+
+        const rawCat = (category || '').toString().trim().toLowerCase();
+        const catAliases = {
+            all: ['all', '', 'hamısı', 'hamisi'],
+            '': ['all', '', 'hamısı', 'hamisi'],
+            hamısı: ['all', '', 'hamısı', 'hamisi'],
+            hamisi: ['all', '', 'hamısı', 'hamisi'],
+            telefon: ['telefon', 'phone', 'telefonlar'],
+            phone: ['telefon', 'phone', 'telefonlar'],
+            tablet: ['planset', 'planşet', 'tablet', 'planşetlər'],
+            'planşet': ['planset', 'planşet', 'tablet', 'planşetlər'],
+            planset: ['planset', 'planşet', 'tablet', 'planşetlər'],
+            headphone: ['qulaqliq', 'qulaqlıq', 'headphone', 'qulaqcıqlar'],
+            'qulaqlıq': ['qulaqliq', 'qulaqlıq', 'headphone', 'qulaqcıqlar'],
+            qulaqliq: ['qulaqliq', 'qulaqlıq', 'headphone', 'qulaqcıqlar'],
+            accessory: ['aksesuar', 'aksessuar', 'accessory', 'telefon aksessuarları', 'saat', 'watch', 'aksesuarlar'],
+            'aksesuar': ['aksesuar', 'aksessuar', 'accessory', 'telefon aksessuarları', 'saat', 'watch', 'aksesuarlar'],
+            aksessuar: ['aksesuar', 'aksessuar', 'accessory', 'telefon aksessuarları', 'saat', 'watch', 'aksesuarlar']
+        };
+
+        const isAll = !rawCat || rawCat === 'all' || rawCat === 'hamısı' || rawCat === 'hamisi';
+        const targetCategories = isAll ? null : (catAliases[rawCat] || [rawCat]);
+
+        const adCards = catalog.querySelectorAll('.ad-card');
+        let visibleCount = 0;
+
+        adCards.forEach(card => {
+            let matches = true;
+            const cardCat = (card.getAttribute('data-category') || '').trim().toLowerCase();
+            const cardBrand = (card.getAttribute('data-brand') || '').trim().toLowerCase();
+            const cardTitle = (card.querySelector('.ad-title')?.textContent || '').toLowerCase();
+            const cardText = (card.textContent || '').toLowerCase();
+
+            // 1. Category check
+            if (targetCategories) {
+                if (!targetCategories.includes(cardCat)) {
+                    matches = false;
+                }
+            }
+
+            // 2. Brand check (e.g. Samsung, Apple, Xiaomi)
+            if (matches && brand && brand.toLowerCase() !== 'all' && brand !== '') {
+                const b = brand.toLowerCase().trim();
+                if (!cardBrand.includes(b) && !cardTitle.includes(b)) {
+                    matches = false;
+                }
+            }
+
+            // 3. Search query check
+            if (matches && query) {
+                const q = query.toLowerCase().trim();
+                if (!cardText.includes(q)) {
+                    matches = false;
+                }
+            }
+
+            const targetEl = card.closest('a') || card;
+            if (matches) {
+                targetEl.style.display = '';
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                targetEl.style.display = 'none';
+            }
+        });
+
+        console.log("Filtered ads count: " + visibleCount);
+
+        // Keep category buttons active state synchronized
+        if (category !== undefined) {
+            document.querySelectorAll('.filter-pill.category-button, .category-buttons button').forEach(btn => {
+                const val = (btn.getAttribute('data-value') || '').toLowerCase().trim();
+                if (isAll) {
+                    if (!val || val === 'all' || val === 'hamısı') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                } else if (val === rawCat || (catAliases[rawCat] && catAliases[rawCat].includes(val))) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        if (query !== undefined && typeof window.showSearchFeedback === 'function') {
+            window.showSearchFeedback(query, visibleCount);
+        }
+
+        return visibleCount;
+    }
+
+    window.filterAds = filterAds;
+    window.filterCatalogAds = filterAds;
+
+
 });
 

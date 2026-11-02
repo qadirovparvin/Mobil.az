@@ -10,30 +10,24 @@ var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes
     hostname.startsWith('10.') ||
     (typeof window !== 'undefined' && window.location && window.location.protocol === 'file:');
 
-function resolveDefaultApiUrl() {
-    if (!hostname) console.warn('config.js hostname undefined');
-    if (!isLocal) return 'https://api.mobilim.az/api';
-    if (hostname && !['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'].includes(hostname)) {
-        const proto = (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') ? 'https:' : 'http:';
-        return `${proto}//${hostname}:5000/api`;
-    }
-    return 'http://localhost:5000/api';
-}
+var backendHost = isLocal ? 'http://localhost:5000' : 'https://api.mobilim.az';
+var resolvedApi = isLocal ? 'http://localhost:5000/api' : 'https://api.mobilim.az/api';
 
-var resolvedApi = (typeof window !== 'undefined' && typeof window.API_URL === 'string' && window.API_URL.trim()) ? window.API_URL : (resolveDefaultApiUrl() || 'http://localhost:5000/api');
 if (typeof window !== 'undefined') {
+    window.BASE_URL = backendHost;
     window.API_URL = resolvedApi;
     window.API_BASE = resolvedApi;
     window.API_BASE_URL = resolvedApi;
 }
 if (typeof globalThis !== 'undefined') {
+    globalThis.BASE_URL = backendHost;
     globalThis.API_URL = resolvedApi;
     globalThis.API_BASE = resolvedApi;
     globalThis.API_BASE_URL = resolvedApi;
 }
 
 if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
-    const healthUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '') + '/api/health';
+    const healthUrl = `${backendHost}/api/health`;
     fetch(healthUrl, { method: 'GET' })
         .then(r => {
             if (!r.ok) console.warn('Backend health check returned status:', r.status);
@@ -322,10 +316,15 @@ function handleGenericApiError(status) {
 
         return originalFetch(input, nextInit).then(async (res) => {
             if (!res.ok && !init.silent) {
-                // Prevent duplicate toast - caller handles /auth/login and /boost errors
-                const isLoginRequest = String(input?.url || input).includes('/auth/login');
-                const isBoostRequest = String(input?.url || input).includes('/boost');
-                if ((res.status === 401 || res.status === 403) && !isLoginRequest && !isBoostRequest) {
+                // Prevent duplicate or unwanted toasts - caller handles /auth/login, /boost, background polls and refresh
+                const reqUrl = String(input?.url || input || '');
+                const isLoginRequest = reqUrl.includes('/auth/login');
+                const isBoostRequest = reqUrl.includes('/boost');
+                const isNotifUnread = reqUrl.includes('/notifications/unread-count');
+                const isRefreshCall = reqUrl.includes('/auth/refresh');
+                const isAdsCall = reqUrl.includes('/ads');
+
+                if ((res.status === 401 || res.status === 403) && !isLoginRequest && !isBoostRequest && !isNotifUnread && !isRefreshCall && !isAdsCall) {
                     try {
                         const clone = res.clone();
                         const data = await clone.json();

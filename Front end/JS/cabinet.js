@@ -1704,7 +1704,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(body)
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            if (!res.ok) {
+                const errMsg = Array.isArray(data.errors) && data.errors.length ? data.errors.join(' • ') : (data.message || `HTTP ${res.status}`);
+                throw new Error(errMsg);
+            }
             return data;
         }
 
@@ -1718,7 +1721,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(body)
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
+            if (!res.ok) {
+                const errMsg = Array.isArray(data.errors) && data.errors.length ? data.errors.join(' • ') : (data.message || `HTTP ${res.status}`);
+                throw new Error(errMsg);
+            }
             return data;
         }
 

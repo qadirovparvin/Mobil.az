@@ -739,6 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const loginPayload = { email: identifier, password, rememberMe };
                 const res = await fetch(`${window.API_URL}/auth/login`, {
+                    credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(loginPayload)
@@ -774,6 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             setLoading(verifyBtn, true);
                             try {
                                 const secondRes = await fetch(`${window.API_URL}/auth/login`, {
+                                    credentials: 'include',
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ ...loginPayload, otpCode, rememberMe })
@@ -890,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
                     password: pwd
                 };
-                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
                     const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');
@@ -931,7 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     phone:    document.getElementById('signupPhoneOptional')?.value.trim() || undefined,
                     password: pwd
                 };
-                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
                     const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');

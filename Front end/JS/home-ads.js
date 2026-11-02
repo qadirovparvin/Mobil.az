@@ -75,14 +75,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function mapCardCategory(category) {
-        const map = {
-            phone: "Telefon",
-            tablet: "Planşet",
-            headphone: "Qulaqlıq",
-            accessory: "Aksesuar"
-        };
-
-        return map[category] || category || "Telefon";
+        const val = String(category || '').trim().toLowerCase();
+        if (val === 'phone' || val === 'telefon') return 'Telefon';
+        if (val === 'tablet' || val === 'planşet' || val === 'planset') return 'Planşet';
+        if (val === 'headphone' || val === 'qulaqlıq' || val === 'qulaqliq') return 'Qulaqlıq';
+        if (val === 'accessory' || val === 'aksesuar' || val === 'aksessuar' || val === 'saat' || val === 'watch') return 'Aksesuar';
+        return category || 'Telefon';
     }
 
     function mapCondition(condition) {
@@ -164,8 +162,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function renderEmpty(container, message) {
+        if (!container) return;
+        container.style.display = 'grid';
         container.innerHTML = `
-            <div class="cab-glass" style="padding:24px;text-align:center;color:var(--text-muted);border-radius:18px;">
+            <div class="cab-glass" style="grid-column: 1/-1; padding:24px;text-align:center;color:var(--text-muted);border-radius:18px;">
                 ${escapeHtml(message)}
             </div>
         `;
@@ -204,7 +204,9 @@ document.addEventListener("DOMContentLoaded", function () {
             let apiUrl = new URL(`${API_BASE}/ads`);
             apiUrl.searchParams.set('limit', '20');
             apiUrl.searchParams.set('page', String(currentPage));
-            apiUrl.searchParams.set('sortBy', params.get('sortBy') || params.get('sort') || 'newest');
+            const sortParam = params.get('sort') || params.get('sortBy') || document.getElementById('sortingOptions')?.value || 'newest';
+            apiUrl.searchParams.set('sortBy', sortParam);
+            apiUrl.searchParams.set('sort', sortParam);
             
             if (sellerParam) {
                 if (['store', 'personal', 'private'].includes(sellerParam)) {
@@ -250,6 +252,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 vipContainer.innerHTML = vipAds.length ? vipAds.map(createCardMarkup).join("") : "";
                 attachImageFallbacks(vipContainer);
                 if (!vipAds.length) renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.");
+
+                const showAllVipBtn = document.getElementById('show-all-vip') || document.querySelector('.show-all-btn') || document.querySelector('.all-view');
+                if (showAllVipBtn) {
+                    if (!vipAds.length) {
+                        showAllVipBtn.textContent = 'Elanını VIP et';
+                        showAllVipBtn.onclick = () => { window.location.href = 'elan-yerlesdir.html?vip=1'; };
+                    } else {
+                        showAllVipBtn.textContent = 'Hamısını göstər';
+                        showAllVipBtn.onclick = () => {
+                            if (typeof window.searchAdsFromAPI === 'function') {
+                                window.searchAdsFromAPI({ promotionType: 'VIP' });
+                            }
+                            document.querySelector('.catalog-section, .all-ads-section')?.scrollIntoView({ behavior: 'smooth' });
+                        };
+                    }
+                }
                 
                 if (window.removeSkeletons) window.removeSkeletons(allAdsContainer);
                 allAdsContainer.innerHTML = "";
@@ -262,6 +280,17 @@ document.addEventListener("DOMContentLoaded", function () {
             } else {
                 allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
                 attachImageFallbacks(allAdsContainer);
+
+                if (typeof window.sortAds === 'function') {
+                    window.sortAds(sortParam);
+                }
+
+                const sortingSelect = document.getElementById("sortingOptions");
+                if (sortingSelect) {
+                    if (sortParam === "price_desc" || sortParam === "price-high") sortingSelect.value = "price-high";
+                    else if (sortParam === "price_asc" || sortParam === "price-low") sortingSelect.value = "price-low";
+                    else if (sortParam === "date" || sortParam === "date_desc" || sortParam === "newest") sortingSelect.value = "date";
+                }
             }
 
             // Show/hide load more button
@@ -274,11 +303,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
 
+            // Ensure Kataloq button remains visible
+            const catBtns = document.querySelectorAll('#catalogBtn, .catalog-btn, .catalog-button, .btn-katalog');
+            catBtns.forEach(btn => {
+                btn.style.display = 'inline-flex';
+                btn.style.visibility = 'visible';
+                btn.style.opacity = '1';
+            });
+
             if (window.initializeFavoriteButtons) window.initializeFavoriteButtons();
 
             if (window.restoreAndApplyFilters) {
                 window.restoreAndApplyFilters(false);
             }
+
+            return { count: ads.length, ads };
         } catch (error) {
             if (isInitial) {
                 renderEmpty(vipContainer, "VIP elanlar yüklənmədi.");
@@ -310,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         
-        await fetchAndAppendAds(true);
+        return await fetchAndAppendAds(true);
     };
 
 

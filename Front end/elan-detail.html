@@ -595,6 +595,28 @@
       letter-spacing: -2px;
     }
 
+    .no-reviews-title {
+      font-size: 14px !important;
+      color: #9ca3af !important;
+      font-weight: 400 !important;
+      text-transform: none !important;
+    }
+
+    .seller-reviews .empty-state,
+    .reviews-section .empty-state,
+    .no-reviews-empty {
+      padding: 16px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .rating-stars-lg.empty-stars {
+      color: #9ca3af !important;
+      font-size: 16px !important;
+      margin: 4px 0 6px !important;
+    }
+
     .rating-stars-lg { color: #ffc107; font-size: 18px; margin: 4px 0 5px; }
     .rating-count { font-size: 12px; color: var(--text-secondary); }
     .rating-bars { flex: 1; }
@@ -1015,7 +1037,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
       </div>
 
       <!-- ── Reviews Section (main content) ── -->
-      <div class="reviews-section">
+      <div class="reviews-section seller-reviews">
         <h3 class="section-head"><i class="fas fa-star"></i> <span data-translate="det-reviews-title">Satıcı rəyləri</span></h3>
         <p class="reviews-seller-note" style="color:var(--text-secondary, #8e8e93);font-size:13.5px;margin:-6px 0 16px 0;">Bu satıcının bütün rəyləri</p>
 
@@ -1034,7 +1056,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
           </div>
         </div>
 
-        <div class="no-reviews-empty" style="padding: 24px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 14px;">Hələ rəy yoxdur</div>
+        <div class="no-reviews-empty empty-state" style="padding: 16px; text-align: center; color: #6b7280; font-size: 14px;"><span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
 
         <!-- Write a Review -->
         <div class="write-review-main">
@@ -1056,7 +1078,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
       <!-- Ad ID bar -->
       <div class="ad-id-bar">
-        <span><span data-translate="det-ad-no">Elan №:</span> <span>APH-2026-04872</span></span>
+        <span><span data-translate="det-ad-no">Elan №:</span> <span>MOB-000000</span></span>
         <span><span data-translate="det-posted">Yerləşdirildi:</span> <span>10 Apr 2026</span></span>
         <span><span data-translate="det-updated">Yeniləndi:</span> <span>Bugün, 14:32</span></span>
       </div>
@@ -1130,7 +1152,7 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
 
           <!-- Mini reviews -->
           <div class="mini-reviews">
-            <div class="no-reviews-empty" style="padding: 12px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 13px;">Hələ rəy yoxdur</div>
+            <div class="no-reviews-empty empty-state" style="padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;"><span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
           </div>
         </div>
 
@@ -1167,7 +1189,43 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
   </section>
 
   <!-- ══════════════════ FOOTER ══════════════════ -->
-    <div id="footer-placeholder"></div>
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-column">
+        <h3><span class="useful-links" data-translate="useful-links">Faydalı Linklər</span></h3>
+        <ul>
+          <li><a href="faq.html"><span class="faq" data-translate="faq">Tez-tez verilən suallar</span></a></li>
+          <li><a href="rules.html"><span class="rules-safety" data-translate="rules-safety">Qaydalar və Təhlükəsizlik</span></a></li>
+          <li><a href="rules.html#posting-rules"><span class="posting-rules" data-translate="posting-rules">Elan yerləşdirmə qaydaları</span></a></li>
+          <li><a href="privacy.html"><span class="privacy-policy" data-translate="privacy-policy">Məxfilik siyasəti</span></a></li>
+        </ul>
+      </div>
+      <div class="footer-column" id="footer-contact">
+        <h3 class="contact" data-translate="contact">Əlaqə</h3>
+        <ul>
+          <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
+          <li><a href="mailto:info@mobilim.az"><i class="fas fa-envelope"></i> info@mobilim.az</a></li>
+        </ul>
+        <div class="social-icons">
+          <a href="https://wa.me/994703638808" target="_blank" rel="noopener noreferrer" class="social whatsapp" title="WhatsApp" aria-label="WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+          </a>
+          <a href="https://instagram.com/mobilim.az" target="_blank" rel="noopener noreferrer" class="social instagram" title="Instagram" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="https://tiktok.com/@mobilim.az" target="_blank" rel="noopener noreferrer" class="social tiktok" title="TikTok" aria-label="TikTok">
+            <i class="fab fa-tiktok"></i>
+          </a>
+          <a href="https://youtube.com/@mobilim.az" target="_blank" rel="noopener noreferrer" class="social youtube" title="YouTube" aria-label="YouTube">
+            <i class="fab fa-youtube"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Mobilim.az. Bütün hüquqlar qorunur.</p>
+    </div>
+  </footer>
 
   <!-- Toast notification -->
   <div class="toast" id="toast">

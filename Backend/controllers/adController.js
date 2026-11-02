@@ -62,7 +62,7 @@ const getAds = async (req, res, next) => {
             minPrice, maxPrice, storage, memory, ram, color,
             screen, battery, nfc, waterproof, fingerprint,
             expandable, delivery, seller, sellerType, promotionType,
-            author, sort: querySort, sortBy = 'newest',
+            author, sort: querySort, sortBy,
             page = 1, limit = 20
         } = req.query;
 
@@ -83,7 +83,7 @@ const getAds = async (req, res, next) => {
             ];
         }
 
-        if (category && category !== 'any' && category !== 'both') {
+        if (category && category !== 'any' && category !== 'both' && category !== 'all' && category.toLowerCase() !== 'hamısı' && category.toLowerCase() !== 'hamisi') {
             const catVal = readString(category, { fieldName: 'category', maxLength: 80 });
             const catMap = {
                 phone: '^(Telefon|Phone)$',
@@ -93,8 +93,8 @@ const getAds = async (req, res, next) => {
                 planset: '^(Planşet|Tablet|Planset)$',
                 headphone: '^(Qulaqlıq|Headphone|Qulaqliq)$',
                 'qulaqlıq': '^(Qulaqlıq|Headphone|Qulaqliq)$',
-                accessory: '^(Aksesuar|Accessory)$',
-                aksesuar: '^(Aksesuar|Accessory)$'
+                accessory: '^(Aksesuar|Accessory|Saat)$',
+                aksesuar: '^(Aksesuar|Accessory|Saat)$'
             };
             const mappedPattern = catMap[catVal.toLowerCase()];
             if (mappedPattern) {
@@ -208,15 +208,21 @@ const getAds = async (req, res, next) => {
             filter['specs.features.fingerprint'] = true;
         }
 
-        const sortParam = querySort || sortBy || 'newest';
-        const sortMap = {
-            newest:      { createdAt: -1 },
-            oldest:      { createdAt:  1 },
-            price_asc:   { price:      1 },
-            price_desc:  { price:     -1 },
-            popular:     { views:     -1 }
-        };
-        const sort = sortMap[sortParam] || sortMap.newest;
+        const sortParam = (querySort || sortBy || req.query.sort || req.query.sortBy || 'newest').toString().trim().toLowerCase();
+        let sort = {};
+        if (sortParam === 'price_desc' || sortParam === 'price-high' || sortParam === 'price_high') {
+            sort = { price: -1 };
+        } else if (sortParam === 'price_asc' || sortParam === 'price-low' || sortParam === 'price_low') {
+            sort = { price: 1 };
+        } else if (sortParam === 'date_desc' || sortParam === 'date' || sortParam === 'newest') {
+            sort = { createdAt: -1 };
+        } else if (sortParam === 'date_asc' || sortParam === 'oldest') {
+            sort = { createdAt: 1 };
+        } else if (sortParam === 'popular') {
+            sort = { views: -1 };
+        } else {
+            sort = { createdAt: -1 }; // default newest
+        }
 
         const isVIPQuery = promotionType === 'VIP' && normalizedPage === 1 && !hasTextSearch;
         let cacheKey = null;
@@ -274,12 +280,25 @@ const getAds = async (req, res, next) => {
 // @access  Public
 const getAdById = async (req, res, next) => {
     try {
-        const ad = await Ad.findOne({
-            _id: req.params.id,
-            status: { $ne: DELETED_AD_STATUS }
-        })
-            .populate('author', 'name lastName avatar phone createdAt')
-            .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+        const idParam = String(req.params.id || '').trim();
+        const baseQuery = { status: { $ne: DELETED_AD_STATUS } };
+        let ad = null;
+        if (mongoose.Types.ObjectId.isValid(idParam)) {
+            ad = await Ad.findOne({
+                ...baseQuery,
+                _id: idParam
+            })
+                .populate('author', 'name lastName avatar phone createdAt')
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+        }
+        if (!ad) {
+            ad = await Ad.findOne({
+                ...baseQuery,
+                adNumber: idParam.toUpperCase()
+            })
+                .populate('author', 'name lastName avatar phone createdAt')
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+        }
 
         if (!ad) {
             return res.status(404).json({ message: 'Elan tapılmadı' });
@@ -392,7 +411,19 @@ const createAd = async (req, res, next) => {
             if (cleanRam && !cleanSpecs.ram) cleanSpecs.ram = cleanRam;
         }
 
+        let adNumber = req.body.adNumber;
+        if (!adNumber) {
+            const count = await Ad.countDocuments();
+            let candidate = `MOB-${(count + 1).toString().padStart(6, '0')}`;
+            const exists = await Ad.exists({ adNumber: candidate });
+            if (exists) {
+                candidate = `MOB-${Date.now().toString().slice(-6)}${Math.random().toString(36).substring(2, 4).toUpperCase()}`;
+            }
+            adNumber = candidate;
+        }
+
         const ad = await Ad.create({
+            adNumber,
             author: req.user._id,
             category: cleanCategory,
             brand: cleanBrand,

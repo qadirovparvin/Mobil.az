@@ -59,7 +59,8 @@
             global.clearAuthSession();
         }
         const path = global.location && global.location.pathname ? global.location.pathname : '';
-        if (global.location && !/\/(login|signup)\.html$/i.test(path)) {
+        const isProtectedPage = /\/(cabinet|elan-yerlesdir|admin)\.html$/i.test(path);
+        if (global.location && isProtectedPage && !/\/(login|signup)\.html$/i.test(path)) {
             global.location.href = 'login.html?expired=1';
         }
     }
@@ -82,6 +83,9 @@
                     sessionStorage.setItem('user', typeof user === 'string' ? user : JSON.stringify(user));
                     sessionStorage.setItem('mobilaz_current_user', typeof user === 'string' ? user : JSON.stringify(user));
                 }
+            }
+            if (typeof window !== 'undefined' && typeof window.updateHeader === 'function') {
+                try { window.updateHeader(); } catch (e) {}
             }
         } catch (e) {}
     }
@@ -122,23 +126,37 @@
         let data;
 
         if (axiosLib && typeof axiosLib.post === 'function') {
-            const extraHeaders = {};
-            if (apiInstance && apiInstance.defaults && apiInstance.defaults.headers && apiInstance.defaults.headers.common) {
-                if (apiInstance.defaults.headers.common['Cookie']) {
-                    extraHeaders['Cookie'] = apiInstance.defaults.headers.common['Cookie'];
-                }
-                if (apiInstance.defaults.headers.common['Origin']) {
-                    extraHeaders['Origin'] = apiInstance.defaults.headers.common['Origin'];
+            try {
+                const res = await axiosLib.post(refreshUrl, {}, {
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                data = res.data;
+            } catch (axiosErr) {
+                // Fallback to native fetch with credentials: 'include'
+                if (typeof global.fetch === 'function' || typeof fetch === 'function') {
+                    const fetchFn = global.originalFetch || global.fetch || fetch;
+                    const res = await fetchFn(refreshUrl, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!res.ok) {
+                        const errBody = await res.json().catch(() => ({}));
+                        const err = new Error(errBody.message || 'Refresh token failed');
+                        err.status = res.status;
+                        throw err;
+                    }
+                    data = await res.json();
+                } else {
+                    throw axiosErr;
                 }
             }
-            const res = await axiosLib.post(refreshUrl, {}, {
-                withCredentials: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...extraHeaders
-                }
-            });
-            data = res.data;
         } else if (typeof global.fetch === 'function' || typeof fetch === 'function') {
             const fetchFn = global.originalFetch || global.fetch || fetch;
             const res = await fetchFn(refreshUrl, {
@@ -290,6 +308,11 @@
             init = init || {};
             const url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
 
+            // Ensure credentials are included so cookies pass on all requests
+            if (!init.credentials) {
+                init.credentials = 'include';
+            }
+
             // Don't intercept refresh itself or non-API calls
             const isRefreshCall = url.includes('/auth/refresh') || url.includes('/auth/refresh-token');
             const isAuthCall = url.includes('/auth/login') || url.includes('/auth/register') || isRefreshCall;
@@ -297,11 +320,6 @@
 
             if (!isApi || isAuthCall || init._isRetry) {
                 return nativeFetch(input, init);
-            }
-
-            // Ensure credentials are included so cookies pass
-            if (!init.credentials) {
-                init.credentials = 'include';
             }
 
             const response = await nativeFetch(input, init);

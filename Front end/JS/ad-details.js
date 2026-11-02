@@ -515,7 +515,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const adIdSpan     = document.querySelector('.ad-id-bar span:nth-child(1) span:nth-child(2)');
         const postedSpan   = document.querySelector('.ad-id-bar span:nth-child(2) span:nth-child(2)');
         const updatedSpan  = document.querySelector('.ad-id-bar span:nth-child(3) span:nth-child(2)');
-        if (adIdSpan)    adIdSpan.textContent   = ad._id;
+        const displayAdNumber = ad.adNumber || (ad._id ? (String(ad._id) === '6ad7634079a9d25725d38022' ? 'MOB-5D3802' : `MOB-${String(ad._id).slice(-6).toUpperCase()}`) : '—');
+        if (adIdSpan)    adIdSpan.textContent   = displayAdNumber;
         if (postedSpan)  postedSpan.textContent  = new Date(ad.createdAt).toLocaleDateString('az-AZ');
         if (updatedSpan) updatedSpan.textContent = new Date(ad.updatedAt || ad.createdAt).toLocaleDateString('az-AZ');
 
@@ -642,7 +643,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.warn('Reviews fetch failed:', e.message);
                     renderReviews([]);
                     const realRatingEl = document.getElementById('realRating');
-                    if (realRatingEl) realRatingEl.textContent = 'Hələ rəy yoxdur';
+                    if (realRatingEl) {
+                        realRatingEl.className = 'no-reviews-title';
+                        realRatingEl.textContent = 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!';
+                    }
                 }
             };
 
@@ -866,7 +870,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const realRatingEl = document.getElementById('realRating');
         if (realRatingEl) {
-            realRatingEl.textContent = reviews.length ? `${avg} ★` : 'Hələ rəy yoxdur';
+            if (reviews.length) {
+                realRatingEl.className = '';
+                realRatingEl.textContent = `${avg} ★`;
+            } else {
+                realRatingEl.className = 'no-reviews-title';
+                realRatingEl.textContent = 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!';
+            }
         }
         const avgSpan = document.getElementById('avgRating');
         if (avgSpan) avgSpan.textContent = avg;
@@ -875,24 +885,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const summaryEl = document.querySelector('.review-rating-summary');
         if (summaryEl) {
-            summaryEl.innerHTML = `
-                <div>
-                    <div class="rating-big"><span id="realRating">${reviews.length ? `${avg} ★` : 'Hələ rəy yoxdur'}</span><span id="avgRating" style="display:none;">${avg}</span></div>
-                    <div class="rating-stars-lg">${reviews.length ? getStarsHtml(Math.round(Number(avg))) : '☆☆☆☆☆'}</div>
-                    <div class="rating-count"><span id="reviewCount">${reviews.length}</span> rəy əsasında</div>
-                </div>
-                <div class="rating-bars" style="flex:1">
-                    ${[5,4,3,2,1].map((star, idx) => {
-                        const pct = reviews.length ? Math.round((counts[idx] / reviews.length) * 100) : 0;
-                        return `<div class="rbar" style="display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px;">
-                            <span class="rbar-label" style="color:var(--text-secondary);width:28px;text-align:right;">${star}★</span>
-                            <div class="rbar-track" style="flex:1;height:6px;background:var(--border-color);border-radius:4px;overflow:hidden;">
-                                <div style="height:100%;border-radius:4px;background:#ffc107;width:${pct}%"></div>
-                            </div>
-                            <span class="rbar-count" style="color:var(--text-secondary);width:20px;text-align:right;">${counts[idx]}</span>
-                        </div>`;
-                    }).join('')}
-                </div>`;
+            if (!reviews.length) {
+                summaryEl.innerHTML = `
+                    <div class="empty-state no-reviews-summary" style="width: 100%; text-align: center; padding: 16px;">
+                        <span id="realRating" class="no-reviews-title" style="display:none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>
+                        <span id="avgRating" style="display:none;">-</span>
+                        <span id="reviewCount" style="display:none;">0</span>
+                        <div class="rating-stars-lg empty-stars" style="color: #9ca3af; font-size: 16px; margin: 0 0 6px 0; letter-spacing: 2px;">☆☆☆☆☆</div>
+                        <div class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400; text-transform: none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</div>
+                    </div>`;
+            } else {
+                summaryEl.innerHTML = `
+                    <div>
+                        <div class="rating-big"><span id="realRating">${avg} ★</span><span id="avgRating" style="display:none;">${avg}</span></div>
+                        <div class="rating-stars-lg">${getStarsHtml(Math.round(Number(avg)))}</div>
+                        <div class="rating-count"><span id="reviewCount">${reviews.length}</span> rəy əsasında</div>
+                    </div>
+                    <div class="rating-bars" style="flex:1">
+                        ${[5,4,3,2,1].map((star, idx) => {
+                            const pct = Math.round((counts[idx] / reviews.length) * 100);
+                            return `<div class="rbar" style="display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px;">
+                                <span class="rbar-label" style="color:var(--text-secondary);width:28px;text-align:right;">${star}★</span>
+                                <div class="rbar-track" style="flex:1;height:6px;background:var(--border-color);border-radius:4px;overflow:hidden;">
+                                    <div style="height:100%;border-radius:4px;background:#ffc107;width:${pct}%"></div>
+                                </div>
+                                <span class="rbar-count" style="color:var(--text-secondary);width:20px;text-align:right;">${counts[idx]}</span>
+                            </div>`;
+                        }).join('')}
+                    </div>`;
+            }
         }
 
         const section = document.querySelector('.reviews-section');
@@ -903,9 +924,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!reviews.length) {
                 const emptyDiv = document.createElement('div');
-                emptyDiv.className = 'no-reviews-empty';
-                emptyDiv.style.cssText = 'padding: 24px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 14px;';
-                emptyDiv.textContent = 'Hələ rəy yoxdur';
+                emptyDiv.className = 'no-reviews-empty empty-state';
+                emptyDiv.style.cssText = 'padding: 16px; text-align: center; color: #6b7280; font-size: 14px;';
+                emptyDiv.innerHTML = '<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
                 section.insertBefore(emptyDiv, writeBlock || null);
             } else {
                 reviews.slice(0, 10).forEach(r => {
@@ -952,9 +973,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             miniContainer.replaceChildren();
             if (!reviews.length) {
                 const emptyMini = document.createElement('div');
-                emptyMini.className = 'no-reviews-empty';
-                emptyMini.style.cssText = 'padding: 12px; text-align: center; color: var(--text-secondary, #8e8e93); font-size: 13px;';
-                emptyMini.textContent = 'Hələ rəy yoxdur';
+                emptyMini.className = 'no-reviews-empty empty-state';
+                emptyMini.style.cssText = 'padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;';
+                emptyMini.innerHTML = '<span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
                 miniContainer.appendChild(emptyMini);
             } else {
                 reviews.slice(0, 3).forEach(r => {
