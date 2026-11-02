@@ -1,5 +1,5 @@
 /**
- * Mobil.az — Database Seed Script
+ * Mobilim.az — Database Seed Script
  * Run: npm run seed
  *
  * Creates:
@@ -68,7 +68,7 @@ const seedDatabase = async () => {
     const buyer = await User.create({
         name: 'Əli',
         lastName: 'Həsənov',
-        email: 'buyer@mobil.az',
+        email: 'buyer@mobilim.az',
         password: await hash('Test1234!'),
         phone: '+994501234567',
         role: 'user',
@@ -80,7 +80,7 @@ const seedDatabase = async () => {
     const seller = await User.create({
         name: 'Rauf',
         lastName: 'Məmmədov',
-        email: 'seller@mobil.az',
+        email: 'seller@mobilim.az',
         password: await hash('Test1234!'),
         phone: '+994552345678',
         role: 'user',
@@ -269,7 +269,7 @@ const seedDatabase = async () => {
     await Promise.all([
         Notification.create({
             user: seller._id, type: 'system',
-            title: 'Mobil.az-a xoş gəldiniz! 🎉',
+            title: 'Mobilim.az-a xoş gəldiniz! 🎉',
             body: 'Hesabınız uğurla yaradıldı.',
             link: '/cabinet.html', isRead: true, createdAt: daysAgo(30)
         }),
@@ -299,7 +299,7 @@ const seedDatabase = async () => {
         }),
         Notification.create({
             user: buyer._id, type: 'system',
-            title: 'Mobil.az-a xoş gəldiniz! 🎉',
+            title: 'Mobilim.az-a xoş gəldiniz! 🎉',
             body: 'Hesabınız uğurla yaradıldı. İlk elanınızı əlavə edin!',
             link: '/elan-yerlesdir.html', isRead: true, createdAt: daysAgo(10)
         }),
@@ -362,8 +362,8 @@ const seedDatabase = async () => {
     console.log('\n✨ Seed completed successfully!');
     console.log('━'.repeat(50));
     console.log('🔑 Login credentials:');
-    console.log('   Buyer:  buyer@mobil.az  / Test1234!');
-    console.log('   Seller: seller@mobil.az / Test1234!');
+    console.log('   Buyer:  buyer@mobilim.az  / Test1234!');
+    console.log('   Seller: seller@mobilim.az / Test1234!');
     console.log('━'.repeat(50));
     console.log(`📊 Data summary:`);
     console.log(`   Users:         2`);

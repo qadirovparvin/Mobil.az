@@ -1,7 +1,7 @@
 "use strict";
 
 /* ================================================================
-   admin.js  —  Mobil.az Admin Dashboard
+   admin.js  —  Mobilim.az Admin Dashboard
    All API calls go to /api/admin/* with Bearer token from localStorage.
    Routes are protected server-side by protect + adminOnly middleware.
    ================================================================ */
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const menuName  = document.getElementById('menuAdminName');
         const menuEmail = document.getElementById('menuAdminEmail');
         if (menuName)  menuName.textContent = name;
-        if (menuEmail) menuEmail.textContent = user.email || 'admin@mobil.az';
+        if (menuEmail) menuEmail.textContent = user.email || 'admin@mobilim.az';
     }
 
     /* ── Verify admin on server ─────────────────────────────────── */

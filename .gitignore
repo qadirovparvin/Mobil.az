@@ -1,36 +1,14 @@
 node_modules/
-dist/
-build/
-.DS_Store
-Thumbs.db
-*.log
-
-# Environment files
 .env
-.env.*
-!.env.example
-
-# Project-specific secrets and generated content
-Backend/.env
-Backend/node_modules/
-Back end/node_modules/
-Front end/node_modules/
-Backend/uploads/
-Backend/logs/
-
-# Editor files
+.tmp/
+logs/
+uploads/
+private_uploads/
+*.log
 .vscode/
-.idea/
-
-# Scratch and migration scripts
-*.py
-*.txt
+.agents/
+.tmp/
 scratch/
-updateAuth*.js
+test-results/
+playwright-report/
 Frontend/
-Front end/diff*.txt
-Front end/fix_*
-Front end/find_classes.js
-Front end/inject_theme.py
-Front end/test.js
-Backend/fix_airyphone.js

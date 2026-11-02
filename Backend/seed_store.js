@@ -30,7 +30,7 @@ async function seed() {
 
   // 2. Köhnə mağazanı və əlaqəli elanları təmizlə
   const existingStores = await Store.find({
-    $or: [{ owner: owner._id }, { storeName: 'Mobil.az Rəsmi Mağaza' }, { storeName: 'Mağaza' }]
+    $or: [{ owner: owner._id }, { storeName: 'Mobilim.az Rəsmi Mağaza' }, { storeName: 'Mobil.az Rəsmi Mağaza' }, { storeName: 'Mağaza' }]
   });
   const existingStoreIds = existingStores.map(s => s._id);
   if (existingStoreIds.length > 0) {
@@ -42,7 +42,7 @@ async function seed() {
   // 3. Yeni PRO rəsmi mağaza yarat
   const store = await Store.create({
     owner: owner._id,
-    storeName: 'Mobil.az Rəsmi Mağaza',
+    storeName: 'Mobilim.az Rəsmi Mağaza',
     description: 'Orijinal telefon və aksesuarlar - 5 il rəsmi zəmanət, 1 saat ərzində cavab, Bakı üzrə operativ çatdırılma',
     logoUrl: 'assets/images/default-avatar.svg',
     coverUrl: 'assets/images/default-cover.svg',
@@ -57,14 +57,14 @@ async function seed() {
     rating: 4.9,
     reviewCount: 127,
     businessDetails: {
-      legalName: 'Mobil.az MMC',
+      legalName: 'Mobilim.az MMC',
       businessType: 'Pərakəndə Satış'
     },
     socialLinks: {
-      instagram: 'https://instagram.com/mobil.az',
-      facebook: 'https://facebook.com/mobil.az',
+      instagram: 'https://instagram.com/mobilim.az',
+      facebook: 'https://facebook.com/mobilim.az',
       whatsapp: 'https://wa.me/994501234567',
-      website: 'https://mobil.az'
+      website: 'https://mobilim.az'
     }
   });
   console.log('Mağaza yaradıldı:', store.storeName, store._id);

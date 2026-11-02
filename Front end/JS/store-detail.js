@@ -461,7 +461,7 @@ async function loadStorePage(storeId) {
                 contactNumber: "+994 50 000 00 00",
                 workingHours: "Hər gün 09:00 - 20:00",
                 voen: "1234567890",
-                businessDetails: { legalName: "Mobil.az Rəsmi Partnyor" },
+                businessDetails: { legalName: "Mobilim.az Rəsmi Partnyor" },
                 createdAt: new Date().toISOString()
             };
         }

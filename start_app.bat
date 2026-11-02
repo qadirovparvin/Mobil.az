@@ -1,9 +1,9 @@
 @echo off
-title Mobil.az Launcher
+title Mobilim.az Launcher
 color 0A
 
 echo ============================================
-echo   Mobil.az - Starting up...
+echo   Mobilim.az - Starting up...
 echo ============================================
 echo.
 
@@ -19,7 +19,7 @@ echo [2/3] Checking backend readiness...
 node Backend/ensure_backend.js
 
 echo.
-echo [3/3] Opening Mobil.az in your browser...
+echo [3/3] Opening Mobilim.az in your browser...
 start "" "%~dp0Front end\index.html"
 
 echo.

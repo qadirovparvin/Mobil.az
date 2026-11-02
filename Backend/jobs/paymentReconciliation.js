@@ -6,7 +6,7 @@
  * - Queries Payriff status via payriffProvider.getOrderStatus / getStatus
  * - If approved/paid -> completes payment via walletController.completeTopUpPayment
  * - If failed/rejected/cancelled -> marks session failed
- * - If pending > 30 minutes -> fails with timeout
+ * - If status check errors or status is unknown/pending -> keeps pending and retries
  * - Reconciles stuck cash-out reserves if applicable
  * - In-memory Set prevents duplicate concurrent checks for the same paymentId
  * - MongoDB withJobLock prevents multiple instances from running concurrently
@@ -27,15 +27,19 @@ const reconcilePendingPayments = async () => {
         let count = 0;
         const now = Date.now();
         const fiveMinAgo = new Date(now - 5 * 60 * 1000);
-        const thirtyMinAgo = new Date(now - 30 * 60 * 1000);
 
         try {
-            const pendingSessions = await PaymentSession.find({
-                status: 'pending',
-                createdAt: { $lt: fiveMinAgo }
+            const stuckThreshold = new Date(Date.now() - 10 * 60 * 1000); // 10 dəq
+            const query = PaymentSession.find({
+                status: { $in: ['pending', 'processing'] },
+                $or: [
+                    { status: 'pending' },
+                    { status: 'processing', updatedAt: { $lt: stuckThreshold } }
+                ]
             });
+            const sessions = typeof query?.limit === 'function' ? await query.limit(50) : await query;
 
-            for (const session of pendingSessions) {
+            for (const session of sessions) {
                 const paymentId = session.paymentId;
                 if (!paymentId || inFlightPayments.has(paymentId)) {
                     continue;
@@ -46,49 +50,45 @@ const reconcilePendingPayments = async () => {
                     const orderId = session.providerOrderId || session.paymentId;
                     const getStatusFn = payriffProvider.getStatus || payriffProvider.getOrderStatus;
 
-                    // If pending for more than 30 minutes
-                    if (session.createdAt < thirtyMinAgo) {
-                        let providerStatus = null;
-                        if (session.provider === 'payriff' && orderId) {
-                            try {
-                                providerStatus = await getStatusFn(orderId);
-                            } catch (e) {
-                                console.warn(`[Reconciliation] Status check failed for ${paymentId}:`, e.message);
-                            }
-                        }
-
-                        if (providerStatus?.status === 'APPROVED' || providerStatus?.status === 'PAID') {
-                            await walletController.completeTopUpPayment({ payment: session, providerStatus });
-                            count++;
-                        } else {
-                            // 30 min exceeded and not approved -> mark as failed
-                            session.status = 'failed';
-                            session.failureReason = 'Reconciliation timeout: pending > 30 minutes';
-                            await session.save();
-                            count++;
-                        }
-                        continue;
-                    }
-
-                    // For pending between 5 min and 30 min:
+                    let providerStatus = null;
                     if (session.provider === 'payriff' && orderId) {
-                        let providerStatus = null;
                         try {
                             providerStatus = await getStatusFn(orderId);
                         } catch (e) {
                             console.warn(`[Reconciliation] Status check failed for ${paymentId}:`, e.message);
+                            continue; // retry
                         }
+                    } else {
+                        console.warn(`[Reconciliation] Skipping payment ${paymentId}: provider=${session.provider}, orderId=${orderId}`);
+                        continue;
+                    }
 
-                        if (providerStatus?.status === 'APPROVED' || providerStatus?.status === 'PAID') {
-                            await walletController.completeTopUpPayment({ payment: session, providerStatus });
-                            count++;
-                        } else if (['REJECTED', 'FAILED', 'DECLINED', 'CANCELED', 'CANCELLED'].includes(providerStatus?.status)) {
-                            session.status = 'failed';
-                            session.failureReason = `Provider status: ${providerStatus.status}`;
-                            await session.save();
-                            count++;
-                        }
-                        // If still pending at provider -> leave untouched
+                    const normalizedStatus = String(providerStatus?.status || '').toUpperCase();
+
+                    if (normalizedStatus === 'APPROVED' || normalizedStatus === 'PAID') {
+                        const payment = session;
+                        await withJobLock(`payment:${session.paymentId}`, 60000, async () => {
+                            try {
+                                await walletController.completeTopUpPayment({
+                                    payment,
+                                    session: null,
+                                    mongoSession: null,
+                                    providerStatus
+                                });
+                                count++;
+                            } catch (completeErr) {
+                                console.error(`[Reconciliation] completeTopUpPayment error for ${paymentId}:`, completeErr.message);
+                            }
+                        });
+                    } else if (['REJECTED', 'FAILED', 'DECLINED', 'CANCELED', 'CANCELLED'].includes(normalizedStatus)) {
+                        session.status = 'failed';
+                        session.failureReason = `Provider status: ${providerStatus?.status || normalizedStatus}`;
+                        await session.save();
+                        count++;
+                    } else {
+                        // Unknown status or still pending -> log + continue, do not mark as failed
+                        console.log(`[Reconciliation] Payment ${paymentId} status is ${providerStatus?.status || 'UNKNOWN'}, keeping pending for retry`);
+                        continue;
                     }
                 } catch (itemErr) {
                     console.error(`[Reconciliation] Error processing payment ${paymentId}:`, itemErr.message);

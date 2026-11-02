@@ -33,7 +33,7 @@ async function runTest() {
 
     process.env.PAYMENT_PROVIDER = 'payriff';
     process.env.PAYRIFF_SECRET = 'test_secret_live_payriff_key';
-    process.env.API_PUBLIC_ORIGIN = 'https://api.mobil.az';
+    process.env.API_PUBLIC_ORIGIN = 'https://api.mobilim.az';
 
     const testUser = await User.create({
         name: 'PayriffOrder',

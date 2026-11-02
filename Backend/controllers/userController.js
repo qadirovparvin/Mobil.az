@@ -165,7 +165,7 @@ const updateSecuritySettings = async (req, res, next) => {
                 return res.status(400).json({ message: 'Yeni şifrə cari şifrə ilə eyni ola bilməz' });
             }
 
-            const salt = await bcrypt.genSalt(10);
+            const salt = await bcrypt.genSalt(12);
             user.password = await bcrypt.hash(req.body.newPassword, salt);
             user.refreshTokens = [];
             user.tokenVersion = (user.tokenVersion || 0) + 1;

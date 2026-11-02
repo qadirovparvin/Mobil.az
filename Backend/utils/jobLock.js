@@ -50,4 +50,10 @@ const withJobLock = async (name, ttlMs, fn) => {
     }
 };
 
-module.exports = { acquireJobLock, releaseJobLock, withJobLock };
+module.exports = {
+    acquireJobLock,
+    releaseJobLock,
+    withJobLock,
+    acquireLock: acquireJobLock,
+    releaseLock: releaseJobLock
+};

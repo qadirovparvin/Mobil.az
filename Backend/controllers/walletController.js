@@ -5,7 +5,9 @@ const Transaction = require('../models/Transaction');
 const Notification = require('../models/Notification');
 const Package = require('../models/Package');
 const PaymentSession = require('../models/PaymentSession');
+const PaymentRequest = PaymentSession;
 const CashOutRequest = require('../models/CashOutRequest');
+const CashOut = CashOutRequest;
 const AuditLog = require('../models/AuditLog');
 const {
     buildPriceSnapshot,
@@ -38,6 +40,50 @@ const httpError = (status, payload) => {
     error.status = status;
     error.payload = payload;
     return error;
+};
+
+const walletTopUpOperationKey = (paymentId) => `topup:${paymentId}`;
+const cashOutReserveOperationKey = (cashOutId) => `cashout-reserve:${cashOutId}`;
+const cashOutRefundOperationKey = (cashOutId) => `refund:${cashOutId}`;
+
+const applyTopUpCreditOnce = async (userId, paymentId, amount, session = null) => {
+    const operationKey = walletTopUpOperationKey(paymentId);
+    const updateQuery = User.findOneAndUpdate(
+        { _id: userId, walletOperationKeys: { $ne: operationKey } },
+        {
+            $inc: { walletBalance: amount },
+            $addToSet: { walletOperationKeys: operationKey },
+            $set: { updatedAt: new Date() }
+        },
+        { new: true, returnDocument: 'after' }
+    );
+    if (session) updateQuery.session(session);
+    const updatedUser = await updateQuery;
+    if (updatedUser) return { user: updatedUser, applied: true };
+
+    let existingQuery = User.findOne({ _id: userId, walletOperationKeys: operationKey }).select('walletBalance');
+    if (session) existingQuery = existingQuery.session(session);
+    const existingUser = await existingQuery;
+    if (existingUser) return { user: existingUser, applied: false };
+
+    throw httpError(404, { message: 'Wallet or user not found' });
+};
+
+const ensureTopUpCreditForRecovery = async (userId, payment, session = null) => {
+    if (Number(payment.walletCreditVersion || 0) >= 1) {
+        return applyTopUpCreditOnce(userId, payment.paymentId, normalizeMoney(payment.expectedAmount ?? payment.amount ?? 0), session);
+    }
+
+    let markerQuery = User.findOne({
+        _id: userId,
+        walletOperationKeys: walletTopUpOperationKey(payment.paymentId)
+    }).select('walletBalance');
+    if (session) markerQuery = markerQuery.session(session);
+    const creditedUser = await markerQuery;
+    if (!creditedUser) {
+        throw httpError(409, { message: 'Legacy ödəniş sessiyası təhlükəsiz avtomatik bərpa edilə bilmir; manual yoxlama tələb olunur' });
+    }
+    return { user: creditedUser, applied: false };
 };
 
 const getIdempotencyReference = (req) => {
@@ -286,7 +332,12 @@ const createPendingPayment = async ({
 
 const getExistingTransactionForPayment = (payment, session = null) => {
     const query = Transaction.findOne({
-        $or: [{ paymentId: payment.paymentId }, { reference: payment.paymentId }],
+        $or: [
+            { idempotencyKey: payment.paymentId },
+            { idempotencyKey: `topup:${payment.paymentId}` },
+            { paymentId: payment.paymentId },
+            { reference: payment.paymentId }
+        ],
         status: { $in: ['completed', 'paid'] }
     });
     if (session) query.session(session);
@@ -303,7 +354,7 @@ const calculatePackageExpiry = (currentUser, durationDays) => {
     return expiresAt;
 };
 
-const completePackagePayment = async ({ payment, useWalletBalance, session }) => {
+const completePackagePayment = async ({ payment, useWalletBalance, session, allowOverrideFailed = false }) => {
     const existingTx = await getExistingTransactionForPayment(payment, session);
     if ((payment.status === 'completed' || payment.status === 'paid') || existingTx) {
         if (existingTx && (existingTx.status === 'completed' || existingTx.status === 'paid') && payment.status !== 'completed' && payment.status !== 'paid') {
@@ -321,7 +372,15 @@ const completePackagePayment = async ({ payment, useWalletBalance, session }) =>
         const user = await userQuery;
         return { user, tx: existingTx, idempotent: true };
     }
-    if (payment.status !== 'pending') {
+    if (payment.status === 'failed') {
+        if (allowOverrideFailed) {
+            console.warn(`Overriding failed package session ${payment.paymentId} with APPROVED callback`);
+            payment.status = 'pending';
+            payment.failureReason = '';
+        } else {
+            throw httpError(409, { message: 'Ödəniş sessiyası artıq işlənib' });
+        }
+    } else if (payment.status !== 'pending') {
         throw httpError(409, { message: 'Ödəniş sessiyası artıq işlənib' });
     }
     if (payment.expiresAt <= new Date()) {
@@ -333,9 +392,9 @@ const completePackagePayment = async ({ payment, useWalletBalance, session }) =>
 
     // Atomic claim of payment status for package payments in standalone Mongo
     const claimQuery = PaymentSession.findOneAndUpdate(
-        { _id: payment._id, status: 'pending' },
+        { _id: payment._id, status: { $in: ['pending', ...(allowOverrideFailed ? ['failed'] : [])] } },
         { $set: { status: 'completed', completedAt: new Date(), activatedAt: new Date() } },
-        { new: true }
+        { new: true, returnDocument: 'after' }
     );
     if (session) claimQuery.session(session);
     const claimedPayment = await claimQuery;
@@ -432,11 +491,19 @@ const completePackagePayment = async ({ payment, useWalletBalance, session }) =>
 };
 
 const completeTopUpPayment = async (input = {}) => {
-    const payment = input?.payment || input;
-    const session = input?.session || null;
+    let payment = input?.payment || input;
+    let session = input?.session || null;
+    const transaction = input?.transaction !== undefined ? input.transaction : null;
     const eventId = input?.eventId || null;
     const signatureContext = input?.signatureContext || null;
     const providerStatus = input?.providerStatus || null;
+
+    if (session && session._id && session.paymentId) {
+        if (!payment || !payment.paymentId) {
+            payment = session;
+        }
+        session = null;
+    }
 
     if (signatureContext) {
         const paymentService = getProvider();
@@ -445,191 +512,371 @@ const completeTopUpPayment = async (input = {}) => {
         }
     }
 
-    // 0. Əgər sessiya artıq tamamlanıbsa, dərhal idempotent nəticə qaytar
-    if (payment.status === 'completed' || payment.status === 'paid') {
-        const tx = await Transaction.findOne({
-            $or: [{ paymentId: payment.paymentId }, { reference: payment.paymentId }]
-        });
-        const user = await User.findById(payment.user).select('walletBalance');
-        return { user, tx, idempotent: true };
-    }
+    const providedMongoSession = (input?.mongoSession && typeof input.mongoSession.startTransaction === 'function')
+        ? input.mongoSession
+        : (session && typeof session.startTransaction === 'function')
+            ? session
+            : (transaction && typeof transaction.startTransaction === 'function')
+                ? transaction
+                : null;
 
-    if (payment.status === 'expired') {
-        throw httpError(400, { message: 'Ödəniş sessiyasının vaxtı bitib' });
-    }
-    if (payment.status === 'failed') {
-        throw httpError(400, { message: 'Ödəniş sessiyası uğursuz olub' });
-    }
-    if (payment.expiresAt && payment.expiresAt <= new Date()) {
-        payment.status = 'expired';
-        payment.failureReason = 'expired';
-        await (session ? payment.save({ session }) : payment.save());
-        throw httpError(400, { message: 'Ödəniş sessiyasının vaxtı bitib' });
-    }
+    const supportsMongoTransactions = () => {
+        const type = mongoose.connection?.client?.topology?.description?.type;
+        return type === 'ReplicaSetWithPrimary' || type === 'Sharded';
+    };
 
-    // 1. At the very start of completeTopUpPayment, do ATOMIC CLAIM:
-    const claimUpdate = { status: 'processing', updatedAt: new Date() };
-    if (eventId) {
-        claimUpdate.lastEventId = eventId;
-    }
+    let sessionToUse = providedMongoSession;
+    let shouldCommit = false;
 
-    const claimQuery = PaymentSession.findOneAndUpdate(
-        { _id: payment._id, status: 'pending' },
-        { $set: claimUpdate },
-        { new: true, returnDocument: 'after' }
-    );
-    if (session) claimQuery.session(session);
-    const claimedSession = await claimQuery;
-
-    if (!claimedSession) {
-        // Another callback claimed it, wait for completed
-        for (let i = 0; i < 20; i++) {
-            await new Promise((r) => setTimeout(r, 250));
-            const p = await PaymentSession.findById(payment._id);
-            if (p?.status === 'completed') {
-                const tx = await Transaction.findOne({
-                    $or: [{ paymentId: payment.paymentId }, { reference: payment.paymentId }]
-                });
-                const user = await User.findById(payment.user).select('walletBalance');
-                return { idempotent: true, payment: p, user, tx };
+    if (!sessionToUse && supportsMongoTransactions()) {
+        try {
+            sessionToUse = await mongoose.startSession();
+            sessionToUse.startTransaction();
+            shouldCommit = true;
+        } catch (sessErr) {
+            if (sessionToUse) {
+                try { sessionToUse.endSession(); } catch {}
             }
+            sessionToUse = null;
+            shouldCommit = false;
         }
-        throw new Error('Payment processing by another callback');
     }
 
-    payment.status = 'processing';
-
-    const amount = normalizeMoney(payment.expectedAmount);
+    const userId = payment.userId || payment.user?._id || payment.user;
+    const amount = normalizeMoney(payment.expectedAmount !== undefined ? payment.expectedAmount : (payment.amount || 0));
     let tx = null;
-    let userIncDone = false;
+    let wasAlreadyCredited = false;
     let user = null;
+    const paymentId = payment.paymentId;
 
     try {
-        // 2. Claim etdikdən sonra Transaction pending yarat
-        const txData = {
-            user: payment.user,
-            amount,
-            type: 'deposit',
-            description: `Balans artırımı - ${amount} ${payment.currency}`,
-            reference: payment.paymentId,
-            paymentProvider: payment.provider,
-            paymentId: payment.paymentId,
-            balanceAfter: 0,
-            status: 'pending'
+        // 0. Əgər sessiya və ya tranzaksiya artıq tamamlanıbsa və ya mövcuddursa, dərhal idempotent nəticə qaytar
+        // Əlavə qoruma: Transaction collection-da idempotencyKey = paymentId yoxla
+        let existingTxQuery = Transaction.findOne({
+            $or: [
+                { idempotencyKey: paymentId },
+                { idempotencyKey: `topup:${paymentId}` },
+                { paymentId: paymentId },
+                { reference: paymentId }
+            ]
+        });
+        if (sessionToUse) existingTxQuery = existingTxQuery.session(sessionToUse);
+        const existingCompletedTx = await existingTxQuery;
+
+        if (existingCompletedTx && (existingCompletedTx.status === 'completed' || existingCompletedTx.status === 'paid')) {
+            const creditResult = await ensureTopUpCreditForRecovery(userId, payment, sessionToUse);
+            user = creditResult.user;
+            wasAlreadyCredited = !creditResult.applied;
+            existingCompletedTx.status = 'completed';
+            existingCompletedTx.walletCredited = true;
+            existingCompletedTx.balanceAfter = user.walletBalance;
+            await (sessionToUse ? existingCompletedTx.save({ session: sessionToUse }) : existingCompletedTx.save());
+            const upd = PaymentSession.updateOne(
+                { _id: payment._id },
+                { $set: { status: 'completed', walletCredited: true, completedAt: new Date(), providerStatus: providerStatus || payment.providerStatus } }
+            );
+            if (sessionToUse) upd.session(sessionToUse);
+            await upd;
+            payment.status = 'completed';
+            payment.walletCredited = true;
+
+            if (shouldCommit && sessionToUse?.inTransaction?.()) {
+                await sessionToUse.commitTransaction();
+            }
+            return { idempotent: wasAlreadyCredited, alreadyCompleted: true, user, tx: existingCompletedTx, payment };
+        }
+
+        if (existingCompletedTx?.walletCredited === true) {
+            const creditResult = await ensureTopUpCreditForRecovery(userId, payment, sessionToUse);
+            user = creditResult.user;
+            existingCompletedTx.status = 'completed';
+            existingCompletedTx.balanceAfter = user.walletBalance;
+            await (sessionToUse ? existingCompletedTx.save({ session: sessionToUse }) : existingCompletedTx.save());
+            const updPay = PaymentSession.updateOne(
+                { _id: payment._id },
+                { $set: { status: 'completed', walletCredited: true, completedAt: new Date(), providerStatus: providerStatus || payment.providerStatus } }
+            );
+            if (sessionToUse) updPay.session(sessionToUse);
+            await updPay;
+            if (shouldCommit && sessionToUse?.inTransaction?.()) await sessionToUse.commitTransaction();
+            wasAlreadyCredited = !creditResult.applied;
+            return { idempotent: true, alreadyCompleted: true, user, tx: existingCompletedTx, payment };
+        }
+
+        if (payment.status === 'completed' || payment.status === 'paid') {
+            if (Number(payment.walletCreditVersion || 0) < 1) {
+                throw httpError(409, { message: 'Legacy ödəniş sessiyası təhlükəsiz avtomatik bərpa edilə bilmir; manual yoxlama tələb olunur' });
+            }
+            const resetCompletedQuery = PaymentSession.updateOne(
+                { _id: payment._id, status: { $in: ['completed', 'paid'] } },
+                { $set: { status: 'pending', walletCredited: false, walletCreditingAt: null } }
+            );
+            if (sessionToUse) resetCompletedQuery.session(sessionToUse);
+            await resetCompletedQuery;
+            payment.status = 'pending';
+            payment.walletCredited = false;
+        }
+
+        if (payment.walletCredited) {
+            const resetQuery = PaymentSession.updateOne(
+                { _id: payment._id, status: { $in: ['pending', 'processing'] } },
+                { $set: { status: 'pending', walletCredited: false, walletCreditingAt: null } }
+            );
+            if (sessionToUse) resetQuery.session(sessionToUse);
+            await resetQuery;
+            payment.status = 'pending';
+            payment.walletCredited = false;
+        }
+
+        if (payment.status === 'expired') {
+            throw httpError(400, { message: 'Ödəniş sessiyasının vaxtı bitib' });
+        }
+        if (payment.status === 'failed') {
+            if (input?.allowOverrideFailed) {
+                console.warn(`Overriding failed session ${paymentId} with APPROVED callback`);
+                payment.status = 'pending';
+                payment.failureReason = '';
+            } else {
+                throw httpError(400, { message: 'Ödəniş sessiyası uğursuz olub' });
+            }
+        }
+        if (payment.expiresAt && payment.expiresAt <= new Date()) {
+            payment.status = 'expired';
+            payment.failureReason = 'expired';
+            await (sessionToUse ? payment.save({ session: sessionToUse }) : payment.save());
+            throw httpError(400, { message: 'Ödəniş sessiyasının vaxtı bitib' });
+        }
+
+        // 1. PaymentSession claim atomik - processing
+        const claimUpdate = {
+            status: 'processing',
+            updatedAt: new Date()
         };
+        if (eventId) {
+            claimUpdate.lastEventId = eventId;
+        }
+
+        const stuckThreshold = new Date(Date.now() - 10 * 60 * 1000);
+        let claimedSession = null;
+        try {
+            const claimQuery = PaymentSession.findOneAndUpdate(
+                {
+                    _id: payment._id,
+                    walletCredited: { $ne: true },
+                    $or: [
+                        { status: 'pending' },
+                        ...(input?.allowOverrideFailed ? [{ status: 'failed' }] : []),
+                        { status: 'processing', updatedAt: { $lt: stuckThreshold } }
+                    ]
+                },
+                { $set: claimUpdate },
+                { new: true, returnDocument: 'after' }
+            );
+            if (sessionToUse) claimQuery.session(sessionToUse);
+            claimedSession = await claimQuery;
+        } catch (claimErr) {
+            if (claimErr.code === 112 || claimErr.errorLabels?.includes('TransientTransactionError') || claimErr.message?.includes('WriteConflict')) {
+                claimedSession = null;
+            } else {
+                throw claimErr;
+            }
+        }
+
+        if (!claimedSession) {
+            // Another callback claimed it, wait for completed
+            for (let i = 0; i < 20; i++) {
+                await new Promise((r) => setTimeout(r, 250));
+                const p = await PaymentSession.findById(payment._id);
+                if (p?.status === 'completed') {
+                    const claimedTx = await Transaction.findOne({
+                        $or: [
+                            { idempotencyKey: payment.paymentId },
+                            { idempotencyKey: `topup:${payment.paymentId}` },
+                            { paymentId: payment.paymentId },
+                            { reference: payment.paymentId }
+                        ]
+                    });
+                    const claimedUser = await User.findById(userId).select('walletBalance');
+                    if (shouldCommit && sessionToUse?.inTransaction?.()) {
+                        try { await sessionToUse.abortTransaction(); } catch {}
+                    }
+                    return { idempotent: true, alreadyCompleted: true, payment: p, user: claimedUser, tx: claimedTx };
+                }
+            }
+            throw new Error('ALREADY_CLAIMED');
+        }
+
+        payment.status = 'processing';
+
+        // 2. Transaction idempotency - ƏSAS FIX
+        let txQuery = Transaction.findOne({
+            $or: [
+                { idempotencyKey: payment.paymentId },
+                { idempotencyKey: `topup:${payment.paymentId}` },
+                { paymentId: payment.paymentId },
+                { reference: payment.paymentId }
+            ]
+        });
+        if (sessionToUse) txQuery = txQuery.session(sessionToUse);
+        tx = await txQuery;
+
+        if (tx && (tx.status === 'completed' || tx.status === 'paid' || tx.walletCredited)) {
+            const creditResult = await ensureTopUpCreditForRecovery(userId, payment, sessionToUse);
+            user = creditResult.user;
+            tx.status = 'completed';
+            tx.walletCredited = true;
+            tx.balanceAfter = user.walletBalance;
+            await (sessionToUse ? tx.save({ session: sessionToUse }) : tx.save());
+            const updPay = PaymentSession.findOneAndUpdate(
+                { _id: payment._id },
+                {
+                    $set: {
+                        status: 'completed',
+                        walletCredited: true,
+                        completedAt: new Date(),
+                        providerStatus: providerStatus || payment.providerStatus
+                    }
+                },
+                { new: true }
+            );
+            if (sessionToUse) updPay.session(sessionToUse);
+            await updPay;
+
+            if (shouldCommit && sessionToUse?.inTransaction?.()) {
+                await sessionToUse.commitTransaction();
+            }
+            wasAlreadyCredited = !creditResult.applied;
+            return { idempotent: true, alreadyCompleted: true, user, tx, payment };
+        }
+
+        const hadExistingTransaction = Boolean(tx);
+        if (!tx) {
+            const txData = {
+                user: userId,
+                userId: userId,
+                amount,
+                type: 'deposit',
+                description: `Balans artırımı - ${amount} ${payment.currency || 'AZN'}`,
+                reference: payment.paymentId,
+                paymentProvider: payment.provider || 'internal',
+                paymentId: payment.paymentId,
+                idempotencyKey: payment.paymentId,
+                balanceAfter: 0,
+                status: 'pending',
+                walletCredited: false
+            };
+            try {
+                const createQuery = Transaction.create([txData], sessionToUse ? { session: sessionToUse } : undefined);
+                tx = (await createQuery)[0];
+            } catch (createErr) {
+                if (createErr.code === 11000) {
+                    let findQuery = Transaction.findOne({
+                        $or: [
+                            { idempotencyKey: payment.paymentId },
+                            { idempotencyKey: `topup:${payment.paymentId}` },
+                            { paymentId: payment.paymentId },
+                            { reference: payment.paymentId }
+                        ]
+                    });
+                    if (sessionToUse) findQuery.session(sessionToUse);
+                    tx = await findQuery;
+                } else {
+                    throw createErr;
+                }
+            }
+        }
+
+        if (hadExistingTransaction && Number(payment.walletCreditVersion || 0) < 1) {
+            let markerQuery = User.findOne({
+                _id: userId,
+                walletOperationKeys: walletTopUpOperationKey(payment.paymentId)
+            }).select('_id');
+            if (sessionToUse) markerQuery = markerQuery.session(sessionToUse);
+            if (!(await markerQuery)) {
+                throw httpError(409, { message: 'Legacy ödəniş sessiyası təhlükəsiz avtomatik bərpa edilə bilmir; manual yoxlama tələb olunur' });
+            }
+        }
+
+        const creditResult = await applyTopUpCreditOnce(userId, payment.paymentId, amount, sessionToUse);
+        user = creditResult.user;
+        wasAlreadyCredited = !creditResult.applied;
+
+        tx.walletCredited = true;
+        tx.balanceAfter = user.walletBalance;
+        tx.status = 'completed';
+        await (sessionToUse ? tx.save({ session: sessionToUse }) : tx.save());
+
+        const updPay = PaymentSession.findOneAndUpdate(
+            { _id: payment._id },
+            {
+                $set: {
+                    status: 'completed',
+                    walletCredited: true,
+                    completedAt: new Date(),
+                    providerStatus: providerStatus || payment.providerStatus
+                }
+            },
+            { new: true, returnDocument: 'after' }
+        );
+        if (sessionToUse) updPay.session(sessionToUse);
+        const finalPayment = await updPay;
+        payment.status = 'completed';
+        payment.walletCredited = true;
+
+        if (shouldCommit && sessionToUse?.inTransaction?.()) {
+            await sessionToUse.commitTransaction();
+        }
+
+        const notifData = {
+            user: userId,
+            type: 'system',
+            title: 'Balansınız artırıldı',
+            body: `${amount} ${payment.currency || 'AZN'} hesabınıza əlavə edildi. Cari balans: ${user?.walletBalance || 0} ${payment.currency || 'AZN'}`,
+            link: '/cabinet.html#wallet',
+            relatedId: tx._id,
+            relatedType: 'Transaction'
+        };
+        try {
+            await Notification.create([notifData]);
+        } catch {}
 
         try {
-            [tx] = session
-                ? await Transaction.create([txData], { session })
-                : await Transaction.create([txData]);
-        } catch (createErr) {
-            if (createErr.code === 11000) {
-                tx = await Transaction.findOne({
-                    $or: [{ paymentId: payment.paymentId }, { reference: payment.paymentId }]
-                });
-                if (tx && (tx.status === 'completed' || tx.status === 'paid')) {
-                    const sessUpdate = PaymentSession.updateOne(
-                        { _id: payment._id },
-                        { $set: { status: 'completed', completedAt: new Date() } }
-                    );
-                    if (session) sessUpdate.session(session);
-                    await sessUpdate;
-                    payment.status = 'completed';
-
-                    const u = await User.findById(payment.user).select('walletBalance');
-                    return { user: u, tx, idempotent: true };
-                }
-            } else {
-                throw createErr;
+            const emailUser = user || await User.findById(userId);
+            if (emailUser && emailUser.email) {
+                sendTopUpSuccessEmail(emailUser, amount, payment.currency || 'AZN').catch(() => {});
             }
+        } catch {}
+
+        return {
+            idempotent: wasAlreadyCredited ? true : false,
+            completed: true,
+            user,
+            tx,
+            payment: finalPayment || payment
+        };
+
+    } catch (e) {
+        if (shouldCommit && sessionToUse?.inTransaction?.()) {
+            try { await sessionToUse.abortTransaction(); } catch {}
         }
-
-        // 3. $inc et
-        const userQuery = User.findOneAndUpdate(
-            { _id: payment.user },
-            { $inc: { walletBalance: amount } },
-            { new: true, returnDocument: 'after' }
-        ).select('walletBalance');
-        if (session) userQuery.session(session);
-        user = await userQuery;
-
-        if (!user) {
-            throw httpError(404, { message: 'Wallet or user not found' });
-        }
-        userIncDone = true;
-
-        tx.status = 'completed';
-        tx.balanceAfter = user.walletBalance;
-        await (session ? tx.save({ session }) : tx.save());
-
-        // 5. Uğurlu olsa PaymentSession completed
-        const paymentUpdate = PaymentSession.updateOne(
-            { _id: payment._id },
-            { $set: { status: 'completed', completedAt: new Date() } }
-        );
-        if (session) paymentUpdate.session(session);
-        await paymentUpdate;
-        payment.status = 'completed';
-    } catch (opErr) {
-        // 4. Rollback catch-də boş catch YOX:
-        if (!session) {
+        if (!sessionToUse) {
             try {
-                if (userIncDone) {
-                    await User.updateOne(
-                        { _id: payment.user },
-                        { $inc: { walletBalance: -amount } }
-                    );
-                }
-                if (tx) {
-                    await Transaction.deleteOne({ _id: tx._id });
-                }
                 await PaymentSession.updateOne(
                     { _id: payment._id },
-                    { $set: { status: 'pending' } }
+                    { $set: { status: 'pending', walletCredited: false, walletCreditingAt: null } }
                 );
                 payment.status = 'pending';
-            } catch (rollbackErr) {
-                console.error('CRITICAL rollback failed', rollbackErr);
-                try {
-                    let Sentry;
-                    try { Sentry = require('@sentry/node'); } catch {}
-                    Sentry?.captureException(rollbackErr);
-                } catch {}
-                throw rollbackErr;
+                payment.walletCredited = false;
+            } catch (resetErr) {
+                logger.error('Top-up finalization recovery state update failed', { paymentId, error: resetErr.message });
             }
-        } else {
-            payment.status = 'pending';
         }
-        throw opErr;
-    }
-
-    const notifData = {
-        user: user._id,
-        type: 'system',
-        title: 'Balansınız artırıldı',
-        body: `${amount} ${payment.currency} hesabınıza əlavə edildi. Cari balans: ${user.walletBalance} ${payment.currency}`,
-        link: '/cabinet.html#wallet',
-        relatedId: tx._id,
-        relatedType: 'Transaction'
-    };
-    if (session) {
-        await Notification.create([notifData], { session });
-    } else {
-        await Notification.create([notifData]);
-    }
-
-    try {
-        const emailUser = user || await User.findById(payment.user);
-        if (emailUser && emailUser.email) {
-            sendTopUpSuccessEmail(emailUser, amount, payment.currency).catch((err) => {
-                console.error('Failed to send top-up success email:', err.message);
-            });
+        throw e;
+    } finally {
+        if (shouldCommit && sessionToUse) {
+            try { sessionToUse.endSession(); } catch {}
         }
-    } catch (emailErr) {
-        console.error('Email hook error (topUp):', emailErr.message);
     }
-
-    return { user, tx, idempotent: false };
 };
 
 const getRequestSignature = (req, headerName) => {
@@ -823,6 +1070,7 @@ const topUp = async (req, res, next) => {
                     expectedAmount: amount,
                     currency,
                     status: 'pending',
+                    walletCreditVersion: 1,
                     expiresAt: new Date(Date.now() + PAYMENT_SESSION_TTL_MS)
                 }]);
             } catch (createErr) {
@@ -1062,8 +1310,11 @@ const getPaymentSessionStatus = async (req, res, next) => {
 const handlePaymentCallback = async (req, res, next) => {
     let session = null;
     try {
-        validateAllowedFields(req.body, ['amount', 'currency', 'packageId', 'productId', 'status', 'providerReference', 'eventId'], 'body');
-        const paymentId = readString(req.params.paymentId, {
+        validateAllowedFields(req.body, [
+            'amount', 'currency', 'packageId', 'productId', 'status',
+            'providerReference', 'eventId', 'sessionId', 'orderId', 'paymentId'
+        ], 'body');
+        const paymentId = readString(req.params.paymentId || req.body?.paymentId || req.body?.sessionId || req.body?.orderId, {
             fieldName: 'paymentId',
             required: true,
             maxLength: 80
@@ -1079,6 +1330,7 @@ const handlePaymentCallback = async (req, res, next) => {
             maxLength: 3,
             uppercase: true
         });
+        const rawStatus = typeof req.body.status === 'string' ? req.body.status.trim() : '';
         const status = readString(req.body.status, {
             fieldName: 'status',
             required: true,
@@ -1101,7 +1353,7 @@ const handlePaymentCallback = async (req, res, next) => {
         try {
             const paymentService = getProvider();
             isSignatureValid = verifyPaymentSignature(paymentService, req, {
-                paymentId, amount, currency, status, providerReference
+                paymentId, amount, currency, status, rawStatus, providerReference
             });
         } catch (sigErr) {
             return res.status(500).json({ message: sigErr.message || 'Payment webhook secret is not configured' });
@@ -1109,6 +1361,40 @@ const handlePaymentCallback = async (req, res, next) => {
 
         if (!isSignatureValid) {
             return res.status(401).json({ message: 'Ödəniş imzası yanlışdır' });
+        }
+
+        const isSuccess = ['paid', 'completed', 'success', 'approved'].includes(status);
+        const isFailure = ['failed', 'rejected', 'declined', 'canceled', 'cancelled'].includes(status);
+
+        // Early check on Transaction collection (A: REPLAY qoruma)
+        const earlyTx = await Transaction.findOne({
+            $or: [
+                { idempotencyKey: paymentId },
+                { idempotencyKey: `topup:${paymentId}` },
+                { paymentId: paymentId },
+                { reference: paymentId }
+            ],
+            status: { $in: ['completed', 'paid'] }
+        });
+
+        if (earlyTx) {
+            if (isFailure) {
+                console.warn(`[PaymentCallback] Ignoring late failure callback for completed payment ${paymentId}`);
+                return res.json({
+                    ok: true,
+                    ignoredLateFailure: true,
+                    idempotent: true,
+                    message: 'Late failure ignored: payment already completed',
+                    transaction: earlyTx
+                });
+            }
+            return res.json({
+                ok: true,
+                idempotent: true,
+                alreadyProcessed: true,
+                message: 'Callback artıq işlənib',
+                transaction: earlyTx
+            });
         }
 
         try {
@@ -1119,41 +1405,54 @@ const handlePaymentCallback = async (req, res, next) => {
 
         let result;
         const runCallbackLogic = async (currentSession) => {
-            const query = PaymentSession.findOne({ paymentId });
+            const query = PaymentSession.findOne({
+                $or: [
+                    { paymentId },
+                    ...(mongoose.isValidObjectId(paymentId) ? [{ _id: paymentId }] : []),
+                    { providerOrderId: paymentId }
+                ]
+            });
             if (currentSession) query.session(currentSession);
             const payment = await query;
             if (!payment) throw httpError(404, { message: 'Ödəniş sessiyası tapılmadı' });
 
-            // 1. PaymentSession status check: əgər artıq 'completed' və ya 'paid' statusundadırsa idempotent 200 qaytar
-            if (payment.status === 'completed' || payment.status === 'paid') {
-                result = {
-                    idempotent: true,
-                    payment,
-                    tx: await getExistingTransactionForPayment(payment, currentSession)
-                };
-                return;
-            }
-
-            // 2. Transaction collection-da eyni paymentId və status=completed/paid varmi yoxla, varsa skip
             const existingTx = await getExistingTransactionForPayment(payment, currentSession);
-            if (existingTx) {
+            const creditOwnerId = payment.user?._id || payment.user;
+            const walletCreditExists = Boolean(await User.exists({
+                _id: creditOwnerId,
+                walletOperationKeys: walletTopUpOperationKey(payment.paymentId)
+            }));
+            const txAlreadyCredited = Boolean(existingTx && (
+                existingTx.status === 'completed' ||
+                existingTx.status === 'paid' ||
+                existingTx.walletCredited === true
+            ));
+
+            if (walletCreditExists) {
                 result = {
                     idempotent: true,
+                    alreadyProcessed: true,
                     payment,
                     tx: existingTx
                 };
                 return;
             }
 
-            if (eventId && payment.callbackEventIds.includes(eventId)) {
+            if (isFailure && (
+                payment.status === 'completed' ||
+                payment.status === 'paid' ||
+                payment.walletCredited ||
+                txAlreadyCredited
+            )) {
+                console.warn(`[PaymentCallback] Ignoring late failure callback for completed payment ${paymentId}`);
                 result = {
                     idempotent: true,
+                    ignoredLateFailure: true,
                     payment,
-                    tx: existingTx || await getExistingTransactionForPayment(payment, currentSession)
+                    tx: existingTx
                 };
                 return;
             }
-            if (eventId) payment.callbackEventIds.push(eventId);
 
             const requestedProductId = req.body.packageId || req.body.productId;
             const callbackMatch = validatePaymentCallbackMatch(payment, {
@@ -1165,6 +1464,7 @@ const handlePaymentCallback = async (req, res, next) => {
             if (!callbackMatch.valid && callbackMatch.reason === 'package_mismatch') {
                 payment.status = 'failed';
                 payment.failureReason = 'package_mismatch';
+                payment.lastCallbackAt = new Date();
                 await (currentSession ? payment.save({ session: currentSession }) : payment.save());
                 throw httpError(400, { message: 'Ödəniş paketi uyğun deyil' });
             }
@@ -1172,6 +1472,7 @@ const handlePaymentCallback = async (req, res, next) => {
             if (!callbackMatch.valid && callbackMatch.reason === 'amount_or_currency_mismatch') {
                 payment.status = 'failed';
                 payment.failureReason = 'amount_or_currency_mismatch';
+                payment.lastCallbackAt = new Date();
                 await (currentSession ? payment.save({ session: currentSession }) : payment.save());
                 throw httpError(400, { message: 'Ödəniş məbləği və ya valyutası uyğun deyil' });
             }
@@ -1179,34 +1480,72 @@ const handlePaymentCallback = async (req, res, next) => {
             if (!callbackMatch.valid && callbackMatch.reason === 'expired') {
                 payment.status = 'expired';
                 payment.failureReason = 'expired';
+                payment.lastCallbackAt = new Date();
                 await (currentSession ? payment.save({ session: currentSession }) : payment.save());
                 throw httpError(400, { message: 'Ödəniş sessiyasının vaxtı bitib' });
             }
 
             // Status yoxlaması imzadan sonradır və status artıq canonical HMAC imzasına daxildir
-            if (!['paid', 'completed', 'success'].includes(status)) {
+            if (!isSuccess) {
+                if (payment.status === 'failed') {
+                    result = {
+                        idempotent: true,
+                        alreadyFailed: true,
+                        payment,
+                        failed: true
+                    };
+                    return;
+                }
                 payment.status = 'failed';
                 payment.failureReason = `provider_status:${status}`;
+                payment.lastCallbackAt = new Date();
+                if (eventId && !payment.callbackEventIds?.includes(eventId)) {
+                    if (!payment.callbackEventIds) payment.callbackEventIds = [];
+                    payment.callbackEventIds.push(eventId);
+                }
                 await (currentSession ? payment.save({ session: currentSession }) : payment.save());
                 result = { payment, failed: true };
                 return;
             }
 
+            // Out-of-order handling: if existing session is failed and incoming is APPROVED/SUCCESS
+            if (payment.status === 'failed') {
+                console.warn(`Overriding failed session ${paymentId} with APPROVED callback`);
+            }
+
+            if (eventId && !payment.callbackEventIds?.includes(eventId)) {
+                if (!payment.callbackEventIds) payment.callbackEventIds = [];
+                payment.callbackEventIds.push(eventId);
+            }
+
             payment.providerReference = providerReference || payment.providerReference;
-            if (payment.kind === 'wallet_topup') {
+            payment.lastCallbackAt = new Date();
+
+            if (payment.kind === 'wallet_topup' || payment.kind === 'topup') {
                 result = await completeTopUpPayment({
                     payment,
                     session: currentSession,
                     eventId,
+                    allowOverrideFailed: true,
                     signatureContext: {
                         req,
-                        params: { paymentId, amount, currency, status, providerReference }
+                        params: { paymentId, amount, currency, status, rawStatus, providerReference }
                     }
                 });
             } else if (payment.kind === 'package_provider') {
-                result = await completePackagePayment({ payment, useWalletBalance: false, session: currentSession });
+                result = await completePackagePayment({
+                    payment,
+                    useWalletBalance: false,
+                    session: currentSession,
+                    allowOverrideFailed: true
+                });
             } else if (payment.kind === 'package_wallet') {
-                result = await completePackagePayment({ payment, useWalletBalance: true, session: currentSession });
+                result = await completePackagePayment({
+                    payment,
+                    useWalletBalance: true,
+                    session: currentSession,
+                    allowOverrideFailed: true
+                });
             } else {
                 throw httpError(400, { message: 'Ödəniş növü dəstəklənmir' });
             }
@@ -1233,14 +1572,44 @@ const handlePaymentCallback = async (req, res, next) => {
             await runCallbackLogic(null);
         }
 
+        if (result?.ignoredLateFailure) {
+            return res.json({
+                ok: true,
+                ignoredLateFailure: true,
+                idempotent: true,
+                message: 'Late failure ignored: payment already completed',
+                payment: paymentResponse(result.payment),
+                transaction: result.tx || null
+            });
+        }
+
+        if (result?.alreadyFailed) {
+            return res.json({
+                ok: true,
+                idempotent: true,
+                alreadyFailed: true,
+                message: 'Ödəniş artıq uğursuz kimi qeydə alınıb',
+                payment: paymentResponse(result.payment),
+                failed: true
+            });
+        }
+
         if (result?.failed) {
-            return res.json({ message: 'Ödəniş uğursuz kimi qeydə alındı', payment: paymentResponse(result.payment) });
+            return res.json({
+                ok: true,
+                message: 'Ödəniş uğursuz kimi qeydə alındı',
+                payment: paymentResponse(result.payment),
+                failed: true
+            });
         }
 
         res.json({
+            ok: true,
             message: result?.idempotent ? 'Callback artıq işlənib' : 'Ödəniş təsdiqləndi',
             idempotent: Boolean(result?.idempotent),
-            transaction: result?.tx || null
+            alreadyProcessed: Boolean(result?.idempotent),
+            transaction: result?.tx || null,
+            payment: result?.payment ? paymentResponse(result.payment) : undefined
         });
     } catch (error) {
         if (error.payload) return res.status(error.status || 500).json(error.payload);
@@ -1292,7 +1661,7 @@ const mockCheckoutPage = async (req, res, next) => {
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Ödəniş Tapılmadı - Mobil.az</title>
+    <title>Ödəniş Tapılmadı - Mobilim.az</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
@@ -1322,7 +1691,7 @@ const mockCheckoutPage = async (req, res, next) => {
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Mobil.az Sandbox Checkout</title>
+    <title>Mobilim.az Sandbox Checkout</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1570,10 +1939,119 @@ const getTransactions = async (req, res, next) => {
     }
 };
 
-// @desc    Request cash out from wallet balance
-// @route   POST /api/wallet/cash-out
-// @access  Private
-// @desc    Request cash out from wallet balance
+// @desc    Idempotent refund of reserved cash-out funds
+// @returns {Object} result of refund operation
+const refundReserve = async (cashOutInput, options = {}) => {
+    const cashOutId = (cashOutInput?._id || (typeof cashOutInput === 'string' || cashOutInput instanceof mongoose.Types.ObjectId ? cashOutInput : null))?.toString();
+    const cashOut = (cashOutInput && typeof cashOutInput === 'object' && cashOutInput._id)
+        ? cashOutInput
+        : (cashOutId ? await CashOutRequest.findById(cashOutId) : null);
+
+    const userId = cashOut?.user || options.userId || options.user;
+    const amount = Number(cashOut?.amount || options.amount);
+    const refundKey = options.idempotencyKey || (cashOutId ? cashOutRefundOperationKey(cashOutId) : null);
+
+    if (!userId || !amount || amount <= 0 || !refundKey) {
+        return { success: false, reason: 'Invalid parameters' };
+    }
+
+    let existingTx = await Transaction.findOne({ idempotencyKey: refundKey });
+    const operationQuery = User.findOne({ _id: userId, walletOperationKeys: refundKey }).select('walletBalance walletReservedBalance');
+    const operationUser = await operationQuery;
+    let alreadyRefunded = Boolean(existingTx || operationUser);
+
+    if (cashOut && !alreadyRefunded) {
+        const expectedReservedAmount = Number(cashOut.reservedAmount || cashOut.amount);
+        const reservationKey = cashOutReserveOperationKey(cashOutId);
+        const reservationUser = await User.findOne({ _id: userId, walletOperationKeys: reservationKey }).select('_id');
+        const requestShowsReservation = cashOut.walletReserved === true && expectedReservedAmount === amount;
+        if (!requestShowsReservation && !reservationUser) {
+            return { success: false, alreadyRefunded: false, notReserved: true, reason: 'Cash-out request has no per-request reserve' };
+        }
+    }
+
+    let updatedUser = operationUser;
+    if (!alreadyRefunded) {
+        const updateQuery = User.findOneAndUpdate(
+            {
+                _id: userId,
+                walletReservedBalance: { $gte: amount },
+                walletOperationKeys: { $ne: refundKey }
+            },
+            {
+                $inc: { walletReservedBalance: -amount, walletBalance: amount },
+                $addToSet: { walletOperationKeys: refundKey },
+                $set: { updatedAt: new Date() }
+            },
+            { new: true, returnDocument: 'after' }
+        );
+        updatedUser = await updateQuery;
+        if (!updatedUser) {
+            updatedUser = await User.findOne({ _id: userId, walletOperationKeys: refundKey }).select('walletBalance walletReservedBalance');
+            alreadyRefunded = Boolean(updatedUser);
+            if (!updatedUser) {
+                return { success: false, alreadyRefunded: false, insufficient: true, reason: 'Insufficient reserved balance or user not found' };
+            }
+        }
+    }
+
+    let tx = null;
+    if (existingTx) {
+        tx = existingTx;
+        const markQuery = User.findOneAndUpdate(
+            { _id: userId },
+            { $addToSet: { walletOperationKeys: refundKey } },
+            { new: true, returnDocument: 'after' }
+        ).select('walletBalance walletReservedBalance');
+        updatedUser = await markQuery;
+        if (!updatedUser) return { success: false, alreadyRefunded: false, reason: 'User not found' };
+    } else {
+        try {
+            const [createdTx] = await Transaction.create([{
+                user: userId,
+                userId: userId,
+                amount: amount,
+                type: 'cashout_refund',
+                description: options.description || `Çıxarış ləğvi refund - ${amount} AZN`,
+                reference: `refund:${cashOutId || refundKey}`,
+                idempotencyKey: refundKey,
+                status: 'completed',
+                balanceAfter: updatedUser.walletBalance,
+                walletCredited: true
+            }]);
+            tx = createdTx;
+        } catch (txErr) {
+            if (txErr.code === 11000) {
+                tx = await Transaction.findOne({ idempotencyKey: refundKey });
+                alreadyRefunded = true;
+            } else {
+                throw txErr;
+            }
+        }
+    }
+
+    if (cashOut) {
+        const targetStatus = options.targetStatus || 'failed';
+        cashOut.status = targetStatus;
+        cashOut.walletReserved = false;
+        cashOut.reservedAmount = 0;
+        if (options.reason) {
+            cashOut.failureReason = options.reason;
+            cashOut.rejectionReason = options.reason;
+        }
+        if (cashOut.reservedTransaction) {
+            await Transaction.updateOne(
+                { _id: cashOut.reservedTransaction },
+                { status: 'failed' }
+            ).catch(() => {});
+        }
+        await cashOut.save();
+    }
+
+    return { success: true, alreadyRefunded, idempotent: alreadyRefunded, balance: updatedUser.walletBalance, transaction: tx };
+};
+
+// @desc    Request cash out from wallet balance (Variant A - Atomic reserve + request)
 // @route   POST /api/wallet/cash-out
 // @access  Private
 const requestCashOut = async (req, res, next) => {
@@ -1596,7 +2074,7 @@ const requestCashOut = async (req, res, next) => {
         // 1. Status check: əgər artıq eyni idempotencyKey varsa
         const existing = await CashOutRequest.findOne({ user: req.user._id, idempotencyKey });
         if (existing) {
-            if (existing.status === 'pending') {
+            if (existing.status === 'reserving' || existing.status === 'pending') {
                 const age = Date.now() - new Date(existing.createdAt).getTime();
                 if (age < 5 * 60 * 1000) { // 5 dəq içindədirsə
                     return res.status(200).json({
@@ -1606,14 +2084,14 @@ const requestCashOut = async (req, res, next) => {
                         idempotent: true
                     });
                 } else {
-                    // 5 dəq-dən çox pending qalıb = stuck, atomik claim et
+                    // 5 dəq-dən çox pending/reserving qalıb = stuck, atomik claim et
                     const stuckRequest = await CashOutRequest.findOneAndUpdate(
-                        { _id: existing._id, status: 'pending' },
+                        { _id: existing._id, status: { $in: ['reserving', 'pending'] } },
                         { $set: { status: 'failed', failureReason: 'timeout - stuck pending', failedAt: new Date() } },
                         { new: true }
                     );
                     if (!stuckRequest) {
-                        // başqa worker artıq failed edib, refund artıq olunub
+                        // başqa worker artıq claim edib, refund artıq olunub
                         const current = await CashOutRequest.findById(existing._id);
                         return res.status(200).json({
                             message: 'Sorğu artıq yenilənib',
@@ -1623,23 +2101,8 @@ const requestCashOut = async (req, res, next) => {
                         });
                     }
 
-                    // 2. YALNIZ 1 REFUND + REZERV YOXLAMA ($gte şərti ilə - mənfi rezerv olmaz)
-                    const user = await User.findById(req.user._id).select('walletReservedBalance walletBalance');
-                    if (user && (user.walletReservedBalance || 0) >= stuckRequest.amount) {
-                        await User.updateOne(
-                            { _id: req.user._id, walletReservedBalance: { $gte: stuckRequest.amount } },
-                            { $inc: { walletBalance: stuckRequest.amount, walletReservedBalance: -stuckRequest.amount } }
-                        );
-                    } else {
-                        console.error('CRITICAL reserve mismatch', req.user._id, stuckRequest.amount, user?.walletReservedBalance);
-                    }
-
-                    if (stuckRequest.reservedTransaction) {
-                        await Transaction.updateOne(
-                            { _id: stuckRequest.reservedTransaction },
-                            { status: 'failed' }
-                        ).catch(() => {});
-                    }
+                    // Idempotent refund
+                    await refundReserve(stuckRequest, { reason: 'timeout - stuck pending' });
 
                     return res.status(200).json({
                         message: 'Sorğu vaxtı bitdiyi üçün ləğv edildi və məbləğ balansınıza qaytarıldı',
@@ -1655,151 +2118,146 @@ const requestCashOut = async (req, res, next) => {
                     cashOut: existing
                 });
             } else if (existing.status === 'failed' || existing.status === 'rejected' || existing.status === 'cancelled') {
+                // Əvvəlki fail olunmuş sorğunun rezervi qalıbsa refund et, sonra təmizlə
+                await refundReserve(existing).catch(() => {});
                 await CashOutRequest.deleteOne({ _id: existing._id });
             }
         }
 
-        let result = null;
-        let session = null;
+        // Step 1: Əvvəl CashOutRequest yarad (status: 'reserving', idempotencyKey unique)
+        let cashOutDoc = null;
         try {
-            session = await mongoose.startSession();
-            session.startTransaction();
-
-            const user = await User.findById(req.user._id).session(session);
-            if (!user || user.walletBalance < amount) {
-                throw httpError(400, {
-                    message: 'Kifayət qədər balans yoxdur',
-                    required: amount,
-                    current: user?.walletBalance || 0
-                });
-            }
-
-            user.walletBalance = normalizeMoney(user.walletBalance - amount);
-            user.walletReservedBalance = normalizeMoney((user.walletReservedBalance || 0) + amount);
-            await user.save({ session });
-
             const [cashOut] = await CashOutRequest.create([{
                 user: req.user._id,
                 amount,
                 destination,
                 accountHolderDetails,
                 idempotencyKey,
-                status: 'pending'
-            }], { session });
-
-            const [tx] = await Transaction.create([{
-                user: user._id,
-                amount: -amount,
-                type: 'withdrawal',
-                description: `Çıxarış sorğusu - ${destination}`,
-                reference: cashOut._id.toString(),
-                status: 'pending',
-                balanceAfter: user.walletBalance
-            }], { session });
-
-            cashOut.reservedTransaction = tx._id;
-            await cashOut.save({ session });
-
-            result = cashOut;
-            await session.commitTransaction();
-        } catch (txError) {
-            if (session) {
-                await session.abortTransaction().catch(() => {});
-            }
-
-            if (txError.code === 11000) {
-                const existing = await CashOutRequest.findOne({ user: req.user._id, idempotencyKey });
-                if (existing) {
+                status: 'reserving',
+                walletReserved: false
+            }]);
+            cashOutDoc = cashOut;
+        } catch (createErr) {
+            if (createErr.code === 11000) {
+                const existingAfterRace = await CashOutRequest.findOne({ user: req.user._id, idempotencyKey });
+                if (existingAfterRace) {
                     return res.status(200).json({
                         message: 'Çıxarış sorğusu artıq mövcuddur',
-                        cashOut: existing,
+                        cashOut: existingAfterRace,
+                        request: existingAfterRace,
                         idempotent: true
                     });
                 }
             }
+            throw createErr;
+        }
 
-            // Fallback for standalone MongoDB environments without replica set
-            const isTxUnsupported = Boolean(
-                txError &&
-                (txError.message?.includes('replica set member') ||
-                 txError.message?.includes('Transaction numbers are only allowed') ||
-                 txError.code === 20 ||
-                 txError.codeName === 'IllegalOperation')
+        // Step 2: Sonra User.findOneAndUpdate ilə atomar balans reserve et ($gte şərti ilə)
+        let userDeducted = false;
+        let txDoc = null;
+        let result = null;
+        try {
+            const reserveKey = cashOutReserveOperationKey(cashOutDoc._id.toString());
+            let user = await User.findOneAndUpdate(
+                {
+                    _id: req.user._id,
+                    walletBalance: { $gte: amount },
+                    walletOperationKeys: { $ne: reserveKey }
+                },
+                {
+                    $inc: { walletBalance: -amount, walletReservedBalance: amount },
+                    $addToSet: { walletOperationKeys: reserveKey },
+                    $set: { updatedAt: new Date() }
+                },
+                { new: true, returnDocument: 'after' }
             );
-            if (isTxUnsupported) {
-                logger.warn('MongoDB transactions not supported on current topology; executing cash-out with compensating rollback');
-                let userDeducted = false;
-                let cashOutDoc = null;
-                let txDoc = null;
-                try {
-                    const user = await User.findById(req.user._id);
-                    if (!user || user.walletBalance < amount) {
-                        throw httpError(400, { message: 'Kifayət qədər balans yoxdur', required: amount, current: user?.walletBalance || 0 });
-                    }
-                    user.walletBalance = normalizeMoney(user.walletBalance - amount);
-                    user.walletReservedBalance = normalizeMoney((user.walletReservedBalance || 0) + amount);
-                    await user.save();
+            if (!user) {
+                const priorReserve = await User.findOne({ _id: req.user._id, walletOperationKeys: reserveKey }).select('_id');
+                if (priorReserve) {
                     userDeducted = true;
-
-                    const [cashOut] = await CashOutRequest.create([{
-                        user: req.user._id,
-                        amount,
-                        destination,
-                        accountHolderDetails,
-                        idempotencyKey,
-                        status: 'pending'
-                    }]);
-                    cashOutDoc = cashOut;
-
-                    const [tx] = await Transaction.create([{
-                        user: user._id,
-                        amount: -amount,
-                        type: 'withdrawal',
-                        description: `Çıxarış sorğusu - ${destination}`,
-                        reference: cashOut._id.toString(),
-                        status: 'pending',
-                        balanceAfter: user.walletBalance
-                    }]);
-                    txDoc = tx;
-
-                    cashOut.reservedTransaction = tx._id;
-                    await cashOut.save();
-                    result = cashOut;
-                } catch (fallbackErr) {
-                    if (userDeducted) {
-                        try {
-                            await User.updateOne(
-                                { _id: req.user._id },
-                                { $inc: { walletBalance: amount, walletReservedBalance: -amount } }
-                            );
-                        } catch (e) {
-                            console.error('CRITICAL rollback balance failed', e);
-                        }
-                    }
-                    if (cashOutDoc) {
-                        try {
-                            await CashOutRequest.updateOne(
-                                { _id: cashOutDoc._id },
-                                { status: 'failed', failureReason: fallbackErr.message }
-                            );
-                        } catch (e) {
-                            console.error('CRITICAL request failed status error', e);
-                        }
-                    }
-                    if (txDoc) {
-                        try {
-                            await Transaction.deleteOne({ _id: txDoc._id });
-                        } catch (e) {}
-                    }
-                    throw fallbackErr;
+                    user = await User.findById(req.user._id).select('walletBalance');
+                    if (!user) throw httpError(404, { message: 'Wallet or user not found' });
+                } else {
+                    await CashOutRequest.updateOne(
+                        { _id: cashOutDoc._id },
+                        { status: 'failed', failureReason: 'Kifayət qədər balans yoxdur', walletReserved: false }
+                    ).catch(() => {});
+                    const currentUser = await User.findById(req.user._id);
+                    throw httpError(400, {
+                        message: 'Kifayət qədər balans yoxdur',
+                        required: amount,
+                        current: currentUser?.walletBalance || 0
+                    });
                 }
             } else {
-                throw txError;
+                userDeducted = true;
             }
-        } finally {
-            if (session) {
-                await session.endSession().catch(() => {});
+
+            const reservedAt = new Date();
+            const reserveRecord = await CashOutRequest.updateOne(
+                { _id: cashOutDoc._id, status: 'reserving' },
+                { $set: { walletReserved: true, reservedAmount: amount, reservedAt } }
+            );
+            if (!reserveRecord || reserveRecord.matchedCount === 0) {
+                throw new Error('Cash-out request reservation state could not be persisted');
             }
+            cashOutDoc.walletReserved = true;
+            cashOutDoc.reservedAmount = amount;
+            cashOutDoc.reservedAt = reservedAt;
+
+            // Step 3: Transaction withdrawal record yarat
+            const [tx] = await Transaction.create([{
+                user: user._id,
+                userId: user._id,
+                amount: -amount,
+                type: 'withdrawal',
+                description: `Çıxarış sorğusu - ${destination}`,
+                reference: cashOutDoc._id.toString(),
+                idempotencyKey: `cashout:${cashOutDoc._id.toString()}`,
+                status: 'pending',
+                balanceAfter: user.walletBalance
+            }]);
+            txDoc = tx;
+
+            // Step 4: CashOutRequest status=pending, walletReserved=true
+            cashOutDoc.status = 'pending';
+            cashOutDoc.walletReserved = true;
+            cashOutDoc.reservedAmount = amount;
+            cashOutDoc.reservedAt = reservedAt;
+            cashOutDoc.reservedTransaction = tx._id;
+            await cashOutDoc.save();
+
+            result = cashOutDoc;
+        } catch (stepErr) {
+            let rollbackComplete = !userDeducted;
+            if (userDeducted) {
+                try {
+                    const refundResult = await refundReserve(cashOutDoc, {
+                        reason: stepErr.message,
+                        targetStatus: 'failed'
+                    });
+                    rollbackComplete = Boolean(refundResult.success || refundResult.alreadyRefunded);
+                    if (!rollbackComplete) {
+                        logger.error('CRITICAL cash-out reserve rollback did not complete', { cashOutId: cashOutDoc?._id, reason: refundResult.reason });
+                    }
+                } catch (e) {
+                    logger.error('CRITICAL cash-out reserve rollback failed', { cashOutId: cashOutDoc?._id, error: e.message });
+                }
+            }
+            if (cashOutDoc && !userDeducted) {
+                try {
+                    await CashOutRequest.updateOne(
+                        { _id: cashOutDoc._id },
+                        { status: 'failed', failureReason: stepErr.message, walletReserved: false }
+                    );
+                } catch (e) {
+                    console.error('CRITICAL request failed status error', e);
+                }
+            }
+            if (txDoc) {
+                await Transaction.updateOne({ _id: txDoc._id }, { status: rollbackComplete ? 'failed' : 'pending' }).catch(() => {});
+            }
+            throw stepErr;
         }
 
         if (result) {
@@ -1823,6 +2281,7 @@ const requestCashOut = async (req, res, next) => {
                 return res.status(200).json({
                     message: 'Çıxarış sorğusu artıq mövcuddur',
                     cashOut: existing,
+                    request: existing,
                     idempotent: true
                 });
             }
@@ -1871,23 +2330,12 @@ const adminReviewCashOut = async (req, res, next) => {
             const tx = await txQuery;
 
             if (status === 'rejected' || status === 'cancelled') {
-                const userUpdate = {
-                    $inc: { walletBalance: cashOut.amount, walletReservedBalance: -cashOut.amount }
-                };
-                const userQuery = User.updateOne(
-                    { _id: cashOut.user, walletReservedBalance: { $gte: cashOut.amount } },
-                    userUpdate
-                );
-                if (currentSession) userQuery.session(currentSession);
-                const userResult = await userQuery;
-
-                if (!userResult || userResult.modifiedCount === 0) {
+                const refundRes = await refundReserve(cashOut, {
+                    targetStatus: status,
+                    reason: rejectionReason
+                });
+                if (!refundRes.success && !refundRes.alreadyRefunded) {
                     throw httpError(400, { message: 'Balance update failed, user not found or insufficient' });
-                }
-
-                if (tx) {
-                    tx.status = 'failed';
-                    await (currentSession ? tx.save({ session: currentSession }) : tx.save());
                 }
 
                 const notifData = {
@@ -2014,50 +2462,113 @@ const adminReviewCashOut = async (req, res, next) => {
     }
 };
 
-// @desc    Reconcile stuck cash-out reserves (older than 24 hours in pending status)
+// @desc    Reconcile stuck cash-out reserves (reserving >5min, pending >30min, orphan reserves)
 // @returns {Object} summary of reconciled requests
 const reconcileStuckReserves = async () => {
-    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const stuckRequests = await CashOutRequest.find({
-        status: 'pending',
-        createdAt: { $lt: cutoff }
-    });
-
     let reconciledCount = 0;
     let totalRefunded = 0;
 
-    for (const item of stuckRequests) {
+    // 1. Stuck 'reserving' requests > 5 minutes
+    const reservingCutoff = new Date(Date.now() - 5 * 60 * 1000);
+    const stuckReserving = await CashOutRequest.find({
+        status: 'reserving',
+        createdAt: { $lt: reservingCutoff }
+    });
+
+    for (const item of stuckReserving) {
         try {
-            const userUpdate = await User.updateOne(
-                { _id: item.user, walletReservedBalance: { $gte: item.amount } },
-                { $inc: { walletBalance: item.amount, walletReservedBalance: -item.amount } }
-            );
+            const cashOutId = item._id.toString();
+            const reserveKey = cashOutReserveOperationKey(cashOutId);
+            const refundKey = cashOutRefundOperationKey(cashOutId);
+            const [reserveOperation, refundOperation] = await Promise.all([
+                User.findOne({ _id: item.user, walletOperationKeys: reserveKey }).select('_id'),
+                User.findOne({ _id: item.user, walletOperationKeys: refundKey }).select('_id')
+            ]);
 
-            if (userUpdate.modifiedCount > 0) {
+            if (refundOperation) {
                 item.status = 'failed';
-                item.rejectionReason = 'Avtomatik ləğv: 24 saat ərzində icra olunmayan sorğu ləğv edildi və vəsait balansa qaytarıldı';
+                item.walletReserved = false;
+                item.reservedAmount = 0;
+                item.failureReason = item.failureReason || 'Cash-out reserve was already refunded';
                 await item.save();
+                reconciledCount++;
+            } else if (item.walletReserved === true || reserveOperation) {
+                item.status = 'pending';
+                item.walletReserved = true;
+                item.reservedAmount = Number(item.reservedAmount || item.amount);
+                item.reservedAt = item.reservedAt || item.createdAt || new Date();
+                await item.save();
+                reconciledCount++;
+            } else {
+                item.status = 'failed';
+                item.walletReserved = false;
+                item.reservedAmount = 0;
+                item.failureReason = 'Timeout during reservation phase; reserve did not complete';
+                await item.save();
+                reconciledCount++;
+            }
+        } catch (resErr) {
+            console.error(`Error reconciling stuck reserving cashout ${item._id}:`, resErr.message);
+        }
+    }
 
-                if (item.reservedTransaction) {
-                    await Transaction.updateOne(
-                        { _id: item.reservedTransaction },
-                        { status: 'failed' }
-                    ).catch(() => {});
-                }
+    // 2. Stuck 'pending' requests > 30 minutes
+    const pendingCutoff = new Date(Date.now() - 30 * 60 * 1000);
+    const stuckPending = await CashOutRequest.find({
+        status: 'pending',
+        createdAt: { $lt: pendingCutoff }
+    });
 
+    for (const item of stuckPending) {
+        try {
+            const refundResult = await refundReserve(item, {
+                reason: 'Avtomatik ləğv: vaxtında tamamlanmayan sorğu ləğv edildi və vəsait balansa qaytarıldı',
+                targetStatus: 'failed'
+            });
+
+            if (refundResult.success && !refundResult.alreadyRefunded) {
                 await Notification.create([{
                     user: item.user,
                     type: 'system',
                     title: 'Çıxarış sorğusu ləğv edildi',
-                    body: `${item.amount} AZN məbləğində çıxarış sorğunuz 24 saat ərzində tamamlanmadığı üçün ləğv edildi və balansınıza qaytarıldı.`,
+                    body: `${item.amount} AZN məbləğində çıxarış sorğunuz vaxtında tamamlanmadığı üçün ləğv edildi və balansınıza qaytarıldı.`,
                     link: '/cabinet.html#wallet'
                 }]).catch(() => {});
 
                 reconciledCount++;
                 totalRefunded = normalizeMoney(totalRefunded + item.amount);
             }
-        } catch (err) {
-            console.error(`Error reconciling stuck cashout ${item._id}:`, err.message);
+        } catch (pendErr) {
+            console.error(`Error reconciling stuck pending cashout ${item._id}:`, pendErr.message);
+        }
+    }
+
+    // 3. Orphan reserves: users with walletReservedBalance > sum of active CashOutRequests
+    const usersWithReserves = await User.find({ walletReservedBalance: { $gt: 0 } });
+    for (const u of usersWithReserves) {
+        try {
+            const activeRequests = await CashOutRequest.find({
+                user: u._id,
+                status: { $in: ['reserving', 'pending', 'under_review', 'approved', 'processing'] }
+            });
+            const activeSum = activeRequests.reduce((sum, r) => sum + (r.amount || 0), 0);
+            if (u.walletReservedBalance > activeSum) {
+                const diff = normalizeMoney(u.walletReservedBalance - activeSum);
+                if (diff > 0) {
+                    const orphanRefund = await refundReserve(null, {
+                        userId: u._id,
+                        amount: diff,
+                        description: `Orphan reserve recovery - ${diff} AZN`,
+                        idempotencyKey: `orphan_refund:${u._id}:${Date.now()}`
+                    });
+                    if (orphanRefund.success) {
+                        reconciledCount++;
+                        totalRefunded = normalizeMoney(totalRefunded + diff);
+                    }
+                }
+            }
+        } catch (orphanErr) {
+            console.error(`Error reconciling orphan reserve for user ${u._id}:`, orphanErr.message);
         }
     }
 
@@ -2077,10 +2588,18 @@ module.exports = {
     topUpWallet: topUp,
     completeTopUpPayment,
     requestCashOut,
+    createCashOutRequest: requestCashOut,
+    cashOut: requestCashOut,
+    refundReserve,
     adminReviewCashOut,
     reconcileStuckReserves
 };
 module.exports.completeTopUpPayment = completeTopUpPayment;
+module.exports.requestCashOut = requestCashOut;
+module.exports.createCashOutRequest = requestCashOut;
+module.exports.cashOut = requestCashOut;
+module.exports.refundReserve = refundReserve;
+module.exports.reconcileStuckReserves = reconcileStuckReserves;
 
 module.exports._test = {
     validatePaymentCallbackMatch,

@@ -34,7 +34,7 @@ async function runTest() {
 
         console.log('--- TEST 3: With secret, calls axios and returns payUrl and providerSessionId ---');
         process.env.PAYRIFF_SECRET = 'test_secret_live_key';
-        process.env.API_PUBLIC_ORIGIN = 'https://api.mobil.az';
+        process.env.API_PUBLIC_ORIGIN = 'https://api.mobilim.az';
 
         // Mock axios.post
         const originalPost = axios.post;
@@ -58,8 +58,8 @@ async function runTest() {
         assert.strictEqual(interceptedRequest.data.amount, 100);
         assert.strictEqual(interceptedRequest.data.currency, 'AZN');
         assert.strictEqual(interceptedRequest.data.language, 'AZ');
-        assert.strictEqual(interceptedRequest.data.description, 'Mobil.az top-up 100 AZN');
-        assert.strictEqual(interceptedRequest.data.callbackUrl, 'https://api.mobil.az/api/wallet/callback/payriff/pay_session_live_1');
+        assert.strictEqual(interceptedRequest.data.description, 'Mobilim.az top-up 100 AZN');
+        assert.strictEqual(interceptedRequest.data.callbackUrl, 'https://api.mobilim.az/api/wallet/callback/payriff/pay_session_live_1');
         assert.strictEqual(interceptedRequest.data.metadata.userId, 'user456');
         assert.strictEqual(interceptedRequest.data.metadata.sessionId, 'pay_session_live_1');
         assert.strictEqual(interceptedRequest.data.operation, 'PURCHASE');

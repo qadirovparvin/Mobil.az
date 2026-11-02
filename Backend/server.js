@@ -4,6 +4,21 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: require('path').join(__dirname, '.env') });
 
+// Validate critical security environment constraints in production
+if (process.env.NODE_ENV === 'production') {
+    if (process.env.DISABLE_RATE_LIMIT === 'true') {
+        throw new Error('DISABLE_RATE_LIMIT blocked in production');
+    }
+    if (!process.env.REDIS_URL) {
+        console.error('FATAL: REDIS_URL required in production for rate limiting');
+        throw new Error('REDIS_URL required in production for rate limiting');
+    }
+}
+
+const redisConfig = require('./config/redis');
+const { redisClient, waitForRedisReady } = redisConfig;
+const os = require('os');
+
 if (process.env.SENTRY_DSN) {
     Sentry.init({
         dsn: process.env.SENTRY_DSN,
@@ -212,9 +227,36 @@ const isAdminRequest = (req) => {
 };
 
 // ── Rate Limiters ─────────────────────────────────────────
+const { RedisStore } = require('rate-limit-redis');
+
+function createServerLimiterStore(prefix) {
+    if (!redisClient) {
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('Redis client not ready - fail closed, do not fallback to memory in production');
+        }
+        return undefined;
+    }
+
+    if (process.env.NODE_ENV !== 'production' && redisClient.status !== 'ready') return undefined;
+
+    try {
+        return new RedisStore({
+            sendCommand: (...args) => redisClient.call(...args),
+            prefix
+        });
+    } catch (error) {
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error(`Redis server rate-limit store initialization failed: ${error.message}`);
+        }
+        return undefined;
+    }
+}
+
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
     max: process.env.NODE_ENV === 'production' ? 1000 : 10000,
+    store: createServerLimiterStore('rl:global:'),
+    passOnStoreError: false,
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => isAdminRequest(req) || req.ip === '127.0.0.1' || req.ip === '::1' || req.ip === '::ffff:127.0.0.1' || process.env.NODE_ENV !== 'production',
@@ -224,6 +266,8 @@ const globalLimiter = rateLimit({
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
     max: 30,                    // max 30 login/register attempts per 15min
+    store: createServerLimiterStore('rl:auth:'),
+    passOnStoreError: false,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Çox sayda giriş cəhdi. 15 dəqiqə sonra yenidən cəhd edin.' }
@@ -232,6 +276,8 @@ const authLimiter = rateLimit({
 const strictLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
     max: 15,                     // max 15 requests per 15 minutes
+    store: createServerLimiterStore('rl:strict:'),
+    passOnStoreError: false,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Çox sayda sorğu göndərildi. Zəhmət olmasa 15 dəqiqə sonra yenidən cəhd edin.' }
@@ -240,6 +286,8 @@ const strictLimiter = rateLimit({
 const passwordResetLimiter = rateLimit({
     windowMs: Number(process.env.PASSWORD_RESET_RATE_WINDOW_MS || 60 * 60 * 1000),
     max: Number(process.env.PASSWORD_RESET_RATE_LIMIT || 5),
+    store: createServerLimiterStore('rl:reset:'),
+    passOnStoreError: false,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Əgər bu email qeydiyyatdan keçibsə, sıfırlama linki göndəriləcək' }
@@ -248,6 +296,8 @@ const passwordResetLimiter = rateLimit({
 const uploadLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: Number(process.env.UPLOAD_RATE_LIMIT || 20),
+    store: createServerLimiterStore('rl:upload:'),
+    passOnStoreError: false,
     standardHeaders: true,
     legacyHeaders: false,
     message: { message: 'Çox sayda yükləmə sorğusu. Zəhmət olmasa bir az sonra yenidən cəhd edin.' }
@@ -333,9 +383,20 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
 });
 
+app.get('/api/health-detailed', (req, res) => {
+    const isRedisReady = redisConfig.isReady;
+    res.json({
+        redis: isRedisReady ? 'connected' : 'disconnected',
+        rateLimiterStore: redisConfig.isReady ? 'redis' : (process.env.NODE_ENV === 'production' ? 'redis-required' : 'memory'),
+        workers: os.cpus().length,
+        pid: process.pid,
+        uptime: process.uptime()
+    });
+});
+
 app.get('/', (req, res) => {
     res.json({
-        message: 'Mobil.az API v1.0',
+        message: 'Mobilim.az API v1.0',
         status:  'running',
         endpoints: {
             auth:          '/api/auth',
@@ -600,11 +661,21 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, '0.0.0.0', () => {
-    logger.info(`🚀 Server running on http://localhost:${PORT}`);
-    if (typeof process.send === 'function') {
-        process.send('ready');
+const startServer = async () => {
+    if (process.env.NODE_ENV === 'production') {
+        await waitForRedisReady(Number(process.env.REDIS_STARTUP_TIMEOUT_MS || 10000));
     }
+    server.listen(PORT, '0.0.0.0', () => {
+        logger.info(`🚀 Server running on http://localhost:${PORT}`);
+        if (typeof process.send === 'function') {
+            process.send('ready');
+        }
+    });
+};
+
+startServer().catch((error) => {
+    logger.error('Fatal server startup error; HTTP listener was not started', { error: error.message });
+    process.exit(1);
 });
 
 // ── Graceful Shutdown ─────────────────────────────────────

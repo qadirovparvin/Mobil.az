@@ -1,5 +1,5 @@
 /**
- * Mobil.az — Centralized API Client & Axios Interceptor
+ * Mobilim.az — Centralized API Client & Axios Interceptor
  * 
  * Features:
  * - Axios instance configured with baseURL and withCredentials: true (HTTP-only cookies).

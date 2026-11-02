@@ -1,5 +1,5 @@
 /**
- * Mobil.az — Centralized API Configuration
+ * Mobilim.az — Centralized API Configuration
  * 
  * This file sets the global API base URL used by all frontend scripts.
  * Update this value when deploying to staging or production.
@@ -12,7 +12,7 @@ var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes
 
 function resolveDefaultApiUrl() {
     if (!hostname) console.warn('config.js hostname undefined');
-    if (!isLocal) return 'https://api.mobil.az/api';
+    if (!isLocal) return 'https://api.mobilim.az/api';
     if (hostname && !['localhost', '127.0.0.1', '::1', '[::1]', '0.0.0.0'].includes(hostname)) {
         const proto = (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') ? 'https:' : 'http:';
         return `${proto}//${hostname}:5000/api`;

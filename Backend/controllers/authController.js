@@ -235,7 +235,7 @@ const createWelcomeNotification = async (userId) => {
     await Notification.create({
         user:  userId,
         type:  'system',
-        title: 'Mobil.az-a xoş gəldiniz! 🎉',
+        title: 'Mobilim.az-a xoş gəldiniz! 🎉',
         body:  'Hesabınız uğurla yaradıldı. İlk elanınızı əlavə edin!',
         link:  '/elan-yerlesdir.html'
     });
@@ -283,14 +283,19 @@ const register = async (req, res, next) => {
         }
 
         // Hash password
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Resolve referrer
         let referrer = null;
         if (referralCode) {
             const cleanReferral = readString(referralCode, { fieldName: 'referralCode', maxLength: 32, uppercase: true });
-            referrer = await User.findOne({ referralCode: cleanReferral });
+            if (cleanReferral) {
+                referrer = await User.findOne({ referralCode: cleanReferral });
+                if (!referrer) {
+                    return res.status(400).json({ message: 'Daxil edilən referal kod etibarsızdır' });
+                }
+            }
         }
 
         const verifyToken = crypto.randomBytes(32).toString('hex');
@@ -444,8 +449,8 @@ const login = async (req, res, next) => {
                             const sendEmail = require('../utils/sendEmail');
                             await sendEmail({
                                 email: user.email,
-                                subject: 'Mobil.az - Giriş üçün təsdiq kodu',
-                                html: `<div style="font-family:sans-serif;padding:20px;"><h2>Mobil.az Giriş Kodu</h2><p>Giriş üçün 6 rəqəmli təsdiq kodunuz:</p><h1 style="color:#7c3aed;letter-spacing:5px;">${code}</h1><p>Bu kod 5 dəqiqə ərzində etibarlıdır.</p></div>`
+                                subject: 'Mobilim.az - Giriş üçün təsdiq kodu',
+                                html: `<div style="font-family:sans-serif;padding:20px;"><h2>Mobilim.az Giriş Kodu</h2><p>Giriş üçün 6 rəqəmli təsdiq kodunuz:</p><h1 style="color:#7c3aed;letter-spacing:5px;">${code}</h1><p>Bu kod 5 dəqiqə ərzində etibarlıdır.</p></div>`
                             });
                         } catch (err) {
                             logger.warn(`SMTP send failed: ${err.message}`);
@@ -716,8 +721,8 @@ const sendOtp = async (req, res, next) => {
                 const sendEmail = require('../utils/sendEmail');
                 await sendEmail({
                     email: cleanIdentifier,
-                    subject: 'Mobil.az - Təsdiq kodu',
-                    html: `<div style="font-family:sans-serif;padding:20px;"><h2>Mobil.az Təsdiq Kodu</h2><p>Təsdiq kodunuz:</p><h1 style="color:#7c3aed;letter-spacing:5px;">${code}</h1><p>Bu kod 5 dəqiqə ərzində etibarlıdır.</p></div>`
+                    subject: 'Mobilim.az - Təsdiq kodu',
+                    html: `<div style="font-family:sans-serif;padding:20px;"><h2>Mobilim.az Təsdiq Kodu</h2><p>Təsdiq kodunuz:</p><h1 style="color:#7c3aed;letter-spacing:5px;">${code}</h1><p>Bu kod 5 dəqiqə ərzində etibarlıdır.</p></div>`
                 });
             } catch (err) {
                 logger.warn(`SMTP send failed: ${err.message}`);
@@ -950,7 +955,7 @@ const forgotPassword = async (req, res, next) => {
                 subject: 'Password Reset / Şifrənin Sıfırlanması',
                 html: `<div style="font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a; background-color: #f9f9f9; border-radius: 8px;">
   <div style="text-align: center; margin-bottom: 30px;">
-    <h2 style="color: #2563eb; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.05em;">Mobil.az</h2>
+    <h2 style="color: #2563eb; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.05em;">Mobilim.az</h2>
   </div>
   <div style="background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.035); border: 1px solid #e5e7eb;">
     <h1 style="font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 16px; color: #111827;">Şifrənin Sıfırlanması</h1>
@@ -961,7 +966,7 @@ const forgotPassword = async (req, res, next) => {
     <p style="font-size: 13px; line-height: 1.5; color: #9ca3af; margin-bottom: 0;">Bu link 15 dəqiqə ərzində etibarlıdır. Əgər bu müraciəti siz etməmisinizsə, bu emaili sadəcə görməzdən gələ bilərsiniz.</p>
   </div>
   <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #9ca3af;">
-    &copy; ${new Date().getFullYear()} Mobil.az. Bütün hüquqlar qorunur.
+    &copy; ${new Date().getFullYear()} Mobilim.az. Bütün hüquqlar qorunur.
   </div>
 </div>`
             });
@@ -1006,7 +1011,7 @@ const resetPassword = async (req, res, next) => {
             return res.status(400).json({ message: 'Keçərsiz və ya vaxtı keçmiş token' });
         }
 
-        const salt = await bcrypt.genSalt(10);
+        const salt = await bcrypt.genSalt(12);
         user.password         = await bcrypt.hash(newPassword, salt);
         user.resetToken       = null;
         user.resetTokenExpiry = null;

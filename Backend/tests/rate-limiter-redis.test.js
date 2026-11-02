@@ -60,7 +60,8 @@ async function runTests() {
         ip: middlewareIp,
         method: 'POST',
         originalUrl: '/api/auth/login',
-        headers: {}
+        headers: {},
+        app: { get: () => false }
     });
 
     // First 5 attempts should pass through to next()
@@ -68,7 +69,8 @@ async function runTests() {
         let nextCalled = false;
         const resObj = {
             status: () => resObj,
-            json: () => resObj
+            json: () => resObj,
+            setHeader: () => {}
         };
         await loginLimiter(makeReq(), resObj, () => {
             nextCalled = true;
@@ -88,7 +90,8 @@ async function runTests() {
         json: (payload) => {
             returnedBody = payload;
             return resBlocked;
-        }
+        },
+        setHeader: () => {}
     };
 
     await loginLimiter(makeReq(), resBlocked, () => {
@@ -103,7 +106,7 @@ async function runTests() {
     console.log('\n--- TEST 3: Multiple IPs are tracked independently ---');
     const anotherIp = `172.16.0.${Math.floor(Math.random() * 200 + 1)}`;
     let anotherNextCalled = false;
-    await loginLimiter({ ip: anotherIp, method: 'POST', originalUrl: '/api/auth/login', headers: {} }, resBlocked, () => {
+    await loginLimiter({ ip: anotherIp, method: 'POST', originalUrl: '/api/auth/login', headers: {}, app: { get: () => false } }, resBlocked, () => {
         anotherNextCalled = true;
     });
     assert.strictEqual(anotherNextCalled, true, 'Different IP must be allowed even when first IP is blocked');

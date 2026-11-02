@@ -1,7 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", function () {
-    const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobil.az/api');
+    const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : 'https://api.mobilim.az/api');
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
     const DEFAULT_AD_IMAGE = "assets/images/default-ad.svg";
 

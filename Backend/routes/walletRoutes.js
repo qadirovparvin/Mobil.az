@@ -29,8 +29,15 @@ router.get('/payments/:paymentId/mock-checkout', mockCheckoutPage);
 router.post('/payments/:paymentId/callback', extractWebhookMetadata, handlePaymentCallback);
 router.post('/callback/payriff/:paymentId', extractWebhookMetadata, handlePaymentCallback);
 router.post('/callback/payriff', extractWebhookMetadata, (req, res, next) => {
-    if (req.body?.sessionId && !req.params.paymentId) {
-        req.params.paymentId = req.body.sessionId;
+    if (!req.params.paymentId) {
+        req.params.paymentId = req.body?.sessionId || req.body?.paymentId || req.body?.orderId;
+    }
+    handlePaymentCallback(req, res, next);
+});
+router.post('/webhook/payriff/:paymentId', extractWebhookMetadata, handlePaymentCallback);
+router.post('/webhook/payriff', extractWebhookMetadata, (req, res, next) => {
+    if (!req.params.paymentId) {
+        req.params.paymentId = req.body?.sessionId || req.body?.paymentId || req.body?.orderId;
     }
     handlePaymentCallback(req, res, next);
 });

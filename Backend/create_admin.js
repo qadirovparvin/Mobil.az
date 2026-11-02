@@ -30,7 +30,7 @@ const createAdmin = async () => {
 
     await User.create({
         name: 'Admin',
-        lastName: 'Mobil.az',
+        lastName: 'Mobilim.az',
         email: email,
         password: password,
         phone: '+994000000000',

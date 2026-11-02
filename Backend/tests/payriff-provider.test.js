@@ -14,7 +14,7 @@ process.env.PAYRIFF_SECRET = 'payriff-api-test-secret-only';
 process.env.PAYRIFF_WEBHOOK_SECRET = 'payriff-webhook-test-secret-only';
 process.env.PAYRIFF_SIGNATURE_HEADER = 'x-payriff-signature';
 process.env.PAYMENT_WEBHOOK_SECRET = 'test-webhook-secret';
-process.env.API_PUBLIC_ORIGIN = 'https://api.mobil.az';
+process.env.API_PUBLIC_ORIGIN = 'https://api.mobilim.az';
 process.env.NODE_ENV = 'test';
 
 try {
@@ -86,7 +86,7 @@ try {
     process.env.NODE_ENV = 'production';
     process.env.PAYMENT_PROVIDER = 'mock';
     assert.throws(() => {
-        payriffProvider.createMockSession({ paymentId: 'pay_prod_123' }, 'https://api.mobil.az');
+        payriffProvider.createMockSession({ paymentId: 'pay_prod_123' }, 'https://api.mobilim.az');
     }, /MOCK_PAYMENT_BLOCKED_IN_PRODUCTION/, 'createMockSession must throw MOCK_PAYMENT_BLOCKED_IN_PRODUCTION in production');
 
     assert.rejects(async () => {
@@ -166,7 +166,7 @@ try {
             process.env.NODE_ENV = 'development';
 
             const session = await payriffProvider.createSession(25, 'user_123', 'sess_abc', {
-                origin: 'https://test.mobil.az'
+                origin: 'https://test.mobilim.az'
             });
 
             assert.strictEqual(interceptedUrl, 'https://sandbox.payriff.com/api/v3/orders');

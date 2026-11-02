@@ -290,8 +290,8 @@ async function loadNotifications() {
         listEl.replaceChildren();
         items.forEach(n => {
             const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleDateString('az-AZ', { hour: '2-digit', minute: '2-digit' }) : '';
-            const title = (n.title || '').replace(/AiryPhone/gi, 'Mobil.az');
-            const content = (n.body || n.message || '').replace(/AiryPhone/gi, 'Mobil.az');
+            const title = (n.title || '').replace(/AiryPhone|Mobil\.az/gi, 'Mobilim.az');
+            const content = (n.body || n.message || '').replace(/AiryPhone|Mobil\.az/gi, 'Mobilim.az');
 
             const itemDiv = document.createElement('div');
             itemDiv.className = `notif-item ${n.isRead || n.read ? '' : 'unread'}`;

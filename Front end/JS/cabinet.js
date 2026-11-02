@@ -1301,8 +1301,8 @@ document.addEventListener('DOMContentLoaded', () => {
         userReferralBalance = Number(user.referralCredits || 0);
         if (referralLink) {
             referralLink.value = user.referralCode
-                ? `https://mobil.az/ref/${user.referralCode}`
-                : 'https://mobil.az/ref/...';
+                ? `https://mobilim.az/ref/${user.referralCode}`
+                : 'https://mobilim.az/ref/...';
         }
         if (facebookProfileName) facebookProfileName.textContent = displayName;
 

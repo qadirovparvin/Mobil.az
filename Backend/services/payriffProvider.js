@@ -109,7 +109,7 @@ const createSession = async (amount, userId, sessionId, context = {}) => {
             amount: Number(amount),
             currency: 'AZN',
             language: 'AZ',
-            description: `Mobil.az top-up ${amount} AZN`,
+            description: `Mobilim.az top-up ${amount} AZN`,
             callbackUrl: `${BASE_URL}/api/wallet/callback/payriff/${actualSessionId}`,
             metadata: {
                 userId: String(userId),

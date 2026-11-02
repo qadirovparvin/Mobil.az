@@ -6,7 +6,7 @@ const sendEmail = async (options) => {
     const user = process.env.EMAIL_USER || process.env.SMTP_USER;
     const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
     const port = parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT, 10) || 587;
-    const from = process.env.EMAIL_FROM || user || 'noreply@mobil.az';
+    const from = process.env.EMAIL_FROM || user || 'noreply@mobilim.az';
 
     const hasSmtp = Boolean(host && user && pass);
 
@@ -33,7 +33,7 @@ const sendEmail = async (options) => {
     });
 
     const mailOptions = {
-        from: `Mobil.az <${from}>`,
+        from: `Mobilim.az <${from}>`,
         to: options.email,
         subject: options.subject,
         html: options.html || options.message,

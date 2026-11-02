@@ -23,13 +23,16 @@ const cashOutRequestSchema = new mongoose.Schema({
         }
     }, // Not full card details!
     idempotencyKey: { type: String, required: true },
+    walletReserved: { type: Boolean, default: false },
+    reservedAmount: { type: Number, default: 0, min: 0 },
+    reservedAt: { type: Date, default: null },
     reservedTransaction: { type: mongoose.Schema.Types.ObjectId, ref: 'Transaction', default: null },
     reviewedAt: { type: Date, default: null },
     processedAt: { type: Date, default: null },
     paidAt: { type: Date, default: null },
     status: {
         type: String,
-        enum: ['pending', 'under_review', 'approved', 'processing', 'paid', 'completed', 'rejected', 'cancelled', 'failed'],
+        enum: ['reserving', 'pending', 'under_review', 'approved', 'processing', 'paid', 'completed', 'rejected', 'cancelled', 'failed'],
         default: 'pending'
     },
     adminId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -40,5 +43,9 @@ const cashOutRequestSchema = new mongoose.Schema({
 cashOutRequestSchema.index({ user: 1, status: 1 });
 cashOutRequestSchema.index({ status: 1, createdAt: -1 });
 cashOutRequestSchema.index({ user: 1, idempotencyKey: 1 }, { unique: true });
+cashOutRequestSchema.index({ idempotencyKey: 1 });
 
-module.exports = mongoose.model('CashOutRequest', cashOutRequestSchema);
+const CashOutRequest = mongoose.model('CashOutRequest', cashOutRequestSchema);
+CashOutRequest.CashOut = CashOutRequest;
+
+module.exports = CashOutRequest;

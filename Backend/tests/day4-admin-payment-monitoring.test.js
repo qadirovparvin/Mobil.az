@@ -40,7 +40,7 @@ async function runTest() {
     const vm = require('vm');
     const sandboxProd = {
         process: { env: { NODE_ENV: 'production' } },
-        window: { location: { hostname: 'mobil.az' } },
+        window: { location: { hostname: 'mobilim.az' } },
         document: { addEventListener: () => {}, getElementById: () => null },
         localStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} },
         sessionStorage: { getItem: () => null, setItem: () => {}, removeItem: () => {} }

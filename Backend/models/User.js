@@ -27,6 +27,7 @@ const userSchema = new mongoose.Schema({
     walletPendingBalance: { type: Number, default: 0, min: 0 },
     walletReservedBalance: { type: Number, default: 0, min: 0 },
     walletPromoBalance: { type: Number, default: 0, min: 0 },
+    walletOperationKeys: { type: [String], default: [], select: false },
 
     // ── Reviews ───────────────────────────────────────────
     rating: { type: Number, default: 0 },
@@ -154,11 +155,103 @@ userSchema.index({ 'refreshTokens.tokenHash': 1 });
 userSchema.index({ 'refreshTokens.sessionId': 1 });
 userSchema.index({ tokenVersion: 1 });
 
+function generateReferralCode() {
+    return 'AP-' + crypto.randomBytes(8).toString('hex').toUpperCase();
+}
+
 // Auto-generate a unique referral code before saving a new user
-userSchema.pre('save', function () {
+userSchema.pre('save', async function () {
     if (!this.referralCode) {
-        this.referralCode = 'AP-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+        const User = this.constructor;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                const candidate = generateReferralCode();
+                if (User && typeof User.findOne === 'function') {
+                    const exists = await User.findOne({ referralCode: candidate }).lean();
+                    if (!exists) {
+                        this.referralCode = candidate;
+                        break;
+                    }
+                } else {
+                    this.referralCode = candidate;
+                    break;
+                }
+            } catch (err) {
+                if (err && (err.code === 11000 || err.codeName === 'DuplicateKey')) {
+                    continue; // retry
+                }
+                throw err;
+            }
+        }
+        if (!this.referralCode) {
+            this.referralCode = generateReferralCode();
+        }
     }
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Auto-recover from rare concurrent E11000 duplicate key race on referralCode
+userSchema.post('save', function (error, doc, next) {
+    const targetDoc = this || doc;
+    const isDuplicateKey = Boolean(error && (error.code === 11000 || error.codeName === 'DuplicateKey'));
+    const isReferralField = Boolean(
+        error && (
+            error.keyPattern?.referralCode ||
+            (error.keyValue && error.keyValue.referralCode) ||
+            (typeof error.message === 'string' && error.message.includes('referralCode'))
+        )
+    );
+
+    if (isDuplicateKey && isReferralField && targetDoc) {
+        if ((targetDoc._referralRetryCount || 0) >= 5) {
+            console.error(`Referral code generation failed after ${targetDoc._referralRetryCount} retries for ${targetDoc.email || targetDoc._id}`);
+            return next(new Error('Referral code generation failed after retries'));
+        }
+        console.warn(`Referral collision intercepted for ${targetDoc.email || targetDoc._id}`);
+    }
+    next(error);
+});
+
+userSchema.statics.generateReferralCode = generateReferralCode;
+
+const User = mongoose.model('User', userSchema);
+User.generateReferralCode = generateReferralCode;
+
+// Wrap save to transparently auto-recover on concurrent E11000 collision
+const originalSave = User.prototype.save;
+User.prototype.save = async function (...args) {
+    let retries = 0;
+    while (true) {
+        try {
+            return await originalSave.apply(this, args);
+        } catch (error) {
+            const isDuplicateKey = Boolean(error && (error.code === 11000 || error.codeName === 'DuplicateKey'));
+            const isReferralField = Boolean(
+                error && (
+                    error.keyPattern?.referralCode ||
+                    (error.keyValue && error.keyValue.referralCode) ||
+                    (typeof error.message === 'string' && error.message.includes('referralCode'))
+                )
+            );
+
+            if (isDuplicateKey && isReferralField) {
+                if (retries >= 5) {
+                    console.error(`Referral code generation failed after ${retries} retries for ${this.email || this._id}`);
+                    throw new Error('Referral code generation failed after retries');
+                }
+                retries++;
+                this._referralRetryCount = retries;
+                console.warn(`Referral collision for ${this.email || this._id}, retrying (attempt #${retries})...`);
+                this.referralCode = generateReferralCode();
+                this.markModified('referralCode');
+                this.$isNew = true;
+                if (this.$__) {
+                    this.$__.saving = null;
+                }
+                continue;
+            }
+            throw error;
+        }
+    }
+};
+
+module.exports = User;

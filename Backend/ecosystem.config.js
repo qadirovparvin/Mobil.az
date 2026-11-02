@@ -1,12 +1,12 @@
 /**
- * PM2 Application Configuration for Mobil.az Backend API
+ * PM2 Application Configuration for Mobilim.az Backend API
  *
  * Usage:
  *   pm2 start ecosystem.config.js --env production
  *   pm2 reload ecosystem.config.js --env production   (Zero-Downtime Reload)
  *   pm2 restart ecosystem.config.js
  *   pm2 stop ecosystem.config.js
- *   pm2 logs mobilaz-backend
+ *   pm2 logs mobilimaz-backend
  *   pm2 monit
  */
 
@@ -15,7 +15,7 @@ const path = require('path');
 module.exports = {
     apps: [
         {
-            name: 'mobilaz-backend',
+            name: 'mobilimaz-backend',
             script: 'server.js',
             cwd: __dirname,
 

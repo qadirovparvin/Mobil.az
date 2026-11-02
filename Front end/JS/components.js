@@ -4,7 +4,7 @@ const headerTemplate = `
 <header>
     <div class="container">
       <a href="index.html" class="logo">
-        <span class="mobil-logo">Mobil<span>.az</span></span>
+        <span class="mobil-logo">Mobilim<span>.az</span></span>
       </a>
 
       <button class="hamburger" id="hamburgerBtn" aria-label="Menu" aria-expanded="false">
@@ -20,7 +20,7 @@ const headerTemplate = `
                 <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
                 <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
                 <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                <a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> Email</a>
+                <a href="mailto:info@mobilim.az"><i class="fas fa-envelope"></i> Email</a>
               </div>
             </li>
             <li class="About" data-translate="About">
@@ -79,7 +79,7 @@ const footerTemplate = `
         <h3 class="contact" data-translate="contact">Əlaqə</h3>
         <ul>
           <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>
-          <li><a href="mailto:info@mobilaz.az"><i class="fas fa-envelope"></i> info@mobilaz.az</a></li>
+          <li><a href="mailto:info@mobilim.az"><i class="fas fa-envelope"></i> info@mobilim.az</a></li>
         </ul>
         <div class="social-icons">
           <a href="#"><i class="fab fa-facebook-f"></i></a>
@@ -89,7 +89,7 @@ const footerTemplate = `
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; ${currentYear} Mobil.az. Bütün hüquqlar qorunur.</p>
+      <p>&copy; ${currentYear} Mobilim.az. Bütün hüquqlar qorunur.</p>
     </div>
   </footer>
 `;

@@ -14,7 +14,7 @@ const priceSnapshotSchema = new mongoose.Schema({
 
 const paymentSessionSchema = new mongoose.Schema({
     paymentId: { type: String, required: true, unique: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, alias: 'userId' },
     package: { type: mongoose.Schema.Types.ObjectId, ref: 'Package', default: null },
     kind: { type: String, enum: ['package_wallet', 'package_provider', 'wallet_topup', 'topup'], required: true },
     idempotencyKey: { type: String, default: '' },
@@ -31,7 +31,11 @@ const paymentSessionSchema = new mongoose.Schema({
         enum: ['pending', 'processing', 'completed', 'failed', 'expired'],
         default: 'pending'
     },
+    walletCredited: { type: Boolean, default: false },
+    walletCreditingAt: { type: Date, default: null },
+    walletCreditVersion: { type: Number, default: 0, min: 0 },
     lastEventId: { type: String, default: null },
+    lastCallbackAt: { type: Date, default: null },
     expiresAt: { type: Date, required: true },
     completedAt: { type: Date, default: null },
     activatedAt: { type: Date, default: null },
@@ -48,5 +52,9 @@ paymentSessionSchema.index(
 );
 paymentSessionSchema.index({ status: 1, expiresAt: 1 });
 paymentSessionSchema.index({ providerReference: 1 });
+paymentSessionSchema.index({ walletCredited: 1 });
 
-module.exports = mongoose.model('PaymentSession', paymentSessionSchema);
+const PaymentSession = mongoose.model('PaymentSession', paymentSessionSchema);
+PaymentSession.PaymentRequest = PaymentSession;
+
+module.exports = PaymentSession;

@@ -3,10 +3,20 @@
     "seed": "npm --prefix Backend run seed",
     "seed_admin": "npm --prefix Backend run seed_admin",
     "check": "npm --prefix Backend run check",
-    "test:security": "npm --prefix Backend run test:security"
+    "test:security": "npm --prefix Backend run test:security",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:all": "npm run check && npm run test:security && npm run test:e2e"
   },
   "dependencies": {
     "dotenv": "^18.0.8",
     "playwright": "^1.61.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.6",
+    "http-server": "^14.1.1",
+    "typescript": "^7.0.2"
   }
 }

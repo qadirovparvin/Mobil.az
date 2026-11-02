@@ -1,12 +1,11 @@
-# Mobil.az
+# Mobilim.az
 
-Mobil.az is a mobile-device marketplace with a static frontend and a Node.js/Express backend.
+Mobilim.az is a mobile-device marketplace with a static frontend and a Node.js/Express backend.
 
 ## Structure
 
 - `Front end/`: HTML, CSS, JavaScript, and TypeScript frontend files
 - `Backend/`: main Express and MongoDB backend API
-- `Back end/`: older minimal backend stub kept in the workspace
 
 ## Local setup
 
@@ -34,7 +33,7 @@ Set real values in `Backend/.env` before starting the API.
 
 ## Production Deployment (PM2)
 
-Mobil.az backend is configured for high availability using **PM2 Cluster Mode** with zero-downtime rolling reload.
+Mobilim.az backend is configured for high availability using **PM2 Cluster Mode** with zero-downtime rolling reload.
 
 ### 1. Prerequisites
 - Node.js >= 18.x
@@ -78,7 +77,7 @@ npm run pm2:monit
 
 # View aggregated logs
 npm run pm2:logs
-# or: pm2 logs mobilaz-backend
+# or: pm2 logs mobilimaz-backend
 
 # Stop or restart processes
 npm run pm2:stop

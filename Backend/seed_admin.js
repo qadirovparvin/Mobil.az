@@ -34,7 +34,7 @@ const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const ADMIN_PHONE    = process.env.ADMIN_PHONE;
 const ADMIN_NAME     = process.env.ADMIN_NAME || 'Admin';
-const ADMIN_LASTNAME = process.env.ADMIN_LASTNAME || 'Mobil.az';
+const ADMIN_LASTNAME = process.env.ADMIN_LASTNAME || 'Mobilim.az';
 
 /* ── Main ──────────────────────────────────────────────────── */
 async function seedAdmin() {

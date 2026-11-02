@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Samsung Galaxy S24 Ultra 512GB — Mobil.az</title>
-  <meta name="description" content="Samsung Galaxy S24 Ultra 512GB, Titan Qara, yeni vəziyyətdə, 2 200 AZN, Bakı — Mobil.az">
+  <title>Samsung Galaxy S24 Ultra 512GB — Mobilim.az</title>
+  <meta name="description" content="Samsung Galaxy S24 Ultra 512GB, Titan Qara, yeni vəziyyətdə, 2 200 AZN, Bakı — Mobilim.az">
   <link rel="stylesheet" href="CSS/general.css">
   <link rel="stylesheet" href="CSS/style.css">
   <link rel="stylesheet" href="CSS/elan-detail.css">
@@ -1209,9 +1209,9 @@ Ciddi alıcılar zəng etsin. Qiymət müzakirəyə açıqdır (±50 AZN).</p>
       if (shareBtn) {
         shareBtn.addEventListener('click', () => {
           if (navigator.share) {
-            const title = document.querySelector('.ad-main-title')?.textContent || 'Mobil.az';
+            const title = document.querySelector('.ad-main-title')?.textContent || 'Mobilim.az';
             const name = document.querySelector('.personal-name')?.textContent.trim() || 'Satıcı';
-            navigator.share({ title: title + ' — ' + name + ' | Mobil.az', url: window.location.href });
+            navigator.share({ title: title + ' — ' + name + ' | Mobilim.az', url: window.location.href });
           } else {
             navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
           }

@@ -676,7 +676,7 @@ function applyEditModeUI() {
     heroBadge.removeAttribute('data-translate');
   }
   if (typeof document !== 'undefined') {
-    document.title = 'Elanı Redaktə Et - Mobil.az';
+    document.title = 'Elanı Redaktə Et - Mobilim.az';
   }
 
   const submitBtn = document.querySelector('.ad-form-btn');

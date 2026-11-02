@@ -1,5 +1,5 @@
 /**
- * Mobil.az — Promotion & Subscription Expiry Checker
+ * Mobilim.az — Promotion & Subscription Expiry Checker
  * 
  * Runs periodically to expire:
  *  - Ad promotions (VIP, BumpUp, etc.) whose promotionExpiresAt has passed

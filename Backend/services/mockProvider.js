@@ -21,7 +21,7 @@ const safeEqualHex = (provided, expected) => {
         crypto.timingSafeEqual(providedBuffer, expectedBuffer);
 };
 
-const verifyMock = (req, { paymentId, amount, currency, status, providerReference } = {}) => {
+const verifyMock = (req, { paymentId, amount, currency, status, rawStatus, providerReference } = {}) => {
     const isProduction = process.env.NODE_ENV === 'production';
     const secret = process.env.PAYMENT_WEBHOOK_SECRET;
 
@@ -48,6 +48,12 @@ const verifyMock = (req, { paymentId, amount, currency, status, providerReferenc
     const payload = `${paymentId}.${amount}.${currency}.${status || ''}.${providerReference || ''}`;
     const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex');
     if (safeEqualHex(provided, expected)) return true;
+
+    if (rawStatus && rawStatus !== status) {
+        const rawPayload = `${paymentId}.${amount}.${currency}.${rawStatus}.${providerReference || ''}`;
+        const rawExpected = crypto.createHmac('sha256', secret).update(rawPayload).digest('hex');
+        if (safeEqualHex(provided, rawExpected)) return true;
+    }
 
     if (req?.rawBody) {
         const expectedRaw = crypto.createHmac('sha256', secret).update(req.rawBody).digest('hex');

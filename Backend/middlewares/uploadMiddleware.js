@@ -176,7 +176,7 @@ const processImage = async (req, res, next) => {
                 <style>
                 .title { fill: rgba(255, 255, 255, 0.45); font-size: 54px; font-weight: 800; font-family: Arial, sans-serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
                 </style>
-                <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="title" transform="rotate(-15 200 100)">Mobil.az</text>
+                <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="title" transform="rotate(-15 200 100)">Mobilim.az</text>
             </svg>
         `);
 

@@ -164,14 +164,43 @@ const getRefreshTokenFromRequest = (req) => {
     return cookieToken || (req.body && req.body.refreshToken) || (req.headers && req.headers['x-refresh-token']);
 };
 
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#])[A-Za-z\d@$!%*?&^#]{10,128}$/;
+const PASSWORD_REQUIREMENTS_MESSAGE = "Parol minimum 10 simvol, 1 böyük, 1 kiçik, 1 rəqəm, 1 simvol (@$!%*?&) olmalıdır";
+
+const commonWeakPasswords = new Set([
+    '123456',
+    '12345678',
+    'password',
+    'qwerty123',
+    'admin123',
+    'password1',
+    'password123',
+    'p@ssw0rd',
+    '1234567890',
+    'qwertyuiop'
+]);
+
+function validatePassword(password) {
+    if (!password || password.length < 10) return { valid: false, message: "Min 10 simvol" };
+    if (password.length > 128) return { valid: false, message: "Max 128 simvol" };
+    if (!/[a-z]/.test(password)) return { valid: false, message: "Kiçik hərf lazım" };
+    if (!/[A-Z]/.test(password)) return { valid: false, message: "Böyük hərf lazım" };
+    if (!/\d/.test(password)) return { valid: false, message: "Rəqəm lazım" };
+    if (!/[@$!%*?&^#]/.test(password)) return { valid: false, message: "Simvol lazım @$!%*?&^#" };
+    if (commonWeakPasswords.has(String(password).toLowerCase())) {
+        return { valid: false, message: "Bu şifrə çox zəifdir, daha güclü şifrə seçin" };
+    }
+    return { valid: true };
+}
+
 const validatePasswordStrength = (password) => {
     const errors = [];
 
     if (typeof password !== 'string') {
         return ['Şifrə mətn formatında olmalıdır'];
     }
-    if (password.length < 8) {
-        errors.push('Şifrə ən azı 8 simvol olmalıdır');
+    if (password.length < 10) {
+        errors.push('Şifrə ən azı 10 simvol olmalıdır');
     }
     if (password.length > 128) {
         errors.push('Şifrə 128 simvoldan uzun olmamalıdır');
@@ -185,15 +214,9 @@ const validatePasswordStrength = (password) => {
     if (!/\d/.test(password)) {
         errors.push('Şifrədə ən azı 1 rəqəm olmalıdır');
     }
-
-    const commonWeakPasswords = new Set([
-        '123456',
-        '12345678',
-        'password',
-        'qwerty123',
-        'admin123',
-        'password1'
-    ]);
+    if (!/[@$!%*?&^#]/.test(password)) {
+        errors.push('Şifrədə ən azı 1 xüsusi simvol olmalıdır (@$!%*?&^#)');
+    }
     if (commonWeakPasswords.has(password.toLowerCase())) {
         errors.push('Bu şifrə çox zəifdir, daha güclü şifrə seçin');
     }
@@ -233,6 +256,9 @@ module.exports = {
     parseCookies,
     setRefreshTokenCookie,
     validatePasswordStrength,
+    validatePassword,
+    PASSWORD_REGEX,
+    PASSWORD_REQUIREMENTS_MESSAGE,
     verifyRefreshToken,
     verifyAccessToken,
     buildAuthResponse

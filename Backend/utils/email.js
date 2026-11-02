@@ -10,7 +10,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
     const user = process.env.SMTP_USER || process.env.EMAIL_USER;
     const pass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
     const port = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT, 10) || 587;
-    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user || 'noreply@mobil.az';
+    const from = process.env.SMTP_FROM || process.env.EMAIL_FROM || user || 'noreply@mobilim.az';
 
     const hasSmtp = Boolean(host && user && pass);
 
@@ -31,7 +31,7 @@ const sendEmail = async ({ to, subject, html, text }) => {
     });
 
     const info = await transporter.sendMail({
-        from: `Mobil.az <${from}>`,
+        from: `Mobilim.az <${from}>`,
         to,
         subject,
         html,
@@ -50,11 +50,11 @@ const sendTopUpSuccessEmail = async (user, amount, currency = 'AZN') => {
     if (!email) return false;
     const name = (typeof user === 'object' && user?.name) ? user.name : 'İstifadəçi';
 
-    const subject = 'Mobil.az — Balansınız uğurla artırıldı';
+    const subject = 'Mobilim.az — Balansınız uğurla artırıldı';
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #2563eb; margin: 0; font-size: 24px;">Mobil.az</h1>
+                <h1 style="color: #2563eb; margin: 0; font-size: 24px;">Mobilim.az</h1>
                 <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Ödəniş Təsdiqi</p>
             </div>
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
@@ -81,7 +81,7 @@ const sendTopUpSuccessEmail = async (user, amount, currency = 'AZN') => {
 const sendCashOutRequestEmail = async (admin, cashOutDetails = {}) => {
     const adminEmail = typeof admin === 'string'
         ? admin
-        : (admin?.email || process.env.ADMIN_NOTIFICATION_EMAIL || 'admin@mobil.az');
+        : (admin?.email || process.env.ADMIN_NOTIFICATION_EMAIL || 'admin@mobilim.az');
     if (!adminEmail) return false;
 
     const amount = cashOutDetails.amount || 0;
@@ -89,11 +89,11 @@ const sendCashOutRequestEmail = async (admin, cashOutDetails = {}) => {
     const requestId = cashOutDetails._id || cashOutDetails.id || 'N/A';
     const user = cashOutDetails.user || 'İstifadəçi';
 
-    const subject = `Mobil.az — Yeni Çıxarış Sorğusu (#${requestId})`;
+    const subject = `Mobilim.az — Yeni Çıxarış Sorğusu (#${requestId})`;
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #d97706; margin: 0; font-size: 24px;">Mobil.az Admin</h1>
+                <h1 style="color: #d97706; margin: 0; font-size: 24px;">Mobilim.az Admin</h1>
                 <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Yeni Çıxarış Sorğusu</p>
             </div>
             <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
@@ -122,11 +122,11 @@ const sendCashOutApprovedEmail = async (user, amount, currency = 'AZN') => {
     if (!email) return false;
     const name = (typeof user === 'object' && user?.name) ? user.name : 'İstifadəçi';
 
-    const subject = 'Mobil.az — Çıxarış sorğunuz təsdiqləndi';
+    const subject = 'Mobilim.az — Çıxarış sorğunuz təsdiqləndi';
     const html = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">
             <div style="text-align: center; margin-bottom: 24px;">
-                <h1 style="color: #10b981; margin: 0; font-size: 24px;">Mobil.az</h1>
+                <h1 style="color: #10b981; margin: 0; font-size: 24px;">Mobilim.az</h1>
                 <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Çıxarış Bildirişi</p>
             </div>
             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">

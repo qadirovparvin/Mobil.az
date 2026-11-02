@@ -13,6 +13,7 @@ process.env.JWT_ACCESS_KEYS = JSON.stringify({
     previous: 'test-previous-secret-with-at-least-32-bytes'
 });
 process.env.ALLOWED_ORIGINS = 'https://app.example.com,http://localhost:3000';
+delete process.env.CORS_ORIGINS;
 process.env.CORS_ALLOW_NO_ORIGIN = 'false';
 process.env.CSRF_ALLOW_NO_ORIGIN = 'false';
 process.env.CSRF_SECRET = 'test-csrf-secret-with-at-least-32-bytes';
@@ -377,6 +378,8 @@ const adId = '507f1f77bcf86cd799439012';
         const prevEnv = process.env.NODE_ENV;
         const prevSecret = process.env.PAYMENT_WEBHOOK_SECRET;
         const prevAllow = process.env.ALLOW_MOCK_SIGNATURE;
+        const prevProvider = process.env.PAYMENT_PROVIDER;
+        delete process.env.PAYMENT_PROVIDER;
         process.env.NODE_ENV = 'production';
         process.env.PAYMENT_WEBHOOK_SECRET = testSecret;
         process.env.ALLOW_MOCK_SIGNATURE = 'true';
@@ -388,6 +391,8 @@ const adId = '507f1f77bcf86cd799439012';
             process.env.NODE_ENV = prevEnv;
             process.env.PAYMENT_WEBHOOK_SECRET = prevSecret;
             process.env.ALLOW_MOCK_SIGNATURE = prevAllow;
+            if (prevProvider !== undefined) process.env.PAYMENT_PROVIDER = prevProvider;
+            else delete process.env.PAYMENT_PROVIDER;
         }
     }
 
@@ -533,7 +538,7 @@ const adId = '507f1f77bcf86cd799439012';
         const prevOrigin = process.env.API_PUBLIC_ORIGIN;
         const prevProvider = process.env.PAYMENT_PROVIDER;
         process.env.NODE_ENV = 'production';
-        process.env.API_PUBLIC_ORIGIN = 'https://api.mobil.az';
+        process.env.API_PUBLIC_ORIGIN = 'https://api.mobilim.az';
         process.env.PAYMENT_PROVIDER = 'mock';
         try {
             assert.throws(() => {

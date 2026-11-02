@@ -1,5 +1,5 @@
 /* ================================================================
-   ad-details.js  —  Mobil.az Ad Detail Page
+   ad-details.js  —  Mobilim.az Ad Detail Page
    - Fetches real ad data from the backend API
    - Populates all DOM elements with real data
    - ALWAYS reveals the page in finally{} — never stays blank
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
         const adTitle = `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
-        document.title = `${adTitle} — Mobil.az`;
+        document.title = `${adTitle} — Mobilim.az`;
 
         const titleEl = document.querySelector('.ad-main-title');
         if (titleEl) titleEl.textContent = adTitle;

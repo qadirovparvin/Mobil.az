@@ -1,4 +1,4 @@
-/* Bütün sayta aid ümumi stillər - Mobil.az | Apple Design & Dark Mode Variables */
+/* Bütün sayta aid ümumi stillər - Mobilim.az | Apple Design & Dark Mode Variables */
 :root {
     /* Apple Light Mode Palette - Pure White Background */
     --bg-page: #FFFFFF;
@@ -17,7 +17,7 @@
     --input-bg: #f5f5f7;
     --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-    /* Mobil.az Purple (Updated to be softer) */
+    /* Mobilim.az Purple (Updated to be softer) */
     --airy-primary: #5e5ce6;
     --airy-hover: #4846c9;
     --airy-secondary: #bfbce3;
@@ -40,7 +40,7 @@
     --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
     --input-bg: #2c2c2e;
 
-    /* Dark Mobil.az Purple */
+    /* Dark Mobilim.az Purple */
     --airy-primary: #7d7aff;
     --airy-hover: #6763eb;
     --airy-secondary: #3b3a7a;
@@ -92,7 +92,7 @@ ul {
     margin: 0;
 }
 
-/* ── Mobil.az Text Logo ────────────────────────────────────────────── */
+/* ── Mobilim.az Text Logo ────────────────────────────────────────────── */
 .mobil-logo {
     font-family: var(--font-family);
     font-size: 26px;
