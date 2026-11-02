@@ -1,5 +1,7 @@
 {
   "scripts": {
+    "start": "node Backend/server.js",
+    "build": "npm --prefix Backend install",
     "seed": "npm --prefix Backend run seed",
     "seed_admin": "npm --prefix Backend run seed_admin",
     "check": "npm --prefix Backend run check",
