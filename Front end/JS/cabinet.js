@@ -1443,7 +1443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const DEFAULT_AD_IMAGE = 'assets/images/default-ad.svg';
+    const DEFAULT_AD_IMAGE = '/assets/images/default-ad.svg';
 
     function getImageUrl(image) {
         if (!image) return DEFAULT_AD_IMAGE;

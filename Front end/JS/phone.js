@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const API_BASE = window.API_URL || window.API_BASE || (['localhost', '127.0.0.1', ''].includes(window.location.hostname) ? 'http://localhost:5000/api' : (window.location.origin ? window.location.origin + '/api' : 'https://mobilim-az.onrender.com/api'));
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
-    const DEFAULT_AD_IMAGE = "assets/images/default-ad.svg";
+    const DEFAULT_AD_IMAGE = "/assets/images/default-ad.svg";
 
     // Update title uniformly
     const titleEl = document.querySelector(".all-ads-title");

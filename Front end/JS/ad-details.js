@@ -84,7 +84,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
 
         // ── Fetch the ad ───────────────────────────────────────────
-        const res = await fetch(`${API_BASE}/ads/${adId}`);
+        let res;
+        try {
+            res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+        } catch (fetchErr) {
+            console.error('[ad-details] Fetch network error:', fetchErr);
+            throw new Error(`Serverlə əlaqə qurula bilmədi (Şəbəkə xətası: ${fetchErr.message || 'Failed to fetch'})`);
+        }
+
         let ad;
         try {
             ad = await res.json();
@@ -93,7 +103,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!res.ok) {
-            throw new Error(ad?.message || `Elan tapılmadı (HTTP ${res.status})`);
+            if (res.status === 404) {
+                throw new Error(ad?.message || `Elan tapılmadı (ID: ${adId})`);
+            }
+            throw new Error(ad?.message || `Server xətası (HTTP ${res.status})`);
         }
         window.__CURRENT_AD = ad;
 

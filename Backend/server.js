@@ -18,6 +18,7 @@ if (process.env.NODE_ENV === 'production') {
 const redisConfig = require('./config/redis');
 const { redisClient, waitForRedisReady } = redisConfig;
 const os = require('os');
+const fs = require('fs');
 
 if (process.env.SENTRY_DSN) {
     Sentry.init({
@@ -71,6 +72,7 @@ const { isAccountAllowed, getAccountDeniedMessage } = require('./utils/accountSe
 const { validateChatMessagePayload } = require('./utils/chatSecurity');
 const { validateChatParticipants } = require('./utils/chatGuards');
 const { verifyAccessToken } = require('./utils/authSecurity');
+const { ensureDemoAds } = require('./scripts/ensure_demo_ads');
 const { buildCorsOptions } = require('./utils/corsPolicy');
 const { buildHelmetOptions } = require('./utils/cspConfig');
 const { rejectNoSqlOperators, validationErrorHandler } = require('./utils/securityValidation');
@@ -226,6 +228,7 @@ const runScheduledExpiryChecks = async () => {
 connectDB().then(async () => {
     await seedAdmin();
     await ensureDefaultPackages();
+    await ensureDemoAds();
     if (process.env.DISABLE_IN_PROCESS_SCHEDULER !== 'true') {
         setTimeout(runScheduledExpiryChecks, 5000);
         setInterval(runScheduledExpiryChecks, Number(process.env.EXPIRY_CHECK_INTERVAL_MS || 60 * 60 * 1000));
@@ -375,6 +378,15 @@ app.post('/api/wallet/packages/payment-session', strictLimiter);
 
 // Serve uploaded files and default assets statically
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Fallback for missing uploads on ephemeral disks (e.g. Render restart)
+app.use('/uploads', (req, res) => {
+    const defaultSvg = path.join(__dirname, '../Front end/assets/images/default-ad.svg');
+    if (fs.existsSync(defaultSvg)) {
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.sendFile(defaultSvg);
+    }
+    return res.redirect(302, '/assets/images/default-ad.svg');
+});
 app.use('/images', express.static(path.join(__dirname, '../Front end/images')));
 app.use('/assets', express.static(path.join(__dirname, '../Front end/assets')));
 app.use('/Photo', express.static(path.join(__dirname, '../Front end/Photo')));
