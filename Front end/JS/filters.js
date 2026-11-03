@@ -85,7 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const btn = document.getElementById('searchBtn') || document.querySelector('.search-btn');
         if (btn) {
             const orig = btn.textContent;
-            btn.textContent = 'Axtarılır...';
+            const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+            const searchingText = (window.translations?.[lang]?.['searching']) || (lang.includes('RU') ? 'Поиск...' : (lang.includes('EN') ? 'Searching...' : 'Axtarılır...'));
+            btn.textContent = searchingText;
             btn.disabled = true;
             setTimeout(() => {
                 btn.textContent = orig;
@@ -116,22 +118,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+        const isRu = lang === 'RUS' || lang === 'RU';
+        const isEng = lang === 'ENG' || lang === 'EN';
+
+        const clearBtnText = isRu ? '✕ Очистить' : (isEng ? '✕ Clear' : '✕ Təmizlə');
+        const clearBtnTitle = isRu ? 'Очистить поиск' : (isEng ? 'Clear search' : 'Axtarışı təmizlə');
+
         if (count > 0) {
+            const foundText = isRu 
+                ? `✓ Найдено ${count} объявлений по запросу "${escapeHtml(cleanQ)}"`
+                : (isEng ? `✓ Found ${count} ads for "${escapeHtml(cleanQ)}"` : `✓ ${count} elan tapıldı "${escapeHtml(cleanQ)}" üçün`);
+
             infoEl.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                    <span style="font-weight:600; color:var(--text-primary, #111827);">✓ ${count} elan tapıldı "${escapeHtml(cleanQ)}" üçün</span>
-                    <button type="button" class="btn-clear-search" id="clearSearchFeedbackBtn" style="background:#e5e7eb; border:none; border-radius:6px; padding:4px 10px; font-size:13px; font-weight:600; color:#374151; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Axtarışı təmizlə">
-                        ✕ Təmizlə
+                    <span style="font-weight:600; color:var(--text-primary, #111827);">${foundText}</span>
+                    <button type="button" class="btn-clear-search" id="clearSearchFeedbackBtn" style="background:#e5e7eb; border:none; border-radius:6px; padding:4px 10px; font-size:13px; font-weight:600; color:#374151; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="${clearBtnTitle}">
+                        ${clearBtnText}
                     </button>
                 </div>
             `;
             infoEl.style.display = 'block';
         } else {
+            const notFoundText = isRu 
+                ? 'Ничего не найдено, попробуйте другое ключевое слово' 
+                : (isEng ? 'Nothing found, try another keyword' : 'Heç nə tapılmadı, başqa açar söz yoxlayın');
+
             infoEl.innerHTML = `
                 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-                    <span style="font-weight:500; color:#dc2626;">Heç nə tapılmadı, başqa açar söz yoxlayın</span>
-                    <button type="button" class="btn-clear-search" id="clearSearchFeedbackBtn" style="background:#e5e7eb; border:none; border-radius:6px; padding:4px 10px; font-size:13px; font-weight:600; color:#374151; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Axtarışı təmizlə">
-                        ✕ Təmizlə
+                    <span style="font-weight:500; color:#dc2626;">${notFoundText}</span>
+                    <button type="button" class="btn-clear-search" id="clearSearchFeedbackBtn" style="background:#e5e7eb; border:none; border-radius:6px; padding:4px 10px; font-size:13px; font-weight:600; color:#374151; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="${clearBtnTitle}">
+                        ${clearBtnText}
                     </button>
                 </div>
             `;
@@ -470,16 +487,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const json = await res.json();
             const cats = json.data || json;
             if (Array.isArray(cats) && cats.length > 0) {
+                const curLang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                const isRu = curLang === 'RUS' || curLang === 'RU';
+                const isEng = curLang === 'ENG' || curLang === 'EN';
                 const catMeta = {
-                    'accessory': { icon: 'fa-plug', key: 'phone-accessories', label: 'Telefon aksessuarları', slug: 'accessory' },
-                    'aksesuar': { icon: 'fa-plug', key: 'phone-accessories', label: 'Telefon aksessuarları', slug: 'accessory' },
-                    'headphone': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
-                    'qulaqlıq': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
-                    'qulaqcıq': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
-                    'tablet': { icon: 'fa-tablet-alt', key: 'tablet', label: 'Planşetlər', slug: 'tablet' },
-                    'planşet': { icon: 'fa-tablet-alt', key: 'tablet', label: 'Planşetlər', slug: 'tablet' },
-                    'phone': { icon: 'fa-mobile-alt', key: 'phone', label: 'Telefonlar', slug: 'phone' },
-                    'telefon': { icon: 'fa-mobile-alt', key: 'phone', label: 'Telefonlar', slug: 'phone' }
+                    'accessory': { icon: 'fa-plug', key: 'phone-accessories', label: isRu ? 'Аксессуары для телефонов' : (isEng ? 'Phone Accessories' : 'Telefon aksessuarları'), slug: 'accessory' },
+                    'aksesuar': { icon: 'fa-plug', key: 'phone-accessories', label: isRu ? 'Аксессуары для телефонов' : (isEng ? 'Phone Accessories' : 'Telefon aksessuarları'), slug: 'accessory' },
+                    'headphone': { icon: 'fa-headphones', key: 'headphone', label: isRu ? 'Наушники' : (isEng ? 'Headphones' : 'Qulaqcıqlar'), slug: 'headphone' },
+                    'qulaqlıq': { icon: 'fa-headphones', key: 'headphone', label: isRu ? 'Наушники' : (isEng ? 'Headphones' : 'Qulaqcıqlar'), slug: 'headphone' },
+                    'qulaqcıq': { icon: 'fa-headphones', key: 'headphone', label: isRu ? 'Наушники' : (isEng ? 'Headphones' : 'Qulaqcıqlar'), slug: 'headphone' },
+                    'tablet': { icon: 'fa-tablet-alt', key: 'tablet', label: isRu ? 'Планшеты' : (isEng ? 'Tablets' : 'Planşetlər'), slug: 'tablet' },
+                    'planşet': { icon: 'fa-tablet-alt', key: 'tablet', label: isRu ? 'Планшеты' : (isEng ? 'Tablets' : 'Planşetlər'), slug: 'tablet' },
+                    'phone': { icon: 'fa-mobile-alt', key: 'phone', label: isRu ? 'Телефоны' : (isEng ? 'Phones' : 'Telefonlar'), slug: 'phone' },
+                    'telefon': { icon: 'fa-mobile-alt', key: 'phone', label: isRu ? 'Телефоны' : (isEng ? 'Phones' : 'Telefonlar'), slug: 'phone' }
                 };
 
                 dd.innerHTML = cats.map(cat => {

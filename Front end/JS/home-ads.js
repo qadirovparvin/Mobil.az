@@ -164,15 +164,16 @@ document.addEventListener("DOMContentLoaded", function () {
     function renderEmpty(container, message, translateKey) {
         if (!container) return;
         container.style.display = 'grid';
-        const lang = localStorage.getItem('lang') || 'AZ';
+        const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
         let text = message;
         if (translateKey) {
             const emptyI18n = {
-                'vip-empty': { AZ: 'Hazırda VIP elan yoxdur.', RUS: 'В настоящее время нет VIP-объявлений', ENG: 'No VIP ads currently.' },
-                'ads-empty': { AZ: 'Hazırda aktiv elan yoxdur.', RUS: 'В настоящее время нет активных объявлений', ENG: 'No active ads currently.' }
+                'vip-empty': { AZ: 'Hazırda VIP elan yoxdur.', RUS: 'В настоящее время нет VIP-объявлений', RU: 'В настоящее время нет VIP-объявлений', ENG: 'No VIP ads currently.' },
+                'ads-empty': { AZ: 'Hazırda aktiv elan yoxdur.', RUS: 'Объявлений пока нет', RU: 'Объявлений пока нет', ENG: 'No active ads currently.' },
+                'no-results': { AZ: 'Nəticə tapılmadı.', RUS: 'Результатов не найдено', RU: 'Результатов не найдено', ENG: 'No results found.' }
             };
-            if (emptyI18n[translateKey] && emptyI18n[translateKey][lang]) {
-                text = emptyI18n[translateKey][lang];
+            if (emptyI18n[translateKey]) {
+                text = emptyI18n[translateKey][lang] || (lang.includes('RU') ? emptyI18n[translateKey]['RUS'] : (lang.includes('EN') ? emptyI18n[translateKey]['ENG'] : emptyI18n[translateKey]['AZ']));
             }
         }
         const keyAttr = translateKey ? ` data-translate="${translateKey}"` : '';
@@ -289,7 +290,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const newAdsHtml = ads.map(createCardMarkup).join("");
             
             if (isInitial && ads.length === 0) {
-                renderEmpty(allAdsContainer, currentQuery ? `"${currentQuery}" üçün nəticə tapılmadı.` : "Hazırda aktiv elan yoxdur.", currentQuery ? null : "ads-empty");
+                const isRu = lang === 'RUS' || lang === 'RU';
+                const isEng = lang === 'ENG' || lang === 'EN';
+                const notFoundMsg = isRu ? `По запросу "${currentQuery}" ничего не найдено.` : (isEng ? `No results found for "${currentQuery}".` : `"${currentQuery}" üçün nəticə tapılmadı.`);
+                renderEmpty(allAdsContainer, currentQuery ? notFoundMsg : "Hazırda aktiv elan yoxdur.", currentQuery ? "no-results" : "ads-empty");
             } else {
                 allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
                 attachImageFallbacks(allAdsContainer);

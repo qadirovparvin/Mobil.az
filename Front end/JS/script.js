@@ -7,6 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
             Stores: "Mağazalar (tezliklə)",
             "vip-empty": "Hazırda VIP elan yoxdur.",
             "ads-empty": "Hazırda aktiv elan yoxdur.",
+            "search-found": "{count} elan tapıldı",
+            "searching": "Axtarılır...",
+            "no-results": "Nəticə tapılmadı",
+            "filter-title": "Filtrlər",
+            "all-ads": "Bütün elanlar",
+            "clear-filter": "Təmizlə",
+            "clear-search": "Təmizlə",
             Favorite: "Seçilmişlər",
             "login-btn": "Giriş",
             "register-btn": "Qeydiyyat",
@@ -333,6 +340,13 @@ document.addEventListener("DOMContentLoaded", function () {
             Stores: "Stores (soon)",
             "vip-empty": "No VIP ads currently.",
             "ads-empty": "No active ads currently.",
+            "search-found": "Found {count} ads",
+            "searching": "Searching...",
+            "no-results": "No results found",
+            "filter-title": "Filters",
+            "all-ads": "All ads",
+            "clear-filter": "Clear",
+            "clear-search": "Clear",
             Favorite: "Favorites",
             "login-btn": "Login",
             "register-btn": "Register",
@@ -658,7 +672,14 @@ document.addEventListener("DOMContentLoaded", function () {
             About: "О нас",
             Stores: "Магазины (скоро)",
             "vip-empty": "В настоящее время нет VIP-объявлений",
-            "ads-empty": "В настоящее время нет активных объявлений",
+            "ads-empty": "Объявлений пока нет",
+            "search-found": "Найдено {count} объявлений",
+            "searching": "Поиск...",
+            "no-results": "Результатов не найдено",
+            "filter-title": "Фильтры",
+            "all-ads": "Все объявления",
+            "clear-filter": "Очистить",
+            "clear-search": "Очистить",
             Favorite: "Избранное",
             "login-btn": "Вход",
             "register-btn": "Регистрация",
@@ -1204,6 +1225,8 @@ document.addEventListener("DOMContentLoaded", function () {
     for (const lang of Object.keys(authTranslations)) {
         Object.assign(translations[lang], authTranslations[lang]);
     }
+    translations.RU = translations.RUS;
+    translations.EN = translations.ENG;
     window.translations = translations;
 
     // ─── LANGUAGE SWITCHER ────────────────────────────────────────────────────
@@ -1218,20 +1241,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
         function changeLanguage(forcedLang) {
             const currentLangElem = document.getElementById("current-lang");
-            let newLang = forcedLang && typeof forcedLang === 'string' ? forcedLang : null;
+            let newLang = forcedLang && typeof forcedLang === 'string' ? forcedLang.trim().toUpperCase() : null;
+            if (newLang === 'RU') newLang = 'RUS';
+            if (newLang === 'EN') newLang = 'ENG';
             if (!newLang) {
-                let currentLang = currentLangElem ? currentLangElem.innerText.trim() : "AZ";
+                let currentLang = currentLangElem ? currentLangElem.innerText.trim().toUpperCase() : "AZ";
                 // Normalise RUS display label back to key
-                if (currentLang === "РУС")
+                if (currentLang === "РУС" || currentLang === "RU")
                     currentLang = "RUS";
+                else if (currentLang === "EN")
+                    currentLang = "ENG";
                 newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
             }
 
-            if (translations[newLang] && translations[newLang]["language-selector"]) {
-                currentLangElem.innerText = translations[newLang]["language-selector"];
+            const dict = translations[newLang] || (newLang.includes('RU') ? translations.RUS : translations.AZ);
+
+            if (currentLangElem && dict && dict["language-selector"]) {
+                currentLangElem.innerText = dict["language-selector"];
             }
             localStorage.setItem("lang", newLang);
-            document.documentElement.lang = newLang === "ENG" ? "en" : newLang === "RUS" ? "ru" : "az";
+            document.documentElement.lang = newLang === "ENG" ? "en" : (newLang === "RUS" || newLang === "RU") ? "ru" : "az";
 
             document.querySelectorAll("[data-translate]").forEach((element) => {
                 if (!element) return;
@@ -1309,9 +1338,14 @@ document.addEventListener("DOMContentLoaded", function () {
         window.applyLanguage = () => changeLanguage(localStorage.getItem("lang") || "AZ");
 
         // Restore saved language on page load
-        const savedLang = localStorage.getItem("lang");
-        if (savedLang && savedLang !== "AZ") {
-            changeLanguage(savedLang);
+        let savedLang = localStorage.getItem("lang");
+        if (savedLang) {
+            savedLang = savedLang.trim().toUpperCase();
+            if (savedLang === 'RU') savedLang = 'RUS';
+            if (savedLang === 'EN') savedLang = 'ENG';
+            if (savedLang !== "AZ") {
+                changeLanguage(savedLang);
+            }
         }
     }
 
