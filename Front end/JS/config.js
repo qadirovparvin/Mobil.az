@@ -5,18 +5,18 @@
  * Update this value when deploying to staging or production.
  */
 function resolveDefaultApiUrl() {
-  if (typeof window === 'undefined') return 'http://localhost:5000/api';
-  var hostname = window.location.hostname || '';
-  var isLocal = ['localhost','127.0.0.1','::1','[::1]','','0.0.0.0'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.') || window.location.protocol === 'file:';
-  if (!isLocal) {
-    // Production on Render
-    if (hostname.includes('onrender.com')) {
-      return window.location.origin + '/api';
+    if (typeof window === 'undefined') return 'http://localhost:5000/api';
+    var hostname = window.location.hostname || '';
+    var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.') || window.location.protocol === 'file:';
+    if (!isLocal) {
+        // Production on Render
+        if (hostname.includes('onrender.com')) {
+            return window.location.origin + '/api';
+        }
+        return 'https://api.mobilim.az/api';
     }
-    return 'https://api.mobilim.az/api';
-  }
-  // Local development
-  return 'http://localhost:5000/api';
+    // Local development
+    return 'http://localhost:5000/api';
 }
 
 var resolvedApi = resolveDefaultApiUrl();
