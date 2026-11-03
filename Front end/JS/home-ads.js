@@ -161,12 +161,24 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    function renderEmpty(container, message) {
+    function renderEmpty(container, message, translateKey) {
         if (!container) return;
         container.style.display = 'grid';
+        const lang = localStorage.getItem('lang') || 'AZ';
+        let text = message;
+        if (translateKey) {
+            const emptyI18n = {
+                'vip-empty': { AZ: 'Hazırda VIP elan yoxdur.', RUS: 'В настоящее время нет VIP-объявлений', ENG: 'No VIP ads currently.' },
+                'ads-empty': { AZ: 'Hazırda aktiv elan yoxdur.', RUS: 'В настоящее время нет активных объявлений', ENG: 'No active ads currently.' }
+            };
+            if (emptyI18n[translateKey] && emptyI18n[translateKey][lang]) {
+                text = emptyI18n[translateKey][lang];
+            }
+        }
+        const keyAttr = translateKey ? ` data-translate="${translateKey}"` : '';
         container.innerHTML = `
             <div class="cab-glass" style="grid-column: 1/-1; padding:24px;text-align:center;color:var(--text-muted);border-radius:18px;">
-                ${escapeHtml(message)}
+                <span${keyAttr}>${escapeHtml(text)}</span>
             </div>
         `;
     }
@@ -251,15 +263,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 ).slice(0, 8);
                 vipContainer.innerHTML = vipAds.length ? vipAds.map(createCardMarkup).join("") : "";
                 attachImageFallbacks(vipContainer);
-                if (!vipAds.length) renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.");
+                if (!vipAds.length) renderEmpty(vipContainer, "Hazırda VIP elan yoxdur.", "vip-empty");
 
                 const showAllVipBtn = document.getElementById('show-all-vip') || document.querySelector('.show-all-btn') || document.querySelector('.all-view');
                 if (showAllVipBtn) {
+                    const lang = localStorage.getItem('lang') || 'AZ';
                     if (!vipAds.length) {
-                        showAllVipBtn.textContent = 'Elanını VIP et';
+                        showAllVipBtn.textContent = lang === 'RUS' ? 'Сделать VIP' : lang === 'ENG' ? 'Make ad VIP' : 'Elanını VIP et';
                         showAllVipBtn.onclick = () => { window.location.href = 'elan-yerlesdir.html?vip=1'; };
                     } else {
-                        showAllVipBtn.textContent = 'Hamısını göstər';
+                        showAllVipBtn.textContent = lang === 'RUS' ? 'Показать все' : lang === 'ENG' ? 'Show all' : 'Hamısını göstər';
                         showAllVipBtn.onclick = () => {
                             if (typeof window.searchAdsFromAPI === 'function') {
                                 window.searchAdsFromAPI({ promotionType: 'VIP' });
@@ -276,7 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const newAdsHtml = ads.map(createCardMarkup).join("");
             
             if (isInitial && ads.length === 0) {
-                renderEmpty(allAdsContainer, currentQuery ? `"${currentQuery}" üçün nəticə tapılmadı.` : "Hazırda aktiv elan yoxdur.");
+                renderEmpty(allAdsContainer, currentQuery ? `"${currentQuery}" üçün nəticə tapılmadı.` : "Hazırda aktiv elan yoxdur.", currentQuery ? null : "ads-empty");
             } else {
                 allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
                 attachImageFallbacks(allAdsContainer);

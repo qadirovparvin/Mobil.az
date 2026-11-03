@@ -1536,16 +1536,18 @@ document.addEventListener('DOMContentLoaded', () => {
         list.innerHTML = ads.map((ad) => `
             <div class="my-ad-item cab-glass" data-status="${getUiStatus(ad.status)}" data-id="${escapeHtml(ad._id)}">
                 <span class="ad-status-badge">${escapeHtml(getStatusBadge(ad.status))}</span>
-                <img src="${escapeHtml(getImageUrl(ad.images?.[0]))}" class="my-ad-img" alt="${escapeHtml(ad.brand)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
-                <div class="my-ad-details">
-                    <h4>${escapeHtml(ad.brand)} ${escapeHtml(ad.modelName)}</h4>
-                    <div class="ad-meta">
-                        <span><i class="fas fa-eye"></i> ${ad.views || 0}</span>
-                        <span><i class="fas fa-heart"></i> ${ad.favorites || 0}</span>
-                        <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(formatDate(ad.createdAt))}</span>
+                <a href="elan-detail.html?id=${encodeURIComponent(ad._id)}" style="display:contents;text-decoration:none;color:inherit;">
+                    <img src="${escapeHtml(getImageUrl(ad.images?.[0]))}" class="my-ad-img" alt="${escapeHtml(ad.brand)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
+                    <div class="my-ad-details">
+                        <h4>${escapeHtml(ad.brand)} ${escapeHtml(ad.modelName)}</h4>
+                        <div class="ad-meta">
+                            <span><i class="fas fa-eye"></i> ${ad.views || 0}</span>
+                            <span><i class="fas fa-heart"></i> ${ad.favorites || 0}</span>
+                            <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(formatDate(ad.createdAt))}</span>
+                        </div>
+                        <p class="ad-price">${Number(ad.price || 0).toLocaleString(getLocale())} AZN</p>
                     </div>
-                    <p class="ad-price">${Number(ad.price || 0).toLocaleString(getLocale())} AZN</p>
-                </div>
+                </a>
                 <div class="my-ad-controls">
                     <button class="btn-boost" data-id="${escapeHtml(ad._id)}">
                         <i class="fas fa-rocket"></i> <span>${escapeHtml(window.translations?.[getCurrentLang()]?.['mon-promote-ad'] || 'Tanıt')}</span>

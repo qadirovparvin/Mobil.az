@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!res.ok) {
             throw new Error(ad?.message || `Elan tapılmadı (HTTP ${res.status})`);
         }
+        window.__CURRENT_AD = ad;
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
         const adTitle = `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
@@ -150,6 +151,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (mainImg) {
                 mainImg.src = getImageUrl(images[0]);
                 mainImg.alt = adTitle;
+                mainImg.onerror = function() {
+                    this.onerror = null;
+                    this.src = '/assets/images/default-ad.svg';
+                };
             }
 
             if (images.length === 1) {
@@ -178,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const thumb = document.createElement('div');
                         thumb.className = `thumb${idx === 0 ? ' active' : ''}`;
                         thumb.dataset.src = getImageUrl(img);
-                        thumb.innerHTML = `<img src="${getImageUrl(img)}" alt="Şəkil ${idx + 1}" loading="lazy">`;
+                        thumb.innerHTML = `<img src="${getImageUrl(img)}" alt="Şəkil ${idx + 1}" loading="lazy" onerror="this.onerror=null;this.src='/assets/images/default-ad.svg';">`;
                         thumb.addEventListener('click', () => {
                             goTo(idx);
                         });
@@ -1013,8 +1018,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Dynamically show personal seller rating stat if reviews exist
-        if (!isStore && sellerStats && Array.isArray(reviews) && reviews.length > 0) {
-            sellerStats.replaceChildren();
+        const currentSellerStats = document.getElementById('sellerStats') || document.querySelector('.personal-stats');
+        const currentIsStore = Boolean(window.__CURRENT_AD?.sellerType === 'store' && window.__CURRENT_AD?.store);
+        if (!currentIsStore && currentSellerStats && Array.isArray(reviews) && reviews.length > 0) {
+            currentSellerStats.replaceChildren();
 
             const statRatingDiv = document.createElement('div');
             statRatingDiv.className = 'p-stat';
@@ -1026,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rLbl.textContent = '★ Reytinq';
             statRatingDiv.appendChild(rVal);
             statRatingDiv.appendChild(rLbl);
-            sellerStats.appendChild(statRatingDiv);
+            currentSellerStats.appendChild(statRatingDiv);
 
             const statCountDiv = document.createElement('div');
             statCountDiv.className = 'p-stat';
@@ -1038,10 +1045,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             cLbl.textContent = 'Rəy';
             statCountDiv.appendChild(cVal);
             statCountDiv.appendChild(cLbl);
-            sellerStats.appendChild(statCountDiv);
+            currentSellerStats.appendChild(statCountDiv);
 
-            sellerStats.classList.remove('hidden');
-            sellerStats.style.display = 'grid';
+            currentSellerStats.classList.remove('hidden');
+            currentSellerStats.style.display = 'grid';
         }
     }
 

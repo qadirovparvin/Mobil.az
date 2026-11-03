@@ -4,7 +4,9 @@ document.addEventListener("DOMContentLoaded", function () {
         AZ: {
             Contact: "Əlaqə",
             About: "Haqqımızda",
-            Stores: "Mağazalar",
+            Stores: "Mağazalar (tezliklə)",
+            "vip-empty": "Hazırda VIP elan yoxdur.",
+            "ads-empty": "Hazırda aktiv elan yoxdur.",
             Favorite: "Seçilmişlər",
             "login-btn": "Giriş",
             "register-btn": "Qeydiyyat",
@@ -328,7 +330,9 @@ document.addEventListener("DOMContentLoaded", function () {
         ENG: {
             Contact: "Contact",
             About: "About",
-            Stores: "Stores",
+            Stores: "Stores (soon)",
+            "vip-empty": "No VIP ads currently.",
+            "ads-empty": "No active ads currently.",
             Favorite: "Favorites",
             "login-btn": "Login",
             "register-btn": "Register",
@@ -652,7 +656,9 @@ document.addEventListener("DOMContentLoaded", function () {
         RUS: {
             Contact: "Контакт",
             About: "О нас",
-            Stores: "Магазины",
+            Stores: "Магазины (скоро)",
+            "vip-empty": "В настоящее время нет VIP-объявлений",
+            "ads-empty": "В настоящее время нет активных объявлений",
             Favorite: "Избранное",
             "login-btn": "Вход",
             "register-btn": "Регистрация",
@@ -1210,14 +1216,16 @@ document.addEventListener("DOMContentLoaded", function () {
             langSwitcher.addEventListener("click", changeLanguage);
         }
 
-        function changeLanguage() {
+        function changeLanguage(forcedLang) {
             const currentLangElem = document.getElementById("current-lang");
-            if (!currentLangElem) return;
-            let currentLang = currentLangElem.innerText.trim();
-            // Normalise RUS display label back to key
-            if (currentLang === "РУС")
-                currentLang = "RUS";
-            let newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
+            let newLang = forcedLang && typeof forcedLang === 'string' ? forcedLang : null;
+            if (!newLang) {
+                let currentLang = currentLangElem ? currentLangElem.innerText.trim() : "AZ";
+                // Normalise RUS display label back to key
+                if (currentLang === "РУС")
+                    currentLang = "RUS";
+                newLang = currentLang === "AZ" ? "ENG" : currentLang === "ENG" ? "RUS" : "AZ";
+            }
 
             if (translations[newLang] && translations[newLang]["language-selector"]) {
                 currentLangElem.innerText = translations[newLang]["language-selector"];
@@ -1231,7 +1239,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!key || !translations[newLang] || !translations[newLang][key])
                     return;
                 if (element.tagName === "LI") {
-                    const link = element.querySelector("a");
+                    const link = element.querySelector("a, span");
                     if (link) {
                         const icon = link.querySelector("i");
                         link.innerHTML = icon
@@ -1252,7 +1260,12 @@ document.addEventListener("DOMContentLoaded", function () {
                         element.innerHTML = text;
                     }
                     else if (text) {
-                        element.textContent = text;
+                        const icon = element.querySelector("i");
+                        if (icon) {
+                            element.innerHTML = icon.outerHTML + " " + text;
+                        } else {
+                            element.textContent = text;
+                        }
                     }
                 }
             });
@@ -1292,20 +1305,13 @@ document.addEventListener("DOMContentLoaded", function () {
             document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
         }
 
+        window.changeLanguage = changeLanguage;
+        window.applyLanguage = () => changeLanguage(localStorage.getItem("lang") || "AZ");
+
         // Restore saved language on page load
         const savedLang = localStorage.getItem("lang");
         if (savedLang && savedLang !== "AZ") {
-            if (currentLangElement) {
-                if (savedLang === "ENG") {
-                    currentLangElement.innerText = "AZ";
-                    changeLanguage(); // AZ → ENG
-                }
-                else if (savedLang === "RUS") {
-                    currentLangElement.innerText = "AZ";
-                    changeLanguage(); // AZ → ENG
-                    changeLanguage(); // ENG → RUS
-                }
-            }
+            changeLanguage(savedLang);
         }
     }
 

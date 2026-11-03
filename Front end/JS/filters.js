@@ -470,7 +470,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const json = await res.json();
             const cats = json.data || json;
             if (Array.isArray(cats) && cats.length > 0) {
-                dd.innerHTML = cats.map(cat => `<div class="cat-item" onclick="filterByCat('${cat._id || cat.name}')">${cat.name}</div>`).join('');
+                const catMeta = {
+                    'accessory': { icon: 'fa-plug', key: 'phone-accessories', label: 'Telefon aksessuarları', slug: 'accessory' },
+                    'aksesuar': { icon: 'fa-plug', key: 'phone-accessories', label: 'Telefon aksessuarları', slug: 'accessory' },
+                    'headphone': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
+                    'qulaqlıq': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
+                    'qulaqcıq': { icon: 'fa-headphones', key: 'headphone', label: 'Qulaqcıqlar', slug: 'headphone' },
+                    'tablet': { icon: 'fa-tablet-alt', key: 'tablet', label: 'Planşetlər', slug: 'tablet' },
+                    'planşet': { icon: 'fa-tablet-alt', key: 'tablet', label: 'Planşetlər', slug: 'tablet' },
+                    'phone': { icon: 'fa-mobile-alt', key: 'phone', label: 'Telefonlar', slug: 'phone' },
+                    'telefon': { icon: 'fa-mobile-alt', key: 'phone', label: 'Telefonlar', slug: 'phone' }
+                };
+
+                dd.innerHTML = cats.map(cat => {
+                    const rawId = String(cat._id || cat.slug || '').toLowerCase();
+                    const normName = String(cat.name || '').toLowerCase();
+                    const matchedKey = catMeta[rawId] ? rawId : Object.keys(catMeta).find(k => rawId.includes(k) || normName.includes(k));
+                    const meta = matchedKey ? catMeta[matchedKey] : { icon: 'fa-tag', key: rawId || normName, label: cat.name, slug: cat.slug || cat.name };
+                    const catSlug = meta.slug || cat.slug || meta.key;
+                    return `<a href="phone.html?category=${encodeURIComponent(catSlug)}"><i class="fas ${meta.icon}"></i> <span data-translate="${meta.key}">${meta.label}</span></a>`;
+                }).join('');
+
+                if (typeof window.applyLanguage === 'function') {
+                    window.applyLanguage();
+                } else if (typeof window.changeLanguage === 'function') {
+                    window.changeLanguage(localStorage.getItem('lang') || 'AZ');
+                }
             }
         } catch(e) {
             console.warn('loadCatalog fallback error:', e);
