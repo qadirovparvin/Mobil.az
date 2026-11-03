@@ -1,4 +1,4 @@
-const API_BASE = window.API_URL || window.API_BASE || localStorage.getItem('apiUrl') || 'http://localhost:5000/api';
+const API_BASE = window.API_URL || window.API_BASE || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
 
 // ── Package Selection ──────────────────────────────────
 const packageData = {

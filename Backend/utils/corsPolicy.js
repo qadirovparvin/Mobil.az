@@ -46,8 +46,10 @@ const isOriginAllowed = (origin) => {
 
     // Allow production Render and custom domains
     if (origin && (
+        origin.includes('onrender.com') ||
+        origin.includes('mobilim.az') ||
         origin === 'https://mobilim-az.onrender.com' ||
-        origin.endsWith('.onrender.com') ||
+        origin === 'https://mobil-az.onrender.com' ||
         origin === 'https://mobilim.az' ||
         origin === 'https://www.mobilim.az'
     )) {

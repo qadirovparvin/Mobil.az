@@ -199,7 +199,7 @@ const CATALOG = {
   },
 };
 
-const base = window.API_URL || window.API_BASE || window.API_BASE_URL || 'http://localhost:5000/api';
+const base = window.API_URL || window.API_BASE || window.API_BASE_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
 console.log('Using API base:', base);
 const API_BASE = base;
 
@@ -470,7 +470,7 @@ let existingImages = [];
 function getDisplayImageUrl(img) {
   if (!img) return '';
   if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) return img;
-  const origin = (base || window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const origin = (base || window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api')).replace(/\/api\/?$/, '');
   return origin + (img.startsWith('/') ? img : '/' + img);
 }
 

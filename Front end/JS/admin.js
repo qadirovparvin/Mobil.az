@@ -7,7 +7,7 @@
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API   = window.API_URL || 'http://localhost:5000/api';
+    const API   = window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
     const TOKEN = () => {
         if (typeof window.getAuthToken === 'function') {
             const t = window.getAuthToken();

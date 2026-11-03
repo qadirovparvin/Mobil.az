@@ -1,4 +1,5 @@
-const API_BASE = window.API_URL || window.API_BASE || 'http://localhost:5000/api';
+const resolveCabinetApi = () => window.API_URL || window.API_BASE || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+let API_BASE = resolveCabinetApi();
 
 document.addEventListener('DOMContentLoaded', () => {
     const CABINET_TRANSLATIONS = {
@@ -1967,7 +1968,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (typeof io !== 'function' || !token || !myId) return null;
 
-        const socketUrl = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        const socketUrl = (window.API_URL || resolveCabinetApi()).replace(/\/api\/?$/, '');
         try {
             cabinetSocket = io(socketUrl, {
                 auth: { token }
@@ -2631,7 +2632,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sessionId) {
                 try {
                     const token = window.getToken ? window.getToken() : localStorage.getItem('token');
-                    const API_BASE = window.API_URL || 'http://localhost:5000/api';
+                    const API_BASE = window.API_URL || resolveCabinetApi();
                     const res = await fetch(`${API_BASE}/wallet/payment-session/${encodeURIComponent(sessionId)}`, {
                         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
                     });
@@ -2756,7 +2757,7 @@ window.confirmPromotion = async function () {
     }
 
     try {
-        const base = window.API_URL || window.API_BASE || (typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:5000/api');
+        const base = window.API_URL || window.API_BASE || resolveCabinetApi();
 
         // Idempotency key to prevent duplicate charges on retry/double-click
         const idempotencyKey = `promo-${Date.now()}-${currentPromoAdId}`;

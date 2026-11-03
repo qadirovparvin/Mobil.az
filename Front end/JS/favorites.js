@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return image.substring(image.indexOf("Photo/"));
         }
 
-        const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+        const origin = (window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api')).replace(/\/api\/?$/, '');
         const cleanPath = image.startsWith('/') ? image : '/' + image;
         return origin + cleanPath;
     }

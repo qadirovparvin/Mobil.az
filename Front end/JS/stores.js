@@ -20,7 +20,8 @@ async function loadStores() {
     if (image.startsWith('http://') || image.startsWith('https://') || image.startsWith('data:')) {
       return image;
     }
-    const origin = (window.API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    const safeApi = window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+    const origin = safeApi.replace(/\/api\/?$/, '');
     return `${origin}${image.startsWith('/') ? '' : '/'}${image}`;
   }
 
@@ -28,7 +29,8 @@ async function loadStores() {
     if (loading) loading.style.display = 'block';
     if (empty) empty.style.display = 'none';
 
-    const res = await fetch(`${window.API_URL || 'http://localhost:5000/api'}/stores`);
+    const safeApi = window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+    const res = await fetch(`${safeApi}/stores`);
     if (!res.ok) throw new Error('API error');
     const data = await res.json();
     const stores = data.stores || data.data || (Array.isArray(data) ? data : []);

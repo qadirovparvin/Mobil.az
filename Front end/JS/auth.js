@@ -1,5 +1,7 @@
 "use strict";
 
+const getAuthApi = () => window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('[id^="toggle"]');
@@ -121,7 +123,7 @@ function fetchUnreadCount(token) {
     if (_fetchingUnreadCount || (now - _lastUnreadCountFetch < 5000)) return;
     _fetchingUnreadCount = true;
     _lastUnreadCountFetch = now;
-    fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/unread-count', {
+    fetch(getAuthApi() + '/notifications/unread-count', {
         headers: { 'Authorization': 'Bearer ' + curToken },
         credentials: 'include'
     })
@@ -256,7 +258,7 @@ function updateHeader() {
                 const curToken = getToken();
                 if (!curToken) return;
                 try {
-                    await fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications/read-all', {
+                    await fetch(getAuthApi() + '/notifications/read-all', {
                         method: 'PUT',
                         headers: { 'Authorization': 'Bearer ' + curToken }
                     });
@@ -314,7 +316,7 @@ async function loadNotifications() {
     }
 
     try {
-        const res = await fetch((window.API_URL || 'http://localhost:5000/api') + '/notifications', {
+        const res = await fetch(getAuthApi() + '/notifications', {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!res.ok) throw new Error('Network error');
