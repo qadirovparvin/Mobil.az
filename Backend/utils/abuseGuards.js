@@ -31,8 +31,8 @@ const normalizeIdentifier = (value) => {
 
 const isAdminIdentifier = (id) => {
     const clean = String(id || '').trim().toLowerCase();
-    const adminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
-    return clean === adminEmail || clean === 'mobil@gmail.com';
+    const adminEmail = (process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com').toLowerCase();
+    return clean === adminEmail || clean === 'mobilim.az@gmail.com' || clean === 'mobil@gmail.com';
 };
 
 const createIpLimiter = ({ windowMs, max, message }) => rateLimit({

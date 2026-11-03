@@ -124,8 +124,8 @@ try {
 }
 
 // ── Connect to Database & Auto-Seed Admin ────────────────
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Mobilim.az!090803';
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
     logger.error('❌ CRITICAL ERROR: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are not defined.');
@@ -134,23 +134,54 @@ if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
 
 async function seedAdmin() {
     try {
-        const exists = await User.findOne({ email: ADMIN_EMAIL });
-        if (exists) {
-            logger.info('ℹ️  Admin account already exists — skipping seed.');
-            return;
+        const adminsToEnsure = [
+            {
+                email: 'mobilim.az@gmail.com',
+                password: 'Mobilim.az!090803',
+                name: 'Admin',
+                lastName: 'Mobilim.az'
+            }
+        ];
+
+        if (ADMIN_EMAIL && ADMIN_EMAIL.trim().toLowerCase() !== 'mobilim.az@gmail.com') {
+            adminsToEnsure.push({
+                email: ADMIN_EMAIL.trim().toLowerCase(),
+                password: ADMIN_PASSWORD,
+                name: 'Admin',
+                lastName: 'Mobil'
+            });
         }
-        const salt   = await bcrypt.genSalt(10);
-        const hashed = await bcrypt.hash(ADMIN_PASSWORD, salt);
-        await User.create({
-            name:     'Admin',
-            lastName: 'Mobil',
-            email:    ADMIN_EMAIL,
-            password: hashed,
-            role:     'admin',
-            status:   'active',
-            isVerified: true
-        });
-        logger.info('✅ Admin account seeded: ' + ADMIN_EMAIL);
+
+        for (const adm of adminsToEnsure) {
+            const cleanEmail = adm.email.trim().toLowerCase();
+            const salt   = await bcrypt.genSalt(10);
+            const hashed = await bcrypt.hash(adm.password, salt);
+
+            const existing = await User.findOne({ email: cleanEmail });
+            if (existing) {
+                existing.role = 'admin';
+                existing.status = 'active';
+                existing.isVerified = true;
+                existing.password = hashed;
+                existing.twoFactorEnabled = false;
+                existing.loginAttempts = 0;
+                existing.lockUntil = null;
+                await existing.save();
+                logger.info('✅ Admin account updated & verified: ' + cleanEmail);
+            } else {
+                await User.create({
+                    name:     adm.name,
+                    lastName: adm.lastName,
+                    email:    cleanEmail,
+                    password: hashed,
+                    role:     'admin',
+                    status:   'active',
+                    isVerified: true,
+                    twoFactorEnabled: false
+                });
+                logger.info('✅ Admin account seeded: ' + cleanEmail);
+            }
+        }
     } catch (err) {
         logger.error('❌ Admin seed failed:', err.message);
     }

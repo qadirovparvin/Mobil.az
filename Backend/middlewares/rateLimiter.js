@@ -62,8 +62,8 @@ const isRequestFromAdmin = async (req) => {
     const rawIdentifier = req.body?.email || req.body?.identifier;
     if (rawIdentifier) {
         const cleanId = String(rawIdentifier).trim().toLowerCase();
-        const configuredAdminEmail = (process.env.ADMIN_EMAIL || 'mobil@gmail.com').toLowerCase();
-        if (cleanId === configuredAdminEmail || cleanId === 'mobil@gmail.com') {
+        const configuredAdminEmail = (process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com').toLowerCase();
+        if (cleanId === configuredAdminEmail || cleanId === 'mobilim.az@gmail.com' || cleanId === 'mobil@gmail.com') {
             return true;
         }
 
