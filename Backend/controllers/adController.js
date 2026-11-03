@@ -292,9 +292,14 @@ const getAdById = async (req, res, next) => {
                 .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
         }
         if (!ad) {
+            const cleanNum = idParam.trim();
+            const candidates = [cleanNum, cleanNum.toUpperCase(), cleanNum.toLowerCase()];
+            if (!cleanNum.toUpperCase().startsWith('MOB-')) {
+                candidates.push(`MOB-${cleanNum.toUpperCase()}`);
+            }
             ad = await Ad.findOne({
                 ...baseQuery,
-                adNumber: idParam.toUpperCase()
+                adNumber: { $in: candidates }
             })
                 .populate('author', 'name lastName avatar phone createdAt')
                 .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');

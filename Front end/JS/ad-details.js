@@ -9,8 +9,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Helpers (defined first so they're always available) ────────
 
-    const API_BASE = window.API_URL || window.API_BASE || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+    const API_BASE = window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
+    let isStore = false;
 
     function getImageUrl(image) {
         if (!image) return '';
@@ -71,8 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ── Read ad ID from URL ─────────────────────────────────────────
-    const params = new URLSearchParams(window.location.search);
-    const adId   = params.get('id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const adId   = urlParams.get('id') || urlParams.get('adId') || urlParams.get('adNumber');
 
     if (!adId) {
         showPageError('URL-də elan ID-si tapılmadı. Ana səhifəyə qayıdıb bir elana klikləyin.');
@@ -275,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // ── 10. Seller Info ────────────────────────────────────────
-        const isStore = ad.sellerType === 'store' && !!ad.store;
+        isStore = Boolean(ad.sellerType === 'store' && ad.store);
         const sellerNameEl = document.getElementById('sellerName') || document.querySelector('.personal-name');
         const avatarEl = document.getElementById('sellerAvatar') || document.querySelector('.personal-avatar');
         const sellerTypeTag = document.getElementById('sellerTypeTag');
@@ -311,6 +312,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     img.src = getImageUrl(store.logoUrl);
                     img.alt = storeName;
                     img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+                    img.onerror = function() {
+                        this.onerror = null;
+                        this.src = '/assets/images/default-avatar.svg';
+                    };
                     avatarEl.appendChild(img);
                 } else {
                     avatarEl.textContent = (storeName || 'M').charAt(0).toUpperCase();
@@ -444,6 +449,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     img.src = getImageUrl(ad.author.avatar);
                     img.alt = authorName;
                     img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
+                    img.onerror = function() {
+                        this.onerror = null;
+                        this.src = '/assets/images/default-avatar.svg';
+                    };
                     avatarEl.appendChild(img);
                 } else {
                     avatarEl.textContent = (ad.author?.name || authorName).charAt(0).toUpperCase() || 'S';
@@ -788,7 +797,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const imgSrc = (Array.isArray(item.images) && item.images.length > 0)
                         ? getImageUrl(item.images[0])
                         : '';
-                    imgEl.src = imgSrc || 'Photo/logo.png';
+                    imgEl.src = imgSrc || '/assets/images/default-ad.svg';
+                    imgEl.onerror = function() {
+                        this.onerror = null;
+                        this.src = '/assets/images/default-ad.svg';
+                    };
                     const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
                     imgEl.alt = itemTitle;
                     imgEl.loading = 'lazy';
