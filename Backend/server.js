@@ -458,10 +458,19 @@ app.get('/', (req, res) => {
 // ── Static Files Serving ─────────────────────────────────
 const frontendDir = path.join(__dirname, '..', 'Front end');
 const frontendAltDir = path.join(__dirname, '..', 'Frontend');
-app.use(express.static(frontendDir));
-app.use('/Frontend', express.static(frontendAltDir));
-app.use('/Front%20end', express.static(frontendDir));
-app.use('/Front end', express.static(frontendDir));
+const staticOptions = {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+};
+app.use(express.static(frontendDir, staticOptions));
+app.use('/Frontend', express.static(frontendAltDir, staticOptions));
+app.use('/Front%20end', express.static(frontendDir, staticOptions));
+app.use('/Front end', express.static(frontendDir, staticOptions));
 
 app.use(validationErrorHandler);
 

@@ -123,18 +123,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ── Fetch the ad with resilient retry ──────────────────────
         let res;
         let fetchErr;
-        const maxAttempts = 3;
+        const maxAttempts = 4;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
                     headers: { 'Accept': 'application/json' }
                 });
-                if (res) break;
+                // If we got a valid response (not server 502/503/504 restart/cold start), break out
+                if (res && res.status < 500) break;
             } catch (err) {
                 fetchErr = err;
-                if (attempt < maxAttempts) {
-                    await new Promise(r => setTimeout(r, attempt * 1200));
-                }
+            }
+            if (attempt < maxAttempts) {
+                await new Promise(r => setTimeout(r, attempt * 1200));
             }
         }
         if (!res && fetchErr) {
