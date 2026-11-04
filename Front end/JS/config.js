@@ -9,16 +9,25 @@ function resolveDefaultApiUrl() {
     var hostname = window.location.hostname || '';
     var isLocal = ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(hostname) || hostname.startsWith('192.168.') || hostname.startsWith('10.') || window.location.protocol === 'file:';
     if (!isLocal) {
-        // Production: frontend and backend are hosted on same origin
-        return (window.location.origin ? window.location.origin : '') + '/api';
+        // Production: frontend and backend are hosted on same origin, ALWAYS use HTTPS to prevent 301 redirect drops in fetch()
+        var protocol = (window.location.protocol === 'http:' || !window.location.protocol) ? 'https:' : window.location.protocol;
+        return protocol + '//' + (window.location.host || hostname) + '/api';
     }
     // Local development
     return 'http://localhost:5000/api';
 }
 
+var isLocal = (typeof window !== 'undefined' && ['localhost', '127.0.0.1', '::1', '[::1]', '', '0.0.0.0'].includes(window.location.hostname || ''));
+
+// Automatically upgrade HTTP to HTTPS on production to prevent 301 CORS drop in fetch
+if (typeof window !== 'undefined' && window.location && window.location.protocol === 'http:' && !isLocal && window.location.hostname) {
+    try {
+        window.location.replace('https://' + window.location.host + window.location.pathname + window.location.search + window.location.hash);
+    } catch (_) {}
+}
+
 var resolvedApi = resolveDefaultApiUrl();
 var backendHost = resolvedApi.replace(/\/api\/?$/, '');
-var isLocal = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'));
 
 if (typeof window !== 'undefined') {
     window.BASE_URL = backendHost;
@@ -398,6 +407,8 @@ function handleGenericApiError(status) {
                                      reqUrl.includes('/health') || 
                                      reqUrl.includes('/auth/csrf-token') || 
                                      reqUrl.includes('/ads/favorites') ||
+                                     reqUrl.includes('/favorites') ||
+                                     reqUrl.includes('/categories') ||
                                      reqUrl.includes('/auth/refresh');
             if (!init.silent && !isBackgroundCall && err?.name !== 'AbortError') {
                 window.toast?.show('Şəbəkə xətası baş verdi. İnternet bağlantınızı yoxlayın.', 'error');

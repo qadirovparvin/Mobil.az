@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
             category: (document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active')?.getAttribute('data-value')) ?? (new URLSearchParams(window.location.search).get('category') || ''),
             brand: document.getElementById('brandSelect')?.value || '',
             model: document.getElementById('modelSelect')?.value || '',
-            minPrice: parseFloat(document.getElementById('priceMin')?.value) || '',
-            maxPrice: parseFloat(document.getElementById('priceMax')?.value) || '',
+            minPrice: (document.getElementById('priceMin')?.value && !isNaN(parseFloat(document.getElementById('priceMin').value))) ? parseFloat(document.getElementById('priceMin').value) : null,
+            maxPrice: (document.getElementById('priceMax')?.value && !isNaN(parseFloat(document.getElementById('priceMax').value))) ? parseFloat(document.getElementById('priceMax').value) : null,
             city: document.querySelector('select[data-filter="city"]')?.value || '',
             storage: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
             memory: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
@@ -239,9 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
         applyClientFilters(filters);
     }
 
-    // Client-side filtering of rendered cards
+    // Client-side filtering of rendered cards (catalog only, never VIP)
     function applyClientFilters(filters) {
-        const adCards = document.querySelectorAll('.elan-card, .ad-card');
+        filters = filters || getActiveFilters();
+        const adCards = document.querySelectorAll('#catalog .elan-card, #catalog .ad-card, .all-ads-container .elan-card, .all-ads-container .ad-card, #phone-ads-container .elan-card, #phone-ads-container .ad-card');
         
         let visibleCount = 0;
         
@@ -302,12 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (matches && !exactCheck(filters.delivery, card.getAttribute('data-delivery'))) matches = false;
             if (matches && !exactCheck(filters.seller, card.getAttribute('data-seller'))) matches = false;
             
-            // Pricing Check
+            // Pricing Check (strict numeric check to avoid '' > 0 comparison bug)
             if (matches) {
                 const priceMatch = (card.getAttribute('data-price') || '').replace(/[^0-9]/g, '');
                 if (priceMatch) {
                     const price = parseFloat(priceMatch);
-                    if (price < filters.minPrice || price > filters.maxPrice) {
+                    if (typeof filters.minPrice === 'number' && !isNaN(filters.minPrice) && price < filters.minPrice) {
+                        matches = false;
+                    }
+                    if (typeof filters.maxPrice === 'number' && !isNaN(filters.maxPrice) && price > filters.maxPrice) {
                         matches = false;
                     }
                 }

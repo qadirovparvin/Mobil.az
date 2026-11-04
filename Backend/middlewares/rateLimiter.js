@@ -227,7 +227,7 @@ function initLimiters() {
 
     currentAdListLimiter = rateLimit({
         windowMs: 15 * 60 * 1000,
-        max: 100,
+        max: 600,
         store: createStore('rl:ads:'),
         passOnStoreError: false,
         message: { message: "Həddindən artıq müraciət. Zəhmət olmasa 15 dəqiqə sonra yenidən cəhd edin." },

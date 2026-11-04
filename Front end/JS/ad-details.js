@@ -9,7 +9,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Helpers (defined first so they're always available) ────────
 
-    const API_BASE = window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+    function resolveAdDetailsApi() {
+        if (window.API_URL) return window.API_URL;
+        if (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+            var protocol = (window.location.protocol === 'http:' || !window.location.protocol) ? 'https:' : window.location.protocol;
+            return protocol + '//' + (window.location.host || window.location.hostname) + '/api';
+        }
+        return 'http://localhost:5000/api';
+    }
+    const API_BASE = resolveAdDetailsApi();
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, '');
     let isStore = false;
 
@@ -123,22 +131,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ── Fetch the ad with resilient retry ──────────────────────
         let res;
         let fetchErr;
-        const maxAttempts = 4;
+        const maxAttempts = 5;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
-                    headers: { 'Accept': 'application/json' }
+                    headers: { 'Accept': 'application/json' },
+                    silent: true
                 });
                 // If we got a valid response (not server 502/503/504 restart/cold start), break out
-                if (res && res.status < 500) break;
+                if (res && res.status < 500) {
+                    fetchErr = null;
+                    break;
+                }
             } catch (err) {
                 fetchErr = err;
+                res = null;
             }
             if (attempt < maxAttempts) {
                 await new Promise(r => setTimeout(r, attempt * 1200));
             }
         }
-        if (!res && fetchErr) {
+        if ((!res || res.status >= 500) && fetchErr) {
             console.error('[ad-details] Fetch network error:', fetchErr);
             throw new Error(`Serverlə əlaqə qurula bilmədi (${fetchErr.message || 'Şəbəkə xətası'}). Zəhmət olmasa bir neçə saniyə sonra yenidən yoxlayın.`);
         }

@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const API_URL = window.API_URL;
+    function getFavoritesApi() {
+        return window.API_URL || window.API_BASE || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+    }
     let userFavorites = []; // Array of ad IDs from MongoDB
     
     function getToken() {
@@ -33,17 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!token) return [];
         
         try {
-            const res = await fetch(`${API_URL}/ads/favorites`, {
+            const apiUrl = getFavoritesApi();
+            const res = await fetch(`${apiUrl}/ads/favorites`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 silent: true
-            });
-            const data = await res.json();
-            if (res.ok && data.ads) {
+            }).catch(() => null);
+            if (!res || !res.ok) return [];
+            const data = await res.json().catch(() => null);
+            if (data && data.ads && Array.isArray(data.ads)) {
                 return data.ads.map(ad => ad._id);
             }
             return [];
         } catch (e) {
-            console.error('Error fetching favorites:', e);
             return [];
         }
     }
@@ -57,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/ads/${adId}/favorite`, {
+            const res = await fetch(`${getFavoritesApi()}/ads/${adId}/favorite`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -208,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const res = await fetch(`${API_URL}/ads/favorites`, {
+            const res = await fetch(`${getFavoritesApi()}/ads/favorites`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 silent: true
             });

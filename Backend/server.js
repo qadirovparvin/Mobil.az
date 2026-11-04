@@ -241,6 +241,8 @@ const server = http.createServer(app);
 
 if (process.env.TRUST_PROXY_HOPS) {
     app.set('trust proxy', Number(process.env.TRUST_PROXY_HOPS));
+} else if (process.env.RENDER === 'true' || process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1);
 }
 
 // ── CORS Configuration ────────────────────────────────────
