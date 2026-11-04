@@ -2,7 +2,10 @@ node_modules/
 .env
 .tmp/
 logs/
-uploads/
+uploads/*
+!uploads/.gitkeep
+!Backend/uploads/images-1bda7bd0-b4cb-4488-98b4-f1dd4b97c778.webp
+!Backend/uploads/images-parvin-s22.webp
 private_uploads/
 *.log
 .vscode/

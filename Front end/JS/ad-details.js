@@ -114,12 +114,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ── Fetch the ad ───────────────────────────────────────────
         let res;
-        try {
-            res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
-                credentials: 'include',
-                headers: { 'Accept': 'application/json' }
-            });
-        } catch (fetchErr) {
+        let fetchErr;
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (res) break;
+            } catch (err) {
+                fetchErr = err;
+                if (attempt < 2) {
+                    await new Promise(r => setTimeout(r, 800));
+                }
+            }
+        }
+        if (!res && fetchErr) {
             console.error('[ad-details] Fetch network error:', fetchErr);
             throw new Error(`Serverlə əlaqə qurula bilmədi (${fetchErr.message || 'Şəbəkə xətası'})`);
         }
@@ -128,7 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             ad = await res.json();
         } catch {
-            throw new Error(`Server JSON cavabı parse edilmədi (HTTP ${res.status})`);
+            throw new Error(`Server JSON cavabı parse edilmədi (HTTP ${res ? res.status : 'unknown'})`);
         }
 
         if (!res.ok) {
@@ -149,11 +158,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const titleEl = document.querySelector('.ad-main-title');
         if (titleEl) titleEl.textContent = adTitle;
 
-        const currentBreadcrumb = document.querySelector('.breadcrumb .current');
-        if (currentBreadcrumb) currentBreadcrumb.textContent = adTitle;
+        const brandBreadcrumb = document.querySelector('.breadcrumb-brand') || document.querySelectorAll('.breadcrumb a')[2];
+        const brandSep = document.querySelector('.breadcrumb-brand-sep');
+        const currentBreadcrumb = document.querySelector('.breadcrumb-model') || document.querySelector('.breadcrumb .current');
+        const modelSep = document.querySelector('.breadcrumb-model-sep');
 
-        const brandBreadcrumb = document.querySelectorAll('.breadcrumb a')[2];
-        if (brandBreadcrumb) brandBreadcrumb.textContent = ad.brand || '';
+        if (ad.brand) {
+            if (brandBreadcrumb) {
+                brandBreadcrumb.textContent = ad.brand;
+                brandBreadcrumb.href = `phone.html?brand=${encodeURIComponent(ad.brand)}`;
+                brandBreadcrumb.style.display = '';
+            }
+            if (brandSep) brandSep.style.display = '';
+        }
+        if (currentBreadcrumb) {
+            currentBreadcrumb.textContent = adTitle;
+        }
+        if (modelSep) modelSep.style.display = '';
 
         // ── 2. Price ───────────────────────────────────────────────
         const priceEl = document.querySelector('.ad-main-price');

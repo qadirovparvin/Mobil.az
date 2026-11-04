@@ -3,210 +3,224 @@ const Store = require('../models/Store');
 const Ad = require('../models/Ad');
 const bcrypt = require('bcryptjs');
 
-const DEMO_ADS = [
-    {
-        adNumber: 'MOB-5D3802',
-        brand: 'Samsung',
-        modelName: 'Galaxy S24 Ultra',
-        price: 1799,
-        color: 'Titan Qara',
-        memory: '256GB',
-        ram: '12GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38020',
-        brand: 'Apple',
-        modelName: 'iPhone 15 Pro Max',
-        price: 1999,
-        color: 'Titan Mavi',
-        memory: '256GB',
-        ram: '8GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38021',
-        brand: 'Apple',
-        modelName: 'iPhone 15 Pro',
-        price: 1699,
-        color: 'Titan Ağ',
-        memory: '128GB',
-        ram: '8GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38023',
-        brand: 'Samsung',
-        modelName: 'Galaxy S24+',
-        price: 1299,
-        color: 'Cobalt Violet',
-        memory: '256GB',
-        ram: '12GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38024',
-        brand: 'Apple',
-        modelName: 'iPhone 14 Pro Max',
-        price: 1399,
-        color: 'Dərin Bənövşəyi',
-        memory: '128GB',
-        ram: '6GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38025',
-        brand: 'Xiaomi',
-        modelName: 'Xiaomi 14 Ultra',
-        price: 1599,
-        color: 'Ağ',
-        memory: '512GB',
-        ram: '16GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1616348436168-de43ad0db179?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38026',
-        brand: 'Google',
-        modelName: 'Pixel 8 Pro',
-        price: 1099,
-        color: 'Qara',
-        memory: '128GB',
-        ram: '12GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=1200&auto=format&fit=crop'
-    },
-    {
-        adNumber: 'MOB-D38027',
-        brand: 'OnePlus',
-        modelName: 'OnePlus 12',
-        price: 999,
-        color: 'Silky Black',
-        memory: '256GB',
-        ram: '12GB',
-        promotionType: 'VIP',
-        image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1200&auto=format&fit=crop'
-    }
-];
-
 async function ensureDemoAds() {
     try {
-        const count = await Ad.countDocuments({ status: { $ne: 'deleted' } });
-        const hasGalaxyS24 = await Ad.exists({ adNumber: 'MOB-5D3802' });
-        
+        console.log('[Catalogue] Cleaning up dummy ads and ensuring real ads (Pərvin & Nəzrin)...');
+
+        // 1. Delete all dummy / demo ads
+        const deleteFilter = {
+            $or: [
+                { adNumber: { $regex: /^MOB-[D5]/i } },
+                { adNumber: { $in: ['MOB-5D3802', 'MOB-D38020', 'MOB-D38021', 'MOB-D38023', 'MOB-D38024', 'MOB-D38025', 'MOB-D38026', 'MOB-D38027'] } },
+                { description: /rəsmi zəmanətlə satılır\. Orijinal qutuda/i }
+            ]
+        };
+
+        const deletedRes = await Ad.deleteMany(deleteFilter);
+        if (deletedRes.deletedCount > 0) {
+            console.log(`🗑️ Deleted ${deletedRes.deletedCount} dummy ads.`);
+        }
+
+        // Clean up dummy store TechZone Baku and dummy seller seller@mobilim.az
+        await Store.deleteMany({ storeName: 'TechZone Baku' });
+        await User.deleteMany({ email: 'seller@mobilim.az' });
+
         const now = new Date();
-        const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-        const vipAdNumbers = DEMO_ADS.filter(d => d.promotionType === 'VIP').map(d => d.adNumber);
+        const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
 
-        // Always ensure VIP ads have valid active promotionExpiresAt
-        await Ad.updateMany(
-            { adNumber: { $in: vipAdNumbers } },
-            { $set: { promotionType: 'VIP', promotionExpiresAt: expires, expiresAt: expires, status: 'active' } }
-        );
+        // 2. Ensure Pərvin Qədirov exists
+        let parvinUser = await User.findOne({ 
+            $or: [
+                { email: 'mobilim.az@gmail.com' },
+                { phone: { $in: ['+994703638808', '0703638808'] } },
+                { name: 'Pərvin', lastName: 'Qədirov' }
+            ]
+        });
 
-        if (count >= 5 && hasGalaxyS24 && process.env.SEED_DEMO_ADS !== 'true') {
-            return;
-        }
-
-        console.log(`[Seed] Checking demo ads (existing: ${count}). Ensuring demo catalogue...`);
-
-        // 1. Ensure a seller user exists
-        let seller = await User.findOne({ email: 'seller@mobilim.az' });
-        if (!seller) {
-            seller = await User.findOne({ role: 'admin' });
-        }
-        if (!seller) {
-            const pw = await bcrypt.hash('Seller1234!', 10);
-            seller = await User.create({
-                name: 'Rauf',
-                lastName: 'Məmmədov',
-                email: 'seller@mobilim.az',
+        if (!parvinUser) {
+            const pw = await bcrypt.hash('Mobilim.az!090803', 10);
+            parvinUser = await User.create({
+                name: 'Pərvin',
+                lastName: 'Qədirov',
+                email: 'mobilim.az@gmail.com',
+                phone: '+994703638808',
                 password: pw,
-                phone: '+994552345678',
+                role: 'admin',
+                status: 'active',
+                isVerified: true
+            });
+            console.log('✅ Created Pərvin user account.');
+        }
+
+        // 3. Ensure Nəzrin Məmmədzadə exists
+        let nazrinUser = await User.findOne({
+            $or: [
+                { phone: { $in: ['+994 77 777 77 77', '+994777777777', '0777777777'] } },
+                { name: 'Nəzrin', lastName: 'Məmmədzadə' }
+            ]
+        });
+
+        if (!nazrinUser) {
+            const pw = await bcrypt.hash('Nazrin1234!', 10);
+            nazrinUser = await User.create({
+                name: 'Nəzrin',
+                lastName: 'Məmmədzadə',
+                phone: '+994 77 777 77 77',
+                password: pw,
                 role: 'user',
                 status: 'active',
                 isVerified: true
             });
+            console.log('✅ Created Nəzrin user account.');
         }
 
-        // 2. Ensure store exists
-        let store = await Store.findOne({ owner: seller._id });
-        if (!store) {
-            store = await Store.findOne({ storeName: 'TechZone Baku' });
-        }
-        if (!store) {
-            store = await Store.create({
-                owner: seller._id,
-                storeName: 'TechZone Baku',
-                description: 'Bakının ən böyük texnika mağazası. Apple, Samsung, Xiaomi rəsmi distribütoru.',
-                logoUrl: '/assets/images/default-avatar.svg',
-                coverUrl: '/assets/images/default-cover.svg',
-                packageType: 'Premium',
-                address: 'Nizami küçəsi 96',
-                city: 'Bakı',
-                contactNumber: '+994123456789',
-                isVerified: true,
-                rating: 4.8,
-                reviewCount: 127,
-                subscriptionActive: true,
-                status: 'active'
-            });
-        }
+        // 4. Ensure Pərvin's real Ad (Samsung Galaxy S22 Ultra Green)
+        let parvinAd = await Ad.findOne({
+            $or: [
+                { adNumber: 'MOB-000001' },
+                { author: parvinUser._id, brand: 'Samsung' }
+            ]
+        });
 
-        // 3. Insert demo ads if not exist
-        let inserted = 0;
+        const parvinImages = [
+            '/uploads/images-parvin-s22.webp',
+            'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?q=80&w=1200&auto=format&fit=crop'
+        ];
 
-        for (const d of DEMO_ADS) {
-            const exists = await Ad.exists({ adNumber: d.adNumber });
-            if (!exists) {
-                await Ad.create({
-                    adNumber: d.adNumber,
-                    author: seller._id,
-                    store: store._id,
-                    sellerType: 'store',
-                    category: 'Telefon',
-                    brand: d.brand,
-                    modelName: d.modelName,
-                    price: d.price,
-                    condition: 'Yeni',
-                    description: `${d.brand} ${d.modelName} — rəsmi zəmanətlə satılır. Orijinal qutuda, tam yeni.`,
-                    images: [d.image],
-                    city: 'Bakı',
-                    contactPhone: '+994123456789',
-                    status: 'active',
-                    publishedAt: now,
-                    expiresAt: expires,
-                    promotionType: d.promotionType,
-                    promotionExpiresAt: d.promotionType === 'VIP' ? expires : null,
-                    specs: {
-                        memory: d.memory,
-                        ram: d.ram,
-                        screenSize: '6.1-6.7',
-                        battery: '4000-5000',
-                        color: d.color,
-                        features: {
-                            nfc: true,
-                            waterproof: true,
-                            fingerprint: true,
-                            delivery: true,
-                            expandable: false
-                        }
+        if (parvinAd) {
+            parvinAd.title = 'Samsung Galaxy S22 Ultra 5G Green';
+            parvinAd.brand = 'Samsung';
+            parvinAd.modelName = 'Galaxy S22';
+            parvinAd.price = 1242;
+            parvinAd.condition = 'Yeni';
+            parvinAd.yaddas = '256';
+            parvinAd.ram = '12';
+            parvinAd.description = 'Samsung Galaxy S22 Ultra 5G Green 256GB/12GB';
+            parvinAd.images = parvinImages;
+            parvinAd.city = 'Sumqayıt';
+            parvinAd.contactPhone = '0703638808';
+            parvinAd.status = 'active';
+            parvinAd.promotionType = 'VIP';
+            parvinAd.promotionExpiresAt = expires;
+            parvinAd.expiresAt = expires;
+            parvinAd.sellerType = 'personal';
+            await parvinAd.save();
+            console.log('✅ Pərvin\'s real ad updated with real photo & VIP status.');
+        } else {
+            await Ad.create({
+                adNumber: 'MOB-000001',
+                author: parvinUser._id,
+                sellerType: 'personal',
+                category: 'Telefon',
+                brand: 'Samsung',
+                modelName: 'Galaxy S22',
+                title: 'Samsung Galaxy S22 Ultra 5G Green',
+                price: 1242,
+                condition: 'Yeni',
+                yaddas: '256',
+                ram: '12',
+                description: 'Samsung Galaxy S22 Ultra 5G Green 256GB/12GB',
+                images: parvinImages,
+                city: 'Sumqayıt',
+                contactPhone: '0703638808',
+                status: 'active',
+                promotionType: 'VIP',
+                promotionExpiresAt: expires,
+                publishedAt: now,
+                expiresAt: expires,
+                specs: {
+                    memory: '256',
+                    ram: '12',
+                    screenSize: '6.8',
+                    battery: '5000',
+                    color: 'Yaşıl',
+                    features: {
+                        nfc: true,
+                        waterproof: true,
+                        fingerprint: true,
+                        expandable: false,
+                        delivery: true
                     }
-                });
-                inserted++;
-            }
+                }
+            });
+            console.log('✅ Pərvin\'s real ad created.');
         }
 
-        console.log(`✅ Demo catalogue ensured: ${inserted} ads inserted, VIP promotions refreshed.`);
+        // 5. Ensure Nəzrin's real Ad (Apple iPhone 11)
+        let nazrinAd = await Ad.findOne({
+            $or: [
+                { adNumber: 'MOB-000002' },
+                { author: nazrinUser._id, brand: 'Apple' }
+            ]
+        });
+
+        const nazrinImages = [
+            '/uploads/images-1bda7bd0-b4cb-4488-98b4-f1dd4b97c778.webp'
+        ];
+
+        if (nazrinAd) {
+            nazrinAd.title = 'Apple iPhone 11 128GB';
+            nazrinAd.brand = 'Apple';
+            nazrinAd.modelName = 'iPhone 11';
+            nazrinAd.price = 500;
+            nazrinAd.condition = 'İşlənmiş';
+            nazrinAd.yaddas = '128';
+            nazrinAd.ram = '4';
+            nazrinAd.description = 'telefonum çiçək kimidi';
+            nazrinAd.images = nazrinImages;
+            nazrinAd.city = 'Bakı';
+            nazrinAd.contactPhone = '+994 77 777 77 77';
+            nazrinAd.status = 'active';
+            nazrinAd.promotionType = 'VIP';
+            nazrinAd.promotionExpiresAt = expires;
+            nazrinAd.expiresAt = expires;
+            nazrinAd.sellerType = 'personal';
+            await nazrinAd.save();
+            console.log('✅ Nəzrin\'s real ad updated with real photo & VIP status.');
+        } else {
+            await Ad.create({
+                adNumber: 'MOB-000002',
+                author: nazrinUser._id,
+                sellerType: 'personal',
+                category: 'Telefon',
+                brand: 'Apple',
+                modelName: 'iPhone 11',
+                title: 'Apple iPhone 11 128GB',
+                price: 500,
+                condition: 'İşlənmiş',
+                yaddas: '128',
+                ram: '4',
+                description: 'telefonum çiçək kimidi',
+                images: nazrinImages,
+                city: 'Bakı',
+                contactPhone: '+994 77 777 77 77',
+                status: 'active',
+                promotionType: 'VIP',
+                promotionExpiresAt: expires,
+                publishedAt: now,
+                expiresAt: expires,
+                specs: {
+                    memory: '128',
+                    ram: '4',
+                    screenSize: '6.1',
+                    battery: '3110',
+                    color: 'Ağ',
+                    features: {
+                        nfc: true,
+                        waterproof: true,
+                        fingerprint: false,
+                        expandable: false,
+                        delivery: false
+                    }
+                }
+            });
+            console.log('✅ Nəzrin\'s real ad created.');
+        }
+
+        console.log('🎯 Database catalogue clean and verified: ONLY real ads for Pərvin and Nəzrin remain.');
     } catch (err) {
         console.error('❌ ensureDemoAds error:', err.message);
     }
 }
 
 module.exports = { ensureDemoAds };
-

@@ -380,6 +380,13 @@ app.post('/api/wallet/packages/payment-session', strictLimiter);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Fallback for missing uploads on ephemeral disks (e.g. Render restart)
 app.use('/uploads', (req, res) => {
+    const fileName = path.basename(req.path || '');
+    if (fileName) {
+        const assetPath = path.join(__dirname, '../Front end/assets/images', fileName);
+        if (fs.existsSync(assetPath)) {
+            return res.sendFile(assetPath);
+        }
+    }
     const defaultSvg = path.join(__dirname, '../Front end/assets/images/default-ad.svg');
     if (fs.existsSync(defaultSvg)) {
         res.setHeader('Content-Type', 'image/svg+xml');
