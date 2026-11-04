@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             showPageError(errMsg, isNotFound);
             return;
         }
+        if (ad && ad.data && typeof ad.data === 'object' && !ad.brand && !ad.modelName) {
+            ad = ad.data;
+        }
         window.__CURRENT_AD = ad;
 
         // ── 1. Page title & breadcrumb ─────────────────────────────

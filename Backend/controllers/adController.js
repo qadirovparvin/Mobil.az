@@ -282,16 +282,24 @@ const getAdById = async (req, res, next) => {
     try {
         const idParam = String(req.params.id || '').trim();
         if (!idParam) {
-            return res.status(400).json({ message: 'Invalid ID' });
+            return res.status(404).json({ message: 'Elan tapılmadı' });
         }
 
         console.log('[adController] getAdById req.params:', req.params);
+
+        const isObjectId = mongoose.Types.ObjectId.isValid(idParam);
+        const isMobPattern = /^MOB-[A-Z0-9_-]{3,20}$/i.test(idParam);
+
+        // If not valid ObjectId and not MOB pattern, return 404 immediately
+        if (!isObjectId && !isMobPattern) {
+            return res.status(404).json({ message: 'Elan tapılmadı' });
+        }
 
         const baseQuery = { status: { $ne: DELETED_AD_STATUS } };
         let ad = null;
 
         // 1. Try finding by MongoDB ObjectId
-        if (mongoose.Types.ObjectId.isValid(idParam)) {
+        if (isObjectId) {
             ad = await Ad.findOne({
                 ...baseQuery,
                 _id: idParam
@@ -302,7 +310,7 @@ const getAdById = async (req, res, next) => {
         }
 
         // 2. If not found by ObjectId, try finding by adNumber (e.g. MOB-5D3802)
-        if (!ad) {
+        if (!ad && isMobPattern) {
             const cleanNum = idParam.trim();
             const candidates = [cleanNum, cleanNum.toUpperCase(), cleanNum.toLowerCase()];
             if (!cleanNum.toUpperCase().startsWith('MOB-')) {
