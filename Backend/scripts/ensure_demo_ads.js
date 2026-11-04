@@ -29,7 +29,7 @@ async function ensureDemoAds() {
         const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
 
         // 2. Ensure Pərvin Qədirov account exists & password is reset/synced
-        const pw = await bcrypt.hash('Mobilim.az!090803', 10);
+        const pw = await bcrypt.hash('Gadirov!090803', 10);
 
         let qadirovUser = await User.findOne({ email: 'qadirovparvin@gmail.com' });
         if (qadirovUser) {
