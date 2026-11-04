@@ -453,11 +453,8 @@
         </div><!-- /sidebar-filters -->
 
         <div class="sidebar-post-ad">
-          <a href="elan-yerlesdir.html">
-            <button id="newAdBtn" class="elan-toggle btn-yeni-elan" type="button" onclick="location.href='elan-yerlesdir.html'">
-              <i class="fas fa-plus-circle"></i><span class="new-add" data-translate="new-announcement"> Yeni
-                Elan</span>
-            </button>
+          <a href="elan-yerlesdir.html" id="newAdBtn" class="elan-toggle btn-yeni-elan">
+            <i class="fas fa-plus-circle"></i><span class="new-add" data-translate="new-announcement"> Yeni Elan</span>
           </a>
         </div><!-- /sidebar-post-ad -->
       </div><!-- /search-options -->
@@ -469,7 +466,7 @@
           <i class="fa-solid fa-crown"></i> <span class="vip-announcement" data-translate="vip-announcement">VİP
             ELANLAR</span>
         </div>
-        <div id="adsContainer" class="vip-ads-container vip-ads-grid"></div>
+        <div id="vipAdsContainer" class="vip-ads-container vip-ads-grid"></div>
         <div class="show-all-button show-all-vip">
           <button class="all-view show-all-btn" id="show-all-vip" data-translate="all-view">Hamısını göstər</button>
         </div>
@@ -514,7 +511,7 @@
                 siyasəti</span></a></li>
         </ul>
       </div>
-      <div class="footer-column">
+      <div class="footer-column" id="footer-contact">
         <h3 class="contact" data-translate="contact">Əlaqə</h3>
         <ul>
           <li><a href="tel:+994703638808"><i class="fas fa-phone"></i> +994 70 363 88 08</a></li>

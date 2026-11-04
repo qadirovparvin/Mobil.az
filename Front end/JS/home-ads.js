@@ -117,7 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
         const city = escapeHtml(ad.city || "");
-        const title = escapeHtml([ad.brand, ad.modelName].filter(Boolean).join(" "));
+        const rawBrand = String(ad.brand || "").trim();
+        const rawModel = String(ad.modelName || "").trim();
+        const fullTitle = rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+            ? rawModel
+            : [rawBrand, rawModel].filter(Boolean).join(" ");
+        const title = escapeHtml(fullTitle);
         const altText = hasRealImage ? title : "Elan şəkli yoxdur";
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
 
@@ -199,10 +204,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     let isLoadingAds = false;
+    let activeExtraFilters = {};
 
-    async function fetchAndAppendAds(isInitial = true) {
+    async function fetchAndAppendAds(isInitial = true, filterOverrides = null) {
         if (isLoadingAds) return;
         isLoadingAds = true;
+        
+        if (filterOverrides && typeof filterOverrides === 'object') {
+            activeExtraFilters = Object.assign({}, filterOverrides);
+        } else if (isInitial && !filterOverrides) {
+            // Keep activeExtraFilters if not explicitly reset
+        }
         
         if (isInitial && window.renderSkeletons) {
             window.renderSkeletons(allAdsContainer, 8);
@@ -211,28 +223,28 @@ document.addEventListener("DOMContentLoaded", function () {
         
         try {
             const params = new URLSearchParams(window.location.search);
-            const sellerParam = params.get('seller');
-            const searchQ = params.get('q') || params.get('search');
+            const sellerParam = activeExtraFilters.seller || params.get('seller');
+            const searchQ = activeExtraFilters.q || currentQuery || params.get('q') || params.get('search');
             
             let apiUrl = new URL(`${API_BASE}/ads`);
             apiUrl.searchParams.set('limit', '20');
             apiUrl.searchParams.set('page', String(currentPage));
-            const sortParam = params.get('sort') || params.get('sortBy') || document.getElementById('sortingOptions')?.value || 'newest';
+            const sortParam = activeExtraFilters.sort || activeExtraFilters.sortBy || params.get('sort') || params.get('sortBy') || document.getElementById('sortingOptions')?.value || 'newest';
             apiUrl.searchParams.set('sortBy', sortParam);
             apiUrl.searchParams.set('sort', sortParam);
             
-            if (sellerParam) {
+            if (sellerParam && sellerParam !== 'any' && sellerParam !== 'both') {
                 if (['store', 'personal', 'private'].includes(sellerParam)) {
                     apiUrl.searchParams.set('seller', sellerParam);
                 } else {
                     apiUrl.searchParams.set('author', sellerParam);
                 }
             }
-            if (currentQuery || searchQ) {
-                apiUrl.searchParams.set('q', currentQuery || searchQ);
+            if (searchQ) {
+                apiUrl.searchParams.set('q', searchQ);
             }
             
-            // Forward existing URL filters to the backend
+            // Forward existing URL filters to the backend, overridden by activeExtraFilters
             const filterKeys = [
                 'category', 'brand', 'model', 'city', 'condition',
                 'minPrice', 'maxPrice', 'storage', 'memory', 'ram',
@@ -241,8 +253,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 'sellerType', 'promotionType'
             ];
             filterKeys.forEach(key => {
-                const val = params.get(key);
-                if (val && val !== 'any' && val !== 'both' && val !== 'Infinity' && val !== '0') {
+                const val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '')
+                    ? activeExtraFilters[key]
+                    : params.get(key);
+                if (val && val !== 'any' && val !== 'both' && val !== 'Infinity' && val !== Infinity && val !== '0' && val !== 0 && isFinite(val) !== false) {
                     apiUrl.searchParams.set(key, val);
                 }
             });
@@ -268,12 +282,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const showAllVipBtn = document.getElementById('show-all-vip') || document.querySelector('.show-all-btn') || document.querySelector('.all-view');
                 if (showAllVipBtn) {
-                    const lang = localStorage.getItem('lang') || 'AZ';
+                    const currentLang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
                     if (!vipAds.length) {
-                        showAllVipBtn.textContent = lang === 'RUS' ? 'Сделать VIP' : lang === 'ENG' ? 'Make ad VIP' : 'Elanını VIP et';
+                        showAllVipBtn.textContent = (currentLang.includes('RU') ? 'Сделать VIP' : (currentLang.includes('EN') ? 'Make ad VIP' : 'Elanını VIP et'));
                         showAllVipBtn.onclick = () => { window.location.href = 'elan-yerlesdir.html?vip=1'; };
                     } else {
-                        showAllVipBtn.textContent = lang === 'RUS' ? 'Показать все' : lang === 'ENG' ? 'Show all' : 'Hamısını göstər';
+                        showAllVipBtn.textContent = (currentLang.includes('RU') ? 'Показать все' : (currentLang.includes('EN') ? 'Show all' : 'Hamısını göstər'));
                         showAllVipBtn.onclick = () => {
                             if (typeof window.searchAdsFromAPI === 'function') {
                                 window.searchAdsFromAPI({ promotionType: 'VIP' });
@@ -290,10 +304,11 @@ document.addEventListener("DOMContentLoaded", function () {
             const newAdsHtml = ads.map(createCardMarkup).join("");
             
             if (isInitial && ads.length === 0) {
+                const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
                 const isRu = lang === 'RUS' || lang === 'RU';
                 const isEng = lang === 'ENG' || lang === 'EN';
-                const notFoundMsg = isRu ? `По запросу "${currentQuery}" ничего не найдено.` : (isEng ? `No results found for "${currentQuery}".` : `"${currentQuery}" üçün nəticə tapılmadı.`);
-                renderEmpty(allAdsContainer, currentQuery ? notFoundMsg : "Hazırda aktiv elan yoxdur.", currentQuery ? "no-results" : "ads-empty");
+                const notFoundMsg = isRu ? `По запросу "${searchQ || ''}" ничего не найдено.` : (isEng ? `No results found for "${searchQ || ''}".` : `"${searchQ || ''}" üçün nəticə tapılmadı.`);
+                renderEmpty(allAdsContainer, searchQ ? notFoundMsg : "Hazırda aktiv elan yoxdur.", searchQ ? "no-results" : "ads-empty");
             } else {
                 allAdsContainer.insertAdjacentHTML('beforeend', newAdsHtml);
                 attachImageFallbacks(allAdsContainer);
@@ -350,23 +365,29 @@ document.addEventListener("DOMContentLoaded", function () {
     async function loadAds() {
         currentPage = 1;
         currentQuery = '';
+        activeExtraFilters = {};
         if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         
-        await fetchAndAppendAds(true);
+        await fetchAndAppendAds(true, {});
     }
 
     window.searchAdsFromAPI = async function (filterArg) {
         currentPage = 1;
+        let overrides = {};
         if (typeof filterArg === 'string') {
             currentQuery = filterArg.trim();
+            overrides = { q: currentQuery };
         } else if (filterArg && typeof filterArg === 'object') {
             currentQuery = filterArg.q ? filterArg.q.trim() : '';
+            overrides = Object.assign({}, filterArg);
         } else {
             currentQuery = '';
+            overrides = {};
         }
+        activeExtraFilters = overrides;
         if (loadMoreContainer) loadMoreContainer.style.display = 'none';
         
-        return await fetchAndAppendAds(true);
+        return await fetchAndAppendAds(true, overrides);
     };
 
 

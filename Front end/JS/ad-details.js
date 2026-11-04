@@ -54,20 +54,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (wrapper)  wrapper.style.visibility = 'visible';
     }
 
-    // ── Show visible error on screen ───────────────────────────────
-    function showPageError(msg) {
+    // ── Show visible error or not found on screen ──────────────────
+    function showPageError(msg, isNotFound = false) {
         revealPage();
         const wrapper = document.getElementById('detailWrapper');
-        if (wrapper) {
+        if (!wrapper) return;
+
+        const notFound = isNotFound || /tapılmadı|tapilmadi|mövcud deyil|invalid id/i.test(String(msg || ''));
+        document.title = notFound ? 'Elan tapılmadı — Mobilim.az' : 'Xəta baş verdi — Mobilim.az';
+
+        if (notFound) {
             wrapper.innerHTML = `
-                <div style="text-align:center;padding:80px 20px;font-size:17px;color:var(--text-secondary,#888);max-width:500px;margin:0 auto;">
-                    <i class="fas fa-exclamation-triangle" style="font-size:52px;color:#dc3545;display:block;margin-bottom:18px;"></i>
-                    <strong style="color:var(--text-primary,#111);font-size:20px;display:block;margin-bottom:10px;">Xəta baş verdi</strong>
-                    <p class="error-msg-box" style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:12px 16px;font-family:monospace;font-size:13px;text-align:left;word-break:break-word;"></p>
-                    <a href="index.html" style="display:inline-block;margin-top:20px;padding:12px 28px;background:var(--airy-primary,#5e5ce6);color:#fff;border-radius:12px;text-decoration:none;font-weight:700;">← Ana Səhifəyə Qayıt</a>
+                <div style="text-align:center;padding:90px 20px;max-width:520px;margin:0 auto;color:var(--text-primary,#fff);">
+                    <div style="width:84px;height:84px;margin:0 auto 20px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-search" style="font-size:36px;color:var(--text-muted,#888);"></i>
+                    </div>
+                    <h2 style="font-size:24px;font-weight:700;margin-bottom:12px;color:var(--text-primary,#fff);">Elan tapılmadı</h2>
+                    <p style="color:var(--text-muted,#aaa);font-size:15px;line-height:1.6;margin-bottom:28px;">Axtardığınız elan silinmiş, vaxtı bitmiş və ya mövcud olmayan bir ünvandır.</p>
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                        <button type="button" onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'" style="cursor:pointer;padding:12px 24px;background:var(--card-bg,#1e1e24);color:var(--text-primary,#fff);border:1px solid var(--border-color,#333);border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
+                            <i class="fas fa-arrow-left"></i> Geri qayıt
+                        </button>
+                        <a href="index.html" style="text-decoration:none;padding:12px 24px;background:var(--primary-color,#2563eb);color:#fff;border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
+                            <i class="fas fa-home"></i> Ana Səhifə
+                        </a>
+                    </div>
                 </div>`;
-            const errP = wrapper.querySelector('.error-msg-box');
-            if (errP) errP.textContent = String(msg ?? '');
+        } else {
+            wrapper.innerHTML = `
+                <div style="text-align:center;padding:90px 20px;max-width:520px;margin:0 auto;color:var(--text-primary,#fff);">
+                    <div style="width:84px;height:84px;margin:0 auto 20px;border-radius:50%;background:rgba(239,68,68,0.12);display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:36px;color:#ef4444;"></i>
+                    </div>
+                    <h2 style="font-size:24px;font-weight:700;margin-bottom:12px;color:var(--text-primary,#fff);">Xəta baş verdi</h2>
+                    <p style="color:var(--text-muted,#aaa);font-size:14px;margin-bottom:24px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color,#333);padding:12px;border-radius:10px;word-break:break-word;">${escapeHtml(msg)}</p>
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                        <button type="button" onclick="window.location.reload()" style="cursor:pointer;padding:12px 24px;background:var(--primary-color,#2563eb);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
+                            <i class="fas fa-sync-alt"></i> Yenidən yoxla
+                        </button>
+                        <a href="index.html" style="text-decoration:none;padding:12px 24px;background:var(--card-bg,#1e1e24);color:var(--text-primary,#fff);border:1px solid var(--border-color,#333);border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
+                            <i class="fas fa-home"></i> Ana Səhifə
+                        </a>
+                    </div>
+                </div>`;
         }
     }
 
@@ -76,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const adId   = urlParams.get('id') || urlParams.get('adId') || urlParams.get('adNumber');
 
     if (!adId) {
-        showPageError('URL-də elan ID-si tapılmadı. Ana səhifəyə qayıdıb bir elana klikləyin.');
+        showPageError('Elan tapılmadı', true);
         return;
     }
 
@@ -92,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (fetchErr) {
             console.error('[ad-details] Fetch network error:', fetchErr);
-            throw new Error(`Serverlə əlaqə qurula bilmədi (Şəbəkə xətası: ${fetchErr.message || 'Failed to fetch'})`);
+            throw new Error(`Serverlə əlaqə qurula bilmədi (${fetchErr.message || 'Şəbəkə xətası'})`);
         }
 
         let ad;
@@ -103,10 +132,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!res.ok) {
-            if (res.status === 404) {
-                throw new Error(ad?.message || `Elan tapılmadı (ID: ${adId})`);
-            }
-            throw new Error(ad?.message || `Server xətası (HTTP ${res.status})`);
+            const isNotFound = res.status === 404 || res.status === 400;
+            const errMsg = isNotFound ? 'Elan tapılmadı' : (ad?.message || `Server xətası (HTTP ${res.status})`);
+            showPageError(errMsg, isNotFound);
+            return;
         }
         window.__CURRENT_AD = ad;
 
@@ -447,7 +476,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } else {
             // Mode B: Personal Seller
-            const authorName = ad.author?.name || ad.author?.email || 'Satıcı';
+            const author = ad.author || ad.user || {};
+            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || author.email || 'Silinmiş istifadəçi';
 
             // Seller Name
             if (sellerNameEl) {
@@ -457,9 +487,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Avatar
             if (avatarEl) {
                 avatarEl.replaceChildren();
-                if (ad.author?.avatar) {
+                if (author.avatar) {
                     const img = document.createElement('img');
-                    img.src = getImageUrl(ad.author.avatar);
+                    img.src = getImageUrl(author.avatar);
                     img.alt = authorName;
                     img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
                     img.onerror = function() {
@@ -468,7 +498,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     };
                     avatarEl.appendChild(img);
                 } else {
-                    avatarEl.textContent = (ad.author?.name || authorName).charAt(0).toUpperCase() || 'S';
+                    avatarEl.textContent = (author.name || authorName).charAt(0).toUpperCase() || 'S';
                 }
             }
 

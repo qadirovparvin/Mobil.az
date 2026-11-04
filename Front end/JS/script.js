@@ -53,6 +53,32 @@ document.addEventListener("DOMContentLoaded", function () {
             Tovuz: "Tovuz", Ujar: "Ucar", Yardimli: "Yardımlı",
             Yevlakh: "Yevlax", Zangilan: "Zəngilan", Zaqatala: "Zaqatala",
             Zardab: "Zərdab",
+            "filter-category-label": "Kateqoriya",
+            "filter-cat-all": "Hamısı",
+            "filter-cat-phone": "Telefonlar",
+            "filter-cat-tablet": "Planşetlər",
+            "filter-cat-headphone": "Qulaqcıqlar",
+            "filter-cat-accessory": "Aksesuarlar",
+            "filter-memory-label": "Yaddaş (ROM)",
+            "filter-ram-label": "Operativ yaddaş (RAM)",
+            "ram-2gb": "2 GB",
+            "ram-4gb": "4 GB",
+            "ram-6gb": "6 GB",
+            "ram-8gb": "8 GB",
+            "ram-12gb": "12 GB",
+            "ram-16gb": "16 GB+",
+            "filter-screen-label": "Ekran ölçüsü",
+            "screen-small": "5\"-dən kiçik",
+            "screen-medium": "5.1\" - 6.0\"",
+            "screen-large": "6.1\" - 6.7\"",
+            "screen-xlarge": "6.8\"+",
+            "filter-battery-label": "Batareya tutumu",
+            "battery-low": "3000 mAh-dan az",
+            "battery-mid": "3000 - 4500 mAh",
+            "battery-high": "4500 mAh+",
+            "filter-seller-label": "Satıcı növü",
+            "seller-private": "Şəxsi",
+            "seller-store": "Mağaza",
             "memory-button-below-64": "64 GB-dən az",
             "memory-button-64": "64 GB",
             "memory-button-128": "128 GB",
@@ -386,6 +412,32 @@ document.addEventListener("DOMContentLoaded", function () {
             Tovuz: "Tovuz", Ujar: "Ujar", Yardimli: "Yardimli",
             Yevlakh: "Yevlakh", Zangilan: "Zangilan", Zaqatala: "Zaqatala",
             Zardab: "Zardab",
+            "filter-category-label": "Category",
+            "filter-cat-all": "All",
+            "filter-cat-phone": "Phones",
+            "filter-cat-tablet": "Tablets",
+            "filter-cat-headphone": "Headphones",
+            "filter-cat-accessory": "Accessories",
+            "filter-memory-label": "Storage (ROM)",
+            "filter-ram-label": "RAM",
+            "ram-2gb": "2 GB",
+            "ram-4gb": "4 GB",
+            "ram-6gb": "6 GB",
+            "ram-8gb": "8 GB",
+            "ram-12gb": "12 GB",
+            "ram-16gb": "16 GB+",
+            "filter-screen-label": "Screen Size",
+            "screen-small": "Under 5\"",
+            "screen-medium": "5.1\" - 6.0\"",
+            "screen-large": "6.1\" - 6.7\"",
+            "screen-xlarge": "6.8\"+",
+            "filter-battery-label": "Battery Capacity",
+            "battery-low": "Under 3000 mAh",
+            "battery-mid": "3000 - 4500 mAh",
+            "battery-high": "4500 mAh+",
+            "filter-seller-label": "Seller Type",
+            "seller-private": "Individual",
+            "seller-store": "Store",
             "memory-button-below-64": "Below 64 GB",
             "memory-button-64": "64 GB",
             "memory-button-128": "128 GB",
@@ -719,6 +771,32 @@ document.addEventListener("DOMContentLoaded", function () {
             Tovuz: "Товуз", Ujar: "Уджар", Yardimli: "Ярдымлы",
             Yevlakh: "Евлах", Zangilan: "Зангилан", Zaqatala: "Закаталы",
             Zardab: "Зардаб",
+            "filter-category-label": "Категория",
+            "filter-cat-all": "Все",
+            "filter-cat-phone": "Телефоны",
+            "filter-cat-tablet": "Планшеты",
+            "filter-cat-headphone": "Наушники",
+            "filter-cat-accessory": "Аксессуары",
+            "filter-memory-label": "Память (ROM)",
+            "filter-ram-label": "Оперативная память (RAM)",
+            "ram-2gb": "2 ГБ",
+            "ram-4gb": "4 ГБ",
+            "ram-6gb": "6 ГБ",
+            "ram-8gb": "8 ГБ",
+            "ram-12gb": "12 ГБ",
+            "ram-16gb": "16 ГБ+",
+            "filter-screen-label": "Размер экрана",
+            "screen-small": "Меньше 5\"",
+            "screen-medium": "5.1\" - 6.0\"",
+            "screen-large": "6.1\" - 6.7\"",
+            "screen-xlarge": "6.8\"+",
+            "filter-battery-label": "Емкость аккумулятора",
+            "battery-low": "Меньше 3000 мАч",
+            "battery-mid": "3000 - 4500 мАч",
+            "battery-high": "4500 мАч+",
+            "filter-seller-label": "Тип продавца",
+            "seller-private": "Частное лицо",
+            "seller-store": "Магазин",
             "memory-button-below-64": "Меньше 64 ГБ",
             "memory-button-64": "64 ГБ",
             "memory-button-128": "128 ГБ",
@@ -1640,11 +1718,25 @@ document.addEventListener("DOMContentLoaded", function () {
     favObserver.observe(document.body, { childList: true, subtree: true });
 
     // ─── DARK MODE / LIGHT MODE THEME INITIALIZER ────────────────────────────
+    function updateThemeIcon(isDark) {
+        const themeToggleBtn = document.getElementById("themeToggle");
+        if (!themeToggleBtn) return;
+        const icon = themeToggleBtn.querySelector("i");
+        if (icon) {
+            icon.className = isDark ? "fas fa-sun" : "fas fa-moon";
+        }
+    }
+
     function initTheme() {
         const savedTheme = localStorage.getItem("mobilaz_theme");
-        if (savedTheme === "dark") {
+        const isDark = savedTheme === "dark";
+        if (isDark) {
             document.documentElement.setAttribute("data-theme", "dark");
+        } else {
+            document.documentElement.removeAttribute("data-theme");
         }
+        updateThemeIcon(isDark);
+
         // Theme toggle button logic
         const themeToggleBtn = document.getElementById("themeToggle");
         if (themeToggleBtn && !themeToggleBtn.dataset.themeListenerAttached) {
@@ -1655,9 +1747,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (currentTheme !== "dark") {
                     newTheme = "dark";
                     document.documentElement.setAttribute("data-theme", "dark");
+                    updateThemeIcon(true);
                 }
                 else {
                     document.documentElement.removeAttribute("data-theme");
+                    updateThemeIcon(false);
                 }
                 localStorage.setItem("mobilaz_theme", newTheme);
             });

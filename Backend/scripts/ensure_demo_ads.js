@@ -99,6 +99,16 @@ async function ensureDemoAds() {
         const count = await Ad.countDocuments({ status: { $ne: 'deleted' } });
         const hasGalaxyS24 = await Ad.exists({ adNumber: 'MOB-5D3802' });
         
+        const now = new Date();
+        const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        const vipAdNumbers = DEMO_ADS.filter(d => d.promotionType === 'VIP').map(d => d.adNumber);
+
+        // Always ensure VIP ads have valid active promotionExpiresAt
+        await Ad.updateMany(
+            { adNumber: { $in: vipAdNumbers } },
+            { $set: { promotionType: 'VIP', promotionExpiresAt: expires, expiresAt: expires, status: 'active' } }
+        );
+
         if (count >= 5 && hasGalaxyS24 && process.env.SEED_DEMO_ADS !== 'true') {
             return;
         }
@@ -125,7 +135,10 @@ async function ensureDemoAds() {
         }
 
         // 2. Ensure store exists
-        let store = await Store.findOne({ storeName: 'TechZone Baku' });
+        let store = await Store.findOne({ owner: seller._id });
+        if (!store) {
+            store = await Store.findOne({ storeName: 'TechZone Baku' });
+        }
         if (!store) {
             store = await Store.create({
                 owner: seller._id,
@@ -147,8 +160,6 @@ async function ensureDemoAds() {
 
         // 3. Insert demo ads if not exist
         let inserted = 0;
-        const now = new Date();
-        const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
         for (const d of DEMO_ADS) {
             const exists = await Ad.exists({ adNumber: d.adNumber });
@@ -171,6 +182,7 @@ async function ensureDemoAds() {
                     publishedAt: now,
                     expiresAt: expires,
                     promotionType: d.promotionType,
+                    promotionExpiresAt: d.promotionType === 'VIP' ? expires : null,
                     specs: {
                         memory: d.memory,
                         ram: d.ram,
@@ -190,10 +202,11 @@ async function ensureDemoAds() {
             }
         }
 
-        console.log(`✅ Demo catalogue ensured: ${inserted} ads inserted.`);
+        console.log(`✅ Demo catalogue ensured: ${inserted} ads inserted, VIP promotions refreshed.`);
     } catch (err) {
         console.error('❌ ensureDemoAds error:', err.message);
     }
 }
 
 module.exports = { ensureDemoAds };
+

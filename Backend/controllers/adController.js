@@ -281,16 +281,27 @@ const getAds = async (req, res, next) => {
 const getAdById = async (req, res, next) => {
     try {
         const idParam = String(req.params.id || '').trim();
+        if (!idParam) {
+            return res.status(400).json({ message: 'Invalid ID' });
+        }
+
+        console.log('[adController] getAdById req.params:', req.params);
+
         const baseQuery = { status: { $ne: DELETED_AD_STATUS } };
         let ad = null;
+
+        // 1. Try finding by MongoDB ObjectId
         if (mongoose.Types.ObjectId.isValid(idParam)) {
             ad = await Ad.findOne({
                 ...baseQuery,
                 _id: idParam
             })
-                .populate('author', 'name lastName avatar phone createdAt')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+                .populate('author', 'name lastName avatar phone createdAt rating')
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
+                .lean();
         }
+
+        // 2. If not found by ObjectId, try finding by adNumber (e.g. MOB-5D3802)
         if (!ad) {
             const cleanNum = idParam.trim();
             const candidates = [cleanNum, cleanNum.toUpperCase(), cleanNum.toLowerCase()];
@@ -301,39 +312,53 @@ const getAdById = async (req, res, next) => {
                 ...baseQuery,
                 adNumber: { $in: candidates }
             })
-                .populate('author', 'name lastName avatar phone createdAt')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+                .populate('author', 'name lastName avatar phone createdAt rating')
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
+                .lean();
         }
 
+        // 3. If still not found, return 404
         if (!ad) {
             return res.status(404).json({ message: 'Elan tapılmadı' });
         }
 
-        const authorId = ad.author?._id || ad.author;
-        const isOwner = Boolean(req.user && authorId && authorId.toString() === req.user._id.toString());
-        const isAdmin = Boolean(req.user && req.user.role === 'admin');
-
-        // Anonymous/non-owner: can only view active, non-expired ads
-        if (!isOwner && !isAdmin) {
-            const isExpired = ad.expiresAt && new Date(ad.expiresAt) <= new Date();
-            const isActive = String(ad.status).toLowerCase() === 'active';
-            if (!isActive || isExpired) {
-                return res.status(404).json({ message: 'Elan tapılmadı' });
-            }
+        // 4. Handle deleted user / author: ensure author and user are never null
+        if (!ad.author) {
+            ad.author = {
+                name: 'Silinmiş istifadəçi',
+                lastName: '',
+                phone: '',
+                avatar: null,
+                rating: 0
+            };
         }
+        // Alias user to author for full compatibility with React/MERN or any client expectations
+        ad.user = ad.author;
 
-        if (authorId && (!req.user || authorId.toString() !== req.user._id.toString())) {
-            await Ad.updateOne({ _id: ad._id }, { $inc: { views: 1 } });
-            ad.views += 1;
+        // Ensure images is always a valid array
+        ad.images = Array.isArray(ad.images) ? ad.images.filter(Boolean) : (ad.images ? [ad.images] : []);
+        ad.specs = ad.specs || {};
+
+        // 5. Increment view count (if viewing someone else's ad or as guest)
+        try {
+            const authorId = ad.author?._id || ad.author;
+            if (!req.user || (authorId && authorId.toString() !== req.user._id.toString())) {
+                await Ad.updateOne({ _id: ad._id }, { $inc: { views: 1 } });
+                ad.views = (ad.views || 0) + 1;
+            }
+        } catch (viewErr) {
+            console.error('[adController] Failed to increment view count:', viewErr.message);
         }
 
         if (!hasActiveVip(ad) && ad.promotionType === 'VIP') {
             ad.promotionType = 'none';
         }
 
-        res.json(ad);
+        // Always return 200 with ad object, never throw 500
+        return res.status(200).json(ad);
     } catch (error) {
-        next(error);
+        console.error('[adController] getAdById error:', error);
+        return res.status(500).json({ message: 'Server xətası baş verdi' });
     }
 };
 

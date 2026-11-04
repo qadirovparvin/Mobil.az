@@ -13,13 +13,19 @@ const {
 // Public (optional authentication; rejects invalid/refresh tokens if Bearer auth header is passed)
 router.get('/',    adListLimiter, optionalProtect, getAds);
 
+// VIP shortcut — must come before /:id to avoid route clash
+router.get('/vip', adListLimiter, optionalProtect, (req, res, next) => {
+    req.query.promotionType = 'VIP';
+    return getAds(req, res, next);
+});
+
 // Protected — must come before /:id to avoid route clash
 router.get('/my',  protect, getMyAds);
 router.get('/user', protect, getMyAds);
 router.get('/favorites', protect, getFavoriteAds);
 
 // Public
-router.get('/:id', adListLimiter, validateAdIdOrNumberParam('id'), optionalProtect, getAdById);
+router.get('/:id', adListLimiter, optionalProtect, getAdById);
 
 // Protected
 router.post('/',          protect, csrfProtection, upload.array('images', MAX_UPLOAD_FILES), processImage, createAd);

@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
             category: (document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active')?.getAttribute('data-value')) ?? (new URLSearchParams(window.location.search).get('category') || ''),
             brand: document.getElementById('brandSelect')?.value || '',
             model: document.getElementById('modelSelect')?.value || '',
-            minPrice: parseFloat(document.getElementById('priceMin')?.value) || 0,
-            maxPrice: parseFloat(document.getElementById('priceMax')?.value) || Infinity,
+            minPrice: parseFloat(document.getElementById('priceMin')?.value) || '',
+            maxPrice: parseFloat(document.getElementById('priceMax')?.value) || '',
             city: document.querySelector('select[data-filter="city"]')?.value || '',
             storage: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
             memory: document.querySelector('.filter-btn-group[data-group="memory"] .filter-pill.active')?.getAttribute('data-value') || '',
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.keys(filters).forEach(key => {
             if (key === 'q' || key === 'colors') return;
             let val = filters[key];
-            if (val && val !== 'any' && val !== 'both' && val !== '0' && val !== 'Infinity') {
+            if (val !== null && val !== undefined && val !== '' && val !== 'any' && val !== 'both' && val !== '0' && val !== 0 && val !== 'Infinity' && val !== Infinity && (!Number.isNaN(val)) && isFinite(val) !== false) {
                 urlParams.set(key, val);
             }
         });
@@ -410,7 +410,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetFilters() {
         if (searchInput) searchInput.value = '';
         const brandSelect = document.getElementById('brandSelect');
-        if (brandSelect) { brandSelect.value = ''; brandSelect.dispatchEvent(new Event('change')); }
+        const modelSelect = document.getElementById('modelSelect');
+        if (brandSelect) { 
+            brandSelect.value = ''; 
+            if (typeof updateModelOptions === 'function') updateModelOptions('');
+        }
+        if (modelSelect) {
+            modelSelect.value = '';
+        }
         const citySelect = document.querySelector('select[data-filter="city"]');
         if (citySelect) { citySelect.value = ''; }
         if (document.getElementById('priceMin')) document.getElementById('priceMin').value = '';
@@ -423,6 +430,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-activate the 'All categories' button (data-value="" so not caught above)
         const allCatBtn = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill[data-value=""]');
         if (allCatBtn) allCatBtn.classList.add('active');
+
+        // Reset badge counter
+        const badge = document.getElementById('filterBadge');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.textContent = '0';
+        }
+
+        // Clean URL query parameters completely
+        window.history.pushState({}, '', window.location.pathname);
         
         // Reload all ads from API and reset client-side filters
         if (window.reloadAllAds) {
@@ -472,9 +489,121 @@ document.addEventListener('DOMContentLoaded', () => {
     const brandSelect = document.getElementById('brandSelect');
     const modelSelect = document.getElementById('modelSelect');
 
+    const FILTER_PHONE_MODELS = {
+        Apple: [
+            'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
+            'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
+            'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
+            'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13', 'iPhone 13 mini',
+            'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12', 'iPhone 12 mini',
+            'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
+            'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X',
+            'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)',
+            'iPhone 8 Plus', 'iPhone 8', 'iPhone 7 Plus', 'iPhone 7'
+        ],
+        Samsung: [
+            'Galaxy S25 Ultra', 'Galaxy S25+', 'Galaxy S25',
+            'Galaxy S24 Ultra', 'Galaxy S24+', 'Galaxy S24', 'Galaxy S24 FE',
+            'Galaxy S23 Ultra', 'Galaxy S23+', 'Galaxy S23', 'Galaxy S23 FE',
+            'Galaxy S22 Ultra', 'Galaxy S22+', 'Galaxy S22',
+            'Galaxy S21 Ultra', 'Galaxy S21+', 'Galaxy S21',
+            'Galaxy Z Fold 6', 'Galaxy Z Fold 5', 'Galaxy Z Fold 4',
+            'Galaxy Z Flip 6', 'Galaxy Z Flip 5', 'Galaxy Z Flip 4',
+            'Galaxy A55', 'Galaxy A54', 'Galaxy A53', 'Galaxy A52',
+            'Galaxy A35', 'Galaxy A34', 'Galaxy A33',
+            'Galaxy A15', 'Galaxy A14', 'Galaxy A13',
+            'Galaxy M55', 'Galaxy M54', 'Galaxy M34',
+            'Galaxy Note 20 Ultra', 'Galaxy Note 20'
+        ],
+        Xiaomi: [
+            'Xiaomi 14 Ultra', 'Xiaomi 14 Pro', 'Xiaomi 14',
+            'Xiaomi 13 Ultra', 'Xiaomi 13 Pro', 'Xiaomi 13',
+            'Xiaomi 12 Pro', 'Xiaomi 12', 'Xiaomi 12 Lite',
+            'Redmi Note 13 Pro+', 'Redmi Note 13 Pro', 'Redmi Note 13',
+            'Redmi Note 12 Pro+', 'Redmi Note 12 Pro', 'Redmi Note 12',
+            'Redmi 13C', 'Redmi 12', 'Redmi 10C',
+            'POCO X6 Pro', 'POCO X6', 'POCO X5 Pro', 'POCO X5',
+            'POCO M6 Pro', 'POCO M5', 'POCO F5 Pro', 'POCO F5'
+        ],
+        Huawei: [
+            'Pura 70 Ultra', 'Pura 70 Pro+', 'Pura 70 Pro', 'Pura 70',
+            'Mate 60 Pro+', 'Mate 60 Pro', 'Mate 60',
+            'P60 Pro', 'P60 Art', 'P60', 'P50 Pro', 'P50',
+            'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12',
+            'Nova 11 Pro', 'Nova 11 Ultra', 'Nova 11',
+            'Nova 10 Pro', 'Nova 10 SE', 'Y90', 'Y72', 'Y62'
+        ],
+        OPPO: [
+            'Find X8 Pro', 'Find X8', 'Find X7 Ultra', 'Find X7',
+            'Find X6 Pro', 'Find X6',
+            'Reno 12 Pro', 'Reno 12 F', 'Reno 12',
+            'Reno 11 Pro', 'Reno 11 F', 'Reno 11',
+            'Reno 10 Pro+', 'Reno 10 Pro', 'Reno 10',
+            'A3 Pro', 'A3', 'A78', 'A77', 'A55'
+        ],
+        Vivo: [
+            'X100 Ultra', 'X100 Pro', 'X100',
+            'X90 Pro', 'X90',
+            'V30 Pro', 'V30 Lite', 'V30',
+            'V29 Pro', 'V29 Lite', 'V29',
+            'V27 Pro', 'V27 Lite', 'V27',
+            'Y200 Pro', 'Y200', 'Y100', 'Y78', 'Y55', 'Y36'
+        ],
+        Honor: [
+            'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6',
+            'Magic 5 Pro', 'Magic 5 Ultimate', 'Magic 5',
+            '90 Smart', '90', '90 Pro',
+            'X9b', 'X8b', 'X7b',
+            'Play 8T', 'Play 7T', 'Play 6T'
+        ],
+        Realme: [
+            'GT 6T', 'GT 6', 'GT 5 Pro', 'GT 5',
+            '12 Pro+ 5G', '12 Pro 5G', '12 5G',
+            '11 Pro+ 5G', '11 Pro 5G', '11 5G',
+            'C67', 'C55', 'C53', 'C35', 'C33',
+            'Narzo 70 Pro', 'Narzo 60 Pro', 'Narzo 50'
+        ],
+        Nokia: [
+            'Nokia G42', 'Nokia G22', 'Nokia G21', 'Nokia G11',
+            'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
+            'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio'
+        ]
+    };
+
+    function updateModelOptions(selectedBrand, currentSelectedModel = '') {
+        if (!modelSelect) return;
+        modelSelect.innerHTML = '';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = selectedBrand ? 'Bütün modellər' : 'Əvvəlcə marka seçin';
+        modelSelect.appendChild(defaultOpt);
+
+        if (selectedBrand && FILTER_PHONE_MODELS[selectedBrand]) {
+            FILTER_PHONE_MODELS[selectedBrand].forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                if (currentSelectedModel && m.toLowerCase() === currentSelectedModel.toLowerCase()) {
+                    opt.selected = true;
+                }
+                modelSelect.appendChild(opt);
+            });
+            const otherOpt = document.createElement('option');
+            otherOpt.value = 'other';
+            otherOpt.textContent = 'Digər model';
+            if (currentSelectedModel === 'other') otherOpt.selected = true;
+            modelSelect.appendChild(otherOpt);
+        }
+    }
+
     if (priceMin) priceMin.addEventListener('input', debouncedApply);
     if (priceMax) priceMax.addEventListener('input', debouncedApply);
-    if (brandSelect) brandSelect.addEventListener('change', debouncedApply);
+    if (brandSelect) {
+        brandSelect.addEventListener('change', () => {
+            updateModelOptions(brandSelect.value);
+            debouncedApply();
+        });
+    }
     if (modelSelect) modelSelect.addEventListener('change', debouncedApply);
 
     // Catalog helpers
@@ -538,8 +667,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (params.has('q') && searchInput) searchInput.value = params.get('q');
         if (params.has('search') && searchInput && !params.has('q')) searchInput.value = params.get('search');
-        if (params.has('brand') && document.getElementById('brandSelect')) document.getElementById('brandSelect').value = params.get('brand');
-        if (params.has('model') && document.getElementById('modelSelect')) document.getElementById('modelSelect').value = params.get('model');
+        if (params.has('brand') && document.getElementById('brandSelect')) {
+            const bVal = params.get('brand');
+            document.getElementById('brandSelect').value = bVal;
+            updateModelOptions(bVal, params.get('model') || '');
+        } else if (params.has('model') && document.getElementById('modelSelect')) {
+            document.getElementById('modelSelect').value = params.get('model');
+        }
         if (params.has('minPrice') && document.getElementById('priceMin')) document.getElementById('priceMin').value = params.get('minPrice');
         if (params.has('maxPrice') && document.getElementById('priceMax') && params.get('maxPrice') !== 'Infinity') document.getElementById('priceMax').value = params.get('maxPrice');
         if (params.has('city') && document.querySelector('select[data-filter="city"]')) document.querySelector('select[data-filter="city"]').value = params.get('city');
