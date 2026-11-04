@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.__CURRENT_AD = ad;
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
-        const adTitle = `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
+        const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
         document.title = `${adTitle} — Mobilim.az`;
 
         const titleEl = document.querySelector('.ad-main-title');
@@ -939,6 +939,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
         // ✅ ALWAYS reveal — no matter what happened above
         revealPage();
+        if (typeof window.applyLanguage === 'function') {
+            try { window.applyLanguage(); } catch (e) { /* ignore */ }
+        }
     }
 
     // ── renderReviews helper ────────────────────────────────────────
