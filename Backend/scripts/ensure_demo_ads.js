@@ -44,22 +44,9 @@ async function ensureDemoAds() {
         }
 
         // 3. Ensure Pərvin Qədirov account (role: 'user', personal account)
-        const parvinPw = await bcrypt.hash('Gadirov!090803', 10);
         let qadirovUser = await User.findOne({ email: 'qadirovparvin@gmail.com' });
-        if (qadirovUser) {
-            qadirovUser.password = parvinPw;
-            qadirovUser.role = 'user';
-            qadirovUser.name = 'Pərvin';
-            qadirovUser.lastName = 'Qədirov';
-            qadirovUser.phone = '+994703638808';
-            qadirovUser.status = 'active';
-            qadirovUser.isVerified = true;
-            qadirovUser.loginAttempts = 0;
-            qadirovUser.lockUntil = null;
-            qadirovUser.twoFactorEnabled = false;
-            await qadirovUser.save();
-            console.log('✅ Updated qadirovparvin@gmail.com (role: user, phone: +994703638808).');
-        } else {
+        if (!qadirovUser) {
+            const parvinPw = await bcrypt.hash('Gadirov!090803', 10);
             qadirovUser = await User.create({
                 name: 'Pərvin',
                 lastName: 'Qədirov',
@@ -75,7 +62,6 @@ async function ensureDemoAds() {
         }
 
         // 4. Ensure Nəzrin Məmmədzadə account (role: 'user', personal account)
-        const nazrinPw = await bcrypt.hash('Nazrin1234!', 10);
         let nazrinUser = await User.findOne({
             $or: [
                 { email: 'nazrin.m@gmail.com' },
@@ -84,21 +70,8 @@ async function ensureDemoAds() {
             ]
         });
 
-        if (nazrinUser) {
-            nazrinUser.password = nazrinPw;
-            nazrinUser.role = 'user';
-            nazrinUser.name = 'Nəzrin';
-            nazrinUser.lastName = 'Məmmədzadə';
-            nazrinUser.email = 'nazrin.m@gmail.com';
-            nazrinUser.phone = '+994 77 777 77 77';
-            nazrinUser.status = 'active';
-            nazrinUser.isVerified = true;
-            nazrinUser.loginAttempts = 0;
-            nazrinUser.lockUntil = null;
-            nazrinUser.twoFactorEnabled = false;
-            await nazrinUser.save();
-            console.log('✅ Updated Nəzrin Məmmədzadə (email: nazrin.m@gmail.com, phone: +994 77 777 77 77).');
-        } else {
+        if (!nazrinUser) {
+            const nazrinPw = await bcrypt.hash('Nazrin1234!', 10);
             nazrinUser = await User.create({
                 name: 'Nəzrin',
                 lastName: 'Məmmədzadə',
@@ -113,22 +86,7 @@ async function ensureDemoAds() {
             console.log('✅ Created Nəzrin user account.');
         }
 
-        // 5. PURGE ALL OTHER USERS (keep ONLY the 3 approved users)
-        const keptUserIds = [adminUser._id, qadirovUser._id, nazrinUser._id];
-        const deletedUsers = await User.deleteMany({
-            _id: { $nin: keptUserIds }
-        });
-        if (deletedUsers.deletedCount > 0) {
-            console.log(`🗑️ Deleted ${deletedUsers.deletedCount} unneeded user accounts. Exactly 3 accounts remain.`);
-        }
-
-        // 6. Delete all dummy / demo ads (keep ONLY MOB-000001 and MOB-000002)
-        const deleteAdsRes = await Ad.deleteMany({
-            adNumber: { $nin: ['MOB-000001', 'MOB-000002'] }
-        });
-        if (deleteAdsRes.deletedCount > 0) {
-            console.log(`🗑️ Deleted ${deleteAdsRes.deletedCount} demo ads.`);
-        }
+        // Note: Do not purge users or ads on startup so user registrations and submissions are preserved
 
         // 7. Ensure Pərvin's real Ad (Samsung Galaxy S22 Ultra Green)
         const parvinImages = [
