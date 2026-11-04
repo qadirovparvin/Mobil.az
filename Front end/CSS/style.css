@@ -1029,7 +1029,9 @@ main {
   width: 100%;
 }
 
-.ad-card {
+.ad-card,
+.elan-card,
+.product-card {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1041,7 +1043,9 @@ main {
   box-shadow: var(--card-shadow);
 }
 
-.ad-card:hover {
+.ad-card:hover,
+.elan-card:hover,
+.product-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
 }

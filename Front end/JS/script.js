@@ -1660,8 +1660,8 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         ads.sort((a, b) => {
-            const cardA = a.querySelector(".ad-card") || a;
-            const cardB = b.querySelector(".ad-card") || b;
+            const cardA = a.querySelector(".elan-card, .ad-card") || a;
+            const cardB = b.querySelector(".elan-card, .ad-card") || b;
             const priceA = getCardPrice(cardA);
             const priceB = getCardPrice(cardB);
             const dateA = getCardDate(cardA);
@@ -1801,7 +1801,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateFavoriteButtons() {
         const favs = getFavorites();
         document.querySelectorAll(".favorite-btn").forEach((btn) => {
-            const card = btn.closest(".ad-card, [data-id]");
+            const card = btn.closest(".elan-card, .ad-card, [data-id]");
             const id = card ? card.getAttribute("data-id") : null;
             const icon = btn.querySelector("i");
             if (!icon) return;
@@ -1827,7 +1827,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const icon = favBtn.querySelector("i");
         if (!icon) return;
 
-        const card = favBtn.closest(".ad-card, [data-id]");
+        const card = favBtn.closest(".elan-card, .ad-card, [data-id]");
         const id = card ? card.getAttribute("data-id") : null;
         let favs = getFavorites();
 
@@ -1953,7 +1953,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const isAll = !rawCat || rawCat === 'all' || rawCat === 'hamısı' || rawCat === 'hamisi';
         const targetCategories = isAll ? null : (catAliases[rawCat] || [rawCat]);
 
-        const adCards = catalog.querySelectorAll('.ad-card');
+        const adCards = catalog.querySelectorAll('.elan-card, .ad-card');
         let visibleCount = 0;
 
         adCards.forEach(card => {

@@ -300,13 +300,13 @@ const getAdById = async (req, res, next) => {
 
         // 1. Try finding by MongoDB ObjectId
         if (isObjectId) {
-            ad = await Ad.findOne({
+            const queryObj = Ad.findOne({
                 ...baseQuery,
                 _id: idParam
             })
                 .populate('author', 'name lastName email avatar phone createdAt rating')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
-                .lean();
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+            ad = (queryObj && typeof queryObj.lean === 'function') ? await queryObj.lean() : await queryObj;
         }
 
         // 2. If not found by ObjectId, try finding by adNumber (e.g. MOB-5D3802)
@@ -316,13 +316,13 @@ const getAdById = async (req, res, next) => {
             if (!cleanNum.toUpperCase().startsWith('MOB-')) {
                 candidates.push(`MOB-${cleanNum.toUpperCase()}`);
             }
-            ad = await Ad.findOne({
+            const queryObj = Ad.findOne({
                 ...baseQuery,
                 adNumber: { $in: candidates }
             })
                 .populate('author', 'name lastName email avatar phone createdAt rating')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
-                .lean();
+                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+            ad = (queryObj && typeof queryObj.lean === 'function') ? await queryObj.lean() : await queryObj;
         }
 
         // 3. If still not found, return 404

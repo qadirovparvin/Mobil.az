@@ -177,16 +177,8 @@ const optionalProtect = async (req, res, next) => {
     try {
         const decoded = tryDecodeToken(token);
 
-        if (!decoded) {
-            return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
-        }
-
-        if (!decoded.type || decoded.type !== 'access') {
-            return res.status(401).json({ message: 'Invalid token type' });
-        }
-
-        if (!decoded.id) {
-            return res.status(401).json({ message: 'Not authorized, token failed', needRelogin: true });
+        if (!decoded || !decoded.type || decoded.type !== 'access' || (!decoded.id && !decoded._id)) {
+            return next();
         }
 
         const userId = decoded.id || decoded._id;

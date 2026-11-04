@@ -125,7 +125,8 @@ function fetchUnreadCount(token) {
     _lastUnreadCountFetch = now;
     fetch(getAuthApi() + '/notifications/unread-count', {
         headers: { 'Authorization': 'Bearer ' + curToken },
-        credentials: 'include'
+        credentials: 'include',
+        silent: true
     })
         .then(res => {
             if (res.status === 401) {

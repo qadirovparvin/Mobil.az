@@ -5,10 +5,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
     const DEFAULT_AD_IMAGE = "/assets/images/default-ad.svg";
 
-    const vipContainer = document.querySelector(".vip-ads-container");
-    const allAdsContainer = document.querySelector(".all-ads-container");
+    const vipContainer = document.querySelector(".vip-ads-container") || document.getElementById("vipAdsContainer");
+    const allAdsContainer = document.querySelector(".all-ads-container") || document.getElementById("catalog");
 
-    if (!vipContainer || !allAdsContainer) {
+    if (!vipContainer && !allAdsContainer) {
         return;
     }
 
@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return `
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
-                <div class="ad-card"
+                <div class="ad-card elan-card product-card"
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const keyAttr = translateKey ? ` data-translate="${translateKey}"` : '';
         container.innerHTML = `
-            <div class="cab-glass" style="grid-column: 1/-1; padding:24px;text-align:center;color:var(--text-muted);border-radius:18px;">
+            <div class="empty-ads-box" style="grid-column: 1/-1; padding:28px 20px; text-align:center; color:#64748b; background:rgba(248,250,252,0.9); border:1px solid #e2e8f0; border-radius:18px; font-weight:500; font-size:15px; margin:10px 0;">
                 <span${keyAttr}>${escapeHtml(text)}</span>
             </div>
         `;

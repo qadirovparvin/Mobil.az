@@ -393,7 +393,13 @@ function handleGenericApiError(status) {
             return res;
         }).catch(err => {
             console.error('API Fetch Network Error:', err);
-            if (!init.silent) {
+            const reqUrl = String(input?.url || input || '');
+            const isBackgroundCall = reqUrl.includes('/notifications') || 
+                                     reqUrl.includes('/health') || 
+                                     reqUrl.includes('/auth/csrf-token') || 
+                                     reqUrl.includes('/ads/favorites') ||
+                                     reqUrl.includes('/auth/refresh');
+            if (!init.silent && !isBackgroundCall && err?.name !== 'AbortError') {
                 window.toast?.show('Şəbəkə xətası baş verdi. İnternet bağlantınızı yoxlayın.', 'error');
             }
             throw err;

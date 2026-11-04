@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         return `
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
-                <div class="ad-card"
+                <div class="ad-card elan-card product-card"
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"

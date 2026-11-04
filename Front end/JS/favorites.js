@@ -34,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         try {
             const res = await fetch(`${API_URL}/ads/favorites`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
+                silent: true
             });
             const data = await res.json();
             if (res.ok && data.ads) {
@@ -74,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initFavoriteButtons() {
-        document.querySelectorAll('.ad-card').forEach(card => {
+        document.querySelectorAll('.elan-card, .ad-card').forEach(card => {
             const btn = card.querySelector('.favorite-btn');
             if (!btn) return;
             
@@ -208,7 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             const res = await fetch(`${API_URL}/ads/favorites`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: { 'Authorization': `Bearer ${token}` },
+                silent: true
             });
             const data = await res.json();
             
