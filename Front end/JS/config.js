@@ -35,14 +35,16 @@ if (typeof globalThis !== 'undefined') {
     globalThis.resolveDefaultApiUrl = resolveDefaultApiUrl;
 }
 
-if (isLocal && typeof window !== 'undefined' && typeof fetch === 'function') {
+if (typeof window !== 'undefined' && typeof fetch === 'function') {
     const healthUrl = `${backendHost}/api/health`;
     fetch(healthUrl, { method: 'GET' })
         .then(r => {
             if (!r.ok) console.warn('Backend health check returned status:', r.status);
         })
         .catch(err => {
-            console.warn('Backend server is down or unreachable (http://localhost:5000). Run "node Backend/ensure_backend.js" to start it.', err);
+            if (isLocal) {
+                console.warn('Backend server is down or unreachable (http://localhost:5000). Run "node Backend/ensure_backend.js" to start it.', err);
+            }
         });
 }
 

@@ -164,9 +164,10 @@ function updateHeader() {
 
     buttonContainers.forEach((buttonContainer) => {
         if (loggedIn) {
-            const rawDisplayName = [currentUser.name || currentUser.firstName || '', currentUser.lastName || ''].filter(Boolean).join(' ') || currentUser.email || 'Kabinet';
+            const rawDisplayName = [currentUser.name || currentUser.firstName || '', currentUser.lastName || ''].filter(Boolean).join(' ') || currentUser.email || currentUser.phone || 'Kabinet';
             const safeDisplayName = escapeHtml(rawDisplayName);
             const safeEmail = escapeHtml(currentUser.email || '');
+            const safePhone = escapeHtml(currentUser.phone || '');
             const isAdmin = currentUser.role === 'admin';
 
             buttonContainer.innerHTML = `
@@ -204,7 +205,8 @@ function updateHeader() {
                             <div class="avatar"><i class="fas fa-user"></i></div>
                             <div class="profile-user-details">
                                 <div class="profile-name">${safeDisplayName}</div>
-                                <div class="profile-email">${safeEmail}</div>
+                                ${safeEmail ? `<div class="profile-email"><i class="fas fa-envelope" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${safeEmail}</div>` : ''}
+                                ${safePhone ? `<div class="profile-phone" style="font-size:12px;color:var(--text-secondary,#aaa);margin-top:2px;"><i class="fas fa-phone" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${safePhone}</div>` : ''}
                                 <span class="role-badge">${isAdmin ? 'ADMİN HESAB' : 'STANDART HESAB'}</span>
                             </div>
                         </div>
@@ -226,7 +228,9 @@ function updateHeader() {
             const profileNameEl = buttonContainer.querySelector('.profile-name');
             if (profileNameEl) profileNameEl.textContent = rawDisplayName;
             const profileEmailEl = buttonContainer.querySelector('.profile-email');
-            if (profileEmailEl) profileEmailEl.textContent = currentUser.email || '';
+            if (profileEmailEl && currentUser.email) profileEmailEl.innerHTML = `<i class="fas fa-envelope" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${escapeHtml(currentUser.email)}`;
+            const profilePhoneEl = buttonContainer.querySelector('.profile-phone');
+            if (profilePhoneEl && currentUser.phone) profilePhoneEl.innerHTML = `<i class="fas fa-phone" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${escapeHtml(currentUser.phone)}`;
 
             // Separate event listeners
             const notifBell = buttonContainer.querySelector('#notifBell');

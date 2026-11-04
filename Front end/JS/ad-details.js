@@ -63,6 +63,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const notFound = isNotFound || /tapılmadı|tapilmadi|mövcud deyil|invalid id/i.test(String(msg || ''));
         document.title = notFound ? 'Elan tapılmadı — Mobilim.az' : 'Xəta baş verdi — Mobilim.az';
 
+        // Clear breadcrumb to avoid stale placeholders
+        const brandBreadcrumb = document.querySelector('.breadcrumb-brand');
+        const brandSep = document.querySelector('.breadcrumb-brand-sep');
+        const currentBreadcrumb = document.querySelector('.breadcrumb-model') || document.querySelector('.breadcrumb .current');
+        if (brandBreadcrumb) brandBreadcrumb.style.display = 'none';
+        if (brandSep) brandSep.style.display = 'none';
+        if (currentBreadcrumb) currentBreadcrumb.textContent = notFound ? 'Elan tapılmadı' : 'Xəta';
+
         if (notFound) {
             wrapper.innerHTML = `
                 <div style="text-align:center;padding:90px 20px;max-width:520px;margin:0 auto;color:var(--text-primary,#fff);">
@@ -112,10 +120,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ── Main try/catch/finally ─────────────────────────────────────
     try {
 
-        // ── Fetch the ad ───────────────────────────────────────────
+        // ── Fetch the ad with resilient retry ──────────────────────
         let res;
         let fetchErr;
-        for (let attempt = 1; attempt <= 2; attempt++) {
+        const maxAttempts = 3;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
                     headers: { 'Accept': 'application/json' }
@@ -123,14 +132,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (res) break;
             } catch (err) {
                 fetchErr = err;
-                if (attempt < 2) {
-                    await new Promise(r => setTimeout(r, 800));
+                if (attempt < maxAttempts) {
+                    await new Promise(r => setTimeout(r, attempt * 1200));
                 }
             }
         }
         if (!res && fetchErr) {
             console.error('[ad-details] Fetch network error:', fetchErr);
-            throw new Error(`Serverlə əlaqə qurula bilmədi (${fetchErr.message || 'Şəbəkə xətası'})`);
+            throw new Error(`Serverlə əlaqə qurula bilmədi (${fetchErr.message || 'Şəbəkə xətası'}). Zəhmət olmasa bir neçə saniyə sonra yenidən yoxlayın.`);
         }
 
         let ad;
@@ -561,6 +570,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     sellerLocationTag.classList.add('hidden');
                     sellerLocationTag.style.display = 'none';
+                }
+            }
+
+            // Email Tag
+            const sellerEmailTag = document.getElementById('sellerEmailTag');
+            const sellerEmailText = document.getElementById('sellerEmailText');
+            if (sellerEmailTag) {
+                const authorEmail = (author.email || '').trim();
+                if (authorEmail) {
+                    if (sellerEmailText) sellerEmailText.textContent = ` ${authorEmail}`;
+                    sellerEmailTag.classList.remove('hidden');
+                    sellerEmailTag.style.display = 'flex';
+                } else {
+                    sellerEmailTag.classList.add('hidden');
+                    sellerEmailTag.style.display = 'none';
+                }
+            }
+
+            // Phone Tag
+            const sellerPhoneTag = document.getElementById('sellerPhoneTag');
+            const sellerPhoneText = document.getElementById('sellerPhoneText');
+            if (sellerPhoneTag) {
+                const authorPhone = (author.phone || ad.contactPhone || '').trim();
+                if (authorPhone) {
+                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${authorPhone}`;
+                    sellerPhoneTag.classList.remove('hidden');
+                    sellerPhoneTag.style.display = 'flex';
+                } else {
+                    sellerPhoneTag.classList.add('hidden');
+                    sellerPhoneTag.style.display = 'none';
                 }
             }
 

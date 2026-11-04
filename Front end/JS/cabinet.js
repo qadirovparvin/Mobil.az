@@ -1274,6 +1274,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sidebarUserName = document.getElementById('sidebarUserName');
         const sidebarUserEmail = document.getElementById('sidebarUserEmail');
+        const sidebarUserPhone = document.getElementById('sidebarUserPhone');
         const sidebarUserRole = document.getElementById('sidebarUserRole');
         const welcomeText = document.querySelector('#tab-profile .cabinet-header p');
         const walletAmountValue = document.getElementById('walletAmountValue');
@@ -1282,7 +1283,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const facebookProfileName = document.querySelector('.social-connect-card.connected .social-info span');
 
         if (sidebarUserName) sidebarUserName.textContent = displayName;
-        if (sidebarUserEmail) sidebarUserEmail.textContent = user.email || user.phone || '—';
+        if (sidebarUserEmail) {
+            const emailVal = user.email || '—';
+            const emailSpan = sidebarUserEmail.querySelector('.val');
+            if (emailSpan) emailSpan.textContent = emailVal;
+            else sidebarUserEmail.textContent = emailVal;
+            sidebarUserEmail.style.display = user.email ? 'flex' : (user.phone ? 'none' : 'flex');
+        }
+        if (sidebarUserPhone) {
+            const phoneVal = user.phone || '—';
+            const phoneSpan = sidebarUserPhone.querySelector('.val');
+            if (phoneSpan) phoneSpan.textContent = phoneVal;
+            else sidebarUserPhone.textContent = phoneVal;
+            sidebarUserPhone.style.display = user.phone ? 'flex' : 'none';
+        }
         if (sidebarUserRole) sidebarUserRole.textContent = getRoleLabel(user);
         if (welcomeText) {
             welcomeText.textContent = t('dashboardWelcome', 'Xoş gəldiniz, {{name}}. Bugünkü statistikanızla tanış olun.').replace('{{name}}', firstName);

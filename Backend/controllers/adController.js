@@ -243,7 +243,7 @@ const getAds = async (req, res, next) => {
             .sort(sort)
             .skip(skip)
             .limit(normalizedLimit)
-            .populate('author', 'name lastName avatar phone')
+            .populate('author', 'name lastName email avatar phone')
             .populate('store',  'storeName logoUrl isVerified rating')
             .lean();
         ads.forEach((ad) => {
@@ -304,7 +304,7 @@ const getAdById = async (req, res, next) => {
                 ...baseQuery,
                 _id: idParam
             })
-                .populate('author', 'name lastName avatar phone createdAt rating')
+                .populate('author', 'name lastName email avatar phone createdAt rating')
                 .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
                 .lean();
         }
@@ -320,7 +320,7 @@ const getAdById = async (req, res, next) => {
                 ...baseQuery,
                 adNumber: { $in: candidates }
             })
-                .populate('author', 'name lastName avatar phone createdAt rating')
+                .populate('author', 'name lastName email avatar phone createdAt rating')
                 .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks')
                 .lean();
         }
@@ -1070,7 +1070,7 @@ const getFavoriteAds = async (req, res, next) => {
         }
 
         const ads = await Ad.find({ _id: { $in: favoriteIds }, ...activeListingFilter(new Date()) })
-            .populate('author', 'name lastName avatar phone')
+            .populate('author', 'name lastName email avatar phone')
             .populate('store', 'storeName logoUrl isVerified rating');
 
         const adsById = new Map(ads.map((ad) => [ad._id.toString(), ad]));

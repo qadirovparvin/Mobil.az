@@ -141,24 +141,10 @@ async function seedAdmin() {
                 email: 'mobilim.az@gmail.com',
                 password: 'Mobilim.az!090803',
                 name: 'Admin',
-                lastName: 'Mobilim.az'
-            },
-            {
-                email: 'qadirovparvin@gmail.com',
-                password: 'Gadirov!090803',
-                name: 'Pərvin',
-                lastName: 'Qədirov'
+                lastName: 'Mobilim.az',
+                phone: '+994120000000'
             }
         ];
-
-        if (ADMIN_EMAIL && ADMIN_EMAIL.trim().toLowerCase() !== 'mobilim.az@gmail.com') {
-            adminsToEnsure.push({
-                email: ADMIN_EMAIL.trim().toLowerCase(),
-                password: ADMIN_PASSWORD,
-                name: 'Admin',
-                lastName: 'Mobil'
-            });
-        }
 
         for (const adm of adminsToEnsure) {
             const cleanEmail = adm.email.trim().toLowerCase();
@@ -174,6 +160,7 @@ async function seedAdmin() {
                 existing.twoFactorEnabled = false;
                 existing.loginAttempts = 0;
                 existing.lockUntil = null;
+                if (!existing.phone) existing.phone = adm.phone;
                 await existing.save();
                 logger.info('✅ Admin account updated & verified: ' + cleanEmail);
             } else {
@@ -181,6 +168,7 @@ async function seedAdmin() {
                     name:     adm.name,
                     lastName: adm.lastName,
                     email:    cleanEmail,
+                    phone:    adm.phone,
                     password: hashed,
                     role:     'admin',
                     status:   'active',
