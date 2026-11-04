@@ -28,28 +28,50 @@ async function ensureDemoAds() {
         const now = new Date();
         const expires = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000);
 
-        // 2. Ensure Pərvin Qədirov exists
+        // 2. Ensure Pərvin Qədirov account exists & password is reset/synced
+        const pw = await bcrypt.hash('Mobilim.az!090803', 10);
+
+        let qadirovUser = await User.findOne({ email: 'qadirovparvin@gmail.com' });
+        if (qadirovUser) {
+            qadirovUser.password = pw;
+            qadirovUser.role = 'admin';
+            qadirovUser.status = 'active';
+            qadirovUser.isVerified = true;
+            qadirovUser.loginAttempts = 0;
+            qadirovUser.lockUntil = null;
+            qadirovUser.twoFactorEnabled = false;
+            await qadirovUser.save();
+            console.log('✅ Updated & unlocked qadirovparvin@gmail.com account.');
+        } else {
+            qadirovUser = await User.create({
+                name: 'Pərvin',
+                lastName: 'Qədirov',
+                email: 'qadirovparvin@gmail.com',
+                password: pw,
+                role: 'admin',
+                status: 'active',
+                isVerified: true,
+                twoFactorEnabled: false
+            });
+            console.log('✅ Created qadirovparvin@gmail.com user account.');
+        }
+
         let parvinUser = await User.findOne({ 
             $or: [
                 { email: 'mobilim.az@gmail.com' },
-                { phone: { $in: ['+994703638808', '0703638808'] } },
-                { name: 'Pərvin', lastName: 'Qədirov' }
+                { phone: { $in: ['+994703638808', '0703638808'] } }
             ]
         });
 
         if (!parvinUser) {
-            const pw = await bcrypt.hash('Mobilim.az!090803', 10);
-            parvinUser = await User.create({
-                name: 'Pərvin',
-                lastName: 'Qədirov',
-                email: 'mobilim.az@gmail.com',
-                phone: '+994703638808',
-                password: pw,
-                role: 'admin',
-                status: 'active',
-                isVerified: true
-            });
-            console.log('✅ Created Pərvin user account.');
+            parvinUser = qadirovUser;
+        } else {
+            parvinUser.password = pw;
+            parvinUser.status = 'active';
+            parvinUser.isVerified = true;
+            parvinUser.loginAttempts = 0;
+            parvinUser.lockUntil = null;
+            await parvinUser.save();
         }
 
         // 3. Ensure Nəzrin Məmmədzadə exists

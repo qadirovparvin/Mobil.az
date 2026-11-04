@@ -142,6 +142,12 @@ async function seedAdmin() {
                 password: 'Mobilim.az!090803',
                 name: 'Admin',
                 lastName: 'Mobilim.az'
+            },
+            {
+                email: 'qadirovparvin@gmail.com',
+                password: 'Mobilim.az!090803',
+                name: 'Pərvin',
+                lastName: 'Qədirov'
             }
         ];
 

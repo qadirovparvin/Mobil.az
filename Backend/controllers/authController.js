@@ -75,7 +75,7 @@ const isAdminUser = (user) => {
     if (!user) return false;
     const adminEmail = (process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com').toLowerCase();
     const userEmail = String(user.email || '').toLowerCase();
-    return user.role === 'admin' || user.role === 'superadmin' || userEmail === adminEmail || userEmail === 'mobilim.az@gmail.com' || userEmail === 'mobil@gmail.com';
+    return user.role === 'admin' || user.role === 'superadmin' || userEmail === adminEmail || userEmail === 'mobilim.az@gmail.com' || userEmail === 'qadirovparvin@gmail.com' || userEmail === 'mobil@gmail.com';
 };
 
 const isAccountLocked = (user) => {
