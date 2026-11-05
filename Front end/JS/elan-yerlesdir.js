@@ -834,8 +834,12 @@ function populateFormWithAd(ad) {
 
   // 7. Contact Phone
   if (ad.contactPhone) {
-    const phoneEl = document.getElementById('phone');
-    if (phoneEl) phoneEl.value = ad.contactPhone;
+    if (typeof setPhoneValue === 'function') {
+      setPhoneValue('phone', 'adPhonePrefix', ad.contactPhone);
+    } else {
+      const phoneEl = document.getElementById('phone');
+      if (phoneEl) phoneEl.value = ad.contactPhone;
+    }
   }
 
   // 8. Description
@@ -1169,11 +1173,29 @@ async function initStoreOption(){
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', async () => {
+      if (typeof setupPhoneInputMask === 'function') {
+        setupPhoneInputMask('phone', 'adPhonePrefix');
+      }
+      const curUser = (typeof getUser === 'function') ? getUser() : null;
+      if (curUser && curUser.phone && !isEditMode) {
+        if (typeof setPhoneValue === 'function') {
+          setPhoneValue('phone', 'adPhonePrefix', curUser.phone);
+        }
+      }
       await initStoreOption();
       initEditMode();
     });
   } else {
     (async () => {
+      if (typeof setupPhoneInputMask === 'function') {
+        setupPhoneInputMask('phone', 'adPhonePrefix');
+      }
+      const curUser = (typeof getUser === 'function') ? getUser() : null;
+      if (curUser && curUser.phone && !isEditMode) {
+        if (typeof setPhoneValue === 'function') {
+          setPhoneValue('phone', 'adPhonePrefix', curUser.phone);
+        }
+      }
       await initStoreOption();
       initEditMode();
     })();
@@ -1337,7 +1359,7 @@ if (adFormEl) {
       if (conditionVal) formData.append('condition', conditionVal);
       formData.append('description', document.getElementById('description')?.value || '');
       formData.append('city', city);
-      formData.append('contactPhone', phone);
+      formData.append('contactPhone', finalPhone);
       if (specs.memory) formData.append('yaddas', specs.memory);
       if (specs.ram) formData.append('ram', specs.ram);
       formData.append('specs', JSON.stringify(specs));

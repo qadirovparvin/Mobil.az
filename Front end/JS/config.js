@@ -57,6 +57,281 @@ if (typeof window !== 'undefined' && typeof fetch === 'function') {
         });
 }
 
+/* ── Centralized Phone Configuration & Masking Engine ── */
+var COUNTRY_PHONE_CONFIGS = {
+    '+994': {
+        name: 'Azərbaycan',
+        code: '+994',
+        digits: 9,
+        placeholder: '(50) 000-00-00',
+        allowedPrefixes: ['10', '50', '51', '55', '60', '70', '77', '99'],
+        format: function(digits) {
+            if (!digits) return '';
+            var res = '(' + digits.slice(0, 2);
+            if (digits.length < 2) return res;
+            res += ') ';
+            if (digits.length <= 5) return res + digits.slice(2);
+            res += digits.slice(2, 5) + '-' + digits.slice(5, 7);
+            if (digits.length <= 7) return res;
+            return res + '-' + digits.slice(7, 9);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('994') && digits.length > 9) digits = digits.slice(3);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 9);
+        }
+    },
+    '+90': {
+        name: 'Türkiyə',
+        code: '+90',
+        digits: 10,
+        placeholder: '(500) 000-00-00',
+        format: function(digits) {
+            if (!digits) return '';
+            var res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            res += digits.slice(3, 6) + '-' + digits.slice(6, 8);
+            if (digits.length <= 8) return res;
+            return res + '-' + digits.slice(8, 10);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('90') && digits.length > 10) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+7': {
+        name: 'Rusiya / Qazaxıstan',
+        code: '+7',
+        digits: 10,
+        placeholder: '(900) 000-00-00',
+        format: function(digits) {
+            if (!digits) return '';
+            var res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            res += digits.slice(3, 6) + '-' + digits.slice(6, 8);
+            if (digits.length <= 8) return res;
+            return res + '-' + digits.slice(8, 10);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if ((digits.startsWith('7') || digits.startsWith('8')) && digits.length > 10) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+1': {
+        name: 'ABŞ / Kanada',
+        code: '+1',
+        digits: 10,
+        placeholder: '(555) 000-0000',
+        format: function(digits) {
+            if (!digits) return '';
+            var res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            return res + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('1') && digits.length > 10) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+44': {
+        name: 'Böyük Britaniya',
+        code: '+44',
+        digits: 10,
+        placeholder: '7911 123456',
+        format: function(digits) {
+            if (!digits) return '';
+            if (digits.length <= 4) return digits;
+            return digits.slice(0, 4) + ' ' + digits.slice(4, 10);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('44') && digits.length > 10) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+49': {
+        name: 'Almaniya',
+        code: '+49',
+        digits: 11,
+        placeholder: '151 12345678',
+        format: function(digits) {
+            if (!digits) return '';
+            if (digits.length <= 3) return digits;
+            return digits.slice(0, 3) + ' ' + digits.slice(3, 11);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('49') && digits.length > 11) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 11);
+        }
+    },
+    '+995': {
+        name: 'Gürcüstan',
+        code: '+995',
+        digits: 9,
+        placeholder: '599 12-34-56',
+        format: function(digits) {
+            if (!digits) return '';
+            var res = digits.slice(0, 3);
+            if (digits.length <= 3) return res;
+            res += ' ' + digits.slice(3, 5);
+            if (digits.length <= 5) return res;
+            res += '-' + digits.slice(5, 7);
+            if (digits.length <= 7) return res;
+            return res + '-' + digits.slice(7, 9);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('995') && digits.length > 9) digits = digits.slice(3);
+            return digits.slice(0, 9);
+        }
+    },
+    '+971': {
+        name: 'BƏƏ',
+        code: '+971',
+        digits: 9,
+        placeholder: '50 123-4567',
+        format: function(digits) {
+            if (!digits) return '';
+            var res = digits.slice(0, 2);
+            if (digits.length <= 2) return res;
+            res += ' ' + digits.slice(2, 5);
+            if (digits.length <= 5) return res;
+            return res + '-' + digits.slice(5, 9);
+        },
+        clean: function(raw) {
+            var digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('971') && digits.length > 9) digits = digits.slice(3);
+            return digits.slice(0, 9);
+        }
+    },
+    'other': {
+        name: 'Digər ölkə',
+        code: '+',
+        digits: 15,
+        placeholder: '7-15 rəqəmli beynəlxalq nömrə',
+        format: function(digits) { return digits.slice(0, 15); },
+        clean: function(raw) { return String(raw || '').replace(/\D/g, '').slice(0, 15); }
+    }
+};
+
+function setupPhoneInputMask(inputId, prefixId) {
+    var input = typeof inputId === 'string' ? document.getElementById(inputId) : inputId;
+    var prefixEl = typeof prefixId === 'string' ? document.getElementById(prefixId) : prefixId;
+    if (!input) return;
+
+    function applyFormat() {
+        var prefix = prefixEl ? prefixEl.value : '+994';
+        var cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
+        input.placeholder = cfg.placeholder;
+
+        var rawVal = input.value;
+        var cleaned = cfg.clean(rawVal);
+        var formatted = cfg.format(cleaned);
+        input.value = formatted;
+
+        if (prefix === '+994') {
+            input.maxLength = 15;
+        } else if (prefix === 'other') {
+            input.maxLength = 18;
+        } else {
+            input.maxLength = 16;
+        }
+    }
+
+    input.addEventListener('input', applyFormat);
+    input.addEventListener('paste', function() { setTimeout(applyFormat, 0); });
+    if (prefixEl) {
+        prefixEl.addEventListener('change', function() {
+            applyFormat();
+            input.focus();
+        });
+    }
+
+    applyFormat();
+}
+
+function validatePhoneNumber(inputId, prefixId) {
+    var input = typeof inputId === 'string' ? document.getElementById(inputId) : inputId;
+    var prefixEl = typeof prefixId === 'string' ? document.getElementById(prefixId) : prefixId;
+    if (!input) return { valid: false, message: 'Telefon sahəsi tapılmadı' };
+    var prefix = prefixEl ? prefixEl.value : '+994';
+    var cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
+    var digits = cfg.clean(input.value);
+
+    if (!digits) {
+        return { valid: false, message: 'Telefon nömrəsini daxil edin' };
+    }
+
+    if (prefix === '+994') {
+        if (digits.length !== 9) {
+            return { valid: false, message: 'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67' };
+        }
+        var op = digits.slice(0, 2);
+        if (!cfg.allowedPrefixes.includes(op)) {
+            return { valid: false, message: 'Mobil operator prefiksi dəstəklənmir (10, 50, 51, 55, 60, 70, 77, 99)' };
+        }
+        return { valid: true, fullPhone: '+994' + digits, digits: digits, prefix: prefix };
+    }
+
+    if (prefix === 'other') {
+        if (digits.length < 7 || digits.length > 15) {
+            return { valid: false, message: 'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır' };
+        }
+        return { valid: true, fullPhone: '+' + digits, digits: digits, prefix: prefix };
+    }
+
+    if (digits.length !== cfg.digits) {
+        return { valid: false, message: cfg.name + ' nömrəsi tam ' + cfg.digits + ' rəqəmdən ibarət olmalıdır' };
+    }
+
+    return { valid: true, fullPhone: prefix + digits, digits: digits, prefix: prefix };
+}
+
+function setPhoneValue(inputId, prefixId, fullPhone) {
+    var input = typeof inputId === 'string' ? document.getElementById(inputId) : inputId;
+    var prefixEl = typeof prefixId === 'string' ? document.getElementById(prefixId) : prefixId;
+    if (!input || !fullPhone) return;
+
+    var raw = String(fullPhone).trim();
+    var matchedPrefix = '+994';
+    var prefixes = ['+994', '+90', '+7', '+1', '+44', '+49', '+995', '+971'];
+    for (var i = 0; i < prefixes.length; i++) {
+        var p = prefixes[i];
+        if (raw.startsWith(p)) {
+            matchedPrefix = p;
+            raw = raw.substring(p.length);
+            break;
+        }
+    }
+    if (prefixEl) {
+        prefixEl.value = matchedPrefix;
+    }
+    var cfg = COUNTRY_PHONE_CONFIGS[matchedPrefix] || COUNTRY_PHONE_CONFIGS['+994'];
+    var cleaned = cfg.clean(raw);
+    input.value = cfg.format(cleaned);
+}
+
+if (typeof window !== 'undefined') {
+    window.COUNTRY_PHONE_CONFIGS = COUNTRY_PHONE_CONFIGS;
+    window.setupPhoneInputMask = setupPhoneInputMask;
+    window.validatePhoneNumber = validatePhoneNumber;
+    window.setPhoneValue = setPhoneValue;
+}
+
 // Global password visibility toggler (safe against strict CSP and works immediately)
 window.togglePwd = function (inputId, iconId) {
     let inp = inputId ? document.getElementById(inputId) : null;
@@ -211,7 +486,7 @@ window.persistAuthSession = function persistAuthSession(data, token, rememberMeP
 };
 
 window.clearAuthSession = window.clearAuthSession || function clearAuthSession() {
-    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
+    const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail', 'savedEmail'];
     keys.forEach((key) => {
         try { sessionStorage.removeItem(key); } catch (e) { }
         try { localStorage.removeItem(key); } catch (e) { }

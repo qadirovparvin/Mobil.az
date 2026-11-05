@@ -172,3 +172,12 @@ if (shopForm) {
         }
     });
 }
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof setupPhoneInputMask === 'function') {
+            setupPhoneInputMask('phone');
+            setupPhoneInputMask('whatsapp');
+        }
+    });
+}

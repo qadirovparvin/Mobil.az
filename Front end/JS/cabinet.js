@@ -2,6 +2,9 @@ const resolveCabinetApi = () => window.API_URL || window.API_BASE || (typeof win
 let API_BASE = resolveCabinetApi();
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (typeof setupPhoneInputMask === 'function') {
+        setupPhoneInputMask('profilePhone');
+    }
     const CABINET_TRANSLATIONS = {
         AZ: {
             userFallback: 'istifadəçi',
@@ -1333,7 +1336,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (profileFirstName) profileFirstName.value = user.name || '';
         if (profileLastName) profileLastName.value = user.lastName || '';
         if (profileEmail) profileEmail.value = user.email || '';
-        if (profilePhone) profilePhone.value = user.phone || '';
+        if (profilePhone) {
+            if (typeof setPhoneValue === 'function') {
+                setPhoneValue('profilePhone', null, user.phone || '');
+            } else {
+                profilePhone.value = user.phone || '';
+            }
+        }
         if (twoFactorCheckbox) twoFactorCheckbox.checked = Boolean(user.twoFactorEnabled);
         if (privacyShowPhone) privacyShowPhone.checked = user.privacySettings?.showPhone ?? true;
         if (privacyAllowMessages) privacyAllowMessages.checked = user.privacySettings?.allowMessages ?? true;

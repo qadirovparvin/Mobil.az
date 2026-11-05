@@ -1,3 +1,52 @@
+
+// Live user synchronization: fetches fresh profile from /api/auth/me to guarantee accurate name & email
+async function syncCurrentUser() {
+    const token = getToken();
+    if (!token) return;
+    try {
+        const apiBase = getAuthApi();
+        const res = await fetch(`${apiBase}/auth/me`, {
+            headers: { Authorization: 'Bearer ' + token },
+            credentials: 'include'
+        });
+        if (res.ok) {
+            const freshUser = await res.json();
+            if (freshUser && (freshUser._id || freshUser.id)) {
+                const userPayload = {
+                    id: freshUser._id || freshUser.id,
+                    name: freshUser.name || '',
+                    lastName: freshUser.lastName || '',
+                    email: freshUser.email || '',
+                    phone: freshUser.phone || '',
+                    role: freshUser.role || 'user',
+                    avatar: freshUser.avatar || ''
+                };
+                const userStr = JSON.stringify(userPayload);
+                ['user', 'mobilaz_current_user', 'mobilaz_user'].forEach(k => {
+                    try { localStorage.setItem(k, userStr); } catch(e) {}
+                    try { sessionStorage.setItem(k, userStr); } catch(e) {}
+                });
+                if (userPayload.email) {
+                    try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
+                    try { localStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+                } else {
+                    try { localStorage.removeItem('savedEmail'); } catch(e) {}
+                    try { localStorage.removeItem('userEmail'); } catch(e) {}
+                }
+                updateHeader();
+            }
+        } else if (res.status === 401) {
+            ['token', 'accessToken', 'authToken', 'adminToken', 'jwt', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail', 'savedEmail'].forEach(k => {
+                try { localStorage.removeItem(k); } catch(e) {}
+                try { sessionStorage.removeItem(k); } catch(e) {}
+            });
+            updateHeader();
+        }
+    } catch (e) {
+        // Network offline, keep cached
+    }
+}
+window.syncCurrentUser = syncCurrentUser;
 "use strict";
 
 const getAuthApi = () => window.API_URL || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
@@ -283,7 +332,7 @@ function updateHeader() {
                         clearSession();
                     } else {
                         ['token', 'accessToken', 'authToken', 'adminToken'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
-                        ['user', 'mobilaz_current_user', 'adminUser', 'mobilaz_user', 'userRole', 'userEmail'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
+                        ['user', 'mobilaz_current_user', 'adminUser', 'mobilaz_user', 'userRole', 'userEmail', 'savedEmail'].forEach(k => { sessionStorage.removeItem(k); localStorage.removeItem(k); });
                     }
                     window.location.href = "index.html";
                 });
@@ -464,3 +513,11 @@ document.addEventListener("DOMContentLoaded", function () {
 // Re-run header update whenever components finish loading or auth changes
 document.addEventListener("componentsLoaded", updateHeader);
 window.addEventListener("authChanged", updateHeader);
+
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => { syncCurrentUser(); });
+    } else {
+        syncCurrentUser();
+    }
+}

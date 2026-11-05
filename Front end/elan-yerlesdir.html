@@ -304,12 +304,32 @@
                 <div class="select-wrapper">
                   <select id="color" name="color">
                     <option value="">Seçin (boş burax)</option>
-                    <option value="black" data-translate-option="opt-qara">Qara</option>
-                    <option value="white" data-translate-option="opt-ag">Ağ</option>
-                    <option value="gold" data-translate-option="opt-qizili">Qızılı</option>
-                    <option value="silver" data-translate-option="opt-gumushu">Gümüşü</option>
-                    <option value="grey" data-translate-option="opt-boz">Boz</option>
-                    <option value="blue" data-translate-option="opt-mavi">Mavi</option>
+                    <option value="black" data-translate-option="opt-qara">Qara (Black / Kosmik Qara)</option>
+                    <option value="white" data-translate-option="opt-ag">Ağ (White / Starlight)</option>
+                    <option value="gold" data-translate-option="opt-qizili">Qızılı (Gold)</option>
+                    <option value="silver" data-translate-option="opt-gumushu">Gümüşü (Silver)</option>
+                    <option value="grey" data-translate-option="opt-boz">Boz (Grey / Space Grey)</option>
+                    <option value="graphite" data-translate-option="opt-qrafit">Qrafit (Graphite)</option>
+                    <option value="blue" data-translate-option="opt-mavi">Mavi (Blue / Açıq Mavi)</option>
+                    <option value="darkblue" data-translate-option="opt-goy">Göy (Deep Blue / Midnight)</option>
+                    <option value="green" data-translate-option="opt-yasil">Yaşıl (Green)</option>
+                    <option value="emerald" data-translate-option="opt-zumrud">Zümrüd Yaşılı (Alpine / Emerald)</option>
+                    <option value="yellow" data-translate-option="opt-sari">Sarı (Yellow)</option>
+                    <option value="red" data-translate-option="opt-qirmizi">Qırmızı (Red / Product RED)</option>
+                    <option value="pink" data-translate-option="opt-cehrayi">Çəhrayı (Pink / Rose Gold)</option>
+                    <option value="purple" data-translate-option="opt-benovseyi">Bənövşəyi (Purple / Violet)</option>
+                    <option value="deeppurple" data-translate-option="opt-derin-benovseyi">Dərin Bənövşəyi (Deep Purple)</option>
+                    <option value="orange" data-translate-option="opt-narinci">Narıncı (Orange)</option>
+                    <option value="titanium-black" data-translate-option="opt-titan-qara">Titan Qara (Black Titanium)</option>
+                    <option value="titanium-natural" data-translate-option="opt-titan-tebii">Titan Təbii (Natural Titanium)</option>
+                    <option value="titanium-white" data-translate-option="opt-titan-ag">Titan Ağ (White Titanium)</option>
+                    <option value="titanium-blue" data-translate-option="opt-titan-mavi">Titan Mavi (Blue Titanium)</option>
+                    <option value="titanium-desert" data-translate-option="opt-titan-col">Titan Çöl / Qum (Desert Titanium)</option>
+                    <option value="beige" data-translate-option="opt-bej">Bej / Krem (Beige / Cream)</option>
+                    <option value="bronze" data-translate-option="opt-burunc">Bürünc (Bronze)</option>
+                    <option value="mint" data-translate-option="opt-nane">Nanə (Mint)</option>
+                    <option value="lavender" data-translate-option="opt-lavanda">Lavanda (Lavender)</option>
+                    <option value="other" data-translate-option="opt-diger-reng">Digər rəng</option>
                   </select>
                   <button type="button" class="clear-select" onclick="clearSelect('color')" title="Təmizlə">✕</button>
                   <i class="fas fa-chevron-down select-arrow"></i>
@@ -390,10 +410,24 @@
 
             <div class="form-group">
               <label for="phone" data-translate="elan-phone">Əlaqə nömrəsi <span class="required">*</span></label>
-              <div class="input-wrapper">
-                <span class="input-prefix"><i class="fas fa-phone"></i></span>
-                <input type="tel" id="phone" name="phone" data-translate-placeholder="elan-phone-placeholder"
-                  placeholder="+994 XX XXX XX XX" required>
+              <div class="phone-combo" style="display:flex; gap:8px;">
+                <div class="prefix-wrap" style="width:125px; flex-shrink:0;">
+                  <select id="adPhonePrefix" aria-label="Ölkə kodu" style="width:100%; height:46px; border:1px solid var(--border-color, #e2e8f0); border-radius:10px; padding:0 8px; font-size:14px; background:var(--input-bg, #fff); color:var(--text-color, #111);">
+                    <option value="+994" selected>🇦🇿 +994</option>
+                    <option value="+90">🇹🇷 +90</option>
+                    <option value="+7">🇷🇺 +7</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+995">🇬🇪 +995</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="other">🌐 Digər</option>
+                  </select>
+                </div>
+                <div class="number-wrap" style="flex:1; position:relative;">
+                  <input type="tel" id="phone" name="phone" placeholder="(50) 000-00-00" required maxlength="15"
+                    style="width:100%; height:46px; border:1px solid var(--border-color, #e2e8f0); border-radius:10px; padding:0 14px; font-size:15px; background:var(--input-bg, #fff); color:var(--text-color, #111); box-sizing:border-box;">
+                </div>
               </div>
             </div>
 
