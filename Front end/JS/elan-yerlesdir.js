@@ -841,6 +841,33 @@ function decodeBasicEntities(str) {
     .replace(/&amp;/g, '&');
 }
 
+const COLOR_VALUE_ALIASES = {
+  'qara': 'black', 'black': 'black', 'kosmik qara': 'black', 'black titanium': 'titanium-black',
+  'ağ': 'white', 'ag': 'white', 'white': 'white', 'starlight': 'white',
+  'qızılı': 'gold', 'qizili': 'gold', 'gold': 'gold',
+  'gümüşü': 'silver', 'gumusu': 'silver', 'silver': 'silver',
+  'boz': 'grey', 'grey': 'grey', 'gray': 'grey', 'space grey': 'grey',
+  'qrafit': 'graphite', 'graphite': 'graphite',
+  'mavi': 'blue', 'blue': 'blue', 'açıq mavi': 'blue', 'aciq mavi': 'blue',
+  'göy': 'darkblue', 'goy': 'darkblue', 'darkblue': 'darkblue', 'midnight': 'darkblue', 'deep blue': 'darkblue',
+  'yaşıl': 'green', 'yasil': 'green', 'green': 'green',
+  'zümrüd yaşılı': 'emerald', 'zumrud yasili': 'emerald', 'emerald': 'emerald', 'alpine green': 'emerald',
+  'sarı': 'yellow', 'sari': 'yellow', 'yellow': 'yellow',
+  'qırmızı': 'red', 'qirmizi': 'red', 'red': 'red', 'product red': 'red',
+  'çəhrayı': 'pink', 'cehrayi': 'pink', 'pink': 'pink', 'rose gold': 'pink',
+  'bənövşəyi': 'purple', 'benovseyi': 'purple', 'purple': 'purple', 'violet': 'purple',
+  'dərin bənövşəyi': 'deeppurple', 'derin benovseyi': 'deeppurple', 'deeppurple': 'deeppurple', 'deep purple': 'deeppurple',
+  'narıncı': 'orange', 'narinci': 'orange', 'orange': 'orange',
+  'titan qara': 'titanium-black', 'titanium-black': 'titanium-black',
+  'titan təbii': 'titanium-natural', 'titan tebii': 'titanium-natural', 'titanium-natural': 'titanium-natural', 'natural titanium': 'titanium-natural',
+  'titan ağ': 'titanium-white', 'titan ag': 'titanium-white', 'titanium-white': 'titanium-white', 'white titanium': 'titanium-white',
+  'titan göy': 'titanium-blue', 'titan goy': 'titanium-blue', 'titanium-blue': 'titanium-blue', 'blue titanium': 'titanium-blue',
+  'bürünc': 'bronze', 'burunc': 'bronze', 'bronze': 'bronze',
+  'bej': 'beige', 'beige': 'beige',
+  'qəhvəyi': 'brown', 'qehveyi': 'brown', 'brown': 'brown',
+  'şəffaf': 'transparent', 'seffaf': 'transparent', 'transparent': 'transparent'
+};
+
 function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = false) {
   if (!selectEl || value === undefined || value === null) return;
   const rawStr = String(value).trim();
@@ -851,49 +878,91 @@ function setSelectValueWithFallback(selectEl, value, allowDynamicFallback = fals
   }
 
   const decoded = decodeBasicEntities(rawStr);
+  const norm = decoded.trim().toLowerCase();
 
-  // Check existing options for decoded or raw matches
+  // 1. Exact match by value
   let matchingOpt = Array.from(selectEl.options || []).find((opt) =>
     opt.value === decoded || opt.value === rawStr || decodeBasicEntities(opt.value) === decoded
   );
 
-  // Backward-compatible alias matching for "Diger" vs "Digər" vs "other"
-  if (!matchingOpt && (decoded === 'Diger' || decoded === 'Digər' || decoded === 'other')) {
+  // 2. Case-insensitive value match
+  if (!matchingOpt) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value.toLowerCase() === norm);
+  }
+
+  // 3. Color matching
+  if (!matchingOpt && (selectEl.id === 'color' || selectEl.name === 'color')) {
+    const targetKey = COLOR_VALUE_ALIASES[norm];
+    if (targetKey) {
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value.toLowerCase() === targetKey);
+    }
+    if (!matchingOpt) {
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => {
+        const text = (opt.textContent || opt.text || '').toLowerCase();
+        return text.includes(norm);
+      });
+    }
+  }
+
+  // 4. Memory matching (128GB, 128 GB, 64-dan-az, 512-den-cox)
+  if (!matchingOpt && (selectEl.id === 'memory' || selectEl.name === 'memory')) {
+    if (norm === 'below-64' || norm === '64-dan-az' || norm.includes('< 64') || norm.includes('<64')) {
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value === '64-dan-az' || opt.value === 'below-64');
+    } else if (norm === '512+' || norm === '512-den-cox' || norm.includes('512+')) {
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value === '512-den-cox' || opt.value === '512+');
+    } else {
+      const numOnly = norm.replace(/\s*gb$/i, '').trim();
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value === numOnly || opt.value.toLowerCase() === numOnly);
+    }
+  }
+
+  // 5. RAM matching (8GB, 8 GB, 16+, 16-dan-cox)
+  if (!matchingOpt && (selectEl.id === 'ram' || selectEl.name === 'ram')) {
+    if (norm === '16+' || norm === '16-dan-cox' || norm.includes('16+')) {
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value === '16-dan-cox' || opt.value === '16+');
+    } else {
+      const numOnly = norm.replace(/\s*gb$/i, '').trim();
+      matchingOpt = Array.from(selectEl.options || []).find((opt) => opt.value === numOnly || opt.value.toLowerCase() === numOnly);
+    }
+  }
+
+  // 6. Battery matching (5000 mAh, 5000)
+  if (!matchingOpt && (selectEl.id === 'battery' || selectEl.id === 'powerbankCapacity')) {
+    const numOnly = norm.replace(/\s*mah$/i, '').replace(/,/g, '').trim();
+    matchingOpt = Array.from(selectEl.options || []).find((opt) => {
+      const optValNorm = opt.value.toLowerCase().replace(/\s*mah$/i, '').replace(/,/g, '').trim();
+      return optValNorm === numOnly;
+    });
+  }
+
+  // 7. Condition & General Aliases
+  if (!matchingOpt && (decoded === 'Diger' || decoded === 'Digər' || norm === 'other')) {
     matchingOpt = Array.from(selectEl.options || []).find((opt) =>
       opt.value === 'Digər' || opt.value === 'Diger' || opt.value === 'other'
     );
   }
-
-  // Memory aliases: below-64 vs 64-dan-az, 512+ vs 512-den-cox
-  if (!matchingOpt && (decoded === 'below-64' || decoded === '64-dan-az')) {
-    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
-      opt.value === '64-dan-az' || opt.value === 'below-64'
-    );
-  }
-  if (!matchingOpt && (decoded === '512+' || decoded === '512-den-cox')) {
-    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
-      opt.value === '512-den-cox' || opt.value === '512+'
-    );
-  }
-  if (!matchingOpt && (decoded === '16+' || decoded === '16-dan-cox')) {
-    matchingOpt = Array.from(selectEl.options || []).find((opt) =>
-      opt.value === '16-dan-cox' || opt.value === '16+'
-    );
-  }
-  if (!matchingOpt && (decoded.toLowerCase() === 'yeni')) {
+  if (!matchingOpt && (norm === 'yeni' || norm.includes('yeni'))) {
     matchingOpt = Array.from(selectEl.options || []).find((opt) =>
       opt.value === 'Yeni' || opt.value === 'yeni'
     );
   }
-  if (!matchingOpt && (decoded.toLowerCase() === 'islenmis' || decoded === 'İşlənmiş')) {
+  if (!matchingOpt && (norm === 'islenmis' || norm === 'işlənmiş' || norm.includes('işlənmiş') || norm.includes('islenmis'))) {
     matchingOpt = Array.from(selectEl.options || []).find((opt) =>
       opt.value === 'İşlənmiş' || opt.value === 'islenmis'
     );
   }
-  if (!matchingOpt && (decoded.toLowerCase() === 'temir-olunub' || decoded === 'Təmir olunub')) {
+  if (!matchingOpt && (norm === 'temir-olunub' || norm === 'təmir olunub' || norm.includes('təmir'))) {
     matchingOpt = Array.from(selectEl.options || []).find((opt) =>
       opt.value === 'Təmir olunub' || opt.value === 'temir-olunub'
     );
+  }
+
+  // 8. Flexible match by option text
+  if (!matchingOpt) {
+    matchingOpt = Array.from(selectEl.options || []).find((opt) => {
+      const optText = (opt.textContent || opt.text || '').toLowerCase().trim();
+      return optText === norm || optText.startsWith(norm + ' ') || optText.startsWith(norm + '(');
+    });
   }
 
   if (matchingOpt) {

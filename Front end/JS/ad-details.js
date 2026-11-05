@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
             }
 
+            if (thumbsContainer) thumbsContainer.replaceChildren();
             if (images.length === 1) {
                 // Single image — hide nav elements
                 if (thumbsContainer) thumbsContainer.style.display = 'none';
@@ -302,6 +303,74 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nextBtn)         nextBtn.style.display = 'none';
         }
 
+        // ── Spec Formatters ────────────────────────────────────────
+        const COLOR_NAMES_MAP = {
+            'black': 'Qara',
+            'white': 'Ağ',
+            'gold': 'Qızılı',
+            'silver': 'Gümüşü',
+            'grey': 'Boz',
+            'gray': 'Boz',
+            'graphite': 'Qrafit',
+            'blue': 'Mavi',
+            'darkblue': 'Göy (Tünd Mavi)',
+            'green': 'Yaşıl',
+            'emerald': 'Zümrüd Yaşılı',
+            'yellow': 'Sarı',
+            'red': 'Qırmızı',
+            'pink': 'Çəhrayı',
+            'purple': 'Bənövşəyi',
+            'deeppurple': 'Dərin Bənövşəyi',
+            'orange': 'Narıncı',
+            'titanium-black': 'Titan Qara',
+            'titanium-natural': 'Titan Təbii',
+            'titanium-white': 'Titan Ağ',
+            'titanium-blue': 'Titan Göy',
+            'bronze': 'Bürünc',
+            'beige': 'Bej',
+            'brown': 'Qəhvəyi',
+            'transparent': 'Şəffaf',
+            'other': 'Digər'
+        };
+
+        const formatColorName = (val) => {
+            if (!val) return '';
+            const key = String(val).trim().toLowerCase();
+            return COLOR_NAMES_MAP[key] || String(val).trim();
+        };
+
+        const formatMemory = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '64-dan-az' || s === 'below-64' || s.toLowerCase() === '< 64' || s.toLowerCase() === '<64') return '< 64 GB';
+            if (s === '512-den-cox' || s === '512+' || s === '512-plus') return '512+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        };
+
+        const formatRam = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '16-dan-cox' || s === '16+' || s === '16-plus') return '16+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        };
+
+        const formatScreen = (val) => {
+            if (!val) return '';
+            const s = String(val).trim().replace(/"/g, '');
+            return `${s}"`;
+        };
+
+        const formatBattery = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (/^\d+$/.test(s)) return `${s} mAh`;
+            return s;
+        };
+
         // ── 6. Quick Spec Chips ────────────────────────────────────
         const quickSpecsEl = document.querySelector('.quick-specs');
         if (quickSpecsEl) {
@@ -315,16 +384,55 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chip.append(icon, document.createTextNode(' ' + text));
                 quickSpecsEl.appendChild(chip);
             };
-            if (ad.specs?.memory)         addChip('fas fa-memory', `${ad.specs.memory} GB Yaddaş`);
-            if (ad.specs?.ram)            addChip('fas fa-microchip', `${ad.specs.ram} GB RAM`);
+            if (ad.specs?.memory)         addChip('fas fa-memory', `${formatMemory(ad.specs.memory)} Yaddaş`);
+            if (ad.specs?.ram)            addChip('fas fa-microchip', `${formatRam(ad.specs.ram)} RAM`);
+            if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', formatScreen(ad.specs.screenSize));
+            if (ad.specs?.battery)        addChip('fas fa-battery-full', formatBattery(ad.specs.battery));
+            if (ad.specs?.color)          addChip('fas fa-palette', formatColorName(ad.specs.color));
             if (ad.specs?.material)       addChip('fas fa-shield-alt', String(ad.specs.material));
             if (ad.specs?.glassType)      addChip('fas fa-shield-virus', String(ad.specs.glassType));
             if (ad.specs?.connectionType) addChip('fas fa-headphones', String(ad.specs.connectionType));
+            if (ad.specs?.headphoneType)  addChip('fas fa-headset', String(ad.specs.headphoneType));
             if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
+            if (ad.specs?.portType)       addChip('fas fa-charging-station', String(ad.specs.portType));
             if (ad.specs?.cableType)      addChip('fas fa-plug', String(ad.specs.cableType));
-            if (ad.specs?.color)          addChip('fas fa-palette', String(ad.specs.color));
-            if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', `${ad.specs.screenSize}"`);
+            if (ad.specs?.cableLength)    addChip('fas fa-ruler-horizontal', String(ad.specs.cableLength));
             if (ad.condition)             addChip('fas fa-box-open', String(ad.condition));
+        }
+
+        // ── 6.5 Dynamic Feature Badges ─────────────────────────────
+        const featureBadgesEl = document.querySelector('.feature-badges');
+        if (featureBadgesEl) {
+            featureBadgesEl.replaceChildren();
+            const f = ad.specs?.features || {};
+            const addFeatureBadge = (iconClass, text) => {
+                const badge = document.createElement('span');
+                badge.className = 'feat-badge yes';
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                badge.append(icon, document.createTextNode(' ' + text));
+                featureBadgesEl.appendChild(badge);
+            };
+
+            if (f.nfc)             addFeatureBadge('fas fa-wifi', 'NFC');
+            if (f.fingerprint)     addFeatureBadge('fas fa-fingerprint', 'Barmaq izi');
+            if (f.waterproof)      addFeatureBadge('fas fa-tint', 'Suya davamlı');
+            if (f.expandable)      addFeatureBadge('fas fa-sd-card', 'Yaddaş kartı dəstəyi');
+            if (f.magsafe)         addFeatureBadge('fas fa-magnet', 'MagSafe');
+            if (f.anc)             addFeatureBadge('fas fa-volume-mute', 'ANC (Küyboğma)');
+            if (f.fastCharge)      addFeatureBadge('fas fa-bolt', 'Sürətli şarj');
+            if (f.wirelessCharge)  addFeatureBadge('fas fa-charging-station', 'Simsiz şarj');
+            if (f.microphone)      addFeatureBadge('fas fa-microphone', 'Mikrofon');
+            if (f.oleophobic)      addFeatureBadge('fas fa-shield-alt', 'Oleofobik örtük');
+            if (f.stylus)          addFeatureBadge('fas fa-pen-nib', 'Stylus / Qələm');
+            if (f.simCard)         addFeatureBadge('fas fa-sim-card', 'SIM kart');
+            if (f.delivery)        addFeatureBadge('fas fa-truck', 'Çatdırılma');
+
+            if (featureBadgesEl.children.length === 0) {
+                featureBadgesEl.style.display = 'none';
+            } else {
+                featureBadgesEl.style.display = 'flex';
+            }
         }
 
         // ── 7. Full Specs Grid ─────────────────────────────────────
@@ -349,10 +457,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ad.modelName) addSpecRow('Model', ad.modelName);
 
             // Electronics specs (only if exists)
-            if (ad.specs?.memory) addSpecRow('Yaddaş', `${ad.specs.memory} GB`);
-            if (ad.specs?.ram) addSpecRow('RAM', `${ad.specs.ram} GB`);
-            if (ad.specs?.screenSize) addSpecRow('Ekran ölçüsü', `${ad.specs.screenSize}"`);
-            if (ad.specs?.battery) addSpecRow('Batareya', String(ad.specs.battery));
+            if (ad.specs?.memory) addSpecRow('Yaddaş', formatMemory(ad.specs.memory));
+            if (ad.specs?.ram) addSpecRow('RAM', formatRam(ad.specs.ram));
+            if (ad.specs?.screenSize) addSpecRow('Ekran ölçüsü', formatScreen(ad.specs.screenSize));
+            if (ad.specs?.battery) addSpecRow('Batareya', formatBattery(ad.specs.battery));
 
             // Accessory specs (only if exists)
             if (ad.specs?.material) addSpecRow('Material', String(ad.specs.material));
@@ -365,7 +473,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (ad.specs?.cableLength) addSpecRow('Uzunluq', String(ad.specs.cableLength));
 
             // Color & Condition
-            if (ad.specs?.color) addSpecRow('Rəng', String(ad.specs.color));
+            if (ad.specs?.color) addSpecRow('Rəng', formatColorName(ad.specs.color));
             addSpecRow('Vəziyyəti', ad.condition || 'Yeni');
 
             // Features (boolean flags)
@@ -382,6 +490,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (f.stylus)          addSpecRow('Stylus / Qələm', '✓ Var');
             if (f.simCard)         addSpecRow('SIM kart (4G/5G)', '✓ Var');
             if (f.expandable)      addSpecRow('Əlavə yaddaş kartı', '✓ Var');
+            if (f.delivery)        addSpecRow('Çatdırılma', '✓ Var');
+
+            if (specsGrid.children.length === 0) {
+                specsGrid.innerHTML = '<div class="spec-row"><span class="spec-label">Məlumat</span><span class="spec-value">—</span></div>';
+            }
         }
 
         // ── 8. Location & Condition rows ───────────────────────────
