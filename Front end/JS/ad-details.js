@@ -307,6 +307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (quickSpecsEl) {
             quickSpecsEl.replaceChildren();
             const addChip = (iconClass, text) => {
+                if (!text || String(text).trim() === '') return;
                 const chip = document.createElement('span');
                 chip.className = 'spec-chip';
                 const icon = document.createElement('i');
@@ -314,11 +315,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chip.append(icon, document.createTextNode(' ' + text));
                 quickSpecsEl.appendChild(chip);
             };
-            if (ad.specs?.memory)     addChip('fas fa-memory', `${ad.specs.memory} Yaddaş`);
-            if (ad.specs?.ram)        addChip('fas fa-microchip', `${ad.specs.ram} RAM`);
-            if (ad.specs?.color)      addChip('fas fa-palette', String(ad.specs.color));
-            if (ad.specs?.screenSize) addChip('fas fa-expand-arrows-alt', `${ad.specs.screenSize}"`);
-            if (ad.condition)         addChip('fas fa-box-open', String(ad.condition));
+            if (ad.specs?.memory)         addChip('fas fa-memory', `${ad.specs.memory} GB Yaddaş`);
+            if (ad.specs?.ram)            addChip('fas fa-microchip', `${ad.specs.ram} GB RAM`);
+            if (ad.specs?.material)       addChip('fas fa-shield-alt', String(ad.specs.material));
+            if (ad.specs?.glassType)      addChip('fas fa-shield-virus', String(ad.specs.glassType));
+            if (ad.specs?.connectionType) addChip('fas fa-headphones', String(ad.specs.connectionType));
+            if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
+            if (ad.specs?.cableType)      addChip('fas fa-plug', String(ad.specs.cableType));
+            if (ad.specs?.color)          addChip('fas fa-palette', String(ad.specs.color));
+            if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', `${ad.specs.screenSize}"`);
+            if (ad.condition)             addChip('fas fa-box-open', String(ad.condition));
         }
 
         // ── 7. Full Specs Grid ─────────────────────────────────────
@@ -326,6 +332,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (specsGrid) {
             specsGrid.replaceChildren();
             const addSpecRow = (label, val) => {
+                if (!val || String(val).trim() === '' || String(val).trim() === '-') return;
                 const row = document.createElement('div');
                 row.className = 'spec-row';
                 const lblSpan = document.createElement('span');
@@ -333,20 +340,48 @@ document.addEventListener('DOMContentLoaded', async () => {
                 lblSpan.textContent = label;
                 const valSpan = document.createElement('span');
                 valSpan.className = 'spec-value';
-                valSpan.textContent = String(val || '-');
+                valSpan.textContent = String(val);
                 row.append(lblSpan, valSpan);
                 specsGrid.appendChild(row);
             };
-            addSpecRow('Marka', ad.brand);
-            addSpecRow('Model', ad.modelName);
-            addSpecRow('Yaddaş', ad.specs?.memory);
-            addSpecRow('RAM', ad.specs?.ram);
-            addSpecRow('Rəng', ad.specs?.color);
-            addSpecRow('Vəziyyəti', ad.condition);
+            if (ad.category) addSpecRow('Kateqoriya', ad.category);
+            if (ad.brand) addSpecRow('Marka', ad.brand);
+            if (ad.modelName) addSpecRow('Model', ad.modelName);
 
-            if (ad.specs?.features?.nfc)         addSpecRow('NFC', '✓ Var');
-            if (ad.specs?.features?.waterproof)  addSpecRow('Suya davamlılıq', '✓ Var');
-            if (ad.specs?.features?.fingerprint) addSpecRow('Barmaq izi', '✓ Var');
+            // Electronics specs (only if exists)
+            if (ad.specs?.memory) addSpecRow('Yaddaş', `${ad.specs.memory} GB`);
+            if (ad.specs?.ram) addSpecRow('RAM', `${ad.specs.ram} GB`);
+            if (ad.specs?.screenSize) addSpecRow('Ekran ölçüsü', `${ad.specs.screenSize}"`);
+            if (ad.specs?.battery) addSpecRow('Batareya', String(ad.specs.battery));
+
+            // Accessory specs (only if exists)
+            if (ad.specs?.material) addSpecRow('Material', String(ad.specs.material));
+            if (ad.specs?.glassType) addSpecRow('Qoruyucu növü', String(ad.specs.glassType));
+            if (ad.specs?.connectionType) addSpecRow('Qoşulma növü', String(ad.specs.connectionType));
+            if (ad.specs?.headphoneType) addSpecRow('Qulaqlıq forması', String(ad.specs.headphoneType));
+            if (ad.specs?.power) addSpecRow('Çıxış gücü', String(ad.specs.power));
+            if (ad.specs?.portType) addSpecRow('Port növü', String(ad.specs.portType));
+            if (ad.specs?.cableType) addSpecRow('Kabel növü', String(ad.specs.cableType));
+            if (ad.specs?.cableLength) addSpecRow('Uzunluq', String(ad.specs.cableLength));
+
+            // Color & Condition
+            if (ad.specs?.color) addSpecRow('Rəng', String(ad.specs.color));
+            addSpecRow('Vəziyyəti', ad.condition || 'Yeni');
+
+            // Features (boolean flags)
+            const f = ad.specs?.features || {};
+            if (f.nfc)             addSpecRow('NFC', '✓ Var');
+            if (f.waterproof)      addSpecRow('Suya davamlılıq', '✓ Var');
+            if (f.fingerprint)     addSpecRow('Barmaq izi', '✓ Var');
+            if (f.magsafe)         addSpecRow('MagSafe dəstəyi', '✓ Var');
+            if (f.anc)             addSpecRow('Aktiv Küyboğma (ANC)', '✓ Var');
+            if (f.microphone)      addSpecRow('Mikrofon', '✓ Var');
+            if (f.fastCharge)      addSpecRow('Sürətli şarj', '✓ Var');
+            if (f.wirelessCharge)  addSpecRow('Simsiz şarj', '✓ Var');
+            if (f.oleophobic)      addSpecRow('Oleofobik örtük', '✓ Var');
+            if (f.stylus)          addSpecRow('Stylus / Qələm', '✓ Var');
+            if (f.simCard)         addSpecRow('SIM kart (4G/5G)', '✓ Var');
+            if (f.expandable)      addSpecRow('Əlavə yaddaş kartı', '✓ Var');
         }
 
         // ── 8. Location & Condition rows ───────────────────────────

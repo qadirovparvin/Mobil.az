@@ -194,13 +194,13 @@
           </div>
 
           <!-- Section: Texniki xüsusiyyətlər -->
-          <div class="form-section">
+          <div class="form-section" id="specsSection">
             <div class="form-section-header">
               <span class="form-section-num">02</span>
               <h3 data-translate="elan-section2">Texniki Xüsusiyyətlər</h3>
             </div>
 
-            <!-- Qiymət + Vəziyyəti -->
+            <!-- Qiymət + Vəziyyəti (Həmişə göstərilir) -->
             <div class="form-row">
               <div class="form-group">
                 <label for="price" data-translate="elan-price">Qiymət (AZN) <span class="required">*</span></label>
@@ -224,81 +224,251 @@
               </div>
             </div>
 
-            <!-- Yaddaş + RAM -->
-            <div class="form-row">
-              <div class="form-group">
-                <label for="memory" data-translate="elan-memory">Yaddaş (GB)</label>
-                <div class="select-wrapper">
-                  <select id="memory" name="memory">
-                    <option value="">Seçin (boş burax)</option>
-                    <option value="16">16 GB</option>
-                    <option value="32">32 GB</option>
-                    <option value="64">64 GB</option>
-                    <option value="64-dan-az" data-translate-option="opt-64-az">64 GB-dan az</option>
-                    <option value="128">128 GB</option>
-                    <option value="256">256 GB</option>
-                    <option value="512">512 GB</option>
-                    <option value="1024">1 TB (1024 GB)</option>
-                    <option value="512-den-cox" data-translate-option="opt-512-cox">512 GB-dan daha çox</option>
-                  </select>
-                  <button type="button" class="clear-select" onclick="clearSelect('memory')" title="Təmizlə">✕</button>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+            <!-- 1. Telefon və Planşet üçün xüsusiyyətlər (Yaddaş, RAM, Ekran, Batareya) -->
+            <div id="groupPhoneTabletSpecs">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="memory" data-translate="elan-memory">Yaddaş (GB)</label>
+                  <div class="select-wrapper">
+                    <select id="memory" name="memory">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="16">16 GB</option>
+                      <option value="32">32 GB</option>
+                      <option value="64">64 GB</option>
+                      <option value="64-dan-az" data-translate-option="opt-64-az">64 GB-dan az</option>
+                      <option value="128">128 GB</option>
+                      <option value="256">256 GB</option>
+                      <option value="512">512 GB</option>
+                      <option value="1024">1 TB (1024 GB)</option>
+                      <option value="512-den-cox" data-translate-option="opt-512-cox">512 GB-dan daha çox</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('memory')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="ram" data-translate="elan-ram">RAM (GB)</label>
+                  <div class="select-wrapper">
+                    <select id="ram" name="ram">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="2">2 GB</option>
+                      <option value="3">3 GB</option>
+                      <option value="4">4 GB</option>
+                      <option value="6">6 GB</option>
+                      <option value="8">8 GB</option>
+                      <option value="12">12 GB</option>
+                      <option value="16">16 GB</option>
+                      <option value="16-dan-cox">16 GB-dan çox</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('ram')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label for="ram" data-translate="elan-ram">RAM (GB)</label>
-                <div class="select-wrapper">
-                  <select id="ram" name="ram">
-                    <option value="">Seçin (boş burax)</option>
-                    <option value="2">2 GB</option>
-                    <option value="3">3 GB</option>
-                    <option value="4">4 GB</option>
-                    <option value="6">6 GB</option>
-                    <option value="8">8 GB</option>
-                    <option value="12">12 GB</option>
-                    <option value="16">16 GB</option>
-                    <option value="16-dan-cox">16 GB-dan çox</option>
-                  </select>
-                  <button type="button" class="clear-select" onclick="clearSelect('ram')" title="Təmizlə">✕</button>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="screen_size" data-translate="elan-screen">Ekran ölçüsü</label>
+                  <div class="select-wrapper">
+                    <select id="screen_size" name="screen_size">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="<5.5">&lt;5.5"</option>
+                      <option value="5.5-6.1">5.5" – 6.1"</option>
+                      <option value="6.1-6.7">6.1" – 6.7"</option>
+                      <option value=">6.7">&gt;6.7"</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('screen_size')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="battery" data-translate="elan-battery">Batareya (mAh)</label>
+                  <div class="select-wrapper">
+                    <select id="battery" name="battery">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="<3000">&lt;3000</option>
+                      <option value="3000-4000">3000-4000</option>
+                      <option value="4000-5000">4000-5000</option>
+                      <option value="5000+">5000+ mAh</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('battery')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Ekran ölçüsü + Batareya -->
-            <div class="form-row">
-              <div class="form-group">
-                <label for="screen_size" data-translate="elan-screen">Ekran ölçüsü</label>
-                <div class="select-wrapper">
-                  <select id="screen_size" name="screen_size">
-                    <option value="">Seçin (boş burax)</option>
-                    <option value="<5.5">&lt;5.5"</option>
-                    <option value="5.5-6.1">5.5" – 6.1"</option>
-                    <option value="6.1-6.7">6.1" – 6.7"</option>
-                    <option value=">6.7">&gt;6.7"</option>
-                  </select>
-                  <button type="button" class="clear-select" onclick="clearSelect('screen_size')" title="Təmizlə">✕</button>
-                  <i class="fas fa-chevron-down select-arrow"></i>
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="battery" data-translate="elan-battery">Batareya (mAh)</label>
-                <div class="select-wrapper">
-                  <select id="battery" name="battery">
-                    <option value="">Seçin (boş burax)</option>
-                    <option value="<3000">&lt;3000</option>
-                    <option value="3000-4000">3000-4000</option>
-                    <option value="4000-5000">4000-5000</option>
-                    <option value="5000+">5000+ mAh</option>
-                  </select>
-                  <button type="button" class="clear-select" onclick="clearSelect('battery')" title="Təmizlə">✕</button>
-                  <i class="fas fa-chevron-down select-arrow"></i>
+            <!-- 2. Qoruyucu örtük (Keys) üçün spesifik sahələr -->
+            <div id="groupCaseSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="caseMaterial">Material</label>
+                  <div class="select-wrapper">
+                    <select id="caseMaterial" name="caseMaterial">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Silikon">Silikon (Soft Silicone)</option>
+                      <option value="Şəffaf plastik">Şəffaf plastik / Akril</option>
+                      <option value="Dəri">Dəri / Eko-dəri</option>
+                      <option value="Karbon">Karbon (Aramid / Carbon)</option>
+                      <option value="Zərbəyə davamlı">Zərbəyə davamlı (Armored)</option>
+                      <option value="Alcantara">Alcantara / Parça</option>
+                      <option value="Digər">Digər material</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('caseMaterial')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Rəng -->
-            <div class="form-row">
+            <!-- 3. Ekran qoruyucu (Şüşə) üçün spesifik sahələr -->
+            <div id="groupGlassSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="glassType">Qoruyucu növü</label>
+                  <div class="select-wrapper">
+                    <select id="glassType" name="glassType">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Tam örtən şüşə">Tam örtən şüşə (Tempered Glass 9D/11D)</option>
+                      <option value="Anti-Spy">Anti-Spy (Məxfilik / Gizlilik)</option>
+                      <option value="Keramika">Keramika (Sınmayan elastik)</option>
+                      <option value="Hidrogel">Hidrogel (Pərdə / Film)</option>
+                      <option value="Mat">Mat (Parıltı əleyhinə)</option>
+                      <option value="Şəffaf sadə">Şəffaf sadə</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('glassType')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Qulaqlıq üçün spesifik sahələr -->
+            <div id="groupHeadphoneSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="headphoneConnection">Qoşulma növü</label>
+                  <div class="select-wrapper">
+                    <select id="headphoneConnection" name="headphoneConnection">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Simsiz (Bluetooth / TWS)">Simsiz (Bluetooth / TWS)</option>
+                      <option value="Naqilli (3.5 mm)">Naqilli (3.5 mm jack)</option>
+                      <option value="Type-C / Lightning">Type-C / Lightning naqilli</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('headphoneConnection')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="headphoneType">Qulaqlıq forması</label>
+                  <div class="select-wrapper">
+                    <select id="headphoneType" name="headphoneType">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Qulaqdaxili (In-Ear)">Qulaqdaxili (In-Ear / Vakuum)</option>
+                      <option value="Qulaqüstü (Over-Ear)">Qulaqüstü (Over-Ear)</option>
+                      <option value="Açıq tipli (Earbuds)">Açıq tipli (Earbuds / AirPods stili)</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('headphoneType')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Şarj cihazı üçün spesifik sahələr -->
+            <div id="groupChargerSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="chargerPower">Çıxış gücü (Vt)</label>
+                  <div class="select-wrapper">
+                    <select id="chargerPower" name="chargerPower">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="20W">18W - 20W</option>
+                      <option value="25W-35W">25W - 35W</option>
+                      <option value="45W-65W">45W - 65W</option>
+                      <option value="67W-100W">67W - 100W</option>
+                      <option value="120W+">120W və daha yüksək</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('chargerPower')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="chargerPort">Port növü</label>
+                  <div class="select-wrapper">
+                    <select id="chargerPort" name="chargerPort">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Type-C">Type-C</option>
+                      <option value="USB-A">USB-A</option>
+                      <option value="İkili port (Type-C + USB-A)">İkili port (Type-C + USB-A)</option>
+                      <option value="Simsiz / MagSafe">Simsiz / MagSafe stansiyası</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('chargerPort')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Kabellər üçün spesifik sahələr -->
+            <div id="groupCableSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="cableType">Kabel növü</label>
+                  <div class="select-wrapper">
+                    <select id="cableType" name="cableType">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="Type-C to Type-C">Type-C to Type-C</option>
+                      <option value="Type-C to Lightning">Type-C to Lightning</option>
+                      <option value="USB to Type-C">USB to Type-C</option>
+                      <option value="USB to Lightning">USB to Lightning</option>
+                      <option value="Micro-USB">Micro-USB</option>
+                      <option value="3-ü 1-də Universal">3-ü 1-də Universal</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('cableType')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="cableLength">Uzunluq</label>
+                  <div class="select-wrapper">
+                    <select id="cableLength" name="cableLength">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="1 metr">1 metr</option>
+                      <option value="1.5 metr">1.5 metr</option>
+                      <option value="2 metr">2 metr</option>
+                      <option value="3 metr">3 metr</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('cableLength')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 7. Power Bank üçün spesifik sahələr -->
+            <div id="groupPowerbankSpecs" style="display:none;">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="powerbankCapacity">Tutumu (mAh)</label>
+                  <div class="select-wrapper">
+                    <select id="powerbankCapacity" name="powerbankCapacity">
+                      <option value="">Seçin (boş burax)</option>
+                      <option value="5000 mAh">5,000 mAh</option>
+                      <option value="10000 mAh">10,000 mAh</option>
+                      <option value="20000 mAh">20,000 mAh</option>
+                      <option value="30000 mAh">30,000 mAh</option>
+                      <option value="40000+ mAh">40,000+ mAh</option>
+                    </select>
+                    <button type="button" class="clear-select" onclick="clearSelect('powerbankCapacity')" title="Təmizlə">✕</button>
+                    <i class="fas fa-chevron-down select-arrow"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rəng (Aktiv olduqda göstərilir) -->
+            <div class="form-row" id="groupColorRow">
               <div class="form-group">
                 <label for="color" data-translate="elan-color">Rəng</label>
                 <div class="select-wrapper">
@@ -337,33 +507,82 @@
               </div>
             </div>
 
-            <!-- Toggle chips for boolean features -->
-            <div class="form-group">
+            <!-- Dinamik Xüsusiyyət Çipləri (Dynamic feature chips) -->
+            <div class="form-group" id="groupFeatureChips">
               <label data-translate="elan-features-label">Xüsusiyyətlər</label>
-              <div class="feature-chips">
-                <label class="chip-toggle">
+              <div class="feature-chips" id="dynamicFeatureChips">
+                <!-- Phone features -->
+                <label class="chip-toggle" data-profile="phone">
                   <input type="checkbox" name="nfc" id="nfc" value="1">
                   <span class="chip"><i class="fas fa-wifi"></i> <span data-translate="elan-chip-nfc">NFC</span></span>
                 </label>
-                <label class="chip-toggle">
+                <label class="chip-toggle" data-profile="phone">
                   <input type="checkbox" name="fingerprint" id="fingerprint" value="1">
-                  <span class="chip"><i class="fas fa-fingerprint"></i> <span
-                      data-translate="elan-chip-fingerprint">Barmaq izi</span></span>
+                  <span class="chip"><i class="fas fa-fingerprint"></i> <span data-translate="elan-chip-fingerprint">Barmaq izi</span></span>
                 </label>
-                <label class="chip-toggle">
+                <label class="chip-toggle" data-profile="phone,tablet,headphone">
                   <input type="checkbox" name="waterproof" id="waterproof" value="1">
-                  <span class="chip"><i class="fas fa-tint"></i> <span data-translate="elan-chip-waterproof">Suya
-                      davamlı</span></span>
+                  <span class="chip"><i class="fas fa-tint"></i> <span data-translate="elan-chip-waterproof">Suya davamlı</span></span>
                 </label>
-                <label class="chip-toggle">
+                <label class="chip-toggle" data-profile="phone">
                   <input type="checkbox" name="expandable" id="expandable" value="1">
-                  <span class="chip"><i class="fas fa-sd-card"></i> <span data-translate="elan-chip-expandable">Əlavə
-                      yaddaş</span></span>
+                  <span class="chip"><i class="fas fa-sd-card"></i> <span data-translate="elan-chip-expandable">Əlavə yaddaş</span></span>
                 </label>
-                <label class="chip-toggle">
+
+                <!-- Tablet features -->
+                <label class="chip-toggle" data-profile="tablet">
+                  <input type="checkbox" name="stylus" id="stylus" value="1">
+                  <span class="chip"><i class="fas fa-pen-nib"></i> <span>Stylus / Qələm</span></span>
+                </label>
+                <label class="chip-toggle" data-profile="tablet">
+                  <input type="checkbox" name="simCard" id="simCard" value="1">
+                  <span class="chip"><i class="fas fa-sim-card"></i> <span>SIM kart (4G/5G)</span></span>
+                </label>
+
+                <!-- Headphone features -->
+                <label class="chip-toggle" data-profile="headphone">
+                  <input type="checkbox" name="anc" id="anc" value="1">
+                  <span class="chip"><i class="fas fa-volume-mute"></i> <span>Aktiv Küyboğma (ANC)</span></span>
+                </label>
+                <label class="chip-toggle" data-profile="headphone">
+                  <input type="checkbox" name="microphone" id="microphone" value="1">
+                  <span class="chip"><i class="fas fa-microphone"></i> <span>Mikrofon</span></span>
+                </label>
+                <label class="chip-toggle" data-profile="headphone">
+                  <input type="checkbox" name="wirelessCharge" id="wirelessCharge" value="1">
+                  <span class="chip"><i class="fas fa-bolt"></i> <span>Simsiz şarj qutusu</span></span>
+                </label>
+
+                <!-- Case features -->
+                <label class="chip-toggle" data-profile="case">
+                  <input type="checkbox" name="magsafe" id="magsafe" value="1">
+                  <span class="chip"><i class="fas fa-magnet"></i> <span>MagSafe dəstəyi</span></span>
+                </label>
+                <label class="chip-toggle" data-profile="case,glass">
+                  <input type="checkbox" name="caseShockproof" id="caseShockproof" value="1">
+                  <span class="chip"><i class="fas fa-shield-alt"></i> <span>Zərbəyə davamlı</span></span>
+                </label>
+
+                <!-- Glass features -->
+                <label class="chip-toggle" data-profile="glass">
+                  <input type="checkbox" name="oleophobic" id="oleophobic" value="1">
+                  <span class="chip"><i class="fas fa-hand-sparkles"></i> <span>Oleofobik örtük</span></span>
+                </label>
+
+                <!-- Charger, Cable, Powerbank features -->
+                <label class="chip-toggle" data-profile="charger,cable,powerbank">
+                  <input type="checkbox" name="fastCharge" id="fastCharge" value="1">
+                  <span class="chip"><i class="fas fa-bolt"></i> <span>Sürətli şarj</span></span>
+                </label>
+                <label class="chip-toggle" data-profile="powerbank">
+                  <input type="checkbox" name="pbWireless" id="pbWireless" value="1">
+                  <span class="chip"><i class="fas fa-wifi"></i> <span>Simsiz şarj (Qi)</span></span>
+                </label>
+
+                <!-- Universal delivery feature (all profiles) -->
+                <label class="chip-toggle" data-profile="all">
                   <input type="checkbox" name="delivery" id="delivery" value="1">
-                  <span class="chip"><i class="fas fa-truck"></i> <span
-                      data-translate="elan-chip-delivery">Çatdırılma</span></span>
+                  <span class="chip"><i class="fas fa-truck"></i> <span data-translate="elan-chip-delivery">Çatdırılma</span></span>
                 </label>
               </div>
             </div>

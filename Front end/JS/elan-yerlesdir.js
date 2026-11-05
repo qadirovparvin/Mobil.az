@@ -433,12 +433,147 @@ document.addEventListener('langchange', (e) => {
   }
 });
 
+/* =========================================================
+   DYNAMIC SPECS ENGINE BY CATEGORY & BRAND
+   ========================================================= */
+function getSpecProfile(category, brand) {
+  const cat = String(category || '').trim().toLowerCase();
+  const br = String(brand || '').trim().toLowerCase();
+
+  if (cat === 'telefon') return 'phone';
+  if (cat === 'planşet' || cat === 'planset') return 'tablet';
+  if (cat === 'qulaqlıq' || cat === 'qulaqliq' || (cat === 'aksesuar' && br.includes('qulaqlıq'))) return 'headphone';
+
+  if (cat === 'aksesuar') {
+    if (br.includes('örtük') || br.includes('ortuk') || br.includes('keys') || br.includes('case')) return 'case';
+    if (br.includes('ekran qoruyucu') || br.includes('şüşə') || br.includes('suse') || br.includes('glass')) return 'glass';
+    if (br.includes('şarj') || br.includes('sarj') || br.includes('adapter') || br.includes('charger')) return 'charger';
+    if (br.includes('kabel')) return 'cable';
+    if (br.includes('power bank') || br.includes('powerbank')) return 'powerbank';
+    return 'accessory_other';
+  }
+
+  return 'phone';
+}
+window.getSpecProfile = getSpecProfile;
+
+function updateDynamicSpecsUI() {
+  const catVal = categorySelect ? categorySelect.value : '';
+  const brandVal = brandSelect ? brandSelect.value : '';
+  const profile = getSpecProfile(catVal, brandVal);
+
+  const phoneTabletEl = document.getElementById('groupPhoneTabletSpecs');
+  const caseEl = document.getElementById('groupCaseSpecs');
+  const glassEl = document.getElementById('groupGlassSpecs');
+  const headphoneEl = document.getElementById('groupHeadphoneSpecs');
+  const chargerEl = document.getElementById('groupChargerSpecs');
+  const cableEl = document.getElementById('groupCableSpecs');
+  const powerbankEl = document.getElementById('groupPowerbankSpecs');
+  const colorRowEl = document.getElementById('groupColorRow');
+
+  if (phoneTabletEl) {
+    const isVisible = (profile === 'phone' || profile === 'tablet');
+    phoneTabletEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const memoryEl = document.getElementById('memory');
+      const ramEl = document.getElementById('ram');
+      const screenEl = document.getElementById('screen_size');
+      const batteryEl = document.getElementById('battery');
+      if (memoryEl) { memoryEl.value = ''; updateClearButtonState(memoryEl); }
+      if (ramEl) { ramEl.value = ''; updateClearButtonState(ramEl); }
+      if (screenEl) { screenEl.value = ''; updateClearButtonState(screenEl); }
+      if (batteryEl) { batteryEl.value = ''; updateClearButtonState(batteryEl); }
+    }
+  }
+
+  if (caseEl) {
+    const isVisible = (profile === 'case');
+    caseEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const matEl = document.getElementById('caseMaterial');
+      if (matEl) { matEl.value = ''; updateClearButtonState(matEl); }
+    }
+  }
+
+  if (glassEl) {
+    const isVisible = (profile === 'glass');
+    glassEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const glassTypeEl = document.getElementById('glassType');
+      if (glassTypeEl) { glassTypeEl.value = ''; updateClearButtonState(glassTypeEl); }
+    }
+  }
+
+  if (headphoneEl) {
+    const isVisible = (profile === 'headphone');
+    headphoneEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const connEl = document.getElementById('headphoneConnection');
+      const typeEl = document.getElementById('headphoneType');
+      if (connEl) { connEl.value = ''; updateClearButtonState(connEl); }
+      if (typeEl) { typeEl.value = ''; updateClearButtonState(typeEl); }
+    }
+  }
+
+  if (chargerEl) {
+    const isVisible = (profile === 'charger');
+    chargerEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const pwrEl = document.getElementById('chargerPower');
+      const portEl = document.getElementById('chargerPort');
+      if (pwrEl) { pwrEl.value = ''; updateClearButtonState(pwrEl); }
+      if (portEl) { portEl.value = ''; updateClearButtonState(portEl); }
+    }
+  }
+
+  if (cableEl) {
+    const isVisible = (profile === 'cable');
+    cableEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const ctypeEl = document.getElementById('cableType');
+      const clenEl = document.getElementById('cableLength');
+      if (ctypeEl) { ctypeEl.value = ''; updateClearButtonState(ctypeEl); }
+      if (clenEl) { clenEl.value = ''; updateClearButtonState(clenEl); }
+    }
+  }
+
+  if (powerbankEl) {
+    const isVisible = (profile === 'powerbank');
+    powerbankEl.style.display = isVisible ? 'block' : 'none';
+    if (!isVisible) {
+      const pbCapEl = document.getElementById('powerbankCapacity');
+      if (pbCapEl) { pbCapEl.value = ''; updateClearButtonState(pbCapEl); }
+    }
+  }
+
+  if (colorRowEl) {
+    colorRowEl.style.display = (profile === 'glass') ? 'none' : 'block';
+  }
+
+  // Toggle feature chips
+  const chips = document.querySelectorAll('#dynamicFeatureChips .chip-toggle');
+  chips.forEach(chip => {
+    const rawProfiles = chip.getAttribute('data-profile') || 'all';
+    const allowed = rawProfiles.split(',').map(s => s.trim().toLowerCase());
+    if (allowed.includes('all') || allowed.includes(profile)) {
+      chip.style.display = 'inline-flex';
+    } else {
+      chip.style.display = 'none';
+      const chk = chip.querySelector('input[type="checkbox"]');
+      if (chk) chk.checked = false;
+    }
+  });
+}
+window.updateDynamicSpecsUI = updateDynamicSpecsUI;
+
 categorySelect.addEventListener('change', () => {
   populateBrands(categorySelect.value);
+  updateDynamicSpecsUI();
 });
 
 brandSelect.addEventListener('change', () => {
   populateModels(categorySelect.value, brandSelect.value);
+  updateDynamicSpecsUI();
 });
 
 /* =========================================================
@@ -854,6 +989,8 @@ function populateFormWithAd(ad) {
 
   // 9. Specs
   if (ad.specs) {
+    if (typeof updateDynamicSpecsUI === 'function') updateDynamicSpecsUI();
+
     const memoryEl = document.getElementById('memory');
     if (memoryEl && ad.specs.memory) setSelectValueWithFallback(memoryEl, ad.specs.memory);
 
@@ -869,18 +1006,46 @@ function populateFormWithAd(ad) {
     const batteryEl = document.getElementById('battery');
     if (batteryEl && ad.specs.battery) setSelectValueWithFallback(batteryEl, ad.specs.battery);
 
+    // Accessory specific fields
+    const caseMaterialEl = document.getElementById('caseMaterial');
+    if (caseMaterialEl && ad.specs.material) setSelectValueWithFallback(caseMaterialEl, ad.specs.material);
+
+    const glassTypeEl = document.getElementById('glassType');
+    if (glassTypeEl && ad.specs.glassType) setSelectValueWithFallback(glassTypeEl, ad.specs.glassType);
+
+    const headphoneConnEl = document.getElementById('headphoneConnection');
+    if (headphoneConnEl && ad.specs.connectionType) setSelectValueWithFallback(headphoneConnEl, ad.specs.connectionType);
+
+    const headphoneTypeEl = document.getElementById('headphoneType');
+    if (headphoneTypeEl && ad.specs.headphoneType) setSelectValueWithFallback(headphoneTypeEl, ad.specs.headphoneType);
+
+    const chargerPowerEl = document.getElementById('chargerPower');
+    if (chargerPowerEl && ad.specs.power) setSelectValueWithFallback(chargerPowerEl, ad.specs.power);
+
+    const chargerPortEl = document.getElementById('chargerPort');
+    if (chargerPortEl && ad.specs.portType) setSelectValueWithFallback(chargerPortEl, ad.specs.portType);
+
+    const cableTypeEl = document.getElementById('cableType');
+    if (cableTypeEl && ad.specs.cableType) setSelectValueWithFallback(cableTypeEl, ad.specs.cableType);
+
+    const cableLengthEl = document.getElementById('cableLength');
+    if (cableLengthEl && ad.specs.cableLength) setSelectValueWithFallback(cableLengthEl, ad.specs.cableLength);
+
+    const pbCapEl = document.getElementById('powerbankCapacity');
+    if (pbCapEl && ad.specs.battery) setSelectValueWithFallback(pbCapEl, ad.specs.battery);
+
     if (ad.specs.features) {
       const f = ad.specs.features;
-      const nfcEl = document.getElementById('nfc');
-      if (nfcEl) nfcEl.checked = !!f.nfc;
-      const fingerprintEl = document.getElementById('fingerprint');
-      if (fingerprintEl) fingerprintEl.checked = !!f.fingerprint;
-      const waterproofEl = document.getElementById('waterproof');
-      if (waterproofEl) waterproofEl.checked = !!f.waterproof;
-      const expandableEl = document.getElementById('expandable');
-      if (expandableEl) expandableEl.checked = !!f.expandable;
-      const deliveryEl = document.getElementById('delivery');
-      if (deliveryEl) deliveryEl.checked = !!f.delivery;
+      ['nfc', 'fingerprint', 'waterproof', 'expandable', 'delivery', 'magsafe', 'microphone', 'anc', 'fastCharge', 'wirelessCharge', 'oleophobic', 'stylus', 'simCard'].forEach(featKey => {
+        const el = document.getElementById(featKey);
+        if (el) el.checked = !!f[featKey];
+      });
+      if (document.getElementById('caseShockproof')) {
+        document.getElementById('caseShockproof').checked = !!(f.waterproof || f.shockproof);
+      }
+      if (document.getElementById('pbWireless')) {
+        document.getElementById('pbWireless').checked = !!f.wirelessCharge;
+      }
     }
   }
 
@@ -1182,6 +1347,7 @@ if (typeof document !== 'undefined') {
           setPhoneValue('phone', 'adPhonePrefix', curUser.phone);
         }
       }
+      if (typeof updateDynamicSpecsUI === 'function') updateDynamicSpecsUI();
       await initStoreOption();
       initEditMode();
     });
@@ -1321,18 +1487,38 @@ if (adFormEl) {
       }
 
       const conditionVal = getConditionValue();
+      const catVal = categorySelect ? categorySelect.value : '';
+      const brandVal = brandSelect ? brandSelect.value : '';
+      const profile = getSpecProfile(catVal, brandVal);
+
       const specs = {
-        memory:     getSpecValue('memory', 'memory_custom'),
-        ram:        getSpecValue('ram', 'ram_custom'),
-        color:      getSpecValue('color', 'color_custom'),
-        screenSize: getSpecValue('screen_size', 'screen_size_custom'),
-        battery:    getSpecValue('battery', 'battery_custom'),
+        color:          (profile !== 'glass') ? getSpecValue('color', 'color_custom') : null,
+        memory:         (profile === 'phone' || profile === 'tablet') ? getSpecValue('memory', 'memory_custom') : null,
+        ram:            (profile === 'phone' || profile === 'tablet') ? getSpecValue('ram', 'ram_custom') : null,
+        screenSize:     (profile === 'phone' || profile === 'tablet') ? getSpecValue('screen_size', 'screen_size_custom') : null,
+        battery:        (profile === 'powerbank') ? (document.getElementById('powerbankCapacity')?.value || null) : ((profile === 'phone' || profile === 'tablet') ? getSpecValue('battery', 'battery_custom') : null),
+        material:       (profile === 'case') ? (document.getElementById('caseMaterial')?.value || null) : null,
+        glassType:      (profile === 'glass') ? (document.getElementById('glassType')?.value || null) : null,
+        connectionType: (profile === 'headphone') ? (document.getElementById('headphoneConnection')?.value || null) : null,
+        headphoneType:  (profile === 'headphone') ? (document.getElementById('headphoneType')?.value || null) : null,
+        power:          (profile === 'charger') ? (document.getElementById('chargerPower')?.value || null) : null,
+        portType:       (profile === 'charger') ? (document.getElementById('chargerPort')?.value || null) : null,
+        cableType:      (profile === 'cable') ? (document.getElementById('cableType')?.value || null) : null,
+        cableLength:    (profile === 'cable') ? (document.getElementById('cableLength')?.value || null) : null,
         features: {
-          nfc:         document.getElementById('nfc')?.checked         || false,
-          fingerprint: document.getElementById('fingerprint')?.checked || false,
-          waterproof:  document.getElementById('waterproof')?.checked  || false,
-          expandable:  document.getElementById('expandable')?.checked  || false,
-          delivery:    document.getElementById('delivery')?.checked    || false,
+          nfc:            Boolean(document.getElementById('nfc')?.checked),
+          fingerprint:    Boolean(document.getElementById('fingerprint')?.checked),
+          waterproof:     Boolean(document.getElementById('waterproof')?.checked || document.getElementById('caseShockproof')?.checked),
+          expandable:     Boolean(document.getElementById('expandable')?.checked),
+          delivery:       Boolean(document.getElementById('delivery')?.checked),
+          magsafe:        Boolean(document.getElementById('magsafe')?.checked),
+          microphone:     Boolean(document.getElementById('microphone')?.checked),
+          anc:            Boolean(document.getElementById('anc')?.checked),
+          fastCharge:     Boolean(document.getElementById('fastCharge')?.checked),
+          wirelessCharge: Boolean(document.getElementById('wirelessCharge')?.checked || document.getElementById('pbWireless')?.checked),
+          oleophobic:     Boolean(document.getElementById('oleophobic')?.checked),
+          stylus:         Boolean(document.getElementById('stylus')?.checked),
+          simCard:        Boolean(document.getElementById('simCard')?.checked)
         }
       };
 

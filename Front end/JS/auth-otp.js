@@ -485,7 +485,7 @@ function switchLoginMethod(method) {
 }
 
 /* ── Country Phone Configurations & Professional Input Engine ── */
-const COUNTRY_PHONE_CONFIGS = {
+var COUNTRY_PHONE_CONFIGS = window.COUNTRY_PHONE_CONFIGS || {
     '+994': {
         name: 'Azərbaycan',
         code: '+994',

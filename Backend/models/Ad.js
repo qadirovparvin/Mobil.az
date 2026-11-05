@@ -60,19 +60,35 @@ const adSchema = new mongoose.Schema({
     promotionStartedAt: { type: Date, default: null },
     promotionExpiresAt: { type: Date, default: null },
 
-    // ── Specs (Electronics) ───────────────────────────────
+    // ── Specs (Electronics & Accessories) ─────────────────
     specs: {
-        memory:     { type: String, default: null, required: false },
-        ram:        { type: String, default: null, required: false },
-        screenSize: { type: String, default: null, required: false },
-        battery:    { type: String, default: null, required: false },
-        color:      { type: String, default: null, required: false },
+        memory:         { type: String, default: null, required: false },
+        ram:            { type: String, default: null, required: false },
+        screenSize:     { type: String, default: null, required: false },
+        battery:        { type: String, default: null, required: false },
+        color:          { type: String, default: null, required: false },
+        material:       { type: String, default: null, required: false },
+        connectionType: { type: String, default: null, required: false },
+        headphoneType:  { type: String, default: null, required: false },
+        power:          { type: String, default: null, required: false },
+        portType:       { type: String, default: null, required: false },
+        cableType:      { type: String, default: null, required: false },
+        cableLength:    { type: String, default: null, required: false },
+        glassType:      { type: String, default: null, required: false },
         features: {
-            nfc:         { type: Boolean, default: false },
-            waterproof:  { type: Boolean, default: false },
-            fingerprint: { type: Boolean, default: false },
-            expandable:  { type: Boolean, default: false },
-            delivery:    { type: Boolean, default: false }
+            nfc:            { type: Boolean, default: false },
+            waterproof:     { type: Boolean, default: false },
+            fingerprint:    { type: Boolean, default: false },
+            expandable:     { type: Boolean, default: false },
+            delivery:       { type: Boolean, default: false },
+            magsafe:        { type: Boolean, default: false },
+            microphone:     { type: Boolean, default: false },
+            anc:            { type: Boolean, default: false },
+            fastCharge:     { type: Boolean, default: false },
+            wirelessCharge: { type: Boolean, default: false },
+            oleophobic:     { type: Boolean, default: false },
+            stylus:         { type: Boolean, default: false },
+            simCard:        { type: Boolean, default: false }
         }
     },
 

@@ -58,8 +58,14 @@ const sanitizeUrlArray = (values, { maxItems = 10 } = {}) => {
     return sanitized;
 };
 
-const ALLOWED_SPEC_FIELDS = ['memory', 'ram', 'screenSize', 'battery', 'color'];
-const ALLOWED_FEATURE_FIELDS = ['nfc', 'waterproof', 'fingerprint', 'expandable', 'delivery'];
+const ALLOWED_SPEC_FIELDS = [
+    'memory', 'ram', 'screenSize', 'battery', 'color',
+    'material', 'connectionType', 'headphoneType', 'power', 'portType', 'cableType', 'cableLength', 'glassType'
+];
+const ALLOWED_FEATURE_FIELDS = [
+    'nfc', 'waterproof', 'fingerprint', 'expandable', 'delivery',
+    'magsafe', 'microphone', 'anc', 'fastCharge', 'wirelessCharge', 'oleophobic', 'stylus', 'simCard'
+];
 
 const ALLOWED_SPEC_VALUES = {
     screenSize: ['<5.5', '5.5-6.1', '6.1-6.7', '>6.7', 'other'],
