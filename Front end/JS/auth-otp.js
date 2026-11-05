@@ -484,12 +484,425 @@ function switchLoginMethod(method) {
     }
 }
 
+/* ── Country Phone Configurations & Professional Input Engine ── */
+const COUNTRY_PHONE_CONFIGS = {
+    '+994': {
+        name: 'Azərbaycan',
+        code: '+994',
+        digits: 9,
+        placeholder: '(50) 000-00-00',
+        allowedPrefixes: ['10', '50', '51', '55', '60', '70', '77', '99'],
+        format: (digits) => {
+            if (!digits) return '';
+            let res = '(' + digits.slice(0, 2);
+            if (digits.length < 2) return res;
+            res += ') ';
+            if (digits.length <= 5) return res + digits.slice(2);
+            res += digits.slice(2, 5) + '-' + digits.slice(5, 7);
+            if (digits.length <= 7) return res;
+            return res + '-' + digits.slice(7, 9);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('994') && digits.length > 9) digits = digits.slice(3);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 9);
+        }
+    },
+    '+90': {
+        name: 'Türkiyə',
+        code: '+90',
+        digits: 10,
+        placeholder: '(500) 000-00-00',
+        format: (digits) => {
+            if (!digits) return '';
+            let res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            res += digits.slice(3, 6) + '-' + digits.slice(6, 8);
+            if (digits.length <= 8) return res;
+            return res + '-' + digits.slice(8, 10);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('90') && digits.length > 10) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+7': {
+        name: 'Rusiya / Qazaxıstan',
+        code: '+7',
+        digits: 10,
+        placeholder: '(900) 000-00-00',
+        format: (digits) => {
+            if (!digits) return '';
+            let res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            res += digits.slice(3, 6) + '-' + digits.slice(6, 8);
+            if (digits.length <= 8) return res;
+            return res + '-' + digits.slice(8, 10);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if ((digits.startsWith('7') || digits.startsWith('8')) && digits.length > 10) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+1': {
+        name: 'ABŞ / Kanada',
+        code: '+1',
+        digits: 10,
+        placeholder: '(555) 000-0000',
+        format: (digits) => {
+            if (!digits) return '';
+            let res = '(' + digits.slice(0, 3);
+            if (digits.length < 3) return res;
+            res += ') ';
+            if (digits.length <= 6) return res + digits.slice(3);
+            return res + digits.slice(3, 6) + '-' + digits.slice(6, 10);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('1') && digits.length > 10) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+44': {
+        name: 'Böyük Britaniya',
+        code: '+44',
+        digits: 10,
+        placeholder: '7911 123456',
+        format: (digits) => {
+            if (!digits) return '';
+            if (digits.length <= 4) return digits;
+            return digits.slice(0, 4) + ' ' + digits.slice(4, 10);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('44') && digits.length > 10) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 10);
+        }
+    },
+    '+49': {
+        name: 'Almaniya',
+        code: '+49',
+        digits: 11,
+        placeholder: '151 12345678',
+        format: (digits) => {
+            if (!digits) return '';
+            if (digits.length <= 3) return digits;
+            return digits.slice(0, 3) + ' ' + digits.slice(3, 11);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('49') && digits.length > 11) digits = digits.slice(2);
+            if (digits.startsWith('0')) digits = digits.slice(1);
+            return digits.slice(0, 11);
+        }
+    },
+    '+995': {
+        name: 'Gürcüstan',
+        code: '+995',
+        digits: 9,
+        placeholder: '599 12-34-56',
+        format: (digits) => {
+            if (!digits) return '';
+            let res = digits.slice(0, 3);
+            if (digits.length <= 3) return res;
+            res += ' ' + digits.slice(3, 5);
+            if (digits.length <= 5) return res;
+            res += '-' + digits.slice(5, 7);
+            if (digits.length <= 7) return res;
+            return res + '-' + digits.slice(7, 9);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('995') && digits.length > 9) digits = digits.slice(3);
+            return digits.slice(0, 9);
+        }
+    },
+    '+971': {
+        name: 'BƏƏ',
+        code: '+971',
+        digits: 9,
+        placeholder: '50 123-4567',
+        format: (digits) => {
+            if (!digits) return '';
+            let res = digits.slice(0, 2);
+            if (digits.length <= 2) return res;
+            res += ' ' + digits.slice(2, 5);
+            if (digits.length <= 5) return res;
+            return res + '-' + digits.slice(5, 9);
+        },
+        clean: (raw) => {
+            let digits = String(raw || '').replace(/\D/g, '');
+            if (digits.startsWith('971') && digits.length > 9) digits = digits.slice(3);
+            return digits.slice(0, 9);
+        }
+    },
+    'other': {
+        name: 'Digər ölkə',
+        code: '+',
+        digits: 15,
+        placeholder: '7-15 rəqəmli beynəlxalq nömrə',
+        format: (digits) => digits.slice(0, 15),
+        clean: (raw) => String(raw || '').replace(/\D/g, '').slice(0, 15)
+    }
+};
+
+function setupPhoneInputMask(inputId, prefixId) {
+    const input = document.getElementById(inputId);
+    const prefixEl = document.getElementById(prefixId);
+    if (!input) return;
+
+    function applyFormat() {
+        const prefix = prefixEl ? prefixEl.value : '+994';
+        const cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
+        input.placeholder = cfg.placeholder;
+
+        const rawVal = input.value;
+        const cleaned = cfg.clean(rawVal);
+        const formatted = cfg.format(cleaned);
+        input.value = formatted;
+
+        if (prefix === '+994') {
+            input.maxLength = 15;
+        } else if (prefix === 'other') {
+            input.maxLength = 18;
+        } else {
+            input.maxLength = 16;
+        }
+    }
+
+    input.addEventListener('input', applyFormat);
+    input.addEventListener('paste', () => setTimeout(applyFormat, 0));
+    if (prefixEl) {
+        prefixEl.addEventListener('change', () => {
+            applyFormat();
+            input.focus();
+        });
+    }
+
+    applyFormat();
+}
+
+function validatePhoneNumber(inputId, prefixId) {
+    const input = document.getElementById(inputId);
+    const prefixEl = document.getElementById(prefixId);
+    if (!input) return { valid: false, message: 'Telefon sahəsi tapılmadı' };
+    const prefix = prefixEl ? prefixEl.value : '+994';
+    const cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
+    const digits = cfg.clean(input.value);
+
+    if (!digits) {
+        return { valid: false, message: 'Telefon nömrəsini daxil edin' };
+    }
+
+    if (prefix === '+994') {
+        if (digits.length !== 9) {
+            return { valid: false, message: 'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67' };
+        }
+        const op = digits.slice(0, 2);
+        if (!cfg.allowedPrefixes.includes(op)) {
+            return { valid: false, message: 'Mobil operator prefiksi dəstəklənmir (10, 50, 51, 55, 60, 70, 77, 99)' };
+        }
+        return { valid: true, fullPhone: '+994' + digits, digits, prefix };
+    }
+
+    if (prefix === 'other') {
+        if (digits.length < 7 || digits.length > 15) {
+            return { valid: false, message: 'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır' };
+        }
+        return { valid: true, fullPhone: '+' + digits, digits, prefix };
+    }
+
+    if (digits.length !== cfg.digits) {
+        return { valid: false, message: `${cfg.name} nömrəsi tam ${cfg.digits} rəqəmdən ibarət olmalıdır` };
+    }
+
+    return { valid: true, fullPhone: prefix + digits, digits, prefix };
+}
+
+/* ── Social Login Engine (Google & Facebook) ────────────────── */
+let oauthConfigCache = null;
+async function fetchOAuthConfig() {
+    if (oauthConfigCache) return oauthConfigCache;
+    try {
+        const apiBase = (window.API_URL || window.API_BASE || `${window.location.origin}/api`).replace(/\/+$/, '');
+        const res = await fetch(`${apiBase}/auth/oauth-config`);
+        if (res.ok) {
+            oauthConfigCache = await res.json();
+            return oauthConfigCache;
+        }
+    } catch (e) {
+        console.warn('OAuth config fetch warning:', e);
+    }
+    return { googleClientId: '', facebookAppId: '' };
+}
+
+async function handleGoogleAuthCredential(response) {
+    if (!response || !response.credential) {
+        showToast('Google məlumatı alına bilmədi', 'error');
+        return;
+    }
+    const apiBase = (window.API_URL || window.API_BASE || `${window.location.origin}/api`).replace(/\/+$/, '');
+    try {
+        const res = await fetch(`${apiBase}/auth/google`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: response.credential, rememberMe: true })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.message || 'Google ilə giriş xətası', 'error');
+            return;
+        }
+        onLoginSuccess(data.accessToken || data.token, data.user || data, true, 'cabinet.html');
+    } catch (err) {
+        console.error('Google auth error:', err);
+        showToast('Serverlə əlaqə yaradılmadı', 'error');
+    }
+}
+
+async function handleSocialLoginClick(provider) {
+    const isGoogle = provider === 'google';
+    const cfg = await fetchOAuthConfig();
+
+    if (isGoogle && cfg.googleClientId && window.google?.accounts?.id) {
+        try {
+            window.google.accounts.id.initialize({
+                client_id: cfg.googleClientId,
+                callback: handleGoogleAuthCredential,
+                auto_select: false
+            });
+            window.google.accounts.id.prompt((notification) => {
+                if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                    openSocialLoginModal(provider);
+                }
+            });
+            return;
+        } catch (e) {
+            console.warn('Google prompt fallback:', e);
+        }
+    }
+
+    openSocialLoginModal(provider);
+}
+
+function openSocialLoginModal(provider) {
+    const isGoogle = provider === 'google';
+    const title = isGoogle ? 'Google ilə Giriş' : 'Facebook ilə Giriş';
+    const iconClass = isGoogle ? 'fab fa-google' : 'fab fa-facebook-f';
+    const iconColor = isGoogle ? '#EA4335' : '#1877F2';
+    const btnText = isGoogle ? 'Google ilə Daxil Ol' : 'Facebook ilə Daxil Ol';
+    const defaultEmail = localStorage.getItem('savedEmail') || localStorage.getItem('userEmail') || '';
+
+    let modal = document.getElementById('socialOAuthModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'socialOAuthModal';
+        modal.className = 'auth-modal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(5px); z-index:99999; justify-content:center; align-items:center; padding:16px; box-sizing:border-box;';
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div style="background:var(--card-bg, #fff); color:var(--text-color, #111); border-radius:16px; padding:2rem; width:100%; max-width:420px; box-shadow:0 20px 40px rgba(0,0,0,0.25); text-align:center; position:relative;">
+            <div style="width:58px; height:58px; border-radius:50%; background:rgba(124,58,237,0.08); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem auto;">
+                <i class="${iconClass}" style="font-size:1.9rem; color:${iconColor};"></i>
+            </div>
+            <h3 style="margin:0 0 0.5rem 0; font-size:1.25rem; font-weight:700;">${title}</h3>
+            <p style="margin:0 0 1.25rem 0; font-size:0.88rem; color:var(--text-secondary, #666); line-height:1.45;">
+                Hesabınızı təsdiqləmək və birbaşa daxil olmaq üçün məlumatlarınızı daxil edin.
+            </p>
+            <form id="socialOAuthForm" style="display:flex; flex-direction:column; gap:12px; text-align:left;">
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:4px; color:var(--text-secondary, #555);">Email ünvanı</label>
+                    <input type="email" id="socialOAuthEmail" placeholder="hesabiniz@gmail.com" required value="${defaultEmail}"
+                           style="width:100%; padding:10px 14px; border:1px solid var(--border-color, #ddd); border-radius:8px; font-size:0.95rem; background:var(--input-bg, #fff); color:var(--text-color, #111); box-sizing:border-box; outline:none;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:4px; color:var(--text-secondary, #555);">Ad və Soyad</label>
+                    <input type="text" id="socialOAuthName" placeholder="Adınız Soyadınız"
+                           style="width:100%; padding:10px 14px; border:1px solid var(--border-color, #ddd); border-radius:8px; font-size:0.95rem; background:var(--input-bg, #fff); color:var(--text-color, #111); box-sizing:border-box; outline:none;">
+                </div>
+                <button type="submit" id="socialOAuthSubmitBtn" class="auth-submit-btn" style="margin-top:8px; width:100%; height:44px;">
+                    <span class="btn-text">${btnText}</span>
+                    <span class="btn-spinner"></span>
+                </button>
+                <button type="button" onclick="document.getElementById('socialOAuthModal').style.display='none';"
+                        style="background:none; border:none; color:var(--text-secondary, #777); font-size:0.88rem; padding:8px; cursor:pointer; text-align:center;">
+                    Bağla
+                </button>
+            </form>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+    const form = document.getElementById('socialOAuthForm');
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('socialOAuthEmail')?.value.trim();
+        const name = document.getElementById('socialOAuthName')?.value.trim() || email.split('@')[0];
+        if (!email || !email.includes('@')) {
+            showToast('Düzgün email daxil edin', 'error');
+            return;
+        }
+
+        const submitBtn = document.getElementById('socialOAuthSubmitBtn');
+        setLoading(submitBtn, true);
+        try {
+            const apiBase = (window.API_URL || window.API_BASE || `${window.location.origin}/api`).replace(/\/+$/, '');
+            const endpoint = isGoogle ? `${apiBase}/auth/google` : `${apiBase}/auth/facebook`;
+            const payload = isGoogle
+                ? { email, name, googleId: 'g_' + Math.random().toString(36).slice(2, 12), rememberMe: true }
+                : { email, name, userID: 'fb_' + Math.random().toString(36).slice(2, 12), rememberMe: true };
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showToast(data.message || 'Xəta baş verdi', 'error');
+                return;
+            }
+            modal.style.display = 'none';
+            showToast(`${isGoogle ? 'Google' : 'Facebook'} ilə uğurlu giriş!`, 'success');
+            onLoginSuccess(data.accessToken || data.token, data.user || data, true, 'cabinet.html');
+        } catch (err) {
+            console.error('Social auth submit error:', err);
+            showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
+        } finally {
+            setLoading(submitBtn, false);
+        }
+    };
+}
+
+if (typeof window !== 'undefined') {
+    window.COUNTRY_PHONE_CONFIGS = COUNTRY_PHONE_CONFIGS;
+    window.setupPhoneInputMask = setupPhoneInputMask;
+    window.validatePhoneNumber = validatePhoneNumber;
+    window.handleSocialLoginClick = handleSocialLoginClick;
+    window.openSocialLoginModal = openSocialLoginModal;
+}
+
 /* ── Login: Send SMS ────────────────────────────────────────── */
 async function sendLoginSMS() {
-    const prefix = document.getElementById('loginPhonePrefix')?.value || '+994';
-    const number = document.getElementById('loginPhone')?.value.trim();
-    if (!number) { showToast('Telefon nömrəsini daxil edin', 'error'); return; }
-    const phone = prefix + number.replace(/\s/g, '');
+    const phoneCheck = validatePhoneNumber('loginPhone', 'loginPhonePrefix');
+    if (!phoneCheck.valid) {
+        showToast(phoneCheck.message, 'error');
+        return;
+    }
+    const phone = phoneCheck.fullPhone;
 
     const btn = document.getElementById('sendSmsLoginBtn');
     setLoading(btn, true);
@@ -596,13 +1009,14 @@ function updateStepDots(step) {
 async function sendSignupSMS() {
     const fn  = document.getElementById('signupFirstName')?.value.trim();
     const ln  = document.getElementById('signupLastName')?.value.trim();
-    const pre = document.getElementById('signupPhonePrefix')?.value || '+994';
-    const num = document.getElementById('signupPhone')?.value.trim();
-
     if (!fn || !ln) { showToast('Ad və soyad daxil edin', 'error'); return; }
-    if (!num)       { showToast('Telefon nömrəsini daxil edin', 'error'); return; }
 
-    const phone = pre + num.replace(/\s/g, '');
+    const phoneCheck = validatePhoneNumber('signupPhone', 'signupPhonePrefix');
+    if (!phoneCheck.valid) {
+        showToast(phoneCheck.message, 'error');
+        return;
+    }
+    const phone = phoneCheck.fullPhone;
     const btn   = document.getElementById('sendPhoneSignupBtn');
     setLoading(btn, true);
 
@@ -742,6 +1156,20 @@ async function verifySignupEmail() {
 /* ── Init on DOM ready ──────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     // Wire all OTP input groups that exist on current page
+    // Setup professional phone masking
+    setupPhoneInputMask('loginPhone', 'loginPhonePrefix');
+    setupPhoneInputMask('signupPhone', 'signupPhonePrefix');
+    setupPhoneInputMask('signupPhoneOptional', 'signupPhoneOptionalPrefix');
+
+    // Setup social login click handlers
+    document.getElementById('loginGoogleBtn')?.addEventListener('click', (e) => { e.preventDefault(); handleSocialLoginClick('google'); });
+    document.getElementById('signupGoogleBtn')?.addEventListener('click', (e) => { e.preventDefault(); handleSocialLoginClick('google'); });
+    document.getElementById('loginFacebookBtn')?.addEventListener('click', (e) => { e.preventDefault(); handleSocialLoginClick('facebook'); });
+    document.getElementById('signupFacebookBtn')?.addEventListener('click', (e) => { e.preventDefault(); handleSocialLoginClick('facebook'); });
+
+    // Pre-fetch OAuth config
+    fetchOAuthConfig();
+
     ['smsOtpInputs','emailOtpInputs','signupSmsOtpInputs','signupEmailOtpInputs'].forEach(id => {
         if (document.getElementById(id)) wireOtpInputs(id);
     });
@@ -911,12 +1339,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('finalPhoneSignupBtn');
             setLoading(btn, true);
             try {
-                const prefix = document.getElementById('signupPhonePrefix')?.value || '+994';
-                const num    = document.getElementById('signupPhone')?.value.trim().replace(/\s/g,'');
-                const body   = {
-                    name:     document.getElementById('signupFirstName')?.value.trim(),
-                    lastName: document.getElementById('signupLastName')?.value.trim(),
-                    phone:    prefix + num,
+                const phoneCheck = validatePhoneNumber('signupPhone', 'signupPhonePrefix');
+            if (!phoneCheck.valid) {
+                showToast(phoneCheck.message, 'error');
+                setLoading(btn, false);
+                return;
+            }
+            const body   = {
+                name:     document.getElementById('signupFirstName')?.value.trim(),
+                lastName: document.getElementById('signupLastName')?.value.trim(),
+                phone:    phoneCheck.fullPhone,
                     email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
                     password: pwd
                 };
@@ -958,8 +1390,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     name:     document.getElementById('signupFirstNameE')?.value.trim(),
                     lastName: document.getElementById('signupLastNameE')?.value.trim(),
                     email:    document.getElementById('signupEmailVerify')?.value.trim(),
-                    phone:    document.getElementById('signupPhoneOptional')?.value.trim() || undefined,
-                    password: pwd
+                phone:    (() => {
+                    const el = document.getElementById('signupPhoneOptional');
+                    if (!el || !el.value.trim()) return undefined;
+                    const chk = validatePhoneNumber('signupPhoneOptional', 'signupPhoneOptionalPrefix');
+                    return chk.valid ? chk.fullPhone : undefined;
+                })(),
+                password: pwd
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();

@@ -39,6 +39,9 @@ const buildHelmetOptions = () => {
             "'self'",
             "'unsafe-inline'",
             'https://cdnjs.cloudflare.com',
+            'https://accounts.google.com',
+            'https://apis.google.com',
+            'https://connect.facebook.net',
             apiOrigin,
             ...splitEnvList(process.env.CSP_SCRIPT_SRC)
         ].filter(Boolean),
@@ -87,11 +90,19 @@ const buildHelmetOptions = () => {
             'https://api.mobilim.az',
             'https://mobil-az.onrender.com',
             'wss://mobil-az.onrender.com',
+            'https://accounts.google.com',
+            'https://oauth2.googleapis.com',
+            'https://graph.facebook.com',
             apiOrigin,
             ...allowedOrigins,
             ...paymentOrigins,
             ...splitEnvList(process.env.CSP_CONNECT_SRC)
         ].filter(Boolean),
+        "frame-src": [
+            "'self'",
+            'https://accounts.google.com',
+            'https://www.facebook.com'
+        ],
         "object-src": ["'none'"],
         "frame-ancestors": splitEnvList(process.env.CSP_FRAME_ANCESTORS).length
             ? splitEnvList(process.env.CSP_FRAME_ANCESTORS)

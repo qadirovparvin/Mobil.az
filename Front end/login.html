@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="JS/config.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
         (function() {
             try {
@@ -86,9 +87,6 @@
                     <button class="social-btn facebook" id="loginFacebookBtn" type="button">
                         <i class="fab fa-facebook-f"></i> Facebook
                     </button>
-                    <button class="social-btn apple" id="loginAppleBtn" type="button">
-                        <i class="fab fa-apple"></i> Apple
-                    </button>
                 </div>
 
                 <div class="auth-divider" data-translate="auth-or">və ya</div>
@@ -136,16 +134,19 @@
                                 <div class="prefix-wrap input-group" style="margin-bottom:0;">
                                     <i class="fas fa-flag input-icon"></i>
                                     <select id="loginPhonePrefix" aria-label="Ölkə kodu">
-                                        <option value="+994">🇦🇿 +994</option>
+                                        <option value="+994" selected>🇦🇿 +994</option>
                                         <option value="+90">🇹🇷 +90</option>
                                         <option value="+7">🇷🇺 +7</option>
                                         <option value="+1">🇺🇸 +1</option>
                                         <option value="+44">🇬🇧 +44</option>
                                         <option value="+49">🇩🇪 +49</option>
+                                        <option value="+995">🇬🇪 +995</option>
+                                        <option value="+971">🇦🇪 +971</option>
+                                        <option value="other">🌐 Digər</option>
                                     </select>
                                 </div>
                                 <div class="number-wrap input-group" style="margin-bottom:0;">
-                                    <input type="tel" id="loginPhone" placeholder="55 123 45 67" data-translate-placeholder="auth-ph-phone" autocomplete="tel" required>
+                                    <input type="tel" id="loginPhone" placeholder="(50) 000-00-00" data-translate-placeholder="auth-ph-phone" autocomplete="tel" required maxlength="15">
                                     <i class="fas fa-mobile-alt input-icon"></i>
                                 </div>
                             </div>

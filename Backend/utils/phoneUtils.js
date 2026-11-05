@@ -15,33 +15,55 @@ const normalizePhone = (phone) => {
     if (!phone) return '';
     let cleaned = String(phone).trim().replace(/[^\d+]/g, '');
     
-    if (cleaned.startsWith('0')) {
+    if (cleaned.startsWith('00')) {
+        cleaned = '+' + cleaned.substring(2);
+    } else if (cleaned.startsWith('0')) {
         cleaned = '+994' + cleaned.substring(1);
-    } else if (cleaned.startsWith('994')) {
+    } else if (cleaned.startsWith('994') && !cleaned.startsWith('+')) {
         cleaned = '+' + cleaned;
     } else if (!cleaned.startsWith('+')) {
-        // Assume it's a local number without 0 or +994, e.g., 501234567
+        // Assume local Azerbaijani number if 9 digits (e.g. 501234567)
         cleaned = '+994' + cleaned;
     }
 
-    if (!/^\+994\d{9}$/.test(cleaned)) {
-        const error = new Error('Telefon nömrəsi düzgün formatda deyil');
+    // Azerbaijani numbers (+994)
+    if (cleaned.startsWith('+994')) {
+        if (!/^\+994\d{9}$/.test(cleaned)) {
+            const error = new Error('Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır (+994XXXXXXXXX)');
+            error.status = 400;
+            throw error;
+        }
+
+        const prefix = cleaned.slice(4, 6);
+        if (!AZ_MOBILE_PREFIXES.has(prefix)) {
+            const error = new Error('Telefon prefiksi dəstəklənmir (50, 51, 55, 70, 77, 99, 10, 60)');
+            error.status = 400;
+            throw error;
+        }
+        return cleaned;
+    }
+
+    // International foreign numbers (E.164: + followed by 7 to 15 digits)
+    if (!/^\+[1-9]\d{6,14}$/.test(cleaned)) {
+        const error = new Error('Xarici telefon nömrəsi düzgün beynəlxalq formatda deyil (+ və 7-15 rəqəm)');
         error.status = 400;
         throw error;
     }
 
-    const prefix = cleaned.slice(4, 6);
-    if (!AZ_MOBILE_PREFIXES.has(prefix)) {
-        const error = new Error('Telefon prefiksi dəstəklənmir');
-        error.status = 400;
-        throw error;
-    }
     return cleaned;
 };
 
 const formatPhone = (phone) => {
-    const norm = normalizePhone(phone);
-    return `${norm.slice(0, 4)} ${norm.slice(4, 6)} ${norm.slice(6, 9)} ${norm.slice(9, 11)} ${norm.slice(11)}`;
+    if (!phone) return '';
+    try {
+        const norm = normalizePhone(phone);
+        if (norm.startsWith('+994') && norm.length === 13) {
+            return `${norm.slice(0, 4)} ${norm.slice(4, 6)} ${norm.slice(6, 9)} ${norm.slice(9, 11)} ${norm.slice(11)}`;
+        }
+        return norm;
+    } catch (_) {
+        return phone;
+    }
 };
 
 /**

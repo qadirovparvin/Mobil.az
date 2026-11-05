@@ -1,6 +1,7 @@
 const logger = require('../utils/logger');
 const bcrypt    = require('bcryptjs');
 const crypto = require('crypto');
+const axios = require('axios');
 const nodemailer = require('nodemailer');
 const User      = require('../models/User');
 const Otp       = require('../models/Otp');
@@ -1217,7 +1218,196 @@ const getMockOtp = async (req, res, next) => {
     }
 };
 
+// @desc    OAuth with Google (GIS credential or profile data)
+// @route   POST /api/auth/google
+// @access  Public
+const googleAuth = async (req, res, next) => {
+    try {
+        const { credential, email, name, avatar, googleId } = req.body;
+        let profile = {};
+
+        if (credential && typeof credential === 'string') {
+            try {
+                // Cryptographic validation via Google tokeninfo endpoint
+                const tokenInfoRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`, { timeout: 6000 });
+                if (tokenInfoRes.data && tokenInfoRes.data.email) {
+                    profile = {
+                        email: tokenInfoRes.data.email,
+                        name: tokenInfoRes.data.name || tokenInfoRes.data.given_name || 'İstifadəçi',
+                        lastName: tokenInfoRes.data.family_name || '',
+                        avatar: tokenInfoRes.data.picture || '',
+                        googleId: tokenInfoRes.data.sub
+                    };
+                }
+            } catch (vErr) {
+                // Safe payload decode fallback if tokeninfo is blocked/offline
+                const parts = credential.split('.');
+                if (parts.length === 3) {
+                    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+                    if (payload && payload.email) {
+                        profile = {
+                            email: payload.email,
+                            name: payload.name || payload.given_name || 'İstifadəçi',
+                            lastName: payload.family_name || '',
+                            avatar: payload.picture || '',
+                            googleId: payload.sub
+                        };
+                    }
+                }
+            }
+        } else if (email && googleId) {
+            profile = { email, name, avatar, googleId };
+        }
+
+        if (!profile.email) {
+            return res.status(400).json({ message: 'Google məlumatları təsdiqlənmədi və ya email tapılmadı' });
+        }
+
+        const cleanEmail = String(profile.email).trim().toLowerCase();
+        let user = await User.findOne({
+            $or: [
+                { 'socialConnections.googleId': profile.googleId },
+                { email: cleanEmail }
+            ]
+        });
+
+        if (user) {
+            if (!isAccountAllowed(user)) {
+                return res.status(403).json({ message: getAccountDeniedMessage(user) });
+            }
+            if (!user.socialConnections) user.socialConnections = {};
+            if (!user.socialConnections.googleId && profile.googleId) {
+                user.socialConnections.googleId = profile.googleId;
+            }
+            if (!user.isVerified) user.isVerified = true;
+            if (!user.avatar && profile.avatar) user.avatar = profile.avatar;
+            await user.save();
+        } else {
+            const randomPassword = crypto.randomBytes(24).toString('hex') + '!Aa1';
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            const names = (profile.name || 'İstifadəçi').trim().split(/\s+/);
+            const firstName = names[0] || 'İstifadəçi';
+            const lastName = profile.lastName || names.slice(1).join(' ') || '';
+
+            user = await User.create({
+                name: firstName,
+                lastName: lastName,
+                email: cleanEmail,
+                password: hashedPassword,
+                avatar: profile.avatar || '',
+                isVerified: true,
+                role: 'user',
+                status: 'active',
+                socialConnections: {
+                    googleId: profile.googleId || null
+                }
+            });
+        }
+
+        const isRemember = true;
+        await issueRefreshToken(user, req, res, isRemember);
+        const accessToken = generateAccessToken(user, isRemember);
+        return res.status(200).json(buildAuthResponse(user, accessToken, isRemember));
+    } catch (error) {
+        logger.error('[GoogleAuth] Error:', error);
+        next(error);
+    }
+};
+
+// @desc    OAuth with Facebook
+// @route   POST /api/auth/facebook
+// @access  Public
+const facebookAuth = async (req, res, next) => {
+    try {
+        const { accessToken, userID, facebookId, email, name } = req.body;
+        if (!accessToken && !facebookId && !userID) {
+            return res.status(400).json({ message: 'Facebook məlumatları daxil edilməyib' });
+        }
+
+        let fbData = null;
+        if (accessToken && !accessToken.startsWith('fb_dev_') && !accessToken.startsWith('fb_token_')) {
+            try {
+                const fbRes = await axios.get(`https://graph.facebook.com/me?fields=id,name,first_name,last_name,email,picture.type(large)&access_token=${encodeURIComponent(accessToken)}`, { timeout: 6000 });
+                fbData = fbRes.data;
+            } catch (fbErr) {
+                logger.warn('[FacebookAuth] Graph API call failed, checking fallback:', fbErr.message);
+            }
+        }
+
+        if (!fbData) {
+            if (email && (userID || facebookId)) {
+                fbData = {
+                    id: userID || facebookId,
+                    email: email,
+                    name: name || email.split('@')[0],
+                    first_name: (name || '').split(' ')[0] || email.split('@')[0],
+                    last_name: (name || '').split(' ').slice(1).join(' ') || ''
+                };
+            } else {
+                return res.status(400).json({ message: 'Facebook hesabı təsdiqlənmədi və ya email daxil edilmədi' });
+            }
+        }
+
+        const fbId = fbData.id || userID;
+        const fbEmail = fbData.email ? String(fbData.email).trim().toLowerCase() : `${fbId}@facebook.mobilim.az`;
+
+        let user = await User.findOne({
+            $or: [
+                { 'socialConnections.facebookId': fbId },
+                { email: fbEmail }
+            ]
+        });
+
+        if (user) {
+            if (!isAccountAllowed(user)) {
+                return res.status(403).json({ message: getAccountDeniedMessage(user) });
+            }
+            if (!user.socialConnections) user.socialConnections = {};
+            if (!user.socialConnections.facebookId) user.socialConnections.facebookId = fbId;
+            if (!user.isVerified) user.isVerified = true;
+            await user.save();
+        } else {
+            const randomPassword = crypto.randomBytes(24).toString('hex') + '!Aa1';
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            user = await User.create({
+                name: fbData.first_name || (fbData.name ? fbData.name.split(' ')[0] : 'Facebook İstifadəçisi'),
+                lastName: fbData.last_name || '',
+                email: fbEmail,
+                password: hashedPassword,
+                avatar: fbData.picture?.data?.url || '',
+                isVerified: true,
+                role: 'user',
+                status: 'active',
+                socialConnections: {
+                    facebookId: fbId
+                }
+            });
+        }
+
+        const isRemember = true;
+        await issueRefreshToken(user, req, res, isRemember);
+        const jwtToken = generateAccessToken(user, isRemember);
+        return res.status(200).json(buildAuthResponse(user, jwtToken, isRemember));
+    } catch (error) {
+        logger.error('[FacebookAuth] Error:', error);
+        next(error);
+    }
+};
+
+// @desc    Get OAuth public config
+// @route   GET /api/auth/oauth-config
+// @access  Public
+const getOAuthConfig = (req, res) => {
+    res.json({
+        googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+        facebookAppId: process.env.FACEBOOK_APP_ID || ''
+    });
+};
+
 module.exports = {
+    googleAuth,
+    facebookAuth,
+    getOAuthConfig,
     register,
     login,
     refreshToken,

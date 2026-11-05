@@ -13,10 +13,14 @@ const {
     sendOtp, verifyOtp, verifyEmailLink, resendVerificationEmail,
     forgotPassword, resetPassword,
     enrollTwoFactor, confirmTwoFactor, disableTwoFactor, regenerateRecoveryCodes,
-    getMockOtp
+    getMockOtp,
+    googleAuth, facebookAuth, getOAuthConfig
 } = require('../controllers/authController');
 
 router.get('/csrf-token', csrfTokenHandler);
+router.get('/oauth-config', getOAuthConfig);
+router.post('/google',   loginLimiter, googleAuth);
+router.post('/facebook', loginLimiter, facebookAuth);
 router.post('/register', registrationIdentifierLimiter, register);
 router.post('/login',    loginLimiter, login);
 router.post('/refresh',       validateOrigin, refreshToken);
