@@ -97,7 +97,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (isPromoActive) {
             if (ad.promotionType === "VIP") {
                 badges += ` <span class="ad-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
-            } else if (ad.promotionType === "Premium" || ad.promotionType === "PRO") {
+            } else if (ad.promotionType === "PRO") {
+                badges += ` <span class="ad-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
+            } else if (ad.promotionType === "Premium") {
                 badges += ` <span class="ad-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
                 badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> ${urgentText}</span>`;
@@ -121,10 +123,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const title = escapeHtml(fullTitle);
         const altText = hasRealImage ? title : (i18n ? i18n.t("noImageAlt") : "Elan şəkli yoxdur");
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
+        const nowTime = new Date();
+        const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > nowTime;
+        const isVip = ad.promotionType === "VIP" && isPromoActive;
+        const isPro = (ad.promotionType === "PRO" || ad.promotionType === "Premium") && isPromoActive;
+        const promoClass = isVip ? " is-vip" : (isPro ? " is-pro" : "");
 
         return `
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
-                <div class="ad-card elan-card product-card"
+                <div class="ad-card elan-card product-card${promoClass}"
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"

@@ -449,10 +449,12 @@
                                             <!-- SOL: Paketlər yan-yana 3 kart - KOMPAKT -->
                                             <div class="billing-left">
                                                 <div class="billing-head-row">
-                                                    <h2 class="billing-title">Paket seçin</h2>
-                                                    <div class="duration-pills" id="billingDurationSwitch">
-                                                        <button type="button" class="dur-btn active" data-duration="30">30 gün</button>
-                                                        <button type="button" class="dur-btn" data-duration="90">90 gün</button>
+                                                    <div>
+                                                        <h2 class="billing-title" data-billing-i18n="choosePackage">Paket seçin</h2>
+                                                        <p class="billing-subtitle" style="font-size:13px; color:var(--text-secondary, #94a3b8); margin:4px 0 0 0;" data-billing-i18n="package30DaysNotice">Bütün paketlər alış tarixindən başlayaraq 30 gün qüvvədədir</p>
+                                                    </div>
+                                                    <div class="duration-badge-pill" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); border-radius:20px; font-size:13px; font-weight:600; color:var(--accent-color, #a855f7);">
+                                                        <i class="fas fa-clock"></i> <span>30 gün</span>
                                                     </div>
                                                 </div>
 
@@ -460,7 +462,7 @@
                                                     <!-- JS dolduracaq - KOMPAKT KARTLAR -->
                                                 </div>
 
-                                                <h3 class="pay-title">Ödəniş üsulu</h3>
+                                                <h3 class="pay-title" data-billing-i18n="paymentMethod">Ödəniş üsulu</h3>
                                                 <div class="pay-row" id="billingMethodsRow">
                                                     <!-- 3 sadə düymə yan-yana -->
                                                 </div>
@@ -470,17 +472,40 @@
                                             <!-- SAĞ: Xülasə - KOMPAKT, STICKY YOX, sadə kart -->
                                             <div class="billing-right">
                                                 <div class="summary-box" id="billingSummaryBox">
-                                                    <div class="summary-label">SİFARİŞ XÜLASƏSİ</div>
-                                                    <div class="summary-line"><span>Paket</span><strong id="summaryPackage">PRO</strong></div>
-                                                    <div class="summary-line"><span>Müddət</span><strong id="summaryDuration">30 gün</strong></div>
-                                                    <div class="summary-line"><span>Üsul</span><strong id="summaryMethod">Bank kartı</strong></div>
-                                                    <div class="summary-total"><span>Yekun</span><strong id="summaryTotal">24.00 AZN</strong></div>
-                                                    <button id="billingConfirmBtn" type="button" class="btn-buy">Paketi aktivləşdir</button>
-                                                    <button id="billingGoWalletBtn" type="button" class="btn-buy-warn" hidden>Balans çatışmır — Artır</button>
-                                                    <div class="trust">🔒 Təhlükəsiz ödəniş</div>
+                                                    <div class="summary-label" data-billing-i18n="orderSummary">SİFARİŞ XÜLASƏSİ</div>
+                                                    <div class="summary-line"><span data-billing-i18n="summaryPackage">Paket</span><strong id="summaryPackage">PRO</strong></div>
+                                                    <div class="summary-line"><span data-billing-i18n="summaryDuration">Müddət</span><strong id="summaryDuration">30 gün</strong></div>
+                                                    <div class="summary-line"><span data-billing-i18n="summaryMethod">Üsul</span><strong id="summaryMethod">Daxili balans</strong></div>
+                                                    <div class="summary-total"><span data-billing-i18n="summaryTotal">Yekun</span><strong id="summaryTotal">19.90 AZN</strong></div>
+                                                    
+                                                    <div id="billingBalanceWarnBox" style="display:none; margin: 12px 0 6px 0; padding: 10px 12px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; font-size: 12.5px; color: #f87171; line-height: 1.4;">
+                                                        <i class="fas fa-exclamation-triangle"></i> <span id="billingBalanceWarnText">Balans çatmır</span>
+                                                    </div>
+
+                                                    <button id="billingConfirmBtn" type="button" class="btn-buy" data-billing-i18n="confirmPurchase">Paketi aktivləşdir</button>
+                                                    <button id="billingGoWalletBtn" type="button" class="btn-topup-simple" style="display:none; width: 100%; margin-top: 8px;">Balansı artır</button>
+                                                    <div class="trust">🔒 <span data-billing-i18n="secure">Təhlükəsiz ödəniş</span></div>
                                                 </div>
                                             </div>
 
+                                        </div>
+
+                                        <!-- Paket qaydaları və şərtlər -->
+                                        <div class="billing-rules-card cab-glass" style="margin-top: 24px; padding: 22px 24px; border-radius: 16px; border: 1px solid var(--border-color, rgba(255,255,255,0.08)); background: var(--bg-card, rgba(30, 41, 59, 0.5));">
+                                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                                                <i class="fas fa-shield-alt" style="color: #8b5cf6; font-size: 18px;"></i>
+                                                <h3 style="margin: 0; font-size: 16px; font-weight: 700;" data-billing-i18n="packageRulesTitle">Paket qaydaları və şərtlər</h3>
+                                            </div>
+                                            <ul class="billing-rules-list" style="margin: 0; padding-left: 20px; line-height: 1.75; font-size: 13.5px; color: var(--text-secondary, #94a3b8);">
+                                                <li><strong data-billing-i18n="ruleLimitTitle">Elan limiti:</strong> <span data-billing-i18n="ruleLimitDesc">Eyni anda aktiv olan elanların sayını ifadə edir (Standart: 2, VIP: 10, PRO: 25).</span></li>
+                                                <li><strong data-billing-i18n="ruleRotationTitle">Növbəli VIP nümayiş:</strong> <span data-billing-i18n="ruleRotationDesc">VIP bölməsində elanlar növbəli göstərilir; daimi ilk yer vədi verilmir.</span></li>
+                                                <li><strong data-billing-i18n="rulePeriodTitle">Dövrün başa çatması:</strong> <span data-billing-i18n="rulePeriodDesc">Dövr bitəndə istifadə olunmamış reklam hüquqları sıfırlanır və aktiv paket reklamları dayanır.</span></li>
+                                                <li><strong data-billing-i18n="ruleWarningTitle">Tam müddət xəbərdarlığı:</strong> <span data-billing-i18n="ruleWarningDesc">Tam reklam müddəti qalmadıqda kampaniyaya başlamazdan əvvəl xəbərdarlıq göstərilir.</span></li>
+                                                <li><strong data-billing-i18n="ruleDowngradeTitle">Standarta keçid:</strong> <span data-billing-i18n="ruleDowngradeDesc">Paket yenilənməzsə hesab Standarta keçir; istifadəçi 2 aktiv elan seçir, qalanları silinmədən dayandırılır.</span></li>
+                                                <li><strong data-billing-i18n="ruleDataTitle">Məlumatların qorunması:</strong> <span data-billing-i18n="ruleDataDesc">Elanlar və keçmiş statistika silinmir; yeni dövrün göstəriciləri ayrıca hesablanır.</span></li>
+                                                <li><strong data-billing-i18n="ruleClicksTitle">Əlaqə statistikası:</strong> <span data-billing-i18n="ruleClicksDesc">Əlaqə düyməsinə klik zəng və ya mesajın baş tutması kimi göstərilmir (yalnız klik sayı əks olunur).</span></li>
+                                                <li><strong data-billing-i18n="ruleTransparencyTitle">Dəqiq xidmət:</strong> <span data-billing-i18n="ruleTransparencyDesc">Hazır olmayan heç bir funksiya aktiv və işlək kimi təqdim edilmir.</span></li>
+                                            </ul>
                                         </div>
 
                                         <!-- Tranzaksiya Tarixçəsi -->

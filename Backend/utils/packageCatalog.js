@@ -3,10 +3,8 @@ const Package = require('../models/Package');
 const { createValidationError } = require('./securityValidation');
 
 const DEFAULT_PACKAGES = [
-    { productId: 'vip-30', code: 'VIP', name: 'VIP 30 days', durationDays: 30, currency: 'AZN', priceAmount: 12 },
-    { productId: 'vip-90', code: 'VIP', name: 'VIP 90 days', durationDays: 90, currency: 'AZN', priceAmount: 30 },
-    { productId: 'pro-30', code: 'PRO', name: 'PRO 30 days', durationDays: 30, currency: 'AZN', priceAmount: 24 },
-    { productId: 'pro-90', code: 'PRO', name: 'PRO 90 days', durationDays: 90, currency: 'AZN', priceAmount: 60 }
+    { productId: 'vip-30', code: 'VIP', name: 'VIP 30 gün', durationDays: 30, currency: 'AZN', priceAmount: 9.90 },
+    { productId: 'pro-30', code: 'PRO', name: 'PRO 30 gün', durationDays: 30, currency: 'AZN', priceAmount: 19.90 }
 ];
 
 const normalizeMoney = (amount) => Math.round(Number(amount) * 100) / 100;
@@ -75,10 +73,15 @@ const ensureDefaultPackages = async () => {
     for (const pkg of DEFAULT_PACKAGES) {
         await Package.updateOne(
             { productId: pkg.productId },
-            { $setOnInsert: { ...pkg, active: true } },
+            { $set: { ...pkg, active: true } },
             { upsert: true }
         );
     }
+    // Deactivate obsolete 90-day packages
+    await Package.updateMany(
+        { productId: { $in: ['vip-90', 'pro-90'] } },
+        { $set: { active: false } }
+    );
 };
 
 const generatePaymentId = () => `pay_${crypto.randomBytes(16).toString('hex')}`;

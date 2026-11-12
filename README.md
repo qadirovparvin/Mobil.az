@@ -115,4 +115,5 @@ Logs are maintained in `Backend/logs/`:
 - `node_modules` and uploaded files are excluded from git.
 - The main backend is `Backend/`, not `Back end/`.
 - Source files should stay in UTF-8. PowerShell output may still display some Azerbaijani characters incorrectly even when the file itself is valid UTF-8, so prefer browser rendering or UTF-8-aware tooling when verifying text.
+- iPhone Telegram botu ugurla isleyir - 11 noyabr
 
