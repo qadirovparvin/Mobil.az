@@ -740,7 +740,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             // Mode B: Personal Seller
             const author = ad.author || ad.user || {};
-            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || author.email || 'Silinmiş istifadəçi';
+            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || 'İstifadəçi';
 
             // Seller Name
             if (sellerNameEl) {
@@ -803,19 +803,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // Email Tag
+            // Email Tag (never show email in public ads)
             const sellerEmailTag = document.getElementById('sellerEmailTag');
-            const sellerEmailText = document.getElementById('sellerEmailText');
             if (sellerEmailTag) {
-                const authorEmail = (author.email || '').trim();
-                if (authorEmail) {
-                    if (sellerEmailText) sellerEmailText.textContent = ` ${authorEmail}`;
-                    sellerEmailTag.classList.remove('hidden');
-                    sellerEmailTag.style.display = 'flex';
-                } else {
-                    sellerEmailTag.classList.add('hidden');
-                    sellerEmailTag.style.display = 'none';
-                }
+                sellerEmailTag.classList.add('hidden');
+                sellerEmailTag.style.display = 'none';
             }
 
             // Phone Tag setup in seller card
@@ -1326,7 +1318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const info = document.createElement('div');
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'rc-name';
-                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
+                    nameDiv.textContent = r.author?.name || 'İstifadəçi';
                     const dateDiv = document.createElement('div');
                     dateDiv.className = 'rc-date';
                     dateDiv.textContent = date;
@@ -1374,7 +1366,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'mini-name';
-                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
+                    nameDiv.textContent = r.author?.name || 'İstifadəçi';
 
                     const starsDiv = document.createElement('div');
                     starsDiv.className = 'mini-stars';
