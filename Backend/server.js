@@ -390,13 +390,23 @@ app.use('/uploads', (req, res) => {
     }
     return res.redirect(302, '/assets/images/default-ad.svg');
 });
+const staticOptions = {
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+};
 app.use('/images', express.static(path.join(__dirname, '../Front end/images')));
 app.use('/assets', express.static(path.join(__dirname, '../Front end/assets')));
 app.use('/Photo', express.static(path.join(__dirname, '../Front end/Photo')));
 app.use('/photo', express.static(path.join(__dirname, '../Front end/Photo')));
-app.use('/Front end', express.static(path.join(__dirname, '../Front end')));
-app.use('/Frontend', express.static(path.join(__dirname, '../Front end')));
-app.use(express.static(path.join(__dirname, '../Front end')));
+app.use('/Front end', express.static(path.join(__dirname, '../Front end'), staticOptions));
+app.use('/Front%20end', express.static(path.join(__dirname, '../Front end'), staticOptions));
+app.use('/Frontend', express.static(path.join(__dirname, '../Front end'), staticOptions));
+app.use(express.static(path.join(__dirname, '../Front end'), staticOptions));
 
 // ── API Routes ────────────────────────────────────────────
 app.use('/api/auth',          authLimiter, require('./routes/authRoutes'));
@@ -456,23 +466,6 @@ app.get('/', (req, res) => {
         }
     });
 });
-
-// ── Static Files Serving ─────────────────────────────────
-const frontendDir = path.join(__dirname, '..', 'Front end');
-const frontendAltDir = path.join(__dirname, '..', 'Frontend');
-const staticOptions = {
-    setHeaders: (res, filePath) => {
-        if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
-            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-            res.setHeader('Pragma', 'no-cache');
-            res.setHeader('Expires', '0');
-        }
-    }
-};
-app.use(express.static(frontendDir, staticOptions));
-app.use('/Frontend', express.static(frontendAltDir, staticOptions));
-app.use('/Front%20end', express.static(frontendDir, staticOptions));
-app.use('/Front end', express.static(frontendDir, staticOptions));
 
 app.use(validationErrorHandler);
 

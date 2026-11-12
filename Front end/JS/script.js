@@ -1577,6 +1577,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.title = translations[newLang][key];
                 }
             });
+            // Translate city/region dropdown options across all pages
+            if (window.MobilazI18n && typeof window.MobilazI18n.translateCity === "function") {
+                document.querySelectorAll('select[data-filter="city"] option, select#city option, select#shopCity option, select[name="city"] option, select[name="region"] option').forEach((opt) => {
+                    if (!opt || !opt.value) return;
+                    if (!opt.dataset.rawCity) opt.dataset.rawCity = opt.textContent.trim();
+                    opt.textContent = window.MobilazI18n.translateCity(opt.dataset.rawCity, newLang);
+                });
+            }
             document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
         }
 

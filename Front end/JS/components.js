@@ -98,7 +98,7 @@ const footerTemplate = `
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; ${currentYear} Mobilim.az. Bütün hüquqlar qorunur.</p>
+      <p data-translate="footer-copyright">&copy; ${currentYear} Mobilim.az. Bütün hüquqlar qorunur.</p>
     </div>
   </footer>
 `;

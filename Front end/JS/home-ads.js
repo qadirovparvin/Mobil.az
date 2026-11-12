@@ -56,22 +56,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function formatDateLabel(value) {
-        if (!value) {
-            return "";
+        if (!value) return "";
+        if (window.MobilazI18n && typeof window.MobilazI18n.formatDate === "function") {
+            return window.MobilazI18n.formatDate(value, true);
         }
-
         const date = new Date(value);
-        if (Number.isNaN(date.getTime())) {
-            return "";
-        }
-
-        return date.toLocaleString("az-AZ", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
+        if (Number.isNaN(date.getTime())) return "";
+        return date.toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
     }
 
     function mapCardCategory(category) {

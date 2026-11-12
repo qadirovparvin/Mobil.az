@@ -228,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const city = ad.city || "";
                     const title = [ad.brand, ad.modelName].filter(Boolean).join(" ");
                     const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
-                    const date = new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                    const date = window.MobilazI18n ? window.MobilazI18n.formatDate(ad.createdAt, true) : new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
                     
                     const i18n = window.MobilazI18n;
                     const badgeType = ad.sellerType === "store" ? "store" : "private";
@@ -435,6 +435,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Expose init function globally so dynamically loaded ads can re-bind
     window.initializeFavoriteButtons = initFavoriteButtons;
+
+    document.addEventListener("mobilaz:languagechange", () => {
+        const i18n = window.MobilazI18n;
+        if (!i18n) return;
+        document.querySelectorAll(".ad-card").forEach((card) => {
+            const rawCity = card.dataset.city;
+            const cityEl = card.querySelector(".ad-city-label");
+            if (cityEl && rawCity) cityEl.textContent = i18n.translateCity(rawCity);
+
+            const sellerBadge = card.querySelector(".ad-badge[data-badge-type]");
+            if (sellerBadge) sellerBadge.textContent = i18n.t(sellerBadge.dataset.badgeType);
+        });
+    });
 
     // Initial load: fetch favorites, then init buttons and render page
     fetchUserFavorites().then(favs => {

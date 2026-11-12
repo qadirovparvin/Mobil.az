@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Location
-            const personalLoc = [ad.city ? i18n.translateCity(ad.city) : '', ad.region].filter(Boolean).join(', ').trim();
+            const personalLoc = [ad.city ? i18n.translateCity(ad.city) : '', ad.region ? i18n.translateCity(ad.region) : ''].filter(Boolean).join(', ').trim();
             if (sellerLocationTag) {
                 if (personalLoc) {
                     if (sellerLocationText) {
@@ -806,6 +806,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let revealed = false;
                     callBtn.addEventListener('click', () => {
                         if (!revealed) {
+                            phoneText.removeAttribute('data-translate');
                             phoneText.textContent = rawPhone;
                             callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
                             revealed = true;
@@ -1097,7 +1098,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (locTextEl) {
                     const rawCity = (ad.sellerType === 'store' && ad.store?.city) ? ad.store.city : ad.city;
                     if (rawCity) {
-                        const locParts = [i18n.translateCity(rawCity), (ad.sellerType !== 'store' ? ad.region : '')].filter(Boolean);
+                        const locParts = [i18n.translateCity(rawCity), (ad.sellerType !== 'store' && ad.region ? i18n.translateCity(ad.region) : '')].filter(Boolean);
                         locTextEl.textContent = ' ' + locParts.join(', ');
                     }
                 }

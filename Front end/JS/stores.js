@@ -53,9 +53,11 @@ async function loadStores() {
 
     grid.innerHTML = stores.map(store => {
       const storeId = store._id || store.id;
-      const name = escapeHtml(store.name || store.storeName || 'Mağaza');
-      const desc = escapeHtml(store.description || 'Mobil telefonlar və aksesuarların satışı.');
-      const city = escapeHtml(store.city || 'Bakı');
+      const i18n = window.MobilazI18n;
+      const name = escapeHtml(store.name || store.storeName || (i18n ? i18n.t('store') : 'Mağaza'));
+      const desc = escapeHtml(store.description || '');
+      const rawCity = store.city || 'Bakı';
+      const city = escapeHtml(i18n ? i18n.translateCity(rawCity) : rawCity);
       const address = escapeHtml(store.address || '');
       const location = address ? `${city}, ${address}` : city;
       const phone = escapeHtml(store.phone || store.contactNumber || '+994 50 123 45 67');
@@ -82,14 +84,14 @@ async function loadStores() {
             <p class="store-description">${desc}</p>
             <div class="store-meta">
               <span class="ad-count">📦 ${store.adCount ?? store.adsCount ?? count} Aktiv Elan</span>
-              ${location ? `<span class="location">📍 ${location}</span>` : ''}
+              ${location ? `<span class="location store-meta-loc" data-raw-city="${escapeHtml(rawCity)}" data-raw-addr="${address}">📍 ${location}</span>` : ''}
             </div>
             <div class="store-details-grid">
               <div class="detail-item">
                 <i class="fas fa-box-open"></i> <span>${count} <span data-translate="stores-active-ads">Aktiv Elan</span></span>
               </div>
               <div class="detail-item">
-                <i class="fas fa-map-marker-alt"></i> <span>${location}</span>
+                <i class="fas fa-map-marker-alt"></i> <span class="store-city-label" data-raw-city="${escapeHtml(rawCity)}" data-raw-addr="${address}">${location}</span>
               </div>
               <div class="detail-item">
                 <i class="fas fa-phone-alt"></i> <span>${phone}</span>
@@ -152,4 +154,19 @@ function initStoreSearch() {
 document.addEventListener('DOMContentLoaded', () => {
   loadStores();
   initStoreSearch();
+});
+
+document.addEventListener('mobilaz:languagechange', () => {
+  const i18n = window.MobilazI18n;
+  if (!i18n) return;
+  document.querySelectorAll('.store-city-label').forEach(el => {
+    const c = i18n.translateCity(el.dataset.rawCity || 'Bakı');
+    const a = el.dataset.rawAddr || '';
+    el.textContent = a ? (c + ', ' + a) : c;
+  });
+  document.querySelectorAll('.store-meta-loc').forEach(el => {
+    const c = i18n.translateCity(el.dataset.rawCity || 'Bakı');
+    const a = el.dataset.rawAddr || '';
+    el.textContent = '📍 ' + (a ? (c + ', ' + a) : c);
+  });
 });
