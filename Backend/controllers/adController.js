@@ -105,19 +105,55 @@ const getAds = async (req, res, next) => {
         }
         if (brand && brand !== 'any' && brand !== 'both') {
             const cleanBrand = readString(brand, { fieldName: 'brand', maxLength: 80 });
-            const escapedBrand = cleanBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            filter.brand = { $regex: new RegExp(`^${escapedBrand}$`, 'i') };
+            if (cleanBrand.toLowerCase() === 'other') {
+                filter.brand = { $regex: /^(Digər|Digər aksesuar|other)$/i };
+            } else {
+                const escapedBrand = cleanBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                filter.brand = { $regex: new RegExp(`^${escapedBrand}$`, 'i') };
+            }
         }
         if (model && model !== 'any' && model !== 'both') {
             const cleanModel = readString(model, { fieldName: 'model', maxLength: 120 });
-            const escapedModel = cleanModel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            filter.modelName = { $regex: escapedModel, $options: 'i' };
+            if (cleanModel.toLowerCase() === 'other') {
+                filter.modelName = { $regex: /^(Digər model|Digər|other)$/i };
+            } else {
+                const escapedModel = cleanModel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                filter.modelName = { $regex: escapedModel, $options: 'i' };
+            }
         }
         if (city && city !== 'any' && city !== 'both') {
-            filter.city = readString(city, { fieldName: 'city', maxLength: 80 });
+            const cleanCity = readString(city, { fieldName: 'city', maxLength: 80 });
+            const cityAliasGroups = [
+                ['bakı', 'baki', 'baku'], ['sumqayıt', 'sumqayit'], ['gəncə', 'gence', 'ganja'],
+                ['abşeron', 'abşəron', 'abseron', 'absheron'], ['ağcabədi', 'agcabedi'],
+                ['ağdam', 'agdam'], ['ağdaş', 'agdash'], ['ağstafa', 'agstafa'], ['ağsu', 'agsu'],
+                ['balakən', 'balakan'], ['beyləqan', 'beylagan'], ['bərdə', 'barda'],
+                ['biləsuvar', 'bilasuvar'], ['daşkəsən', 'dashkasan'], ['füzuli', 'fuzuli'],
+                ['gədəbəy', 'gadabay'], ['göyçay', 'goychay'], ['göygöl', 'goygol'],
+                ['hacıqabul', 'hajigabul'], ['imişli', 'imishli'], ['ismayıllı', 'ismayilli'],
+                ['cəbrayıl', 'jabrayil'], ['cəlilabad', 'jalilabad'], ['kəlbəcər', 'kalbajar'],
+                ['kürdəmir', 'kurdamir'], ['laçın', 'lachin'], ['lənkəran', 'lankaran'],
+                ['masallı', 'masalli'], ['mingəçevir', 'mingachevir'], ['naxçıvan', 'nakhchivan'],
+                ['neftçala', 'neftchala'], ['oğuz', 'oguz'], ['qəbələ', 'qabala'],
+                ['qax', 'qakh'], ['qazax', 'qazakh'], ['qubadlı', 'qubadli'],
+                ['saatlı', 'saatli'], ['şabran', 'shabran'], ['şəki', 'shaki'],
+                ['şamaxı', 'shamakhi'], ['şirvan', 'shirvan'], ['şuşa', 'shusha'],
+                ['siyəzən', 'siazan'], ['tərtər', 'tartar'], ['ucar', 'ujar'],
+                ['yardımlı', 'yardimli'], ['yevlax', 'yevlakh'], ['zəngilan', 'zangilan'],
+                ['zərdab', 'zardab']
+            ];
+            const cityKey = cleanCity.toLowerCase().replace(/\u0307/g, '');
+            const matchedGroup = cityAliasGroups.find(g => g.includes(cityKey));
+            if (matchedGroup) {
+                const pat = matchedGroup.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+                filter.city = { $regex: new RegExp(`^(${pat})$`, 'i') };
+            } else {
+                const escapedCity = cleanCity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                filter.city = { $regex: new RegExp(`^${escapedCity}$`, 'i') };
+            }
         }
         if (condition && condition !== 'any' && condition !== 'both') {
-            const rawCond = String(condition).trim().toLowerCase();
+            const rawCond = String(condition).trim().toLowerCase().replace(/\u0307/g, '');
             let condVal = 'Yeni';
             if (rawCond === 'used' || rawCond === 'islenmis' || rawCond === 'işlənmiş') condVal = 'İşlənmiş';
             else if (rawCond === 'new' || rawCond === 'yeni') condVal = 'Yeni';
@@ -154,9 +190,16 @@ const getAds = async (req, res, next) => {
         }
         const storageVal = storage || memory;
         if (storageVal && storageVal !== 'any' && storageVal !== 'both') {
-            const cleanStorage = readString(storageVal, { fieldName: 'storage', maxLength: 80 });
-            const escapedStorage = cleanStorage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const storageRegex = { $regex: escapedStorage, $options: 'i' };
+            const cleanStorage = readString(storageVal, { fieldName: 'storage', maxLength: 80 }).toLowerCase();
+            let storageRegex;
+            if (cleanStorage === 'below-64' || cleanStorage === '64-dan-az') {
+                storageRegex = { $regex: /^(64-dan-az|below-64|<\s*64|8|16|32)(\s*GB)?$/i };
+            } else if (cleanStorage === '512+' || cleanStorage === '512-den-cox') {
+                storageRegex = { $regex: /^(512-den-cox|512\+|1024|1\s*TB)(\s*GB)?$/i };
+            } else {
+                const numOnly = cleanStorage.replace(/\s*gb$/i, '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                storageRegex = { $regex: new RegExp(`^${numOnly}(\\s*GB)?$`, 'i') };
+            }
             filter.$and = filter.$and || [];
             filter.$and.push({
                 $or: [
@@ -166,9 +209,14 @@ const getAds = async (req, res, next) => {
             });
         }
         if (ram && ram !== 'any' && ram !== 'both') {
-            const cleanRam = readString(ram, { fieldName: 'ram', maxLength: 80 });
-            const escapedRam = cleanRam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const ramRegex = { $regex: escapedRam, $options: 'i' };
+            const cleanRam = readString(ram, { fieldName: 'ram', maxLength: 80 }).toLowerCase();
+            let ramRegex;
+            if (cleanRam === '16+' || cleanRam === '16-dan-cox') {
+                ramRegex = { $regex: /^(16-dan-cox|16\+|16|24|32)(\s*GB)?$/i };
+            } else {
+                const numOnly = cleanRam.replace(/\s*gb$/i, '').trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                ramRegex = { $regex: new RegExp(`^${numOnly}(\\s*GB)?$`, 'i') };
+            }
             filter.$and = filter.$and || [];
             filter.$and.push({
                 $or: [
@@ -178,9 +226,31 @@ const getAds = async (req, res, next) => {
             });
         }
         if (color && color !== 'any' && color !== 'both') {
-            const cleanColor = readString(color, { fieldName: 'color', maxLength: 80 });
-            const escapedColor = cleanColor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            filter['specs.color'] = { $regex: escapedColor, $options: 'i' };
+            const cleanColor = readString(color, { fieldName: 'color', maxLength: 160 });
+            const colorAliasMap = {
+                black: ['black', 'qara', 'titan qara', 'titanium-black', 'silky black'],
+                white: ['white', 'ağ', 'ag', 'titan ağ', 'titan ag', 'titanium-white'],
+                grey: ['grey', 'gray', 'boz', 'graphite', 'qrafit', 'titanium-natural', 'titan təbii'],
+                blue: ['blue', 'mavi', 'göy', 'goy', 'darkblue', 'titan mavi', 'titan göy', 'titanium-blue'],
+                red: ['red', 'qırmızı', 'qirmizi'],
+                green: ['green', 'yaşıl', 'yasil', 'emerald', 'zümrüd yaşılı', 'mint'],
+                yellow: ['yellow', 'sarı', 'sari'],
+                orange: ['orange', 'narıncı', 'narinci'],
+                pink: ['pink', 'çəhrayı', 'cehrayi'],
+                purple: ['purple', 'bənövşəyi', 'benovseyi', 'deeppurple', 'dərin bənövşəyi', 'cobalt violet', 'lavender'],
+                brown: ['brown', 'qəhvəyi', 'qehveyi', 'bronze', 'bürünc', 'beige', 'bej'],
+                gold: ['gold', 'qızılı', 'qizili', 'titanium-desert', 'titan çöl'],
+                silver: ['silver', 'gümüşü', 'gumusu']
+            };
+            const parts = cleanColor.split(',').map(p => p.trim().toLowerCase()).filter(Boolean);
+            const allPatterns = [];
+            parts.forEach(p => {
+                const aliases = colorAliasMap[p] || [p];
+                aliases.forEach(a => allPatterns.push(a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+            });
+            if (allPatterns.length > 0) {
+                filter['specs.color'] = { $regex: new RegExp(allPatterns.join('|'), 'i') };
+            }
         }
         if (screen && screen !== 'any' && screen !== 'both') {
             const cleanScreen = readString(screen, { fieldName: 'screen', maxLength: 80 });
@@ -188,25 +258,31 @@ const getAds = async (req, res, next) => {
             filter['specs.screenSize'] = { $regex: escapedScreen, $options: 'i' };
         }
         if (battery && battery !== 'any' && battery !== 'both') {
-            const cleanBattery = readString(battery, { fieldName: 'battery', maxLength: 80 });
-            const escapedBattery = cleanBattery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            filter['specs.battery'] = { $regex: escapedBattery, $options: 'i' };
+            const cleanBattery = readString(battery, { fieldName: 'battery', maxLength: 80 }).toLowerCase();
+            if (cleanBattery === '3000-4500') {
+                filter['specs.battery'] = { $regex: /^(3000-4000|3000-4500|4000-5000)$/i };
+            } else if (cleanBattery === '>4500' || cleanBattery === '5000+') {
+                filter['specs.battery'] = { $regex: /^(4000-5000|5000\+|>4500|5000)/i };
+            } else {
+                const escapedBattery = cleanBattery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                filter['specs.battery'] = { $regex: escapedBattery, $options: 'i' };
+            }
         }
-        if (expandable === 'yes' || expandable === 'true' || readBoolean(expandable, { fieldName: 'expandable' }) === true) {
-            filter['specs.features.expandable'] = true;
-        }
-        if (delivery === 'yes' || delivery === 'true' || readBoolean(delivery, { fieldName: 'delivery' }) === true) {
-            filter['specs.features.delivery'] = true;
-        }
-        if (nfc === 'yes' || nfc === 'true' || readBoolean(nfc, { fieldName: 'nfc' }) === true) {
-            filter['specs.features.nfc'] = true;
-        }
-        if (waterproof === 'yes' || waterproof === 'true' || readBoolean(waterproof, { fieldName: 'waterproof' }) === true) {
-            filter['specs.features.waterproof'] = true;
-        }
-        if (fingerprint === 'yes' || fingerprint === 'true' || readBoolean(fingerprint, { fieldName: 'fingerprint' }) === true) {
-            filter['specs.features.fingerprint'] = true;
-        }
+        [
+            ['expandable', expandable],
+            ['delivery', delivery],
+            ['nfc', nfc],
+            ['waterproof', waterproof],
+            ['fingerprint', fingerprint]
+        ].forEach(([featKey, featVal]) => {
+            if (!featVal || featVal === 'any' || featVal === 'both') return;
+            const norm = String(featVal).trim().toLowerCase();
+            if (norm === 'yes' || norm === 'true' || readBoolean(featVal, { fieldName: featKey }) === true) {
+                filter[`specs.features.${featKey}`] = true;
+            } else if (norm === 'no' || norm === 'false' || norm === 'broken') {
+                filter[`specs.features.${featKey}`] = { $ne: true };
+            }
+        });
 
         const sortParam = (querySort || sortBy || req.query.sort || req.query.sortBy || 'newest').toString().trim().toLowerCase();
         let sort = {};

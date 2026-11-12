@@ -128,6 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
+                    data-model="${escapeHtml(ad.modelName || "")}"
                     data-category="${mapCardCategory(ad.category)}"
                     data-price="${escapeHtml(ad.price || 0)}"
                     data-city="${city}"
@@ -249,12 +250,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 'sellerType', 'promotionType'
             ];
             filterKeys.forEach(key => {
-                const val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '')
+                let val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '' && activeExtraFilters[key] !== null)
                     ? activeExtraFilters[key]
                     : params.get(key);
-                if (val && val !== 'any' && val !== 'both' && val !== 'Infinity' && val !== Infinity && val !== '0' && val !== 0 && isFinite(val) !== false) {
-                    apiUrl.searchParams.set(key, val);
+                if (key === 'color' && (!val || val === '') && Array.isArray(activeExtraFilters.colors) && activeExtraFilters.colors.length) {
+                    val = activeExtraFilters.colors.join(',');
                 }
+                if (val === null || val === undefined || val === '') return;
+                if (typeof val === 'number' && (!Number.isFinite(val) || val === 0)) return;
+                const strVal = String(val).trim();
+                if (!strVal || strVal === 'any' || strVal === 'both' || strVal === 'Infinity' || strVal === 'NaN' || strVal === 'null' || strVal === 'undefined' || strVal === '0') return;
+                apiUrl.searchParams.set(key, strVal);
             });
             
             const response = await fetch(apiUrl.toString());

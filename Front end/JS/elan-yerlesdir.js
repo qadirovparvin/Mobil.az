@@ -88,6 +88,15 @@ const CATALOG = {
       'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
       'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio', 'Digər model',
     ],
+    OnePlus: [
+      'OnePlus 13', 'OnePlus 12', 'OnePlus 12R', 'OnePlus 11',
+      'OnePlus Nord 4', 'OnePlus Nord CE 4', 'Digər model',
+    ],
+    Google: [
+      'Pixel 9 Pro XL', 'Pixel 9 Pro', 'Pixel 9',
+      'Pixel 8 Pro', 'Pixel 8', 'Pixel 8a',
+      'Pixel 7 Pro', 'Pixel 7', 'Digər model',
+    ],
     'Digər': ['Digər model'],
   },
 

@@ -16,18 +16,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     const API_ORIGIN = API_BASE.replace(/\/api\/?$/, "");
     const DEFAULT_AD_IMAGE = "/assets/images/default-ad.svg";
 
-    // Update title uniformly
-    const titleEl = document.querySelector(".all-ads-title");
-    if (titleEl) {
-        const catMap = {
-            tablet: 'Planşet modelləri',
-            headphone: 'Qulaqlıq modelləri',
-            accessory: 'Telefon aksessuarları',
-            phone: 'Telefon modelləri',
-            all: 'Bütün elanlar'
+    function updateCategoryHeading() {
+        const titleEl = document.querySelector(".all-ads-title");
+        if (!titleEl) return;
+        const lang = (window.MobilazI18n && window.MobilazI18n.getLang()) || (localStorage.getItem('lang') || 'AZ').toUpperCase();
+        const isRu = lang === 'RUS' || lang === 'RU';
+        const isEng = lang === 'ENG' || lang === 'EN';
+        const key = String(urlCat || 'phone').toLowerCase();
+        const titles = {
+            tablet: { AZ: 'Planşet modelləri', RUS: 'Планшеты', ENG: 'Tablets' },
+            'planşet': { AZ: 'Planşet modelləri', RUS: 'Планшеты', ENG: 'Tablets' },
+            headphone: { AZ: 'Qulaqlıq modelləri', RUS: 'Наушники', ENG: 'Headphones' },
+            'qulaqlıq': { AZ: 'Qulaqlıq modelləri', RUS: 'Наушники', ENG: 'Headphones' },
+            accessory: { AZ: 'Telefon aksessuarları', RUS: 'Аксессуары для телефонов', ENG: 'Phone Accessories' },
+            aksesuar: { AZ: 'Telefon aksessuarları', RUS: 'Аксессуары для телефонов', ENG: 'Phone Accessories' },
+            phone: { AZ: 'Telefon modelləri', RUS: 'Телефоны', ENG: 'Phones' },
+            telefon: { AZ: 'Telefon modelləri', RUS: 'Телефоны', ENG: 'Phones' },
+            all: { AZ: 'Bütün elanlar', RUS: 'Все объявления', ENG: 'All ads' }
         };
-        titleEl.textContent = catMap[urlCat] || 'Telefon modelləri';
+        const entry = titles[key] || titles.phone;
+        titleEl.textContent = isRu ? entry.RUS : (isEng ? entry.ENG : entry.AZ);
     }
+    updateCategoryHeading();
 
     function escapeHtml(value) {
         return String(value ?? "")
@@ -108,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
+                    data-model="${escapeHtml(ad.modelName || "")}"
                     data-category="${escapeHtml(ad.category || urlCat)}"
                     data-price="${escapeHtml(ad.price || 0)}"
                     data-city="${city}"
@@ -156,17 +167,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             }
         });
     }
-    window.sortAdsList = sortAds;
 
-    // Load More container setup
-    let loadMoreContainer = document.getElementById("load-more-container");
-    if (!loadMoreContainer) {
+    let loadMoreContainer = document.getElementById("loadMoreContainer");
+    if (!loadMoreContainer && container) {
         loadMoreContainer = document.createElement("div");
-        loadMoreContainer.id = "load-more-container";
+        loadMoreContainer.id = "loadMoreContainer";
         loadMoreContainer.className = "load-more-container";
-        loadMoreContainer.style.cssText = "text-align: center; margin: 32px 0; display: none;";
+        loadMoreContainer.style.cssText = "text-align: center; margin: 30px auto; width: 100%; display: none;";
         loadMoreContainer.innerHTML = `
-            <button id="loadMoreBtn" class="load-more-btn" style="padding: 12px 32px; font-size: 15px; font-weight: 600; border-radius: 12px; background: var(--accent, #6366f1); color: #fff; border: none; cursor: pointer; transition: all 0.2s ease;">
+            <button id="loadMoreBtn" class="btn-load-more" style="background: var(--primary-color, #4f46e5); color: white; border: none; padding: 12px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); transition: all 0.2s;">
                 <i class="fas fa-spinner fa-spin" style="display:none; margin-right: 8px;"></i>
                 <span>Daha çox göstər</span>
             </button>
@@ -175,6 +184,106 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     const loadMoreBtn = document.getElementById("loadMoreBtn");
+    let activeExtraFilters = {};
+
+    function buildQueryParams(targetPage) {
+        const liveParams = new URLSearchParams(window.location.search);
+        const query = new URLSearchParams();
+        const activeSort = activeExtraFilters.sort || activeExtraFilters.sortBy || liveParams.get('sort') || liveParams.get('sortBy') || 'newest';
+        const effectiveCat = activeExtraFilters.category || liveParams.get('category') || cat || 'phone';
+
+        query.set('page', String(targetPage));
+        query.set('limit', '20');
+        query.set('sort', activeSort);
+        query.set('sortBy', activeSort);
+        if (effectiveCat && effectiveCat !== 'all') {
+            query.set('category', effectiveCat);
+        }
+
+        const filterKeys = [
+            'q', 'brand', 'model', 'city', 'condition',
+            'minPrice', 'maxPrice', 'storage', 'memory', 'ram',
+            'color', 'screen', 'battery', 'nfc', 'waterproof',
+            'fingerprint', 'expandable', 'delivery', 'seller',
+            'sellerType', 'promotionType'
+        ];
+        filterKeys.forEach((key) => {
+            let val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '' && activeExtraFilters[key] !== null)
+                ? activeExtraFilters[key]
+                : liveParams.get(key);
+            if (key === 'color' && (!val || val === '') && Array.isArray(activeExtraFilters.colors) && activeExtraFilters.colors.length) {
+                val = activeExtraFilters.colors.join(',');
+            }
+            if (val === null || val === undefined || val === '') return;
+            if (typeof val === 'number' && (!Number.isFinite(val) || val === 0)) return;
+            const strVal = String(val).trim();
+            if (!strVal || strVal === 'any' || strVal === 'both' || strVal === 'Infinity' || strVal === 'NaN' || strVal === 'null' || strVal === 'undefined' || strVal === '0') return;
+            query.set(key, strVal);
+        });
+        return { query, activeSort };
+    }
+
+    async function fetchCatalogAds(isInitial = true, filterOverrides = null) {
+        if (filterOverrides && typeof filterOverrides === 'object') {
+            activeExtraFilters = Object.assign({}, filterOverrides);
+        }
+        if (isInitial) {
+            page = 1;
+            if (window.renderSkeletons) {
+                window.renderSkeletons(container, 6);
+            } else {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Yüklənir...</div>';
+            }
+        }
+
+        const { query, activeSort } = buildQueryParams(page);
+        let ads = [];
+        let totalPages = 1;
+
+        if (window.api && typeof window.api.get === 'function') {
+            const res = await window.api.get(`/ads?${query.toString()}`);
+            ads = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
+            totalPages = res.data?.totalPages || 1;
+        } else {
+            const res = await fetch(`${API_BASE}/ads?${query.toString()}`);
+            const data = await res.json();
+            ads = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
+            totalPages = data?.totalPages || 1;
+        }
+
+        if (window.removeSkeletons) window.removeSkeletons(container);
+
+        if (isInitial) {
+            if (!ads || ads.length === 0) {
+                const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                const emptyText = (lang === 'RUS' || lang === 'RU') ? 'Объявлений не найдено.' : ((lang === 'ENG' || lang === 'EN') ? 'No ads found.' : 'Heç bir elan tapılmadı.');
+                container.innerHTML = `<div class="cab-glass" style="grid-column: 1/-1; padding: 32px; text-align: center; color: var(--text-muted); border-radius: 16px;">${emptyText}</div>`;
+                if (loadMoreContainer) loadMoreContainer.style.display = "none";
+                hasMore = false;
+                return { count: 0, ads: [] };
+            }
+            ads = sortAds(ads, activeSort);
+            container.style.display = 'grid';
+            container.innerHTML = ads.map(createCardMarkup).join('');
+        } else if (ads.length > 0) {
+            container.insertAdjacentHTML('beforeend', ads.map(createCardMarkup).join(''));
+        }
+
+        if (ads.length >= 20 && totalPages > page) {
+            hasMore = true;
+            if (loadMoreContainer) loadMoreContainer.style.display = "block";
+        } else {
+            hasMore = false;
+            if (loadMoreContainer) loadMoreContainer.style.display = "none";
+        }
+
+        if (typeof window.syncFavoritesUI === 'function') {
+            window.syncFavoritesUI();
+        } else if (typeof window.initFavorites === 'function') {
+            window.initFavorites();
+        }
+        return { count: ads.length, ads };
+    }
 
     async function loadMore() {
         if (isLoadingMore || !hasMore) return;
@@ -187,36 +296,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         page++;
         try {
-            const activeSort = params.get('sort') || params.get('sortBy') || 'newest';
-            const sortQuery = `&sort=${encodeURIComponent(activeSort)}&sortBy=${encodeURIComponent(activeSort)}`;
-            let nextAds = [];
-            let totalPages = 1;
-            if (window.api && typeof window.api.get === 'function') {
-                const res = await window.api.get(`/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
-                nextAds = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
-                totalPages = res.data?.totalPages || 1;
-            } else {
-                const res = await fetch(`${API_BASE}/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
-                const data = await res.json();
-                nextAds = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
-                totalPages = data?.totalPages || 1;
-            }
-
-            if (nextAds.length > 0) {
-                const newHtml = nextAds.map(createCardMarkup).join('');
-                container.insertAdjacentHTML('beforeend', newHtml);
-
-                if (typeof window.syncFavoritesUI === 'function') {
-                    window.syncFavoritesUI();
-                } else if (typeof window.initFavorites === 'function') {
-                    window.initFavorites();
-                }
-            }
-
-            if (nextAds.length < 20 || page >= totalPages) {
-                hasMore = false;
-                if (loadMoreContainer) loadMoreContainer.style.display = "none";
-            }
+            await fetchCatalogAds(false);
         } catch (err) {
             console.error("Daha çox elan yüklənərkən xəta:", err);
             page--;
@@ -229,47 +309,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     window.loadMore = loadMore;
+    window.searchAdsFromAPI = async function (filterArg) {
+        let overrides = {};
+        if (typeof filterArg === 'string') {
+            overrides = { q: filterArg.trim() };
+        } else if (filterArg && typeof filterArg === 'object') {
+            overrides = Object.assign({}, filterArg);
+        }
+        return await fetchCatalogAds(true, overrides);
+    };
+    window.reloadAllAds = async function () {
+        activeExtraFilters = {};
+        return await fetchCatalogAds(true, {});
+    };
+
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener("click", loadMore);
     }
 
     try {
-        if (window.renderSkeletons) {
-            window.renderSkeletons(container, 6);
-        } else {
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Yüklənir...</div>';
-        }
+        await fetchCatalogAds(true);
 
         const activeSort = params.get('sort') || params.get('sortBy') || 'newest';
-        const sortQuery = `&sort=${encodeURIComponent(activeSort)}&sortBy=${encodeURIComponent(activeSort)}`;
-
-        let ads = [];
-        let totalPages = 1;
-        if (window.api && typeof window.api.get === 'function') {
-            const res = await window.api.get(`/ads?category=${cat}&page=1&limit=20${sortQuery}`);
-            ads = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
-            totalPages = res.data?.totalPages || 1;
-        } else {
-            const res = await fetch(`${API_BASE}/ads?category=${cat}&page=1&limit=20${sortQuery}`);
-            const data = await res.json();
-            ads = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
-            totalPages = data?.totalPages || 1;
-        }
-
-        if (window.removeSkeletons) window.removeSkeletons(container);
-
-        if (!ads || ads.length === 0) {
-            container.innerHTML = '<div class="cab-glass" style="grid-column: 1/-1; padding: 32px; text-align: center; color: var(--text-muted); border-radius: 16px;">Heç bir elan tapılmadı.</div>';
-            if (loadMoreContainer) loadMoreContainer.style.display = "none";
-            return;
-        }
-
-        // Apply numeric sort client-side as well
-        ads = sortAds(ads, activeSort);
-
-        container.style.display = 'grid';
-        container.innerHTML = ads.map(createCardMarkup).join('');
-
         const sortingSelect = document.getElementById("sortingOptions");
         if (sortingSelect) {
             if (activeSort === "price_desc" || activeSort === "price-high") sortingSelect.value = "price-high";
@@ -288,26 +349,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (typeof window.sortAds === "function") {
                     window.sortAds(chosen);
                 } else {
-                    ads = sortAds(ads, chosen);
-                    container.innerHTML = ads.map(createCardMarkup).join('');
+                    fetchCatalogAds(true, Object.assign({}, activeExtraFilters, { sort: chosen, sortBy: chosen }));
                 }
             });
-        }
-        container.innerHTML = ads.map(createCardMarkup).join('');
-
-        if (ads.length >= 20 && totalPages > 1) {
-            hasMore = true;
-            if (loadMoreContainer) loadMoreContainer.style.display = "block";
-        } else {
-            hasMore = false;
-            if (loadMoreContainer) loadMoreContainer.style.display = "none";
-        }
-
-        // Sync favorite buttons
-        if (typeof window.syncFavoritesUI === 'function') {
-            window.syncFavoritesUI();
-        } else if (typeof window.initFavorites === 'function') {
-            window.initFavorites();
         }
     } catch (err) {
         console.error("Elanlar yüklənərkən xəta:", err);
@@ -316,6 +360,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     document.addEventListener("mobilaz:languagechange", () => {
+        updateCategoryHeading();
         const i18n = window.MobilazI18n;
         if (!i18n) return;
         document.querySelectorAll(".ad-card").forEach((card) => {
