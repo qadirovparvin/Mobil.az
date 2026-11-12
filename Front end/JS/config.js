@@ -685,11 +685,414 @@ function handleGenericApiError(status) {
                                      reqUrl.includes('/favorites') ||
                                      reqUrl.includes('/categories') ||
                                      reqUrl.includes('/auth/refresh');
-            if (!init.silent && !isBackgroundCall && err?.name !== 'AbortError') {
+                if (!init.silent && !isBackgroundCall && err?.name !== 'AbortError') {
                 window.toast?.show('Şəbəkə xətası baş verdi. İnternet bağlantınızı yoxlayın.', 'error');
             }
             throw err;
         });
     };
     window.secureFetch = window.fetch;
+})();
+
+// === MOBILAZ SHARED I18N HELPER ===
+(function() {
+    function getLang() {
+        try {
+            var raw = (localStorage.getItem('lang') || 'AZ').trim().toUpperCase();
+            if (raw === 'RU' || raw === 'РУС') return 'RUS';
+            if (raw === 'EN') return 'ENG';
+            if (raw === 'RUS' || raw === 'ENG' || raw === 'AZ') return raw;
+        } catch (e) {}
+        return 'AZ';
+    }
+
+    var CITIES = {
+        'bakı': { AZ: 'Bakı', RUS: 'Баку', ENG: 'Baku' },
+        'baki': { AZ: 'Bakı', RUS: 'Баку', ENG: 'Baku' },
+        'baku': { AZ: 'Bakı', RUS: 'Баку', ENG: 'Baku' },
+        'sumqayıt': { AZ: 'Sumqayıt', RUS: 'Сумгайыт', ENG: 'Sumqayit' },
+        'sumqayit': { AZ: 'Sumqayıt', RUS: 'Сумгайыт', ENG: 'Sumqayit' },
+        'gəncə': { AZ: 'Gəncə', RUS: 'Гянджа', ENG: 'Ganja' },
+        'gence': { AZ: 'Gəncə', RUS: 'Гянджа', ENG: 'Ganja' },
+        'abşeron': { AZ: 'Abşeron', RUS: 'Апшерон', ENG: 'Absheron' },
+        'abseron': { AZ: 'Abşeron', RUS: 'Апшерон', ENG: 'Absheron' },
+        'ağcabədi': { AZ: 'Ağcabədi', RUS: 'Агджабеди', ENG: 'Aghjabadi' },
+        'ağdam': { AZ: 'Ağdam', RUS: 'Агдам', ENG: 'Aghdam' },
+        'ağdaş': { AZ: 'Ağdaş', RUS: 'Агдаш', ENG: 'Aghdash' },
+        'ağstafa': { AZ: 'Ağstafa', RUS: 'Агстафа', ENG: 'Aghstafa' },
+        'ağsu': { AZ: 'Ağsu', RUS: 'Агсу', ENG: 'Aghsu' },
+        'astara': { AZ: 'Astara', RUS: 'Астара', ENG: 'Astara' },
+        'balakən': { AZ: 'Balakən', RUS: 'Балакен', ENG: 'Balakan' },
+        'beyləqan': { AZ: 'Beyləqan', RUS: 'Бейляган', ENG: 'Beylagan' },
+        'bərdə': { AZ: 'Bərdə', RUS: 'Барда', ENG: 'Barda' },
+        'biləsuvar': { AZ: 'Biləsuvar', RUS: 'Билясувар', ENG: 'Bilasuvar' },
+        'daşkəsən': { AZ: 'Daşkəsən', RUS: 'Дашкесан', ENG: 'Dashkasan' },
+        'füzuli': { AZ: 'Füzuli', RUS: 'Физули', ENG: 'Fuzuli' },
+        'gədəbəy': { AZ: 'Gədəbəy', RUS: 'Гедабек', ENG: 'Gadabay' },
+        'goranboy': { AZ: 'Goranboy', RUS: 'Горанбой', ENG: 'Goranboy' },
+        'göyçay': { AZ: 'Göyçay', RUS: 'Гейчай', ENG: 'Goychay' },
+        'göygöl': { AZ: 'Göygöl', RUS: 'Гейгёль', ENG: 'Goygol' },
+        'hacıqabul': { AZ: 'Hacıqabul', RUS: 'Хаджигабул', ENG: 'Hajigabul' },
+        'imişli': { AZ: 'İmişli', RUS: 'Имишли', ENG: 'Imishli' },
+        'ismayıllı': { AZ: 'İsmayıllı', RUS: 'Исмаиллы', ENG: 'Ismayilli' },
+        'cəbrayıl': { AZ: 'Cəbrayıl', RUS: 'Джабраил', ENG: 'Jabrayil' },
+        'cəlilabad': { AZ: 'Cəlilabad', RUS: 'Джалилабад', ENG: 'Jalilabad' },
+        'kəlbəcər': { AZ: 'Kəlbəcər', RUS: 'Кельбаджар', ENG: 'Kalbajar' },
+        'kürdəmir': { AZ: 'Kürdəmir', RUS: 'Кюрдамир', ENG: 'Kurdamir' },
+        'laçın': { AZ: 'Laçın', RUS: 'Лачин', ENG: 'Lachin' },
+        'lənkəran': { AZ: 'Lənkəran', RUS: 'Ленкорань', ENG: 'Lankaran' },
+        'lerik': { AZ: 'Lerik', RUS: 'Лерик', ENG: 'Lerik' },
+        'masallı': { AZ: 'Masallı', RUS: 'Масаллы', ENG: 'Masalli' },
+        'mingəçevir': { AZ: 'Mingəçevir', RUS: 'Мингячевир', ENG: 'Mingachevir' },
+        'naftalan': { AZ: 'Naftalan', RUS: 'Нафталан', ENG: 'Naftalan' },
+        'naxçıvan': { AZ: 'Naxçıvan', RUS: 'Нахчыван', ENG: 'Nakhchivan' },
+        'neftçala': { AZ: 'Neftçala', RUS: 'Нефтчала', ENG: 'Neftchala' },
+        'oğuz': { AZ: 'Oğuz', RUS: 'Огуз', ENG: 'Oguz' },
+        'qəbələ': { AZ: 'Qəbələ', RUS: 'Габала', ENG: 'Qabala' },
+        'qax': { AZ: 'Qax', RUS: 'Гах', ENG: 'Qakh' },
+        'qazax': { AZ: 'Qazax', RUS: 'Казах', ENG: 'Qazakh' },
+        'quba': { AZ: 'Quba', RUS: 'Губа', ENG: 'Quba' },
+        'qubadlı': { AZ: 'Qubadlı', RUS: 'Губадлы', ENG: 'Qubadli' },
+        'qusar': { AZ: 'Qusar', RUS: 'Гусар', ENG: 'Qusar' },
+        'saatlı': { AZ: 'Saatlı', RUS: 'Саатлы', ENG: 'Saatli' },
+        'sabirabad': { AZ: 'Sabirabad', RUS: 'Сабирабад', ENG: 'Sabirabad' },
+        'salyan': { AZ: 'Salyan', RUS: 'Сальян', ENG: 'Salyan' },
+        'şabran': { AZ: 'Şabran', RUS: 'Шабран', ENG: 'Shabran' },
+        'şəki': { AZ: 'Şəki', RUS: 'Шеки', ENG: 'Shaki' },
+        'şamaxı': { AZ: 'Şamaxı', RUS: 'Шемаха', ENG: 'Shamakhi' },
+        'şirvan': { AZ: 'Şirvan', RUS: 'Ширван', ENG: 'Shirvan' },
+        'şuşa': { AZ: 'Şuşa', RUS: 'Шуша', ENG: 'Shusha' },
+        'siyəzən': { AZ: 'Siyəzən', RUS: 'Сиязань', ENG: 'Siazan' },
+        'tərtər': { AZ: 'Tərtər', RUS: 'Тертер', ENG: 'Tartar' },
+        'tovuz': { AZ: 'Tovuz', RUS: 'Товуз', ENG: 'Tovuz' },
+        'ucar': { AZ: 'Ucar', RUS: 'Уджар', ENG: 'Ujar' },
+        'xırdalan': { AZ: 'Xırdalan', RUS: 'Хырдалан', ENG: 'Khirdalan' },
+        'xırdalan (abşeron)': { AZ: 'Xırdalan', RUS: 'Хырдалан', ENG: 'Khirdalan' },
+        'xudat': { AZ: 'Xudat', RUS: 'Худат', ENG: 'Khudat' },
+        'xaçmaz': { AZ: 'Xaçmaz', RUS: 'Хачмаз', ENG: 'Khachmaz' },
+        'yardımlı': { AZ: 'Yardımlı', RUS: 'Ярдымлы', ENG: 'Yardimli' },
+        'yevlax': { AZ: 'Yevlax', RUS: 'Евлах', ENG: 'Yevlakh' },
+        'zəngilan': { AZ: 'Zəngilan', RUS: 'Зангилан', ENG: 'Zangilan' },
+        'zaqatala': { AZ: 'Zaqatala', RUS: 'Закаталы', ENG: 'Zaqatala' },
+        'zərdab': { AZ: 'Zərdab', RUS: 'Зардаб', ENG: 'Zardab' },
+        'digər': { AZ: 'Digər', RUS: 'Другой', ENG: 'Other' }
+    };
+
+    var CATEGORIES = {
+        'telefon': { AZ: 'Telefon', RUS: 'Телефон', ENG: 'Phone' },
+        'phone': { AZ: 'Telefon', RUS: 'Телефон', ENG: 'Phone' },
+        'telefonlar': { AZ: 'Telefonlar', RUS: 'Телефоны', ENG: 'Phones' },
+        'planşet': { AZ: 'Planşet', RUS: 'Планшет', ENG: 'Tablet' },
+        'planset': { AZ: 'Planşet', RUS: 'Планшет', ENG: 'Tablet' },
+        'tablet': { AZ: 'Planşet', RUS: 'Планшет', ENG: 'Tablet' },
+        'aksesuar': { AZ: 'Aksesuar', RUS: 'Аксессуар', ENG: 'Accessory' },
+        'aksessuar': { AZ: 'Aksesuar', RUS: 'Аксессуар', ENG: 'Accessory' },
+        'accessory': { AZ: 'Aksesuar', RUS: 'Аксессуар', ENG: 'Accessory' },
+        'qulaqlıq': { AZ: 'Qulaqlıq', RUS: 'Наушники', ENG: 'Headphones' },
+        'qulaqliq': { AZ: 'Qulaqlıq', RUS: 'Наушники', ENG: 'Headphones' },
+        'headphone': { AZ: 'Qulaqlıq', RUS: 'Наушники', ENG: 'Headphones' },
+        'smart saat': { AZ: 'Smart Saat', RUS: 'Смарт-часы', ENG: 'Smartwatch' },
+        'watch': { AZ: 'Smart Saat', RUS: 'Смарт-часы', ENG: 'Smartwatch' }
+    };
+
+    var CONDITIONS = {
+        'yeni': { AZ: 'Yeni', RUS: 'Новый', ENG: 'New' },
+        'new': { AZ: 'Yeni', RUS: 'Новый', ENG: 'New' },
+        'işlənmiş': { AZ: 'İşlənmiş', RUS: 'Б/у', ENG: 'Used' },
+        'islenmis': { AZ: 'İşlənmiş', RUS: 'Б/у', ENG: 'Used' },
+        'used': { AZ: 'İşlənmiş', RUS: 'Б/у', ENG: 'Used' },
+        'təmir olunub': { AZ: 'Təmir olunub', RUS: 'После ремонта', ENG: 'Refurbished' },
+        'temir-olunub': { AZ: 'Təmir olunub', RUS: 'После ремонта', ENG: 'Refurbished' },
+        'refurbished': { AZ: 'Təmir olunub', RUS: 'После ремонта', ENG: 'Refurbished' }
+    };
+
+    var COLORS = {
+        'black': { AZ: 'Qara', RUS: 'Чёрный', ENG: 'Black' },
+        'qara': { AZ: 'Qara', RUS: 'Чёрный', ENG: 'Black' },
+        'white': { AZ: 'Ağ', RUS: 'Белый', ENG: 'White' },
+        'ağ': { AZ: 'Ağ', RUS: 'Белый', ENG: 'White' },
+        'ag': { AZ: 'Ağ', RUS: 'Белый', ENG: 'White' },
+        'gold': { AZ: 'Qızılı', RUS: 'Золотой', ENG: 'Gold' },
+        'qızılı': { AZ: 'Qızılı', RUS: 'Золотой', ENG: 'Gold' },
+        'silver': { AZ: 'Gümüşü', RUS: 'Серебристый', ENG: 'Silver' },
+        'gümüşü': { AZ: 'Gümüşü', RUS: 'Серебристый', ENG: 'Silver' },
+        'grey': { AZ: 'Boz', RUS: 'Серый', ENG: 'Grey' },
+        'gray': { AZ: 'Boz', RUS: 'Серый', ENG: 'Grey' },
+        'boz': { AZ: 'Boz', RUS: 'Серый', ENG: 'Grey' },
+        'graphite': { AZ: 'Qrafit', RUS: 'Графитовый', ENG: 'Graphite' },
+        'qrafit': { AZ: 'Qrafit', RUS: 'Графитовый', ENG: 'Graphite' },
+        'blue': { AZ: 'Mavi', RUS: 'Голубой', ENG: 'Blue' },
+        'mavi': { AZ: 'Mavi', RUS: 'Голубой', ENG: 'Blue' },
+        'darkblue': { AZ: 'Göy (Tünd Mavi)', RUS: 'Тёмно-синий', ENG: 'Dark Blue' },
+        'göy': { AZ: 'Göy (Tünd Mavi)', RUS: 'Тёмно-синий', ENG: 'Dark Blue' },
+        'green': { AZ: 'Yaşıl', RUS: 'Зелёный', ENG: 'Green' },
+        'yaşıl': { AZ: 'Yaşıl', RUS: 'Зелёный', ENG: 'Green' },
+        'emerald': { AZ: 'Zümrüd Yaşılı', RUS: 'Изумрудный', ENG: 'Emerald Green' },
+        'yellow': { AZ: 'Sarı', RUS: 'Жёлтый', ENG: 'Yellow' },
+        'sarı': { AZ: 'Sarı', RUS: 'Жёлтый', ENG: 'Yellow' },
+        'red': { AZ: 'Qırmızı', RUS: 'Красный', ENG: 'Red' },
+        'qırmızı': { AZ: 'Qırmızı', RUS: 'Красный', ENG: 'Red' },
+        'pink': { AZ: 'Çəhrayı', RUS: 'Розовый', ENG: 'Pink' },
+        'çəhrayı': { AZ: 'Çəhrayı', RUS: 'Розовый', ENG: 'Pink' },
+        'purple': { AZ: 'Bənövşəyi', RUS: 'Фиолетовый', ENG: 'Purple' },
+        'bənövşəyi': { AZ: 'Bənövşəyi', RUS: 'Фиолетовый', ENG: 'Purple' },
+        'deeppurple': { AZ: 'Dərin Bənövşəyi', RUS: 'Тёмно-фиолетовый', ENG: 'Deep Purple' },
+        'orange': { AZ: 'Narıncı', RUS: 'Оранжевый', ENG: 'Orange' },
+        'narıncı': { AZ: 'Narıncı', RUS: 'Оранжевый', ENG: 'Orange' },
+        'titanium-black': { AZ: 'Titan Qara', RUS: 'Чёрный титан', ENG: 'Black Titanium' },
+        'titan qara': { AZ: 'Titan Qara', RUS: 'Чёрный титан', ENG: 'Black Titanium' },
+        'titanium-natural': { AZ: 'Titan Təbii', RUS: 'Натуральный титан', ENG: 'Natural Titanium' },
+        'titanium-white': { AZ: 'Titan Ağ', RUS: 'Белый титан', ENG: 'White Titanium' },
+        'titanium-blue': { AZ: 'Titan Göy', RUS: 'Синий титан', ENG: 'Blue Titanium' },
+        'titanium-desert': { AZ: 'Titan Çöl', RUS: 'Пустынный титан', ENG: 'Desert Titanium' },
+        'bronze': { AZ: 'Bürünc', RUS: 'Бронзовый', ENG: 'Bronze' },
+        'beige': { AZ: 'Bej', RUS: 'Бежевый', ENG: 'Beige' },
+        'brown': { AZ: 'Qəhvəyi', RUS: 'Коричневый', ENG: 'Brown' },
+        'qəhvəyi': { AZ: 'Qəhvəyi', RUS: 'Коричневый', ENG: 'Brown' },
+        'mint': { AZ: 'Nanə yaşılı', RUS: 'Мятный', ENG: 'Mint' },
+        'lavender': { AZ: 'Lavanda', RUS: 'Лавандовый', ENG: 'Lavender' },
+        'transparent': { AZ: 'Şəffaf', RUS: 'Прозрачный', ENG: 'Transparent' },
+        'other': { AZ: 'Digər', RUS: 'Другой', ENG: 'Other' },
+        'digər': { AZ: 'Digər', RUS: 'Другой', ENG: 'Other' }
+    };
+
+    var SPEC_VALUES = {
+        'silikon': { AZ: 'Silikon', RUS: 'Силикон', ENG: 'Silicone' },
+        'şəffaf plastik': { AZ: 'Şəffaf plastik', RUS: 'Прозрачный пластик', ENG: 'Clear plastic' },
+        'dəri': { AZ: 'Dəri', RUS: 'Кожа', ENG: 'Leather' },
+        'karbon': { AZ: 'Karbon', RUS: 'Карбон', ENG: 'Carbon' },
+        'zərbəyə davamlı': { AZ: 'Zərbəyə davamlı', RUS: 'Ударопрочный', ENG: 'Shockproof' },
+        'alcantara': { AZ: 'Alcantara', RUS: 'Алькантара', ENG: 'Alcantara' },
+        'digər': { AZ: 'Digər', RUS: 'Другое', ENG: 'Other' },
+        'tam örtən şüşə': { AZ: 'Tam örtən şüşə', RUS: 'Полноэкранное стекло', ENG: 'Full cover glass' },
+        'anti-spy': { AZ: 'Anti-Spy', RUS: 'Антишпион (Anti-Spy)', ENG: 'Anti-Spy Privacy' },
+        'keramika': { AZ: 'Keramika', RUS: 'Керамика', ENG: 'Ceramic' },
+        'hidrogel': { AZ: 'Hidrogel', RUS: 'Гидрогель', ENG: 'Hydrogel' },
+        'mat': { AZ: 'Mat', RUS: 'Матовое', ENG: 'Matte' },
+        'şəffaf sadə': { AZ: 'Şəffaf sadə', RUS: 'Обычное прозрачное', ENG: 'Clear standard' },
+        'simsiz (bluetooth / tws)': { AZ: 'Simsiz (Bluetooth / TWS)', RUS: 'Беспроводные (Bluetooth / TWS)', ENG: 'Wireless (Bluetooth / TWS)' },
+        'naqilli (3.5 mm)': { AZ: 'Naqilli (3.5 mm)', RUS: 'Проводные (3.5 мм)', ENG: 'Wired (3.5 mm)' },
+        'type-c / lightning': { AZ: 'Type-C / Lightning', RUS: 'Type-C / Lightning', ENG: 'Type-C / Lightning' },
+        'qulaqdaxili (in-ear)': { AZ: 'Qulaqdaxili (In-Ear)', RUS: 'Внутриканальные (In-Ear)', ENG: 'In-Ear' },
+        'qulaqüstü (over-ear)': { AZ: 'Qulaqüstü (Over-Ear)', RUS: 'Полноразмерные (Over-Ear)', ENG: 'Over-Ear' },
+        'açıq tipli (earbuds)': { AZ: 'Açıq tipli (Earbuds)', RUS: 'Вкладыши (Earbuds)', ENG: 'Earbuds' },
+        'ikili port (type-c + usb-a)': { AZ: 'İkili port (Type-C + USB-A)', RUS: 'Двойной порт (Type-C + USB-A)', ENG: 'Dual port (Type-C + USB-A)' },
+        'simsiz / magsafe': { AZ: 'Simsiz / MagSafe', RUS: 'Беспроводная / MagSafe', ENG: 'Wireless / MagSafe' },
+        '3-ü 1-də universal': { AZ: '3-ü 1-də Universal', RUS: 'Универсальный 3-в-1', ENG: '3-in-1 Universal' },
+        '1 metr': { AZ: '1 metr', RUS: '1 метр', ENG: '1 meter' },
+        '1.5 metr': { AZ: '1.5 metr', RUS: '1.5 метра', ENG: '1.5 meters' },
+        '2 metr': { AZ: '2 metr', RUS: '2 метра', ENG: '2 meters' },
+        '3 metr': { AZ: '3 metr', RUS: '3 метра', ENG: '3 meters' }
+    };
+
+    var MONTHS = {
+        AZ: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'],
+        RUS: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+        ENG: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    };
+
+    var UI_STRINGS = {
+        views: { AZ: 'baxış', RUS: 'просм.', ENG: 'views' },
+        noDescription: { AZ: 'Açıqlama yoxdur.', RUS: 'Описание отсутствует.', ENG: 'No description.' },
+        storageChip: { AZ: 'Yaddaş', RUS: 'Память', ENG: 'Storage' },
+        ramChip: { AZ: 'RAM', RUS: 'ОЗУ', ENG: 'RAM' },
+        gb: { AZ: 'GB', RUS: 'ГБ', ENG: 'GB' },
+        mah: { AZ: 'mAh', RUS: 'мАч', ENG: 'mAh' },
+        var: { AZ: 'Var', RUS: 'Есть', ENG: 'Available' },
+        yoxdur: { AZ: 'Yoxdur', RUS: 'Нет', ENG: 'None' },
+        yesVar: { AZ: '✓ Var', RUS: '✓ Есть', ENG: '✓ Yes' },
+        personalAccount: { AZ: 'Şəxsi hesab', RUS: 'Частное лицо', ENG: 'Personal account' },
+        store: { AZ: 'Mağaza', RUS: 'Магазин', ENG: 'Store' },
+        private: { AZ: 'Şəxsi', RUS: 'Частное', ENG: 'Private' },
+        urgent: { AZ: 'Təcili', RUS: 'Срочно', ENG: 'Urgent' },
+        officialStore: { AZ: 'Rəsmi Mağaza', RUS: 'Официальный магазин', ENG: 'Official Store' },
+        viewStore: { AZ: 'Mağazaya bax', RUS: 'Перейти в магазин', ENG: 'View store' },
+        deletedUser: { AZ: 'Silinmiş istifadəçi', RUS: 'Удалённый пользователь', ENG: 'Deleted user' },
+        user: { AZ: 'İstifadəçi', RUS: 'Пользователь', ENG: 'User' },
+        rating: { AZ: '★ Reytinq', RUS: '★ Рейтинг', ENG: '★ Rating' },
+        review: { AZ: 'Rəy', RUS: 'Отзывов', ENG: 'Reviews' },
+        basedOnReviews: { AZ: 'rəy əsasında', RUS: 'на основе отзывов', ENG: 'based on reviews' },
+        noReviews: { AZ: 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!', RUS: 'Отзывов об этом продавце пока нет. Оставьте первый отзыв!', ENG: 'No reviews for this seller yet. Be the first to review!' },
+        editBtn: { AZ: 'Düzəliş Et', RUS: 'Редактировать', ENG: 'Edit' },
+        deleteBtn: { AZ: 'Elanı Sil', RUS: 'Удалить объявление', ENG: 'Delete Ad' },
+        deleteConfirm: { AZ: 'Bu elanı silmək istədiyinizə əminsiniz?', RUS: 'Вы уверены, что хотите удалить это объявление?', ENG: 'Are you sure you want to delete this ad?' },
+        adDeleted: { AZ: 'Elan silindi!', RUS: 'Объявление удалено!', ENG: 'Ad deleted!' },
+        deleteErr: { AZ: 'Silinmə zamanı xəta oldu.', RUS: 'Ошибка при удалении.', ENG: 'Error deleting ad.' },
+        networkErr: { AZ: 'Şəbəkə xətası baş verdi.', RUS: 'Произошла ошибка сети.', ENG: 'Network error occurred.' },
+        loginToMessage: { AZ: 'Mesaj yazmaq üçün sistemə daxil olun!', RUS: 'Войдите в систему, чтобы написать сообщение!', ENG: 'Please log in to send a message!' },
+        loginToReview: { AZ: 'Rəy yazmaq üçün daxil olun!', RUS: 'Войдите, чтобы оставить отзыв!', ENG: 'Please log in to write a review!' },
+        selectRating: { AZ: 'Zəhmət olmasa reytinq seçin (ulduz)', RUS: 'Пожалуйста, выберите оценку (звёзды)', ENG: 'Please select a star rating' },
+        sending: { AZ: 'Göndərilir...', RUS: 'Отправка...', ENG: 'Sending...' },
+        reviewAdded: { AZ: 'Rəy uğurla əlavə edildi!', RUS: 'Отзыв успешно добавлен!', ENG: 'Review added successfully!' },
+        errOccurred: { AZ: 'Xəta baş verdi', RUS: 'Произошла ошибка', ENG: 'An error occurred' },
+        toastFavAdd: { AZ: 'Seçilmişlərə əlavə edildi!', RUS: 'Добавлено в избранное!', ENG: 'Added to favorites!' },
+        toastFavRemove: { AZ: 'Seçilmişlərdən çıxarıldı!', RUS: 'Удалено из избранного!', ENG: 'Removed from favorites!' },
+        toastLinkCopied: { AZ: 'Link kopyalandı!', RUS: 'Ссылка скопирована!', ENG: 'Link copied!' },
+        toastReportAccepted: { AZ: 'Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.', RUS: 'Жалоба принята. Модераторы проверят её.', ENG: 'Report received. Our moderators will review it.' },
+        adFallback: { AZ: 'Elan', RUS: 'Объявление', ENG: 'Ad' },
+        noImageAlt: { AZ: 'Elan şəkli yoxdur', RUS: 'Нет фото', ENG: 'No photo' },
+        untitledAd: { AZ: 'Adsız Elan', RUS: 'Объявление без названия', ENG: 'Untitled Ad' },
+        // Spec row labels
+        lblCategory: { AZ: 'Kateqoriya', RUS: 'Категория', ENG: 'Category' },
+        lblBrand: { AZ: 'Marka', RUS: 'Марка', ENG: 'Brand' },
+        lblModel: { AZ: 'Model', RUS: 'Модель', ENG: 'Model' },
+        lblMemory: { AZ: 'Yaddaş', RUS: 'Память', ENG: 'Storage' },
+        lblRam: { AZ: 'RAM', RUS: 'ОЗУ', ENG: 'RAM' },
+        lblScreen: { AZ: 'Ekran ölçüsü', RUS: 'Размер экрана', ENG: 'Screen size' },
+        lblBattery: { AZ: 'Batareya', RUS: 'Аккумулятор', ENG: 'Battery' },
+        lblMaterial: { AZ: 'Material', RUS: 'Материал', ENG: 'Material' },
+        lblGlassType: { AZ: 'Qoruyucu növü', RUS: 'Тип защиты', ENG: 'Protector type' },
+        lblConnType: { AZ: 'Qoşulma növü', RUS: 'Тип подключения', ENG: 'Connection type' },
+        lblHeadphoneType: { AZ: 'Qulaqlıq forması', RUS: 'Тип наушников', ENG: 'Headphone type' },
+        lblPower: { AZ: 'Çıxış gücü', RUS: 'Выходная мощность', ENG: 'Output power' },
+        lblPortType: { AZ: 'Port növü', RUS: 'Тип порта', ENG: 'Port type' },
+        lblCableType: { AZ: 'Kabel növü', RUS: 'Тип кабеля', ENG: 'Cable type' },
+        lblCableLength: { AZ: 'Uzunluq', RUS: 'Длина', ENG: 'Length' },
+        lblColor: { AZ: 'Rəng', RUS: 'Цвет', ENG: 'Color' },
+        lblCondition: { AZ: 'Vəziyyəti', RUS: 'Состояние', ENG: 'Condition' },
+        lblInfo: { AZ: 'Məlumat', RUS: 'Информация', ENG: 'Info' },
+        // Feature names
+        featNfc: { AZ: 'NFC', RUS: 'NFC', ENG: 'NFC' },
+        featWaterproofChip: { AZ: 'Suya davamlı', RUS: 'Влагозащита', ENG: 'Waterproof' },
+        featWaterproofRow: { AZ: 'Suya davamlılıq', RUS: 'Влагозащита', ENG: 'Water resistance' },
+        featFingerprint: { AZ: 'Barmaq izi', RUS: 'Отпечаток пальца', ENG: 'Fingerprint' },
+        featExpandableChip: { AZ: 'Yaddaş kartı dəstəyi', RUS: 'Слот для карты памяти', ENG: 'Memory card slot' },
+        featExpandableRow: { AZ: 'Əlavə yaddaş kartı', RUS: 'Карта памяти', ENG: 'Expandable storage' },
+        featMagsafe: { AZ: 'MagSafe', RUS: 'MagSafe', ENG: 'MagSafe' },
+        featMagsafeRow: { AZ: 'MagSafe dəstəyi', RUS: 'Поддержка MagSafe', ENG: 'MagSafe support' },
+        featAnc: { AZ: 'ANC (Küyboğma)', RUS: 'Шумоподавление (ANC)', ENG: 'Active Noise Cancelling' },
+        featFastCharge: { AZ: 'Sürətli şarj', RUS: 'Быстрая зарядка', ENG: 'Fast charging' },
+        featWirelessCharge: { AZ: 'Simsiz şarj', RUS: 'Беспроводная зарядка', ENG: 'Wireless charging' },
+        featMicrophone: { AZ: 'Mikrofon', RUS: 'Микрофон', ENG: 'Microphone' },
+        featOleophobic: { AZ: 'Oleofobik örtük', RUS: 'Олеофобное покрытие', ENG: 'Oleophobic coating' },
+        featStylus: { AZ: 'Stylus / Qələm', RUS: 'Стилус', ENG: 'Stylus' },
+        featSimCard: { AZ: 'SIM kart', RUS: 'SIM-карта', ENG: 'SIM card' },
+        featSimCardRow: { AZ: 'SIM kart (4G/5G)', RUS: 'SIM-карта (4G/5G)', ENG: 'SIM card (4G/5G)' },
+        featDelivery: { AZ: 'Çatdırılma', RUS: 'Доставка', ENG: 'Delivery' }
+    };
+
+    function t(key, langOverride) {
+        var lang = langOverride || getLang();
+        var entry = UI_STRINGS[key];
+        if (!entry) return key;
+        return entry[lang] || entry.AZ || key;
+    }
+
+    function lookupMap(map, val, langOverride) {
+        if (!val) return '';
+        var lang = langOverride || getLang();
+        var key = String(val).trim().toLowerCase().replace(/\u0307/g, '');
+        if (map[key]) return map[key][lang] || map[key].AZ;
+        return String(val).trim();
+    }
+
+    function translateCity(val, langOverride) {
+        return lookupMap(CITIES, val, langOverride);
+    }
+
+    function translateCategory(val, langOverride) {
+        return lookupMap(CATEGORIES, val, langOverride);
+    }
+
+    function translateCondition(val, langOverride) {
+        return lookupMap(CONDITIONS, val, langOverride);
+    }
+
+    function translateColor(val, langOverride) {
+        return lookupMap(COLORS, val, langOverride);
+    }
+
+    function translateSpecValue(val, langOverride) {
+        return lookupMap(SPEC_VALUES, val, langOverride);
+    }
+
+    function formatMemory(val, langOverride) {
+        if (!val) return '';
+        var lang = langOverride || getLang();
+        var gbUnit = t('gb', lang);
+        var s = String(val).trim();
+        if (s === '64-dan-az' || s === 'below-64' || s.toLowerCase() === '< 64' || s.toLowerCase() === '<64') {
+            return '< 64 ' + gbUnit;
+        }
+        if (s === '512-den-cox' || s === '512+' || s === '512-plus') {
+            return '512+ ' + gbUnit;
+        }
+        if (/^\d+$/.test(s)) return s + ' ' + gbUnit;
+        var m = s.match(/^(\d+)\s*gb$/i);
+        if (m) return m[1] + ' ' + gbUnit;
+        return s;
+    }
+
+    function formatRam(val, langOverride) {
+        if (!val) return '';
+        var lang = langOverride || getLang();
+        var gbUnit = t('gb', lang);
+        var s = String(val).trim();
+        if (s === '16-dan-cox' || s === '16+' || s === '16-plus') {
+            return '16+ ' + gbUnit;
+        }
+        if (/^\d+$/.test(s)) return s + ' ' + gbUnit;
+        var m = s.match(/^(\d+)\s*gb$/i);
+        if (m) return m[1] + ' ' + gbUnit;
+        return s;
+    }
+
+    function formatScreen(val) {
+        if (!val) return '';
+        return String(val).trim().replace(/"/g, '') + '"';
+    }
+
+    function formatBattery(val, langOverride) {
+        if (!val) return '';
+        var lang = langOverride || getLang();
+        var mahUnit = t('mah', lang);
+        var s = String(val).trim();
+        if (/^\d+$/.test(s) || /^\d+\s*-\s*\d+$/.test(s) || /^\d+\+$/.test(s)) {
+            return s + ' ' + mahUnit;
+        }
+        var m = s.match(/^(.+?)\s*mah$/i);
+        if (m) return m[1].trim() + ' ' + mahUnit;
+        return s;
+    }
+
+    function formatMonthYear(dateVal, langOverride) {
+        if (!dateVal) return '';
+        var d = new Date(dateVal);
+        if (isNaN(d.getTime())) return '';
+        var lang = langOverride || getLang();
+        var months = MONTHS[lang] || MONTHS.AZ;
+        return months[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function formatDate(dateVal, withTime, langOverride) {
+        if (!dateVal) return '';
+        var d = new Date(dateVal);
+        if (isNaN(d.getTime())) return '';
+        var dd = String(d.getDate()).padStart(2, '0');
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var yyyy = d.getFullYear();
+        var dateStr = dd + '.' + mm + '.' + yyyy;
+        if (withTime) {
+            var hh = String(d.getHours()).padStart(2, '0');
+            var min = String(d.getMinutes()).padStart(2, '0');
+            return dateStr + ', ' + hh + ':' + min;
+        }
+        return dateStr;
+    }
+
+    window.MobilazI18n = {
+        getLang: getLang,
+        t: t,
+        translateCity: translateCity,
+        translateCategory: translateCategory,
+        translateCondition: translateCondition,
+        translateColor: translateColor,
+        translateSpecValue: translateSpecValue,
+        formatMemory: formatMemory,
+        formatRam: formatRam,
+        formatScreen: formatScreen,
+        formatBattery: formatBattery,
+        formatMonthYear: formatMonthYear,
+        formatDate: formatDate
+    };
 })();

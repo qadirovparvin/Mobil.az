@@ -90,12 +90,15 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getBadgeHtml(ad) {
-        const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
+        const i18n = window.MobilazI18n;
+        const badgeType = ad.sellerType === "store" ? "store" : "private";
+        const sellerType = i18n ? i18n.t(badgeType) : (badgeType === "store" ? "Mağaza" : "Şəxsi");
+        const urgentText = i18n ? i18n.t("urgent") : "Təcili";
         const badgeStyle = ad.sellerType === "store"
             ? ""
             : ' style="background:var(--accent-hover);"';
 
-        let badges = `<span class="ad-badge"${badgeStyle}>${sellerType}</span>`;
+        let badges = `<span class="ad-badge" data-badge-type="${badgeType}"${badgeStyle}>${sellerType}</span>`;
 
         const now = new Date();
         const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
@@ -106,7 +109,7 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (ad.promotionType === "Premium" || ad.promotionType === "PRO") {
                 badges += ` <span class="ad-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
+                badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> ${urgentText}</span>`;
             }
         }
 
@@ -116,14 +119,16 @@ document.addEventListener("DOMContentLoaded", function () {
     function createCardMarkup(ad) {
         const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
+        const i18n = window.MobilazI18n;
         const city = escapeHtml(ad.city || "");
+        const displayCity = escapeHtml(i18n ? i18n.translateCity(ad.city || "") : (ad.city || ""));
         const rawBrand = String(ad.brand || "").trim();
         const rawModel = String(ad.modelName || "").trim();
         const fullTitle = rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
             ? rawModel
             : [rawBrand, rawModel].filter(Boolean).join(" ");
         const title = escapeHtml(fullTitle);
-        const altText = hasRealImage ? title : "Elan şəkli yoxdur";
+        const altText = hasRealImage ? title : (i18n ? i18n.t("noImageAlt") : "Elan şəkli yoxdur");
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
 
         return `
@@ -157,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         <div class="ad-title">${title}</div>
                         <div class="ad-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>${city}</span>
+                            <span class="ad-city-label">${displayCity}</span>
                             <span class="ad-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
                         </div>
                     </div>
@@ -398,4 +403,23 @@ document.addEventListener("DOMContentLoaded", function () {
     vipContainer.innerHTML = ``;
     allAdsContainer.innerHTML = ``;
     loadAds();
+
+    document.addEventListener("mobilaz:languagechange", () => {
+        const i18n = window.MobilazI18n;
+        if (!i18n) return;
+        document.querySelectorAll(".ad-card").forEach((card) => {
+            const rawCity = card.dataset.city;
+            const cityEl = card.querySelector(".ad-city-label");
+            if (cityEl && rawCity) cityEl.textContent = i18n.translateCity(rawCity);
+
+            const sellerBadge = card.querySelector(".ad-badge[data-badge-type]");
+            if (sellerBadge) {
+                sellerBadge.textContent = i18n.t(sellerBadge.dataset.badgeType);
+            }
+            const urgentBadge = card.querySelector(".ad-badge.urgent");
+            if (urgentBadge) {
+                urgentBadge.innerHTML = `<i class="fas fa-fire"></i> ${i18n.t("urgent")}`;
+            }
+        });
+    });
 });

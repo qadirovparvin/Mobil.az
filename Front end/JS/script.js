@@ -405,7 +405,13 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Şikayət et",
             "det-related-title": "Oxşar Elanlar",
             "det-review-name-ph": "Adınız (məs. Əli M.)",
-            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın..."
+            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın...",
+            "det-sidebar-review-ph": "Bu satıcı haqqında rəyiniz...",
+            "det-reviews-seller-note": "Bu satıcının bütün rəyləri",
+            "det-rating-based-on": "rəy əsasında",
+            "det-no-reviews": "Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!",
+            "det-view-store": "Mağazaya bax",
+            "footer-copyright": "© 2025 Mobilim.az. Bütün hüquqlar qorunur."
         },
         ENG: {
             Contact: "Contact",
@@ -811,7 +817,13 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Report",
             "det-related-title": "Similar Ads",
             "det-review-name-ph": "Your name (e.g. John D.)",
-            "det-review-text-ph": "Share your experience with the seller..."
+            "det-review-text-ph": "Share your experience with the seller...",
+            "det-sidebar-review-ph": "Your review about this seller...",
+            "det-reviews-seller-note": "All reviews for this seller",
+            "det-rating-based-on": "based on reviews",
+            "det-no-reviews": "No reviews for this seller yet. Be the first to review!",
+            "det-view-store": "View store",
+            "footer-copyright": "© 2025 Mobilim.az. All rights reserved."
         },
         RUS: {
             Contact: "Контакт",
@@ -1217,7 +1229,13 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Пожаловаться",
             "det-related-title": "Похожие объявления",
             "det-review-name-ph": "Ваше имя (напр. Али М.)",
-            "det-review-text-ph": "Поделитесь опытом о продавце..."
+            "det-review-text-ph": "Поделитесь опытом о продавце...",
+            "det-sidebar-review-ph": "Ваш отзыв об этом продавце...",
+            "det-reviews-seller-note": "Все отзывы об этом продавце",
+            "det-rating-based-on": "на основе отзывов",
+            "det-no-reviews": "Отзывов об этом продавце пока нет. Будьте первым!",
+            "det-view-store": "Перейти в магазин",
+            "footer-copyright": "© 2025 Mobilim.az. Все права защищены."
         }
     };
     const authTranslations = {

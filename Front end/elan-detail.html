@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="JS/config.js?v=20261104_4"></script>
+    <script src="JS/config.js?v=20261112_1"></script>
   <title>Elan Detalları — Mobilim.az</title>
   <meta name="description" content="Mobilim.az — Elan detalları">
   <link rel="stylesheet" href="CSS/general.css">
@@ -940,13 +940,13 @@
       <!-- ── Reviews Section (main content) ── -->
       <div class="reviews-section seller-reviews">
         <h3 class="section-head"><i class="fas fa-star"></i> <span data-translate="det-reviews-title">Satıcı rəyləri</span></h3>
-        <p class="reviews-seller-note" style="color:var(--text-secondary, #8e8e93);font-size:13.5px;margin:-6px 0 16px 0;">Bu satıcının bütün rəyləri</p>
+        <p class="reviews-seller-note" data-translate="det-reviews-seller-note" style="color:var(--text-secondary, #8e8e93);font-size:13.5px;margin:-6px 0 16px 0;">Bu satıcının bütün rəyləri</p>
 
         <div class="review-rating-summary">
           <div>
             <div class="rating-big"><span id="realRating">Yüklənir...</span><span id="avgRating" style="display:none;">-</span></div>
             <div class="rating-stars-lg">☆☆☆☆☆</div>
-            <div class="rating-count"><span id="reviewCount">0</span> rəy əsasında</div>
+            <div class="rating-count"><span id="reviewCount">0</span> <span data-translate="det-rating-based-on">rəy əsasında</span></div>
           </div>
           <div class="rating-bars">
             <div class="rbar"><span class="rbar-label">5★</span><div class="rbar-track"><div class="rbar-fill" style="width:0%"></div></div><span class="rbar-count">0</span></div>
@@ -957,7 +957,7 @@
           </div>
         </div>
 
-        <div class="no-reviews-empty empty-state" style="padding: 16px; text-align: center; color: #6b7280; font-size: 14px;"><span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
+        <div class="no-reviews-empty empty-state" style="padding: 16px; text-align: center; color: #6b7280; font-size: 14px;"><span class="no-reviews-title" data-translate="det-no-reviews" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
 
         <!-- Write a Review -->
         <div class="write-review-main">
@@ -1012,7 +1012,7 @@
                 <i class="fas fa-phone"></i> <span id="sellerPhoneText"></span>
               </div>
               <a href="#" id="storeProfileLink" class="hidden" style="display:none;align-items:center;gap:5px;font-size:12.5px;color:var(--airy-primary);text-decoration:none;margin-top:6px;font-weight:600;">
-                <i class="fas fa-store"></i> <span>Mağazaya bax</span>
+                <i class="fas fa-store"></i> <span data-translate="det-view-store">Mağazaya bax</span>
               </a>
             </div>
           </div>
@@ -1059,7 +1059,7 @@
 
           <!-- Mini reviews -->
           <div class="mini-reviews">
-            <div class="no-reviews-empty empty-state" style="padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;"><span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
+            <div class="no-reviews-empty empty-state" style="padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;"><span class="no-reviews-title" data-translate="det-no-reviews" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span></div>
           </div>
         </div>
 
@@ -1130,7 +1130,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2025 Mobilim.az. Bütün hüquqlar qorunur.</p>
+      <p data-translate="footer-copyright">&copy; 2025 Mobilim.az. Bütün hüquqlar qorunur.</p>
     </div>
   </footer>
 
@@ -1165,7 +1165,8 @@
           favBtn.classList.toggle('active', isFaved);
           favBtn.style.transform = 'scale(1.3)';
           setTimeout(() => favBtn.style.transform = '', 200);
-          showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!');
+          const i18n = window.MobilazI18n;
+          showToast(i18n ? i18n.t(isFaved ? 'toastFavAdd' : 'toastFavRemove') : (isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!'));
         });
       }
 
@@ -1173,12 +1174,13 @@
       const shareBtn = document.getElementById('shareBtn');
       if (shareBtn) {
         shareBtn.addEventListener('click', () => {
+          const i18n = window.MobilazI18n;
           if (navigator.share) {
             const title = document.querySelector('.ad-main-title')?.textContent || 'Mobilim.az';
-            const name = document.querySelector('.personal-name')?.textContent.trim() || 'Satıcı';
+            const name = document.querySelector('.personal-name')?.textContent.trim() || 'Mobilim.az';
             navigator.share({ title: title + ' — ' + name + ' | Mobilim.az', url: window.location.href });
           } else {
-            navigator.clipboard.writeText(window.location.href).then(() => showToast('Link kopyalandı!'));
+            navigator.clipboard.writeText(window.location.href).then(() => showToast(i18n ? i18n.t('toastLinkCopied') : 'Link kopyalandı!'));
           }
         });
       }
@@ -1187,14 +1189,16 @@
       const reportBtn = document.getElementById('reportBtn');
       if (reportBtn) {
         reportBtn.addEventListener('click', () => {
-          showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
+          const i18n = window.MobilazI18n;
+          showToast(i18n ? i18n.t('toastReportAccepted') : 'Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
         });
       }
 
       const reportBtnStore = document.getElementById('reportBtnStore');
       if (reportBtnStore) {
         reportBtnStore.addEventListener('click', () => {
-          showToast('Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
+          const i18n = window.MobilazI18n;
+          showToast(i18n ? i18n.t('toastReportAccepted') : 'Şikayətiniz qəbul edildi. Moderatorlarımız yoxlayacaq.');
         });
       }
 
@@ -1235,12 +1239,12 @@
 
 
   <script src="JS/axios.min.js"></script>
-  <script src="JS/api.js?v=20261104_4"></script>
-  <script src="JS/auth.js?v=20261104_4"></script>
-  <script src="JS/script.js?v=20261104_4"></script>
-  <script src="JS/favorites.js?v=20261104_4"></script>
-  <script src="JS/ad-details.js?v=20261104_4"></script>
-  <script src="JS/components.js?v=20261104_4"></script>
+  <script src="JS/api.js?v=20261112_1"></script>
+  <script src="JS/auth.js?v=20261112_1"></script>
+  <script src="JS/script.js?v=20261112_1"></script>
+  <script src="JS/favorites.js?v=20261112_1"></script>
+  <script src="JS/ad-details.js?v=20261112_1"></script>
+  <script src="JS/components.js?v=20261112_1"></script>
 </body>
 
 </html>

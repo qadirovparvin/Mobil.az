@@ -230,7 +230,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
                     const date = new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
                     
-                    const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
+                    const i18n = window.MobilazI18n;
+                    const badgeType = ad.sellerType === "store" ? "store" : "private";
+                    const sellerType = i18n ? i18n.t(badgeType) : (badgeType === "store" ? "Mağaza" : "Şəxsi");
                     const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
                     
                     const aTag = document.createElement('a');
@@ -240,6 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const card = document.createElement('div');
                     card.className = 'ad-card';
                     card.setAttribute('data-id', ad._id);
+                    card.setAttribute('data-city', city);
                     card.style.position = 'relative';
 
                     const adImage = document.createElement('div');
@@ -251,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const badge = document.createElement('span');
                     badge.className = 'ad-badge';
+                    badge.setAttribute('data-badge-type', badgeType);
                     if (ad.sellerType !== 'store') {
                         badge.style.background = 'var(--accent-hover)';
                     }
@@ -285,7 +289,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     marker.className = 'fas fa-map-marker-alt';
 
                     const citySpan = document.createElement('span');
-                    citySpan.textContent = city;
+                    citySpan.className = 'ad-city-label';
+                    citySpan.textContent = i18n ? i18n.translateCity(city) : city;
 
                     const dateSpan = document.createElement('span');
                     dateSpan.className = 'ad-date';
