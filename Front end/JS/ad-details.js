@@ -6,20 +6,6 @@
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const i18n = window.MobilazI18n || {
-        t: (k) => k,
-        translateCity: (v) => v || '',
-        translateCategory: (v) => v || '',
-        translateCondition: (v) => v || '',
-        translateColor: (v) => v || '',
-        translateSpecValue: (v) => v || '',
-        formatMemory: (v) => (v ? String(v) + ' GB' : ''),
-        formatRam: (v) => (v ? String(v) + ' GB' : ''),
-        formatScreen: (v) => (v ? String(v).replace(/"/g, '') + '"' : ''),
-        formatBattery: (v) => (v ? String(v) : ''),
-        formatMonthYear: (d) => (d ? new Date(d).toLocaleDateString() : ''),
-        formatDate: (d) => (d ? new Date(d).toLocaleDateString() : '')
-    };
 
     // ── Helpers (defined first so they're always available) ────────
 
@@ -66,6 +52,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             '"': '&quot;',
             "'": '&#39;'
         }[c]));
+    }
+
+    function maskPhoneNumber(phone) {
+        if (!phone) return '';
+        const trimmed = String(phone).trim();
+        const digits = trimmed.replace(/\D/g, '');
+        if (digits.startsWith('994') && digits.length >= 11) {
+            const op = digits.slice(3, 5);
+            const last = digits.slice(-2);
+            return `+994 ${op} *** ** ${last}`;
+        }
+        if (digits.startsWith('0') && digits.length >= 9) {
+            const op = digits.slice(0, 3);
+            const last = digits.slice(-2);
+            return `${op} *** ** ${last}`;
+        }
+        if (digits.length >= 7) {
+            const op = trimmed.slice(0, Math.min(6, Math.max(3, Math.floor(trimmed.length * 0.4))));
+            const last = trimmed.slice(-2);
+            return `${op} *** ** ${last}`;
+        }
+        return `${trimmed.slice(0, 3)} ***`;
     }
 
     // ── Always-reveal function (called in finally) ─────────────────
@@ -189,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.__CURRENT_AD = ad;
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
-        const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || i18n.t('untitledAd');
+        const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
         document.title = `${adTitle} — Mobilim.az`;
 
         const titleEl = document.querySelector('.ad-main-title');
@@ -217,17 +225,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const priceEl = document.querySelector('.ad-main-price');
         if (priceEl) priceEl.innerHTML = `${Number(ad.price || 0).toLocaleString('az-AZ')} <span class="ad-currency">AZN</span>`;
 
-        // ── 3 & 4. Description, Date & Views (localized) ───────────
-        const renderHeaderMeta = () => {
-            const descEl = document.querySelector('.desc-text');
-            if (descEl) descEl.textContent = ad.description || i18n.t('noDescription');
+        // ── 3. Description ─────────────────────────────────────────
+        const descEl = document.querySelector('.desc-text');
+        if (descEl) descEl.textContent = ad.description || 'Açıqlama yoxdur.';
 
-            const dateEl  = document.querySelector('.ad-date-views span:nth-child(1)');
-            const viewsEl = document.querySelector('.ad-date-views span:nth-child(2)');
-            if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${i18n.formatDate(ad.createdAt)}`;
-            if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} ${i18n.t('views')}`;
-        };
-        renderHeaderMeta();
+        // ── 4. Date & Views ────────────────────────────────────────
+        const dateEl  = document.querySelector('.ad-date-views span:nth-child(1)');
+        const viewsEl = document.querySelector('.ad-date-views span:nth-child(2)');
+        if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${new Date(ad.createdAt).toLocaleDateString('az-AZ')}`;
+        if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} baxış`;
 
         // ── 5. Image Gallery ───────────────────────────────────────
         const mainImg        = document.getElementById('mainImage');
@@ -319,150 +325,214 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nextBtn)         nextBtn.style.display = 'none';
         }
 
-        const renderSpecsAndLocation = () => {
-            // ── 6. Quick Spec Chips ────────────────────────────────
-            const quickSpecsEl = document.querySelector('.quick-specs');
-            if (quickSpecsEl) {
-                quickSpecsEl.replaceChildren();
-                const addChip = (iconClass, text) => {
-                    if (!text || String(text).trim() === '') return;
-                    const chip = document.createElement('span');
-                    chip.className = 'spec-chip';
-                    const icon = document.createElement('i');
-                    icon.className = iconClass;
-                    chip.append(icon, document.createTextNode(' ' + text));
-                    quickSpecsEl.appendChild(chip);
-                };
-                if (ad.specs?.memory)         addChip('fas fa-memory', `${i18n.formatMemory(ad.specs.memory)} ${i18n.t('storageChip')}`);
-                if (ad.specs?.ram)            addChip('fas fa-microchip', `${i18n.formatRam(ad.specs.ram)} ${i18n.t('ramChip')}`);
-                if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', i18n.formatScreen(ad.specs.screenSize));
-                if (ad.specs?.battery)        addChip('fas fa-battery-full', i18n.formatBattery(ad.specs.battery));
-                if (ad.specs?.color)          addChip('fas fa-palette', i18n.translateColor(ad.specs.color));
-                if (ad.specs?.material)       addChip('fas fa-shield-alt', i18n.translateSpecValue(ad.specs.material));
-                if (ad.specs?.glassType)      addChip('fas fa-shield-virus', i18n.translateSpecValue(ad.specs.glassType));
-                if (ad.specs?.connectionType) addChip('fas fa-headphones', i18n.translateSpecValue(ad.specs.connectionType));
-                if (ad.specs?.headphoneType)  addChip('fas fa-headset', i18n.translateSpecValue(ad.specs.headphoneType));
-                if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
-                if (ad.specs?.portType)       addChip('fas fa-charging-station', i18n.translateSpecValue(ad.specs.portType));
-                if (ad.specs?.cableType)      addChip('fas fa-plug', i18n.translateSpecValue(ad.specs.cableType));
-                if (ad.specs?.cableLength)    addChip('fas fa-ruler-horizontal', i18n.translateSpecValue(ad.specs.cableLength));
-                if (ad.condition)             addChip('fas fa-box-open', i18n.translateCondition(ad.condition));
-            }
-
-            // ── 6.5 Dynamic Feature Badges ─────────────────────────
-            const featureBadgesEl = document.querySelector('.feature-badges');
-            if (featureBadgesEl) {
-                featureBadgesEl.replaceChildren();
-                const f = ad.specs?.features || {};
-                const addFeatureBadge = (iconClass, text) => {
-                    const badge = document.createElement('span');
-                    badge.className = 'feat-badge yes';
-                    const icon = document.createElement('i');
-                    icon.className = iconClass;
-                    badge.append(icon, document.createTextNode(' ' + text));
-                    featureBadgesEl.appendChild(badge);
-                };
-
-                if (f.nfc)             addFeatureBadge('fas fa-wifi', i18n.t('featNfc'));
-                if (f.fingerprint)     addFeatureBadge('fas fa-fingerprint', i18n.t('featFingerprint'));
-                if (f.waterproof)      addFeatureBadge('fas fa-tint', i18n.t('featWaterproofChip'));
-                if (f.expandable)      addFeatureBadge('fas fa-sd-card', i18n.t('featExpandableChip'));
-                if (f.magsafe)         addFeatureBadge('fas fa-magnet', i18n.t('featMagsafe'));
-                if (f.anc)             addFeatureBadge('fas fa-volume-mute', i18n.t('featAnc'));
-                if (f.fastCharge)      addFeatureBadge('fas fa-bolt', i18n.t('featFastCharge'));
-                if (f.wirelessCharge)  addFeatureBadge('fas fa-charging-station', i18n.t('featWirelessCharge'));
-                if (f.microphone)      addFeatureBadge('fas fa-microphone', i18n.t('featMicrophone'));
-                if (f.oleophobic)      addFeatureBadge('fas fa-shield-alt', i18n.t('featOleophobic'));
-                if (f.stylus)          addFeatureBadge('fas fa-pen-nib', i18n.t('featStylus'));
-                if (f.simCard)         addFeatureBadge('fas fa-sim-card', i18n.t('featSimCard'));
-                if (f.delivery)        addFeatureBadge('fas fa-truck', i18n.t('featDelivery'));
-
-                if (featureBadgesEl.children.length === 0) {
-                    featureBadgesEl.style.display = 'none';
-                } else {
-                    featureBadgesEl.style.display = 'flex';
-                }
-            }
-
-            // ── 7. Full Specs Grid ─────────────────────────────────
-            const specsGrid = document.querySelector('.specs-grid');
-            if (specsGrid) {
-                specsGrid.replaceChildren();
-                const addSpecRow = (label, val) => {
-                    if (!val || String(val).trim() === '' || String(val).trim() === '-') return;
-                    const row = document.createElement('div');
-                    row.className = 'spec-row';
-                    const lblSpan = document.createElement('span');
-                    lblSpan.className = 'spec-label';
-                    lblSpan.textContent = label;
-                    const valSpan = document.createElement('span');
-                    valSpan.className = 'spec-value';
-                    valSpan.textContent = String(val);
-                    row.append(lblSpan, valSpan);
-                    specsGrid.appendChild(row);
-                };
-                if (ad.category) addSpecRow(i18n.t('lblCategory'), i18n.translateCategory(ad.category));
-                if (ad.brand) addSpecRow(i18n.t('lblBrand'), ad.brand);
-                if (ad.modelName) addSpecRow(i18n.t('lblModel'), ad.modelName);
-
-                // Electronics specs (only if exists)
-                if (ad.specs?.memory) addSpecRow(i18n.t('lblMemory'), i18n.formatMemory(ad.specs.memory));
-                if (ad.specs?.ram) addSpecRow(i18n.t('lblRam'), i18n.formatRam(ad.specs.ram));
-                if (ad.specs?.screenSize) addSpecRow(i18n.t('lblScreen'), i18n.formatScreen(ad.specs.screenSize));
-                if (ad.specs?.battery) addSpecRow(i18n.t('lblBattery'), i18n.formatBattery(ad.specs.battery));
-
-                // Accessory specs (only if exists)
-                if (ad.specs?.material) addSpecRow(i18n.t('lblMaterial'), i18n.translateSpecValue(ad.specs.material));
-                if (ad.specs?.glassType) addSpecRow(i18n.t('lblGlassType'), i18n.translateSpecValue(ad.specs.glassType));
-                if (ad.specs?.connectionType) addSpecRow(i18n.t('lblConnType'), i18n.translateSpecValue(ad.specs.connectionType));
-                if (ad.specs?.headphoneType) addSpecRow(i18n.t('lblHeadphoneType'), i18n.translateSpecValue(ad.specs.headphoneType));
-                if (ad.specs?.power) addSpecRow(i18n.t('lblPower'), String(ad.specs.power));
-                if (ad.specs?.portType) addSpecRow(i18n.t('lblPortType'), i18n.translateSpecValue(ad.specs.portType));
-                if (ad.specs?.cableType) addSpecRow(i18n.t('lblCableType'), i18n.translateSpecValue(ad.specs.cableType));
-                if (ad.specs?.cableLength) addSpecRow(i18n.t('lblCableLength'), i18n.translateSpecValue(ad.specs.cableLength));
-
-                // Color & Condition
-                if (ad.specs?.color) addSpecRow(i18n.t('lblColor'), i18n.translateColor(ad.specs.color));
-                addSpecRow(i18n.t('lblCondition'), i18n.translateCondition(ad.condition || 'Yeni'));
-
-                // Features (boolean flags)
-                const f = ad.specs?.features || {};
-                const yesText = i18n.t('yesVar');
-                if (f.nfc)             addSpecRow(i18n.t('featNfc'), yesText);
-                if (f.waterproof)      addSpecRow(i18n.t('featWaterproofRow'), yesText);
-                if (f.fingerprint)     addSpecRow(i18n.t('featFingerprint'), yesText);
-                if (f.magsafe)         addSpecRow(i18n.t('featMagsafeRow'), yesText);
-                if (f.anc)             addSpecRow(i18n.t('featAnc'), yesText);
-                if (f.microphone)      addSpecRow(i18n.t('featMicrophone'), yesText);
-                if (f.fastCharge)      addSpecRow(i18n.t('featFastCharge'), yesText);
-                if (f.wirelessCharge)  addSpecRow(i18n.t('featWirelessCharge'), yesText);
-                if (f.oleophobic)      addSpecRow(i18n.t('featOleophobic'), yesText);
-                if (f.stylus)          addSpecRow(i18n.t('featStylus'), yesText);
-                if (f.simCard)         addSpecRow(i18n.t('featSimCardRow'), yesText);
-                if (f.expandable)      addSpecRow(i18n.t('featExpandableRow'), yesText);
-                if (f.delivery)        addSpecRow(i18n.t('featDelivery'), yesText);
-
-                if (specsGrid.children.length === 0) {
-                    specsGrid.innerHTML = `<div class="spec-row"><span class="spec-label">${i18n.t('lblInfo')}</span><span class="spec-value">—</span></div>`;
-                }
-            }
-
-            // ── 8. Location & Condition rows ───────────────────────
-            const locationRows = document.querySelectorAll('.location-item strong');
-            if (locationRows[0]) locationRows[0].textContent = i18n.translateCity(ad.city || 'Bakı');
-            if (locationRows[1]) locationRows[1].textContent = i18n.translateCondition(ad.condition || 'Yeni');
-            if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? i18n.t('var') : i18n.t('yoxdur');
-
-            // ── 9. Category tag ────────────────────────────────────
-            const catTag = document.querySelector('.ad-category-tag');
-            if (catTag) {
-                catTag.replaceChildren();
-                const catIcon = document.createElement('i');
-                catIcon.className = 'fas fa-mobile-alt';
-                catTag.append(catIcon, document.createTextNode(` ${i18n.translateCategory(ad.category || 'Telefon')} · ${ad.brand || ''}`));
-            }
+        // ── Spec Formatters ────────────────────────────────────────
+        const COLOR_NAMES_MAP = {
+            'black': 'Qara',
+            'white': 'Ağ',
+            'gold': 'Qızılı',
+            'silver': 'Gümüşü',
+            'grey': 'Boz',
+            'gray': 'Boz',
+            'graphite': 'Qrafit',
+            'blue': 'Mavi',
+            'darkblue': 'Göy (Tünd Mavi)',
+            'green': 'Yaşıl',
+            'emerald': 'Zümrüd Yaşılı',
+            'yellow': 'Sarı',
+            'red': 'Qırmızı',
+            'pink': 'Çəhrayı',
+            'purple': 'Bənövşəyi',
+            'deeppurple': 'Dərin Bənövşəyi',
+            'orange': 'Narıncı',
+            'titanium-black': 'Titan Qara',
+            'titanium-natural': 'Titan Təbii',
+            'titanium-white': 'Titan Ağ',
+            'titanium-blue': 'Titan Göy',
+            'bronze': 'Bürünc',
+            'beige': 'Bej',
+            'brown': 'Qəhvəyi',
+            'transparent': 'Şəffaf',
+            'other': 'Digər'
         };
-        renderSpecsAndLocation();
+
+        const formatColorName = (val) => {
+            if (!val) return '';
+            const key = String(val).trim().toLowerCase();
+            return COLOR_NAMES_MAP[key] || String(val).trim();
+        };
+
+        const formatMemory = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '64-dan-az' || s === 'below-64' || s.toLowerCase() === '< 64' || s.toLowerCase() === '<64') return '< 64 GB';
+            if (s === '512-den-cox' || s === '512+' || s === '512-plus') return '512+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        };
+
+        const formatRam = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '16-dan-cox' || s === '16+' || s === '16-plus') return '16+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        };
+
+        const formatScreen = (val) => {
+            if (!val) return '';
+            const s = String(val).trim().replace(/"/g, '');
+            return `${s}"`;
+        };
+
+        const formatBattery = (val) => {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (/^\d+$/.test(s)) return `${s} mAh`;
+            return s;
+        };
+
+        // ── 6. Quick Spec Chips ────────────────────────────────────
+        const quickSpecsEl = document.querySelector('.quick-specs');
+        if (quickSpecsEl) {
+            quickSpecsEl.replaceChildren();
+            const addChip = (iconClass, text) => {
+                if (!text || String(text).trim() === '') return;
+                const chip = document.createElement('span');
+                chip.className = 'spec-chip';
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                chip.append(icon, document.createTextNode(' ' + text));
+                quickSpecsEl.appendChild(chip);
+            };
+            if (ad.specs?.memory)         addChip('fas fa-memory', `${formatMemory(ad.specs.memory)} Yaddaş`);
+            if (ad.specs?.ram)            addChip('fas fa-microchip', `${formatRam(ad.specs.ram)} RAM`);
+            if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', formatScreen(ad.specs.screenSize));
+            if (ad.specs?.battery)        addChip('fas fa-battery-full', formatBattery(ad.specs.battery));
+            if (ad.specs?.color)          addChip('fas fa-palette', formatColorName(ad.specs.color));
+            if (ad.specs?.material)       addChip('fas fa-shield-alt', String(ad.specs.material));
+            if (ad.specs?.glassType)      addChip('fas fa-shield-virus', String(ad.specs.glassType));
+            if (ad.specs?.connectionType) addChip('fas fa-headphones', String(ad.specs.connectionType));
+            if (ad.specs?.headphoneType)  addChip('fas fa-headset', String(ad.specs.headphoneType));
+            if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
+            if (ad.specs?.portType)       addChip('fas fa-charging-station', String(ad.specs.portType));
+            if (ad.specs?.cableType)      addChip('fas fa-plug', String(ad.specs.cableType));
+            if (ad.specs?.cableLength)    addChip('fas fa-ruler-horizontal', String(ad.specs.cableLength));
+            if (ad.condition)             addChip('fas fa-box-open', String(ad.condition));
+        }
+
+        // ── 6.5 Dynamic Feature Badges ─────────────────────────────
+        const featureBadgesEl = document.querySelector('.feature-badges');
+        if (featureBadgesEl) {
+            featureBadgesEl.replaceChildren();
+            const f = ad.specs?.features || {};
+            const addFeatureBadge = (iconClass, text) => {
+                const badge = document.createElement('span');
+                badge.className = 'feat-badge yes';
+                const icon = document.createElement('i');
+                icon.className = iconClass;
+                badge.append(icon, document.createTextNode(' ' + text));
+                featureBadgesEl.appendChild(badge);
+            };
+
+            if (f.nfc)             addFeatureBadge('fas fa-wifi', 'NFC');
+            if (f.fingerprint)     addFeatureBadge('fas fa-fingerprint', 'Barmaq izi');
+            if (f.waterproof)      addFeatureBadge('fas fa-tint', 'Suya davamlı');
+            if (f.expandable)      addFeatureBadge('fas fa-sd-card', 'Yaddaş kartı dəstəyi');
+            if (f.magsafe)         addFeatureBadge('fas fa-magnet', 'MagSafe');
+            if (f.anc)             addFeatureBadge('fas fa-volume-mute', 'ANC (Küyboğma)');
+            if (f.fastCharge)      addFeatureBadge('fas fa-bolt', 'Sürətli şarj');
+            if (f.wirelessCharge)  addFeatureBadge('fas fa-charging-station', 'Simsiz şarj');
+            if (f.microphone)      addFeatureBadge('fas fa-microphone', 'Mikrofon');
+            if (f.oleophobic)      addFeatureBadge('fas fa-shield-alt', 'Oleofobik örtük');
+            if (f.stylus)          addFeatureBadge('fas fa-pen-nib', 'Stylus / Qələm');
+            if (f.simCard)         addFeatureBadge('fas fa-sim-card', 'SIM kart');
+            if (f.delivery)        addFeatureBadge('fas fa-truck', 'Çatdırılma');
+
+            if (featureBadgesEl.children.length === 0) {
+                featureBadgesEl.style.display = 'none';
+            } else {
+                featureBadgesEl.style.display = 'flex';
+            }
+        }
+
+        // ── 7. Full Specs Grid ─────────────────────────────────────
+        const specsGrid = document.querySelector('.specs-grid');
+        if (specsGrid) {
+            specsGrid.replaceChildren();
+            const addSpecRow = (label, val) => {
+                if (!val || String(val).trim() === '' || String(val).trim() === '-') return;
+                const row = document.createElement('div');
+                row.className = 'spec-row';
+                const lblSpan = document.createElement('span');
+                lblSpan.className = 'spec-label';
+                lblSpan.textContent = label;
+                const valSpan = document.createElement('span');
+                valSpan.className = 'spec-value';
+                valSpan.textContent = String(val);
+                row.append(lblSpan, valSpan);
+                specsGrid.appendChild(row);
+            };
+            if (ad.category) addSpecRow('Kateqoriya', ad.category);
+            if (ad.brand) addSpecRow('Marka', ad.brand);
+            if (ad.modelName) addSpecRow('Model', ad.modelName);
+
+            // Electronics specs (only if exists)
+            if (ad.specs?.memory) addSpecRow('Yaddaş', formatMemory(ad.specs.memory));
+            if (ad.specs?.ram) addSpecRow('RAM', formatRam(ad.specs.ram));
+            if (ad.specs?.screenSize) addSpecRow('Ekran ölçüsü', formatScreen(ad.specs.screenSize));
+            if (ad.specs?.battery) addSpecRow('Batareya', formatBattery(ad.specs.battery));
+
+            // Accessory specs (only if exists)
+            if (ad.specs?.material) addSpecRow('Material', String(ad.specs.material));
+            if (ad.specs?.glassType) addSpecRow('Qoruyucu növü', String(ad.specs.glassType));
+            if (ad.specs?.connectionType) addSpecRow('Qoşulma növü', String(ad.specs.connectionType));
+            if (ad.specs?.headphoneType) addSpecRow('Qulaqlıq forması', String(ad.specs.headphoneType));
+            if (ad.specs?.power) addSpecRow('Çıxış gücü', String(ad.specs.power));
+            if (ad.specs?.portType) addSpecRow('Port növü', String(ad.specs.portType));
+            if (ad.specs?.cableType) addSpecRow('Kabel növü', String(ad.specs.cableType));
+            if (ad.specs?.cableLength) addSpecRow('Uzunluq', String(ad.specs.cableLength));
+
+            // Color & Condition
+            if (ad.specs?.color) addSpecRow('Rəng', formatColorName(ad.specs.color));
+            addSpecRow('Vəziyyəti', ad.condition || 'Yeni');
+
+            // Features (boolean flags)
+            const f = ad.specs?.features || {};
+            if (f.nfc)             addSpecRow('NFC', '✓ Var');
+            if (f.waterproof)      addSpecRow('Suya davamlılıq', '✓ Var');
+            if (f.fingerprint)     addSpecRow('Barmaq izi', '✓ Var');
+            if (f.magsafe)         addSpecRow('MagSafe dəstəyi', '✓ Var');
+            if (f.anc)             addSpecRow('Aktiv Küyboğma (ANC)', '✓ Var');
+            if (f.microphone)      addSpecRow('Mikrofon', '✓ Var');
+            if (f.fastCharge)      addSpecRow('Sürətli şarj', '✓ Var');
+            if (f.wirelessCharge)  addSpecRow('Simsiz şarj', '✓ Var');
+            if (f.oleophobic)      addSpecRow('Oleofobik örtük', '✓ Var');
+            if (f.stylus)          addSpecRow('Stylus / Qələm', '✓ Var');
+            if (f.simCard)         addSpecRow('SIM kart (4G/5G)', '✓ Var');
+            if (f.expandable)      addSpecRow('Əlavə yaddaş kartı', '✓ Var');
+            if (f.delivery)        addSpecRow('Çatdırılma', '✓ Var');
+
+            if (specsGrid.children.length === 0) {
+                specsGrid.innerHTML = '<div class="spec-row"><span class="spec-label">Məlumat</span><span class="spec-value">—</span></div>';
+            }
+        }
+
+        // ── 8. Location & Condition rows ───────────────────────────
+        const locationRows = document.querySelectorAll('.location-item strong');
+        if (locationRows[0]) locationRows[0].textContent = ad.city || 'Bakı';
+        if (locationRows[1]) locationRows[1].textContent = ad.condition || 'Yeni';
+        if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? 'Var' : 'Yoxdur';
+
+        // ── 9. Category tag ────────────────────────────────────────
+        const catTag = document.querySelector('.ad-category-tag');
+        if (catTag) {
+            catTag.replaceChildren();
+            const catIcon = document.createElement('i');
+            catIcon.className = 'fas fa-mobile-alt';
+            catTag.append(catIcon, document.createTextNode(` ${ad.category || 'Telefon'} · ${ad.brand || ''}`));
+        }
 
         // ── 10. Seller Info ────────────────────────────────────────
         isStore = Boolean(ad.sellerType === 'store' && ad.store);
@@ -476,6 +546,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sellerSinceRow = document.getElementById('sellerSinceRow') || document.querySelector('.seller-since-row');
         const sellerSinceText = document.getElementById('sellerSinceText');
 
+        // Phone info & reveal logic
+        const rawPhone = (
+            ad.contactPhone ||
+            ad.author?.phone ||
+            ad.user?.phone ||
+            ad.store?.contactNumber ||
+            ''
+        ).trim();
+        const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+        let phoneRevealed = false;
+
+        function revealSellerPhone() {
+            if (phoneRevealed) return;
+            phoneRevealed = true;
+
+            // 1. Reveal in seller card (sellerPhoneTag)
+            const sellerPhoneTag = document.getElementById('sellerPhoneTag');
+            const sellerPhoneText = document.getElementById('sellerPhoneText');
+            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
+            if (sellerPhoneText) {
+                sellerPhoneText.textContent = ` ${rawPhone}`;
+            }
+            if (sellerPhoneHint) {
+                sellerPhoneHint.style.display = 'none';
+                sellerPhoneHint.removeAttribute('data-translate');
+            }
+            if (sellerPhoneTag) {
+                sellerPhoneTag.classList.add('revealed');
+                const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                const callTitle = (lang === 'RUS' || lang === 'RU')
+                    ? 'Нажмите, чтобы позвонить'
+                    : (lang === 'ENG' || lang === 'EN' ? 'Click to call' : 'Zəng etmək üçün klikləyin');
+                sellerPhoneTag.setAttribute('title', callTitle);
+            }
+
+            // 2. Reveal in callBtn
+            const callBtnEl = document.getElementById('callBtn');
+            const phoneTextEl = document.getElementById('phoneText');
+            if (callBtnEl && phoneTextEl) {
+                phoneTextEl.textContent = rawPhone;
+                phoneTextEl.removeAttribute('data-translate');
+                callBtnEl.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+                callBtnEl.classList.add('revealed');
+            }
+        }
+
         if (isStore) {
             // Mode A: Store Seller
             const store = ad.store;
@@ -488,7 +604,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const verifiedBadge = document.createElement('i');
                     verifiedBadge.className = 'fas fa-check-circle';
                     verifiedBadge.style.cssText = 'color: #007bff; margin-left: 6px; font-size: 15px;';
-                    verifiedBadge.title = i18n.t('officialStore');
+                    verifiedBadge.title = 'Rəsmi Mağaza';
                     sellerNameEl.appendChild(verifiedBadge);
                 }
             }
@@ -517,7 +633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const storeIcon = document.createElement('i');
                 storeIcon.className = 'fas fa-store';
                 const storeLabel = document.createElement('span');
-                storeLabel.textContent = ' ' + i18n.t('store');
+                storeLabel.textContent = ' Mağaza';
                 sellerTypeTag.appendChild(storeIcon);
                 sellerTypeTag.appendChild(storeLabel);
             }
@@ -535,7 +651,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Location
-            const storeLoc = i18n.translateCity((store.city || ad.city || '').trim());
+            const storeLoc = (store.city || ad.city || '').trim();
             if (sellerLocationTag) {
                 if (storeLoc) {
                     if (sellerLocationText) {
@@ -571,7 +687,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         rVal.textContent = Number(store.rating).toFixed(1);
                         const rLbl = document.createElement('span');
                         rLbl.className = 'lbl';
-                        rLbl.textContent = i18n.t('rating');
+                        rLbl.textContent = '★ Reytinq';
                         statRatingDiv.appendChild(rVal);
                         statRatingDiv.appendChild(rLbl);
                         sellerStats.appendChild(statRatingDiv);
@@ -585,7 +701,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         cVal.textContent = String(store.reviewCount);
                         const cLbl = document.createElement('span');
                         cLbl.className = 'lbl';
-                        cLbl.textContent = i18n.t('review');
+                        cLbl.textContent = 'Rəy';
                         statCountDiv.appendChild(cVal);
                         statCountDiv.appendChild(cLbl);
                         sellerStats.appendChild(statCountDiv);
@@ -602,12 +718,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Membership / creation date
             const storeDateVal = store.createdAt || ad.createdAt;
             if (sellerSinceRow) {
-                if (storeDateVal && i18n.formatMonthYear(storeDateVal)) {
-                    if (sellerSinceText) {
-                        sellerSinceText.textContent = ` ${i18n.formatMonthYear(storeDateVal)}`;
+                if (storeDateVal) {
+                    const d = new Date(storeDateVal);
+                    if (!isNaN(d.getTime())) {
+                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
+                        if (sellerSinceText) {
+                            sellerSinceText.textContent = ` ${monthYear}`;
+                        }
+                        sellerSinceRow.classList.remove('hidden');
+                        sellerSinceRow.style.display = '';
+                    } else {
+                        sellerSinceRow.classList.add('hidden');
+                        sellerSinceRow.style.display = 'none';
                     }
-                    sellerSinceRow.classList.remove('hidden');
-                    sellerSinceRow.style.display = '';
                 } else {
                     sellerSinceRow.classList.add('hidden');
                     sellerSinceRow.style.display = 'none';
@@ -617,7 +740,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             // Mode B: Personal Seller
             const author = ad.author || ad.user || {};
-            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || author.email || i18n.t('deletedUser');
+            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || author.email || 'Silinmiş istifadəçi';
 
             // Seller Name
             if (sellerNameEl) {
@@ -648,8 +771,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userIcon = document.createElement('i');
                 userIcon.className = 'fas fa-user-circle';
                 const userLabel = document.createElement('span');
-                userLabel.setAttribute('data-translate', 'det-seller-personal');
-                userLabel.textContent = ' ' + i18n.t('personalAccount');
+                userLabel.textContent = ' Şəxsi hesab';
                 sellerTypeTag.appendChild(userIcon);
                 sellerTypeTag.appendChild(userLabel);
             }
@@ -661,7 +783,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Location
-            const personalLoc = [ad.city ? i18n.translateCity(ad.city) : '', ad.region ? i18n.translateCity(ad.region) : ''].filter(Boolean).join(', ').trim();
+            const personalLoc = [ad.city, ad.region].filter(Boolean).join(', ').trim();
             if (sellerLocationTag) {
                 if (personalLoc) {
                     if (sellerLocationText) {
@@ -696,20 +818,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // Phone Tag
+            // Phone Tag setup in seller card
             const sellerPhoneTag = document.getElementById('sellerPhoneTag');
             const sellerPhoneText = document.getElementById('sellerPhoneText');
+            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
             if (sellerPhoneTag) {
-                const authorPhone = (author.phone || ad.contactPhone || '').trim();
-                if (authorPhone) {
-                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${authorPhone}`;
+                if (rawPhone) {
+                    const maskedPhone = maskPhoneNumber(rawPhone);
+                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${maskedPhone}`;
                     sellerPhoneTag.classList.remove('hidden');
-                    sellerPhoneTag.style.display = 'flex';
+                    sellerPhoneTag.style.display = 'inline-flex';
+                    sellerPhoneTag.classList.add('phone-clickable');
+
+                    const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                    const revealTitle = (lang === 'RUS' || lang === 'RU')
+                        ? 'Нажмите, чтобы увидеть номер'
+                        : (lang === 'ENG' || lang === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
+                    sellerPhoneTag.setAttribute('title', revealTitle);
+
+                    if (sellerPhoneHint) {
+                        sellerPhoneHint.style.display = 'inline';
+                    }
+
+                    sellerPhoneTag.onclick = (e) => {
+                        e.preventDefault();
+                        if (!phoneRevealed) {
+                            revealSellerPhone();
+                        } else {
+                            const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
+                            if (telNumber) window.location.href = `tel:${telNumber}`;
+                        }
+                    };
                 } else {
                     sellerPhoneTag.classList.add('hidden');
                     sellerPhoneTag.style.display = 'none';
                 }
             }
+
+            document.addEventListener('mobilaz:languagechange', (e) => {
+                if (!phoneRevealed && sellerPhoneTag && sellerPhoneTag.style.display !== 'none') {
+                    const l = (e.detail?.lang || localStorage.getItem('lang') || 'AZ').toUpperCase();
+                    const titleText = (l === 'RUS' || l === 'RU')
+                        ? 'Нажмите, чтобы увидеть номер'
+                        : (l === 'ENG' || l === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
+                    sellerPhoneTag.setAttribute('title', titleText);
+                }
+            });
 
             // Stats (Hide dummy stats for personal seller)
             if (sellerStats) {
@@ -719,12 +873,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Membership date
             if (sellerSinceRow) {
-                if (ad.author?.createdAt && i18n.formatMonthYear(ad.author.createdAt)) {
-                    if (sellerSinceText) {
-                        sellerSinceText.textContent = ` ${i18n.formatMonthYear(ad.author.createdAt)}`;
+                if (ad.author?.createdAt) {
+                    const d = new Date(ad.author.createdAt);
+                    if (!isNaN(d.getTime())) {
+                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
+                        if (sellerSinceText) {
+                            sellerSinceText.textContent = ` ${monthYear}`;
+                        }
+                        sellerSinceRow.classList.remove('hidden');
+                        sellerSinceRow.style.display = '';
+                    } else {
+                        sellerSinceRow.classList.add('hidden');
+                        sellerSinceRow.style.display = 'none';
                     }
-                    sellerSinceRow.classList.remove('hidden');
-                    sellerSinceRow.style.display = '';
                 } else {
                     sellerSinceRow.classList.add('hidden');
                     sellerSinceRow.style.display = 'none';
@@ -738,8 +899,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const updatedSpan  = document.querySelector('.ad-id-bar span:nth-child(3) span:nth-child(2)');
         const displayAdNumber = ad.adNumber || (ad._id ? (String(ad._id) === '6ad7634079a9d25725d38022' ? 'MOB-5D3802' : `MOB-${String(ad._id).slice(-6).toUpperCase()}`) : '—');
         if (adIdSpan)    adIdSpan.textContent   = displayAdNumber;
-        if (postedSpan)  postedSpan.textContent  = i18n.formatDate(ad.createdAt);
-        if (updatedSpan) updatedSpan.textContent = i18n.formatDate(ad.updatedAt || ad.createdAt);
+        if (postedSpan)  postedSpan.textContent  = new Date(ad.createdAt).toLocaleDateString('az-AZ');
+        if (updatedSpan) updatedSpan.textContent = new Date(ad.updatedAt || ad.createdAt).toLocaleDateString('az-AZ');
 
         // ── 12. Author: Edit/Delete buttons ───────────────────────
         let isAuthor = false;
@@ -754,10 +915,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (contactBtnGroup) {
                 contactBtnGroup.innerHTML = `
                     <button class="btn-call-reveal" style="background:var(--airy-primary);margin-bottom:10px;" id="editAdBtn">
-                        <i class="fas fa-edit"></i> ${i18n.t('editBtn')}
+                        <i class="fas fa-edit"></i> Düzəliş Et
                     </button>
                     <button class="btn-message" style="color:#dc3545;border-color:#dc3545;" id="deleteAdBtn">
-                        <i class="fas fa-trash-alt"></i> ${i18n.t('deleteBtn')}
+                        <i class="fas fa-trash-alt"></i> Elanı Sil
                     </button>`;
 
                 document.getElementById('editAdBtn')?.addEventListener('click', () => {
@@ -765,7 +926,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 document.getElementById('deleteAdBtn')?.addEventListener('click', async () => {
-                    if (!confirm(i18n.t('deleteConfirm'))) return;
+                    if (!confirm('Bu elanı silmək istədiyinizə əminsiniz?')) return;
                     try {
                         const token = (typeof window !== "undefined" && window.getAuthToken)
                             ? window.getAuthToken()
@@ -775,14 +936,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         if (delRes.ok) {
-                            showToast(i18n.t('adDeleted'));
+                            showToast('Elan silindi!');
                             setTimeout(() => window.location.href = 'cabinet.html', 1500);
                         } else {
                             const errData = await delRes.json().catch(() => ({}));
-                            showToast(errData.message || i18n.t('deleteErr'));
+                            showToast(errData.message || 'Silinmə zamanı xəta oldu.');
                         }
                     } catch (e) {
-                        showToast(i18n.t('networkErr'));
+                        showToast('Şəbəkə xətası baş verdi.');
                     }
                 });
             }
@@ -791,29 +952,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .forEach(c => c.style.display = 'none');
         } else {
             // ── 13. Phone / WhatsApp / Message buttons ─────────────
-            const rawPhone = (
-                ad.contactPhone ||
-                ad.store?.contactNumber ||
-                ad.author?.phone ||
-                ''
-            ).trim();
-            const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-
             const callBtn  = document.getElementById('callBtn');
             const phoneText= document.getElementById('phoneText');
             if (callBtn && phoneText) {
                 if (rawPhone) {
-                    let revealed = false;
-                    callBtn.addEventListener('click', () => {
-                        if (!revealed) {
-                            phoneText.removeAttribute('data-translate');
-                            phoneText.textContent = rawPhone;
-                            callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
-                            revealed = true;
+                    callBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (!phoneRevealed) {
+                            revealSellerPhone();
                         } else {
-                            window.location.href = `tel:${cleanPhone || rawPhone.replace(/\s+/g, '')}`;
+                            const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
+                            if (telNumber) window.location.href = `tel:${telNumber}`;
                         }
-                    });
+                    };
                     callBtn.classList.remove('hidden');
                     callBtn.style.display = '';
                 } else {
@@ -844,7 +995,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? window.getAuthToken()
                         : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
                     if (!token) {
-                        showToast(i18n.t('loginToMessage'));
+                        showToast('Mesaj yazmaq üçün sistemə daxil olun!');
                         setTimeout(() => window.location.href = 'login.html', 1500);
                         return;
                     }
@@ -867,7 +1018,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const realRatingEl = document.getElementById('realRating');
                     if (realRatingEl) {
                         realRatingEl.className = 'no-reviews-title';
-                        realRatingEl.textContent = i18n.t('noReviews');
+                        realRatingEl.textContent = 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!';
                     }
                 }
             };
@@ -899,15 +1050,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const token = (typeof window !== "undefined" && window.getAuthToken)
                             ? window.getAuthToken()
                             : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
-                        if (!token) { showToast(i18n.t('loginToReview')); return; }
-                        if (!currentRating) { showToast(i18n.t('selectRating')); return; }
+                        if (!token) { showToast('Rəy yazmaq üçün daxil olun!'); return; }
+                        if (!currentRating) { showToast('Zəhmət olmasa reytinq seçin (ulduz)'); return; }
 
                         const textElId = type === 'main' ? 'mainReviewText' : 'sideReviewText';
                         const textEl   = document.getElementById(textElId);
                         const text     = textEl?.value.trim() || '';
 
                         const btnText  = submitBtn.innerHTML;
-                        submitBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${i18n.t('sending')}`;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göndərilir...';
 
                         try {
                             const postRes = await fetch(`${API_BASE}/reviews`, {
@@ -917,14 +1068,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                             });
                             const data = await postRes.json();
                             if (postRes.ok) {
-                                showToast(i18n.t('reviewAdded'));
+                                showToast('Rəy uğurla əlavə edildi!');
                                 if (textEl) textEl.value = '';
                                 fetchAndRenderReviews();
                             } else {
-                                showToast(data.message || i18n.t('errOccurred'));
+                                showToast(data.message || 'Xəta baş verdi');
                             }
                         } catch (e) {
-                            showToast(i18n.t('networkErr'));
+                            showToast('Şəbəkə xətası baş verdi.');
                             renderReviews([]);
                         } finally {
                             submitBtn.innerHTML = btnText;
@@ -1010,7 +1161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         this.onerror = null;
                         this.src = '/assets/images/default-ad.svg';
                     };
-                    const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || i18n.t('adFallback');
+                    const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
                     imgEl.alt = itemTitle;
                     imgEl.loading = 'lazy';
                     imgContainer.appendChild(imgEl);
@@ -1019,9 +1170,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     badge.className = 'ad-badge';
                     if (item.sellerType === 'personal') {
                         badge.style.background = '#e67e22';
-                        badge.textContent = i18n.t('private');
+                        badge.textContent = 'Şəxsi';
                     } else {
-                        badge.textContent = i18n.t('store');
+                        badge.textContent = 'Mağaza';
                     }
                     imgContainer.appendChild(badge);
 
@@ -1048,12 +1199,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const cityIcon = document.createElement('i');
                     cityIcon.className = 'fas fa-map-marker-alt';
                     citySpan.appendChild(cityIcon);
-                    citySpan.appendChild(document.createTextNode(` ${i18n.translateCity(item.city || 'Bakı')}`));
+                    citySpan.appendChild(document.createTextNode(` ${item.city || 'Bakı'}`));
                     locEl.appendChild(citySpan);
 
                     const dateSpan = document.createElement('span');
                     if (item.createdAt) {
-                        dateSpan.textContent = i18n.formatDate(item.createdAt);
+                        const d = new Date(item.createdAt);
+                        dateSpan.textContent = !isNaN(d.getTime()) ? d.toLocaleDateString('az-AZ') : '';
                     }
                     locEl.appendChild(dateSpan);
 
@@ -1076,38 +1228,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('[ad-details] Error:', err);
         showPageError(err.message || 'Naməlum xəta baş verdi.');
         return; // revealPage() called inside showPageError
-        // Re-render dynamic localized blocks when language changes live
-        document.addEventListener('mobilaz:languagechange', () => {
-            try {
-                if (typeof renderHeaderMeta === 'function') renderHeaderMeta();
-                if (typeof renderSpecsAndLocation === 'function') renderSpecsAndLocation();
-                if (typeof fetchAndRenderRelated === 'function') fetchAndRenderRelated();
-                if (Array.isArray(window.__CURRENT_REVIEWS)) renderReviews(window.__CURRENT_REVIEWS);
-
-                const sinceTextEl = document.getElementById('sellerSinceText');
-                if (sinceTextEl) {
-                    const dt = (ad.sellerType === 'store' && ad.store?.createdAt) ? ad.store.createdAt : (ad.author?.createdAt || ad.createdAt);
-                    if (dt) sinceTextEl.textContent = ' ' + i18n.formatMonthYear(dt);
-                }
-                const sellerTypeEl = document.getElementById('sellerTypeTag');
-                if (sellerTypeEl) {
-                    const lblSpan = sellerTypeEl.querySelector('span');
-                    if (lblSpan) lblSpan.textContent = ' ' + (ad.sellerType === 'store' && ad.store ? i18n.t('store') : i18n.t('personalAccount'));
-                }
-                const locTextEl = document.getElementById('sellerLocationText');
-                if (locTextEl) {
-                    const rawCity = (ad.sellerType === 'store' && ad.store?.city) ? ad.store.city : ad.city;
-                    if (rawCity) {
-                        const locParts = [i18n.translateCity(rawCity), (ad.sellerType !== 'store' && ad.region ? i18n.translateCity(ad.region) : '')].filter(Boolean);
-                        locTextEl.textContent = ' ' + locParts.join(', ');
-                    }
-                }
-                const editBtn = document.getElementById('editAdBtn');
-                if (editBtn) editBtn.innerHTML = `<i class="fas fa-edit"></i> ${i18n.t('editBtn')}`;
-                const delBtn = document.getElementById('deleteAdBtn');
-                if (delBtn) delBtn.innerHTML = `<i class="fas fa-trash-alt"></i> ${i18n.t('deleteBtn')}`;
-            } catch (err) { /* ignore live re-render errors */ }
-        });
     } finally {
         // ✅ ALWAYS reveal — no matter what happened above
         revealPage();
@@ -1119,7 +1239,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ── renderReviews helper ────────────────────────────────────────
     function renderReviews(reviews) {
         reviews = Array.isArray(reviews) ? reviews : [];
-        window.__CURRENT_REVIEWS = reviews;
         let total = 0;
         const counts = [0, 0, 0, 0, 0];
         reviews.forEach(r => {
@@ -1136,7 +1255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 realRatingEl.textContent = `${avg} ★`;
             } else {
                 realRatingEl.className = 'no-reviews-title';
-                realRatingEl.textContent = i18n.t('noReviews');
+                realRatingEl.textContent = 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!';
             }
         }
         const avgSpan = document.getElementById('avgRating');
@@ -1149,18 +1268,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!reviews.length) {
                 summaryEl.innerHTML = `
                     <div class="empty-state no-reviews-summary" style="width: 100%; text-align: center; padding: 16px;">
-                        <span id="realRating" class="no-reviews-title" style="display:none;">${i18n.t('noReviews')}</span>
+                        <span id="realRating" class="no-reviews-title" style="display:none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>
                         <span id="avgRating" style="display:none;">-</span>
                         <span id="reviewCount" style="display:none;">0</span>
                         <div class="rating-stars-lg empty-stars" style="color: #9ca3af; font-size: 16px; margin: 0 0 6px 0; letter-spacing: 2px;">☆☆☆☆☆</div>
-                        <div class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400; text-transform: none;">${i18n.t('noReviews')}</div>
+                        <div class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400; text-transform: none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</div>
                     </div>`;
             } else {
                 summaryEl.innerHTML = `
                     <div>
                         <div class="rating-big"><span id="realRating">${avg} ★</span><span id="avgRating" style="display:none;">${avg}</span></div>
                         <div class="rating-stars-lg">${getStarsHtml(Math.round(Number(avg)))}</div>
-                        <div class="rating-count"><span id="reviewCount">${reviews.length}</span> ${i18n.t('basedOnReviews')}</div>
+                        <div class="rating-count"><span id="reviewCount">${reviews.length}</span> rəy əsasında</div>
                     </div>
                     <div class="rating-bars" style="flex:1">
                         ${[5,4,3,2,1].map((star, idx) => {
@@ -1187,14 +1306,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = 'no-reviews-empty empty-state';
                 emptyDiv.style.cssText = 'padding: 16px; text-align: center; color: #6b7280; font-size: 14px;';
-                emptyDiv.innerHTML = `<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">${i18n.t('noReviews')}</span>`;
+                emptyDiv.innerHTML = '<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
                 section.insertBefore(emptyDiv, writeBlock || null);
             } else {
                 reviews.slice(0, 10).forEach(r => {
                     const div = document.createElement('div');
                     div.className = 'review-card-full';
                     const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
-                    const date = r.createdAt ? i18n.formatDate(r.createdAt) : '';
+                    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('az-AZ') : '';
 
                     const header = document.createElement('div');
                     header.className = 'rc-header';
@@ -1207,7 +1326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const info = document.createElement('div');
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'rc-name';
-                    nameDiv.textContent = r.author?.name || r.author?.email || i18n.t('user');
+                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
                     const dateDiv = document.createElement('div');
                     dateDiv.className = 'rc-date';
                     dateDiv.textContent = date;
@@ -1236,7 +1355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const emptyMini = document.createElement('div');
                 emptyMini.className = 'no-reviews-empty empty-state';
                 emptyMini.style.cssText = 'padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;';
-                emptyMini.innerHTML = `<span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">${i18n.t('noReviews')}</span>`;
+                emptyMini.innerHTML = '<span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
                 miniContainer.appendChild(emptyMini);
             } else {
                 reviews.slice(0, 3).forEach(r => {
@@ -1255,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'mini-name';
-                    nameDiv.textContent = r.author?.name || r.author?.email || i18n.t('user');
+                    nameDiv.textContent = r.author?.name || r.author?.email || 'İstifadəçi';
 
                     const starsDiv = document.createElement('div');
                     starsDiv.className = 'mini-stars';
