@@ -54,6 +54,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }[c]));
     }
 
+    function maskPhoneNumber(phone) {
+        if (!phone) return '';
+        const trimmed = String(phone).trim();
+        const digits = trimmed.replace(/\D/g, '');
+        if (digits.startsWith('994') && digits.length >= 11) {
+            const op = digits.slice(3, 5);
+            const last = digits.slice(-2);
+            return `+994 ${op} *** ** ${last}`;
+        }
+        if (digits.startsWith('0') && digits.length >= 9) {
+            const op = digits.slice(0, 3);
+            const last = digits.slice(-2);
+            return `${op} *** ** ${last}`;
+        }
+        if (digits.length >= 7) {
+            const op = trimmed.slice(0, Math.min(6, Math.max(3, Math.floor(trimmed.length * 0.4))));
+            const last = trimmed.slice(-2);
+            return `${op} *** ** ${last}`;
+        }
+        return `${trimmed.slice(0, 3)} ***`;
+    }
+
     // ── Always-reveal function (called in finally) ─────────────────
     function revealPage() {
         const skeleton = document.getElementById('adLoadingSkeleton');
@@ -524,6 +546,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         const sellerSinceRow = document.getElementById('sellerSinceRow') || document.querySelector('.seller-since-row');
         const sellerSinceText = document.getElementById('sellerSinceText');
 
+        // Phone info & reveal logic
+        const rawPhone = (
+            ad.contactPhone ||
+            ad.author?.phone ||
+            ad.user?.phone ||
+            ad.store?.contactNumber ||
+            ''
+        ).trim();
+        const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+        let phoneRevealed = false;
+
+        function revealSellerPhone() {
+            if (phoneRevealed) return;
+            phoneRevealed = true;
+
+            // 1. Reveal in seller card (sellerPhoneTag)
+            const sellerPhoneTag = document.getElementById('sellerPhoneTag');
+            const sellerPhoneText = document.getElementById('sellerPhoneText');
+            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
+            if (sellerPhoneText) {
+                sellerPhoneText.textContent = ` ${rawPhone}`;
+            }
+            if (sellerPhoneHint) {
+                sellerPhoneHint.style.display = 'none';
+                sellerPhoneHint.removeAttribute('data-translate');
+            }
+            if (sellerPhoneTag) {
+                sellerPhoneTag.classList.add('revealed');
+                const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                const callTitle = (lang === 'RUS' || lang === 'RU')
+                    ? 'Нажмите, чтобы позвонить'
+                    : (lang === 'ENG' || lang === 'EN' ? 'Click to call' : 'Zəng etmək üçün klikləyin');
+                sellerPhoneTag.setAttribute('title', callTitle);
+            }
+
+            // 2. Reveal in callBtn
+            const callBtnEl = document.getElementById('callBtn');
+            const phoneTextEl = document.getElementById('phoneText');
+            if (callBtnEl && phoneTextEl) {
+                phoneTextEl.textContent = rawPhone;
+                phoneTextEl.removeAttribute('data-translate');
+                callBtnEl.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+                callBtnEl.classList.add('revealed');
+            }
+        }
+
         if (isStore) {
             // Mode A: Store Seller
             const store = ad.store;
@@ -750,20 +818,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // Phone Tag
+            // Phone Tag setup in seller card
             const sellerPhoneTag = document.getElementById('sellerPhoneTag');
             const sellerPhoneText = document.getElementById('sellerPhoneText');
+            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
             if (sellerPhoneTag) {
-                const authorPhone = (author.phone || ad.contactPhone || '').trim();
-                if (authorPhone) {
-                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${authorPhone}`;
+                if (rawPhone) {
+                    const maskedPhone = maskPhoneNumber(rawPhone);
+                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${maskedPhone}`;
                     sellerPhoneTag.classList.remove('hidden');
-                    sellerPhoneTag.style.display = 'flex';
+                    sellerPhoneTag.style.display = 'inline-flex';
+                    sellerPhoneTag.classList.add('phone-clickable');
+
+                    const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+                    const revealTitle = (lang === 'RUS' || lang === 'RU')
+                        ? 'Нажмите, чтобы увидеть номер'
+                        : (lang === 'ENG' || lang === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
+                    sellerPhoneTag.setAttribute('title', revealTitle);
+
+                    if (sellerPhoneHint) {
+                        sellerPhoneHint.style.display = 'inline';
+                    }
+
+                    sellerPhoneTag.onclick = (e) => {
+                        e.preventDefault();
+                        if (!phoneRevealed) {
+                            revealSellerPhone();
+                        } else {
+                            const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
+                            if (telNumber) window.location.href = `tel:${telNumber}`;
+                        }
+                    };
                 } else {
                     sellerPhoneTag.classList.add('hidden');
                     sellerPhoneTag.style.display = 'none';
                 }
             }
+
+            document.addEventListener('mobilaz:languagechange', (e) => {
+                if (!phoneRevealed && sellerPhoneTag && sellerPhoneTag.style.display !== 'none') {
+                    const l = (e.detail?.lang || localStorage.getItem('lang') || 'AZ').toUpperCase();
+                    const titleText = (l === 'RUS' || l === 'RU')
+                        ? 'Нажмите, чтобы увидеть номер'
+                        : (l === 'ENG' || l === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
+                    sellerPhoneTag.setAttribute('title', titleText);
+                }
+            });
 
             // Stats (Hide dummy stats for personal seller)
             if (sellerStats) {
@@ -852,28 +952,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .forEach(c => c.style.display = 'none');
         } else {
             // ── 13. Phone / WhatsApp / Message buttons ─────────────
-            const rawPhone = (
-                ad.contactPhone ||
-                ad.store?.contactNumber ||
-                ad.author?.phone ||
-                ''
-            ).trim();
-            const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-
             const callBtn  = document.getElementById('callBtn');
             const phoneText= document.getElementById('phoneText');
             if (callBtn && phoneText) {
                 if (rawPhone) {
-                    let revealed = false;
-                    callBtn.addEventListener('click', () => {
-                        if (!revealed) {
-                            phoneText.textContent = rawPhone;
-                            callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
-                            revealed = true;
+                    callBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (!phoneRevealed) {
+                            revealSellerPhone();
                         } else {
-                            window.location.href = `tel:${cleanPhone || rawPhone.replace(/\s+/g, '')}`;
+                            const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
+                            if (telNumber) window.location.href = `tel:${telNumber}`;
                         }
-                    });
+                    };
                     callBtn.classList.remove('hidden');
                     callBtn.style.display = '';
                 } else {

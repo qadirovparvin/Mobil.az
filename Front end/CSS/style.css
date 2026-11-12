@@ -1732,3 +1732,49 @@ main {
     z-index: 500 !important;
   }
 }
+
+/* Seller Phone Reveal in Ads */
+.personal-tag.phone-clickable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  margin-left: -8px;
+  border-radius: 8px;
+  width: fit-content;
+}
+
+.personal-tag.phone-clickable:hover {
+  background: rgba(99, 102, 241, 0.14);
+  color: var(--text-primary, #fff);
+}
+
+.personal-tag.phone-clickable:active {
+  transform: scale(0.98);
+}
+
+.personal-tag.phone-clickable .phone-reveal-hint {
+  font-size: 11px;
+  color: var(--airy-primary, #6366f1);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  margin-left: 2px;
+}
+
+.personal-tag.phone-clickable.revealed {
+  color: var(--text-primary, #fff);
+  font-weight: 600;
+}
+
+.personal-tag.phone-clickable.revealed i {
+  color: #10b981;
+}
+
+.personal-tag.phone-clickable.revealed:hover {
+  background: rgba(16, 185, 129, 0.14);
+}

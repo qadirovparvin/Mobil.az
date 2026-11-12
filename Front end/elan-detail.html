@@ -106,6 +106,51 @@
 
     .personal-tag i { color: var(--airy-primary); }
 
+    .personal-tag.phone-clickable {
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      margin-left: -8px;
+      border-radius: 8px;
+      width: fit-content;
+    }
+
+    .personal-tag.phone-clickable:hover {
+      background: rgba(99, 102, 241, 0.14);
+      color: var(--text-primary);
+    }
+
+    .personal-tag.phone-clickable:active {
+      transform: scale(0.98);
+    }
+
+    .personal-tag.phone-clickable .phone-reveal-hint {
+      font-size: 11px;
+      color: var(--airy-primary);
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      margin-left: 2px;
+    }
+
+    .personal-tag.phone-clickable.revealed {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .personal-tag.phone-clickable.revealed i {
+      color: #10b981;
+    }
+
+    .personal-tag.phone-clickable.revealed:hover {
+      background: rgba(16, 185, 129, 0.14);
+    }
+
     /* Stats row for personal */
     .personal-stats {
       display: grid;
@@ -1008,8 +1053,10 @@
               <div class="personal-tag hidden" id="sellerEmailTag" style="display:none;margin-top:4px;">
                 <i class="fas fa-envelope"></i> <span id="sellerEmailText"></span>
               </div>
-              <div class="personal-tag hidden" id="sellerPhoneTag" style="display:none;margin-top:4px;">
-                <i class="fas fa-phone"></i> <span id="sellerPhoneText"></span>
+              <div class="personal-tag hidden phone-clickable" id="sellerPhoneTag" style="display:none;margin-top:4px;" title="Nömrəni görmək üçün toxunun">
+                <i class="fas fa-phone" id="sellerPhoneIcon"></i>
+                <span id="sellerPhoneText"></span>
+                <span id="sellerPhoneHint" class="phone-reveal-hint" data-translate="det-reveal-hint" style="display:none;">(Göstər)</span>
               </div>
               <a href="#" id="storeProfileLink" class="hidden" style="display:none;align-items:center;gap:5px;font-size:12.5px;color:var(--airy-primary);text-decoration:none;margin-top:6px;font-weight:600;">
                 <i class="fas fa-store"></i> <span>Mağazaya bax</span>
