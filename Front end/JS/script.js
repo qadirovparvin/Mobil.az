@@ -1513,6 +1513,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             : translations[newLang][key];
                     }
                 }
+                else if (element.tagName === "OPTION") {
+                    const text = translations[newLang][key];
+                    if (text) element.textContent = text;
+                }
                 else if (element.classList.contains("login-btn") ||
                     element.classList.contains("register-btn")) {
                     const icon = element.querySelector("i");
@@ -1534,6 +1538,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
+            });
+            document.querySelectorAll("select option[data-translate]").forEach((option) => {
+                const key = option.getAttribute("data-translate");
+                const localized = translations[newLang] && translations[newLang][key];
+                if (localized) option.textContent = localized;
             });
             const searchInput = document.querySelector(".search-options input");
             if (searchInput && translations[newLang] && translations[newLang]["search-placeholder"]) {
