@@ -96,12 +96,12 @@ const DEMO_ADS = [
 
 async function ensureDemoAds() {
     try {
-        const count = await Ad.countDocuments({ status: { $ne: 'deleted' } });
-        const hasGalaxyS24 = await Ad.exists({ adNumber: 'MOB-5D3802' });
-
-        if (count >= 5 && hasGalaxyS24 && process.env.SEED_DEMO_ADS !== 'true') {
+        if (process.env.SEED_DEMO_ADS !== 'true') {
             return;
         }
+
+        const count = await Ad.countDocuments({ status: { $ne: 'deleted' } });
+        const hasGalaxyS24 = await Ad.exists({ adNumber: 'MOB-5D3802' });
 
         console.log(`[Seed] Checking demo ads (existing: ${count}). Ensuring demo catalogue...`);
 

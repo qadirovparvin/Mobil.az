@@ -111,7 +111,43 @@ async function expirePromotions() {
             await invalidateCache('ads:*');
         }
 
-        // 2. Expire user packages
+        // 2. Expire user packages (Downgrade to Standart: keep max 2 active ads, pause excess without deleting)
+        const expiredUsersList = await User.find({
+            activePackage: { $ne: 'none' },
+            packageExpiresAt: { $lte: now }
+        }).select('_id name email activePackage');
+
+        for (const expUser of expiredUsersList) {
+            try {
+                const activeAds = await Ad.find({
+                    author: expUser._id,
+                    status: 'active'
+                }).sort({ createdAt: -1 });
+
+                if (activeAds.length > 2) {
+                    const adsToPause = activeAds.slice(2).map(a => a._id);
+                    await Ad.updateMany(
+                        { _id: { $in: adsToPause } },
+                        { $set: { status: 'archived' } }
+                    );
+                }
+
+                await Ad.updateMany(
+                    { author: expUser._id, promotionType: { $in: ['VIP', 'PRO', 'Premium'] } },
+                    { $set: { promotionType: 'none' }, $unset: { promotionExpiresAt: '', promotionStartedAt: '' } }
+                );
+
+                await Notification.create({
+                    user: expUser._id,
+                    title: 'Paket müddəti bitdi',
+                    message: 'Paketinizin 30 günlük müddəti başa çatdı və hesabınız Standart paketinə keçirildi. 2 aktiv elanınız saxlanıldı, digər elanlarınız silinmədən dayandırıldı.',
+                    type: 'system'
+                }).catch(() => {});
+            } catch (err) {
+                console.error('Error handling expired user:', expUser._id, err.message);
+            }
+        }
+
         const expiredUsers = await User.updateMany(
             {
                 activePackage: { $ne: 'none' },

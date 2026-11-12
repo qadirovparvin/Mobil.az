@@ -240,18 +240,42 @@ document.addEventListener('DOMContentLoaded', () => {
             historyPackage: 'paketi',
             historyActivated: 'aktiv edildi',
             historyMethod: 'Üsul',
-            standardDescription: 'Fərdi istifadəçilər üçün sadə başlanğıc paketi.',
-            vipDescription: 'Daha çox elan və daha güclü görünürlük istəyənlər üçün.',
-            proDescription: 'Mağazalar və peşəkar satıcılar üçün tam paket həlli.',
-            standardFeature1: '3 aktiv elan',
-            standardFeature2: 'Standart sıralama',
-            standardFeature3: 'E-poçt bildirişləri',
+            package30DaysNotice: 'Bütün paketlər alış tarixindən başlayaraq 30 gün qüvvədədir',
+            standardDescription: 'Fərdi istifadəçilər üçün ödənişsiz sadə başlanğıc paketi.',
+            vipDescription: 'Daha çox elan və güclü görünürlük istəyən fəal satıcılar üçün.',
+            proDescription: 'Maksimum satış və prioritet görünürlük əldə etmək istəyənlər üçün tam paket həlli.',
+            standardFeature1: '2 aktiv elan',
+            standardFeature2: 'Elana baxış və elan kartına klik sayı',
             vipFeature1: '10 aktiv elan',
-            vipFeature2: 'VIP nişanı və vurğulanan kart',
-            vipFeature3: 'Daha sürətli moderasiya',
+            vipFeature2: 'Baxışlar, kart klikləri, əlaqə klikləri və seçilmişlərə əlavə edilmə statistikası',
+            vipFeature3: '5 fərqli elanın hər birini VIP bölməsində 3 gün göstərmək',
+            vipFeature4: '5 ədəd 3 günlük irəli çəkmə kampaniyası (gündə 1 dəfə, cəmi 3 irəli çəkmə)',
+            vipFeature5: 'VIP nişanı, incə rəngli çərçivə və 7 günlük statistika qrafiki',
             proFeature1: '25 aktiv elan',
-            proFeature2: 'Ana səhifədə üstün görünürlük',
-            proFeature3: 'Prioritet dəstək və analitika',
+            proFeature2: 'VIP-dəki bütün statistika, 30 günlük qrafik, elanların nəticələrini müqayisə və aylıq xülasə',
+            proFeature3: '5 fərqli elanın hər birini VIP bölməsində 7 gün göstərmək',
+            proFeature4: '9 ədəd 3 günlük irəli çəkmə kampaniyası (hər kampaniyada gündə 1 dəfə)',
+            proFeature5: 'İrəli çəkmə üçün tarix və saat planlaşdırması',
+            proFeature6: 'Bütün aktiv elanlarda PRO nişanı, incə gradient çərçivə və yumşaq kölgə (yanıb-sönməyən)',
+            packageRulesTitle: 'Paket qaydaları və şərtlər',
+            ruleLimitTitle: 'Elan limiti:',
+            ruleLimitDesc: 'Eyni anda aktiv olan elanların sayını ifadə edir (Standart: 2, VIP: 10, PRO: 25).',
+            ruleRotationTitle: 'Növbəli VIP nümayiş:',
+            ruleRotationDesc: 'VIP bölməsində elanlar növbəli göstərilir; daimi ilk yer vədi verilmir.',
+            rulePeriodTitle: 'Dövrün başa çatması:',
+            rulePeriodDesc: 'Dövr bitəndə istifadə olunmamış reklam hüquqları sıfırlanır və aktiv paket reklamları dayanır.',
+            ruleWarningTitle: 'Tam müddət xəbərdarlığı:',
+            ruleWarningDesc: 'Tam reklam müddəti qalmadıqda kampaniyaya başlamazdan əvvəl xəbərdarlıq göstərilir.',
+            ruleDowngradeTitle: 'Standarta keçid:',
+            ruleDowngradeDesc: 'Paket yenilənməzsə hesab Standarta keçir; istifadəçi 2 aktiv elan seçir, qalanları silinmədən dayandırılır.',
+            ruleDataTitle: 'Məlumatların qorunması:',
+            ruleDataDesc: 'Elanlar və keçmiş statistika silinmir; yeni dövrün göstəriciləri ayrıca hesablanır.',
+            ruleClicksTitle: 'Əlaqə statistikası:',
+            ruleClicksDesc: 'Əlaqə düyməsinə klik zəng və ya mesajın baş tutması kimi göstərilmir (yalnız klik sayı əks olunur).',
+            ruleTransparencyTitle: 'Dəqiq xidmət:',
+            ruleTransparencyDesc: 'Hazır olmayan heç bir funksiya aktiv və işlək kimi təqdim edilmir.',
+            balanceShortfall: 'Balansınızda {{amount}} AZN çatışmır',
+            topUpMissingBtn: 'Balansı artır (+{{amount}} AZN)',
             selectNow: 'Seç',
             selectedNow: 'Seçildi',
             includedPlan: 'Daxildir',
@@ -321,18 +345,42 @@ document.addEventListener('DOMContentLoaded', () => {
             historyPackage: 'package',
             historyActivated: 'activated',
             historyMethod: 'Method',
-            standardDescription: 'A simple starting point for individual sellers.',
-            vipDescription: 'For users who want more listings and stronger visibility.',
-            proDescription: 'Maximum package for stores and active sellers.',
-            standardFeature1: '3 active ads',
-            standardFeature2: 'Regular ranking',
-            standardFeature3: 'Email notifications',
-            vipFeature1: '10 active ads',
-            vipFeature2: 'VIP badge and highlighted card',
-            vipFeature3: 'Faster moderation',
-            proFeature1: '25 active ads',
-            proFeature2: 'Homepage priority visibility',
-            proFeature3: 'Priority support and analytics',
+            package30DaysNotice: 'All packages are valid for 30 days from the purchase date',
+            standardDescription: 'Free starting package for individual sellers.',
+            vipDescription: 'For active sellers wanting more listings and stronger visibility.',
+            proDescription: 'Maximum performance package for top sellers and power users.',
+            standardFeature1: '2 active listings',
+            standardFeature2: 'Listing views and card click count',
+            vipFeature1: '10 active listings',
+            vipFeature2: 'Views, card clicks, contact clicks, and favorites statistics',
+            vipFeature3: 'Feature 5 different listings in the VIP section for 3 days each',
+            vipFeature4: '5 bump-up campaigns of 3 days (once daily, 3 bump-ups total)',
+            vipFeature5: 'VIP badge, subtle colored border, and 7-day analytics chart',
+            proFeature1: '25 active listings',
+            proFeature2: 'All VIP analytics, 30-day chart, listing performance comparison, and monthly summary',
+            proFeature3: 'Feature 5 different listings in the VIP section for 7 days each',
+            proFeature4: '9 bump-up campaigns of 3 days (once daily)',
+            proFeature5: 'Scheduled date and time planning for bump-ups',
+            proFeature6: 'PRO badge on all active listings, subtle gradient border, and soft shadow (non-blinking)',
+            packageRulesTitle: 'Package Rules & Terms',
+            ruleLimitTitle: 'Listing limit:',
+            ruleLimitDesc: 'Represents simultaneously active listings (Standard: 2, VIP: 10, PRO: 25).',
+            ruleRotationTitle: 'Rotational VIP display:',
+            ruleRotationDesc: 'Listings in the VIP section rotate fairly; no permanent top spot is promised.',
+            rulePeriodTitle: 'Period expiration:',
+            rulePeriodDesc: 'When the 30-day period ends, unused promo rights reset and active package promos pause.',
+            ruleWarningTitle: 'Duration warning:',
+            ruleWarningDesc: 'A warning is displayed before starting if insufficient campaign time remains in the period.',
+            ruleDowngradeTitle: 'Downgrade to Standard:',
+            ruleDowngradeDesc: 'If not renewed, the account switches to Standard; user keeps 2 active listings while others are paused without deletion.',
+            ruleDataTitle: 'Data preservation:',
+            ruleDataDesc: 'Listings and past analytics are never deleted; new period metrics calculate separately.',
+            ruleClicksTitle: 'Contact analytics:',
+            ruleClicksDesc: 'Contact button clicks reflect button presses only, not confirmed calls or messages.',
+            ruleTransparencyTitle: 'Transparency:',
+            ruleTransparencyDesc: 'Unfinished or unready features are never represented as active or operational.',
+            balanceShortfall: 'Insufficient balance: {{amount}} AZN needed',
+            topUpMissingBtn: 'Top up balance (+{{amount}} AZN)',
             selectNow: 'Choose',
             selectedNow: 'Selected',
             includedPlan: 'Included',
@@ -402,18 +450,42 @@ document.addEventListener('DOMContentLoaded', () => {
             historyPackage: 'пакет',
             historyActivated: 'активирован',
             historyMethod: 'Способ',
-            standardDescription: 'Простой стартовый пакет для частных продавцов.',
-            vipDescription: 'Для тех, кому нужно больше объявлений и лучшая видимость.',
-            proDescription: 'Полный пакет для магазинов и профессиональных продавцов.',
-            standardFeature1: '3 активных объявления',
-            standardFeature2: 'Стандартная выдача',
-            standardFeature3: 'Email-уведомления',
+            package30DaysNotice: 'Все пакеты действуют 30 дней с даты покупки',
+            standardDescription: 'Бесплатный стартовый пакет для частных продавцов.',
+            vipDescription: 'Для активных продавцов, которым нужно больше объявлений и лучшая видимость.',
+            proDescription: 'Максимальный пакет для активных продавцов с приоритетным размещением.',
+            standardFeature1: '2 активных объявления',
+            standardFeature2: 'Количество просмотров объявления и кликов по карточке',
             vipFeature1: '10 активных объявлений',
-            vipFeature2: 'VIP-значок и выделенная карточка',
-            vipFeature3: 'Более быстрая модерация',
+            vipFeature2: 'Просмотры, клики по карточке, клики по контактам и добавления в избранное',
+            vipFeature3: 'Показ 5 различных объявлений в VIP-разделе по 3 дня каждое',
+            vipFeature4: '5 кампаний поднятия на 3 дня (по 1 разу в день, всего 3 поднятия)',
+            vipFeature5: 'VIP-значок, тонкая цветная рамка и 7-дневный график статистики',
             proFeature1: '25 активных объявлений',
-            proFeature2: 'Приоритетная видимость на главной',
-            proFeature3: 'Приоритетная поддержка и аналитика',
+            proFeature2: 'Вся статистика VIP, 30-дневный график, сравнение объявлений и ежемесячный отчет',
+            proFeature3: 'Показ 5 различных объявлений в VIP-разделе по 7 дней каждое',
+            proFeature4: '9 кампаний поднятия на 3 дня (по 1 разу в день)',
+            proFeature5: 'Планирование даты и времени поднятия',
+            proFeature6: 'PRO-значок на всех активных объявлениях, изящная градиентная рамка и мягкая тень (без мерцания)',
+            packageRulesTitle: 'Правила и условия пакетов',
+            ruleLimitTitle: 'Лимит объявлений:',
+            ruleLimitDesc: 'Количество одновременно активных объявлений (Стандарт: 2, VIP: 10, PRO: 25).',
+            ruleRotationTitle: 'Ротация в VIP:',
+            ruleRotationDesc: 'Объявления в VIP-разделе показываются по очереди; постоянное первое место не гарантируется.',
+            rulePeriodTitle: 'Окончание периода:',
+            rulePeriodDesc: 'По истечении 30 дней неиспользованные рекламные права обнуляются, а активные промо-кампании останавливаются.',
+            ruleWarningTitle: 'Предупреждение о сроке:',
+            ruleWarningDesc: 'Если до конца периода не хватает времени на полную кампанию, перед запуском отображается предупреждение.',
+            ruleDowngradeTitle: 'Переход на Стандарт:',
+            ruleDowngradeDesc: 'При непродлении аккаунт переходит на Стандарт; пользователь выбирает 2 активных объявления, остальные приостанавливаются без удаления.',
+            ruleDataTitle: 'Сохранение данных:',
+            ruleDataDesc: 'Объявления и прошлая статистика не удаляются; показатели нового периода рассчитываются отдельно.',
+            ruleClicksTitle: 'Статистика контактов:',
+            ruleClicksDesc: 'Клик по кнопке связи отражает только нажатие, а не факт состоявшегося звонка или сообщения.',
+            ruleTransparencyTitle: 'Честность сервиса:',
+            ruleTransparencyDesc: 'Неготовые функции никогда не выдаются за активные или работающие.',
+            balanceShortfall: 'Недостаточно средств: не хватает {{amount}} AZN',
+            topUpMissingBtn: 'Пополнить баланс (+{{amount}} AZN)',
             selectNow: 'Выбрать',
             selectedNow: 'Выбрано',
             includedPlan: 'Включено',
@@ -424,29 +496,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const BILLING_PACKAGES = [
         {
             id: 'standard',
-            names: { AZ: 'Standart', ENG: 'Standard', RUS: 'Standart' },
+            names: { AZ: 'Standart', ENG: 'Standard', RUS: 'Стандарт' },
             icon: 'fa-layer-group',
             descriptionKey: 'standardDescription',
-            featureKeys: ['standardFeature1', 'standardFeature2', 'standardFeature3'],
-            prices: { 30: 0, 90: 0 }
+            featureKeys: ['standardFeature1', 'standardFeature2'],
+            prices: { 30: 0 },
+            activeLimit: 2
         },
         {
             id: 'vip',
             names: { AZ: 'VIP', ENG: 'VIP', RUS: 'VIP' },
             icon: 'fa-crown',
             descriptionKey: 'vipDescription',
-            featureKeys: ['vipFeature1', 'vipFeature2', 'vipFeature3'],
-            prices: { 30: 12, 90: 30 },
-            featuredLabelKey: 'featuredPopular'
+            featureKeys: ['vipFeature1', 'vipFeature2', 'vipFeature3', 'vipFeature4', 'vipFeature5'],
+            prices: { 30: 9.90 },
+            featuredLabelKey: 'featuredPopular',
+            activeLimit: 10
         },
         {
             id: 'pro',
             names: { AZ: 'PRO', ENG: 'PRO', RUS: 'PRO' },
             icon: 'fa-bolt',
             descriptionKey: 'proDescription',
-            featureKeys: ['proFeature1', 'proFeature2', 'proFeature3'],
-            prices: { 30: 24, 90: 60 },
-            featuredLabelKey: 'featuredMax'
+            featureKeys: ['proFeature1', 'proFeature2', 'proFeature3', 'proFeature4', 'proFeature5', 'proFeature6'],
+            prices: { 30: 19.90 },
+            featuredLabelKey: 'featuredMax',
+            activeLimit: 25
         }
     ];
 
@@ -589,7 +664,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const currentPackageId = resolveCurrentPackageId(user);
         packageGrid.innerHTML = BILLING_PACKAGES.map((pkg) => {
-            const price = getBillingPrice(pkg.id, billingState.duration);
+            const price = getBillingPrice(pkg.id, 30);
             const isSelected = billingState.packageId === pkg.id;
             const isPopular = pkg.id === 'vip';
             const isCurrent = currentPackageId === pkg.id;
@@ -607,7 +682,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `✓ ${escapeHtml(billingText('selectedNow', 'Seçildi'))}`
                 : escapeHtml(billingText('selectNow', 'Seç'));
 
-            const durationText = escapeHtml(billingText(`duration${billingState.duration}`, `${billingState.duration} gün`));
+            const durationText = escapeHtml(billingText('duration30', '30 gün'));
+            const formattedPrice = price === 0 ? '0' : (price % 1 === 0 ? price.toFixed(0) : price.toFixed(2).replace('.', ','));
+            const priceHtml = price === 0
+                ? `<b>0</b> <i>AZN / ${escapeHtml(billingText('freePlan', 'Pulsuz'))}</i>`
+                : `<b>${formattedPrice}</b> <i>AZN / ${durationText}</i>`;
 
             const features = pkg.featureKeys.map((key) => `
                 <li><span class="check">✓</span><span class="feature-text">${escapeHtml(billingText(key, key))}</span></li>
@@ -617,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <article class="pkg-card ${isSelected ? 'selected' : ''}" data-package="${pkg.id}" data-package-id="${pkg.id}" role="button" tabindex="0">
                     ${badgeHtml}
                     <div class="pkg-name">${escapeHtml(getBillingPackageName(pkg.id))}</div>
-                    <div class="price"><b>${escapeHtml(String(price))}</b> <i>AZN / ${price === 0 ? 'həmişə' : durationText}</i></div>
+                    <div class="price">${priceHtml}</div>
                     <ul>${features}</ul>
                     <button type="button" class="select-btn">${buttonLabel}</button>
                 </article>
@@ -673,12 +752,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const summaryMethod = document.getElementById('summaryMethod') || document.getElementById('billingSummaryMethod');
         const summaryTotal = document.getElementById('summaryTotal') || document.getElementById('billingSummaryTotal');
         const confirmBtn = document.getElementById('billingConfirmBtn');
+        const warnBox = document.getElementById('billingBalanceWarnBox');
+        const warnText = document.getElementById('billingBalanceWarnText');
         const walletBtn = document.getElementById('billingGoWalletBtn');
         const walletBalance = Number(user?.walletBalance || 0);
 
         if (summaryPackage) summaryPackage.textContent = getBillingPackageName(selectedPackage.id);
         if (summaryDuration) summaryDuration.textContent = canPurchase
-            ? billingText(`duration${billingState.duration}`, `${billingState.duration} gün`)
+            ? billingText('duration30', '30 gün')
             : billingText('includedPlan', 'Daxildir');
         if (summaryMethod) summaryMethod.textContent = canPurchase
             ? billingText(selectedMethod.nameKey, selectedMethod.id)
@@ -693,11 +774,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 : billingText('noPaymentRequired', 'Ödəniş tələb olunmur');
         }
 
+        const isShortfall = canPurchase && billingState.method === 'wallet' && walletBalance < total;
+        const diff = (total - walletBalance).toFixed(2);
+
+        if (warnBox) {
+            if (isShortfall) {
+                warnBox.style.display = 'block';
+                if (warnText) {
+                    warnText.textContent = billingText('balanceShortfall', 'Balansınızda {{amount}} AZN çatışmır').replace('{{amount}}', diff);
+                }
+            } else {
+                warnBox.style.display = 'none';
+            }
+        }
+
         if (walletBtn) {
-            walletBtn.hidden = !canPurchase || billingState.method !== 'wallet' || walletBalance >= total;
-            if (!walletBtn.hidden) {
-                const diff = (total - walletBalance).toFixed(2);
-                walletBtn.textContent = `Balans çatışmır (${diff} AZN) — Artır`;
+            if (isShortfall) {
+                walletBtn.style.display = 'block';
+                walletBtn.hidden = false;
+                walletBtn.textContent = billingText('topUpMissingBtn', 'Balansı artır (+{{amount}} AZN)').replace('{{amount}}', diff);
+            } else {
+                walletBtn.style.display = 'none';
+                walletBtn.hidden = true;
             }
         }
     }
@@ -1008,17 +1106,23 @@ document.addEventListener('DOMContentLoaded', () => {
             interactiveCard.click();
         });
 
-        const topUpHandler = () => {
+        const topUpHandler = (suggestedAmount) => {
             if (typeof window.openTopUpModal === 'function') {
-                window.openTopUpModal();
+                window.openTopUpModal(suggestedAmount);
             } else {
                 openBillingPanel();
             }
         };
 
-        document.getElementById('billingTopUpBtn')?.addEventListener('click', topUpHandler);
-        document.getElementById('billingTopUpQuickBtn')?.addEventListener('click', topUpHandler);
-        document.getElementById('billingGoWalletBtn')?.addEventListener('click', topUpHandler);
+        document.getElementById('billingTopUpBtn')?.addEventListener('click', () => topUpHandler());
+        document.getElementById('billingTopUpQuickBtn')?.addEventListener('click', () => topUpHandler());
+        document.getElementById('billingGoWalletBtn')?.addEventListener('click', () => {
+            const user = getStoredUser() || {};
+            const price = getBillingPrice();
+            const walletBalance = Number(user.walletBalance || 0);
+            const diff = Math.max(0, price - walletBalance).toFixed(2);
+            topUpHandler(diff);
+        });
 
         document.getElementById('billingConfirmBtn')?.addEventListener('click', async () => {
             const user = getStoredUser() || {};
@@ -1029,9 +1133,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Map billing package id + duration to productId expected by backend
-            // BILLING_PACKAGES uses ids: 'vip', 'pro'  → productIds: 'vip-30', 'vip-90', 'pro-30', 'pro-90'
-            const productId = `${billingState.packageId}-${billingState.duration}`;
+            // Fixed 30-day package productId: 'vip-30', 'pro-30'
+            const productId = `${billingState.packageId}-30`;
 
             const token = getToken();
             if (!token) {
@@ -1042,7 +1145,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (methodId === 'wallet') {
                 const walletBalance = Number(user.walletBalance || 0);
                 if (walletBalance < price) {
-                    toast.show(billingText('insufficientBalance', 'Not enough balance. Top up first.'), 'warning');
+                    const diff = (price - walletBalance).toFixed(2);
+                    const msg = billingText('balanceShortfall', 'Balansınızda {{amount}} AZN çatışmır').replace('{{amount}}', diff);
+                    toast.show(msg, 'warning');
+                    topUpHandler(diff);
                     return;
                 }
 

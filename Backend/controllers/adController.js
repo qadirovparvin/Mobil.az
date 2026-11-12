@@ -252,6 +252,14 @@ const getAds = async (req, res, next) => {
             }
         });
 
+        // Fair rotation for VIP listings: no permanent first place promise
+        if (isVIPQuery && Array.isArray(ads) && ads.length > 1) {
+            for (let i = ads.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [ads[i], ads[j]] = [ads[j], ads[i]];
+            }
+        }
+
         const totalPages = Math.ceil(total / normalizedLimit);
         const responseData = {
             ads,
@@ -447,6 +455,31 @@ const createAd = async (req, res, next) => {
         if (cleanSpecs) {
             if (cleanYaddas && !cleanSpecs.memory) cleanSpecs.memory = cleanYaddas;
             if (cleanRam && !cleanSpecs.ram) cleanSpecs.ram = cleanRam;
+        }
+
+        // Check active ad limit based on package
+        const User = require('../models/User');
+        const userDoc = await User.findById(req.user._id).select('activePackage packageExpiresAt role');
+        let maxActiveAds = 2; // Standart default
+        if (userDoc) {
+            if (userDoc.role === 'admin') {
+                maxActiveAds = 99999;
+            } else if (userDoc.activePackage && userDoc.packageExpiresAt && new Date(userDoc.packageExpiresAt) > new Date()) {
+                const pkg = String(userDoc.activePackage).toUpperCase();
+                if (pkg === 'PRO') maxActiveAds = 25;
+                else if (pkg === 'VIP') maxActiveAds = 10;
+            }
+        }
+
+        const currentActiveCount = await Ad.countDocuments({
+            author: req.user._id,
+            status: { $in: ['active', 'pending'] }
+        });
+
+        if (currentActiveCount >= maxActiveAds) {
+            return res.status(400).json({
+                message: `Mövcud paketiniz üzrə eyni anda maksimum ${maxActiveAds} aktiv elan yerləşdirə bilərsiniz. Daha çox elan üçün paketinizi yüksəldin.`
+            });
         }
 
         let adNumber = req.body.adNumber;

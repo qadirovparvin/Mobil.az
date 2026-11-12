@@ -73,6 +73,7 @@ const { validateChatMessagePayload } = require('./utils/chatSecurity');
 const { validateChatParticipants } = require('./utils/chatGuards');
 const { verifyAccessToken } = require('./utils/authSecurity');
 const { ensureDemoAds } = require('./scripts/ensure_demo_ads');
+const { cleanupStoresAndStoreAds } = require('./scripts/cleanup_stores');
 const { buildCorsOptions } = require('./utils/corsPolicy');
 const { buildHelmetOptions } = require('./utils/cspConfig');
 const { rejectNoSqlOperators, validationErrorHandler } = require('./utils/securityValidation');
@@ -222,7 +223,10 @@ const runScheduledExpiryChecks = async () => {
 connectDB().then(async () => {
     await seedAdmin();
     await ensureDefaultPackages();
-    await ensureDemoAds();
+    if (process.env.SEED_DEMO_ADS === 'true') {
+        await ensureDemoAds();
+    }
+    await cleanupStoresAndStoreAds();
     if (process.env.DISABLE_IN_PROCESS_SCHEDULER !== 'true') {
         setTimeout(runScheduledExpiryChecks, 5000);
         setInterval(runScheduledExpiryChecks, Number(process.env.EXPIRY_CHECK_INTERVAL_MS || 60 * 60 * 1000));

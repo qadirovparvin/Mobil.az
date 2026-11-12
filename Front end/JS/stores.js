@@ -39,12 +39,15 @@ async function loadStores() {
 
     if (!stores.length) {
       if (empty) {
+        const i18n = window.MobilazI18n;
+        const emptyTitle = i18n ? i18n.t('noStoresTitle') : 'Hələ mağaza yoxdur';
+        const emptyDesc = i18n ? i18n.t('noStoresDesc') : 'Hal-hazırda aktiv mağaza mövcud deyil. İlk mağazanı siz açın!';
         empty.style.display = 'block';
         empty.innerHTML = `
           <div class="empty-state" style="text-align:center;padding:60px 20px;grid-column:1/-1;">
             <div style="font-size:48px;margin-bottom:12px;">🏪</div>
-            <h3 style="font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text-primary);">Hələ mağaza yoxdur</h3>
-            <p style="color:var(--text-secondary);font-size:14px;">Hal-hazırda aktiv mağaza mövcud deyil. İlk mağazanı siz açın!</p>
+            <h3 style="font-size:20px;font-weight:600;margin-bottom:8px;color:var(--text-primary);" data-translate="noStoresTitle">${escapeHtml(emptyTitle)}</h3>
+            <p style="color:var(--text-secondary);font-size:14px;" data-translate="noStoresDesc">${escapeHtml(emptyDesc)}</p>
           </div>
         `;
       }
