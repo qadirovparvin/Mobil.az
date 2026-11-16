@@ -1491,7 +1491,8 @@ if (adFormEl) {
       return;
     }
     const price       = priceNum;
-    const phone       = document.getElementById('phone') ? document.getElementById('phone').value : '';
+    const phoneInput  = document.getElementById('phone');
+    const phone       = phoneInput ? phoneInput.value.trim() : '';
     const cityEl      = document.getElementById('city');
     const city        = cityEl ? cityEl.value : '';
 
@@ -1500,9 +1501,21 @@ if (adFormEl) {
     if (!model)              { alert('Zəhmət olmasa model seçin.');       return; }
     if (!city)               { alert('Zəhmət olmasa region seçin.');      return; }
     if (!phone)              { alert('Əlaqə nömrəsini daxil edin.');      return; }
-    if (!isValidAzPhone(phone)) {
-      alert('Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67).');
-      return;
+
+    let finalPhone = '';
+    if (typeof validatePhoneNumber === 'function') {
+      const phoneCheck = validatePhoneNumber('phone', 'adPhonePrefix');
+      if (!phoneCheck.valid) {
+        alert(phoneCheck.message || 'Düzgün əlaqə nömrəsi daxil edin.');
+        return;
+      }
+      finalPhone = phoneCheck.fullPhone;
+    } else {
+      if (!isValidAzPhone(phone)) {
+        alert('Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67).');
+        return;
+      }
+      finalPhone = phone;
     }
 
     const currentExistingCount = (isEditMode && Array.isArray(existingImages)) ? existingImages.length : 0;
@@ -1723,7 +1736,7 @@ if (adFormEl) {
       if (err && err.message && err.message.includes('login səhifəsinə')) {
         return;
       }
-      alert('Xəta: Failed to fetch - ' + err.message + ' | base=' + base + ' | token=' + !!token);
+      alert('Xəta: ' + (err.message || 'Elan göndərilərkən xəta baş verdi.'));
       if (submitBtn) submitBtn.disabled = false;
       if (btnSpan) btnSpan.textContent = originalTxt;
     }
