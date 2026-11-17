@@ -85,13 +85,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ── Show visible error or not found on screen ──────────────────
+    let pageRetryCountdown = null;
     function showPageError(msg, isNotFound = false) {
         revealPage();
         const wrapper = document.getElementById('detailWrapper');
         if (!wrapper) return;
 
+        const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+        const isEn = lang.includes('EN') || lang.includes('ENG');
+        const isRu = lang.includes('RU') || lang.includes('RUS');
+
+        const i18n = {
+            errorTitle: isEn ? 'An error occurred' : (isRu ? 'Произошла ошибка' : 'Xəta baş verdi'),
+            notFoundTitle: isEn ? 'Ad not found' : (isRu ? 'Объявление не найдено' : 'Elan tapılmadı'),
+            notFoundDesc: isEn
+                ? 'The ad you are looking for has been deleted, expired, or does not exist.'
+                : (isRu ? 'Искомое объявление удалено, срок действия истек или его не существует.' : 'Axtardığınız elan silinmiş, vaxtı bitmiş və ya mövcud olmayan bir ünvandır.'),
+            serverErrDesc: isEn
+                ? 'Could not connect to the server. The server may be waking up or updating. Please wait a moment.'
+                : (isRu ? 'Не удалось подключиться к серверу. Возможно, сервер запускается или обновляется. Пожалуйста, подождите немного.' : 'Serverlə əlaqə qurula bilmədi. Server oyanır və ya yenilənir (Render). Zəhmət olmasa bir neçə saniyə sonra yenidən yoxlayın.'),
+            retryBtn: isEn ? 'Try again' : (isRu ? 'Попробовать снова' : 'Yenidən yoxla'),
+            backBtn: isEn ? 'Go back' : (isRu ? 'Назад' : 'Geri qayıt'),
+            homeBtn: isEn ? 'Home' : (isRu ? 'На главную' : 'Ana Səhifə'),
+            breadcrumbError: isEn ? 'Error' : (isRu ? 'Ошибка' : 'Xəta'),
+            breadcrumbNotFound: isEn ? 'Not found' : (isRu ? 'Не найдено' : 'Elan tapılmadı'),
+            autoRetryMsg: isEn ? 'Automatic retry in ' : (isRu ? 'Автоматическая повторная попытка через ' : 'Avtomatik yenidən yoxlanılır: ')
+        };
+
         const notFound = isNotFound || /tapılmadı|tapilmadi|mövcud deyil|invalid id/i.test(String(msg || ''));
-        document.title = notFound ? 'Elan tapılmadı — Mobilim.az' : 'Xəta baş verdi — Mobilim.az';
+        document.title = notFound ? `${i18n.notFoundTitle} — Mobilim.az` : `${i18n.errorTitle} — Mobilim.az`;
 
         // Clear breadcrumb to avoid stale placeholders
         const brandBreadcrumb = document.querySelector('.breadcrumb-brand');
@@ -99,42 +121,60 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentBreadcrumb = document.querySelector('.breadcrumb-model') || document.querySelector('.breadcrumb .current');
         if (brandBreadcrumb) brandBreadcrumb.style.display = 'none';
         if (brandSep) brandSep.style.display = 'none';
-        if (currentBreadcrumb) currentBreadcrumb.textContent = notFound ? 'Elan tapılmadı' : 'Xəta';
+        if (currentBreadcrumb) currentBreadcrumb.textContent = notFound ? i18n.breadcrumbNotFound : i18n.breadcrumbError;
 
         if (notFound) {
             wrapper.innerHTML = `
-                <div style="text-align:center;padding:90px 20px;max-width:520px;margin:0 auto;color:var(--text-primary,#fff);">
-                    <div style="width:84px;height:84px;margin:0 auto 20px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-search" style="font-size:36px;color:var(--text-muted,#888);"></i>
+                <div class="detail-error-card">
+                    <div class="detail-error-icon-wrap notfound">
+                        <i class="fas fa-search" style="font-size:36px;"></i>
                     </div>
-                    <h2 style="font-size:24px;font-weight:700;margin-bottom:12px;color:var(--text-primary,#fff);">Elan tapılmadı</h2>
-                    <p style="color:var(--text-muted,#aaa);font-size:15px;line-height:1.6;margin-bottom:28px;">Axtardığınız elan silinmiş, vaxtı bitmiş və ya mövcud olmayan bir ünvandır.</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <button type="button" onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'" style="cursor:pointer;padding:12px 24px;background:var(--card-bg,#1e1e24);color:var(--text-primary,#fff);border:1px solid var(--border-color,#333);border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
-                            <i class="fas fa-arrow-left"></i> Geri qayıt
+                    <h2 class="detail-error-title">${escapeHtml(i18n.notFoundTitle)}</h2>
+                    <p class="detail-error-msg">${escapeHtml(i18n.notFoundDesc)}</p>
+                    <div class="detail-error-actions">
+                        <button type="button" class="detail-btn-back" onclick="window.history.length > 1 ? window.history.back() : window.location.href='index.html'">
+                            <i class="fas fa-arrow-left"></i> ${escapeHtml(i18n.backBtn)}
                         </button>
-                        <a href="index.html" style="text-decoration:none;padding:12px 24px;background:var(--primary-color,#2563eb);color:#fff;border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
-                            <i class="fas fa-home"></i> Ana Səhifə
+                        <a href="index.html" class="detail-btn-retry">
+                            <i class="fas fa-home"></i> ${escapeHtml(i18n.homeBtn)}
                         </a>
                     </div>
                 </div>`;
         } else {
+            const isNetworkError = /failed to fetch|şəbəkə|network|serverlə əlaqə/i.test(String(msg || ''));
+            const displayMsg = isNetworkError ? i18n.serverErrDesc : msg;
+
             wrapper.innerHTML = `
-                <div style="text-align:center;padding:90px 20px;max-width:520px;margin:0 auto;color:var(--text-primary,#fff);">
-                    <div style="width:84px;height:84px;margin:0 auto 20px;border-radius:50%;background:rgba(239,68,68,0.12);display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-exclamation-triangle" style="font-size:36px;color:#ef4444;"></i>
+                <div class="detail-error-card">
+                    <div class="detail-error-icon-wrap error">
+                        <i class="fas fa-exclamation-triangle" style="font-size:36px;"></i>
                     </div>
-                    <h2 style="font-size:24px;font-weight:700;margin-bottom:12px;color:var(--text-primary,#fff);">Xəta baş verdi</h2>
-                    <p style="color:var(--text-muted,#aaa);font-size:14px;margin-bottom:24px;background:rgba(255,255,255,0.04);border:1px solid var(--border-color,#333);padding:12px;border-radius:10px;word-break:break-word;">${escapeHtml(msg)}</p>
-                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                        <button type="button" onclick="window.location.reload()" style="cursor:pointer;padding:12px 24px;background:var(--primary-color,#2563eb);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
-                            <i class="fas fa-sync-alt"></i> Yenidən yoxla
+                    <h2 class="detail-error-title">${escapeHtml(i18n.errorTitle)}</h2>
+                    <p class="detail-error-msg">${escapeHtml(displayMsg)}</p>
+                    <div class="detail-error-actions">
+                        <button type="button" class="detail-btn-retry" id="detailErrorRetryBtn" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt"></i> ${escapeHtml(i18n.retryBtn)}
                         </button>
-                        <a href="index.html" style="text-decoration:none;padding:12px 24px;background:var(--card-bg,#1e1e24);color:var(--text-primary,#fff);border:1px solid var(--border-color,#333);border-radius:12px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;">
-                            <i class="fas fa-home"></i> Ana Səhifə
+                        <a href="index.html" class="detail-btn-home">
+                            <i class="fas fa-home"></i> ${escapeHtml(i18n.homeBtn)}
                         </a>
                     </div>
+                    ${isNetworkError ? `<div style="margin-top:16px;font-size:13px;color:var(--text-secondary);"><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>${escapeHtml(i18n.autoRetryMsg)}<strong id="errorCountdownSec">8</strong>s...</div>` : ''}
                 </div>`;
+
+            if (isNetworkError) {
+                if (pageRetryCountdown) clearInterval(pageRetryCountdown);
+                let count = 8;
+                const timerEl = document.getElementById('errorCountdownSec');
+                pageRetryCountdown = setInterval(() => {
+                    count--;
+                    if (timerEl) timerEl.textContent = count;
+                    if (count <= 0) {
+                        clearInterval(pageRetryCountdown);
+                        window.location.reload();
+                    }
+                }, 1000);
+            }
         }
     }
 
@@ -153,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ── Fetch the ad with resilient retry ──────────────────────
         let res;
         let fetchErr;
-        const maxAttempts = 5;
+        const maxAttempts = 8;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
             try {
                 res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
@@ -170,7 +210,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 res = null;
             }
             if (attempt < maxAttempts) {
-                await new Promise(r => setTimeout(r, attempt * 1200));
+                await new Promise(r => setTimeout(r, Math.min(attempt * 1200, 3000)));
             }
         }
         if ((!res || res.status >= 500) && fetchErr) {
