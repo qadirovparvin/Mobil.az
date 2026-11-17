@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
+                    data-model="${escapeHtml(ad.modelName || "")}"
                     data-category="${escapeHtml(ad.category || urlCat)}"
                     data-price="${escapeHtml(ad.price || 0)}"
                     data-city="${city}"
