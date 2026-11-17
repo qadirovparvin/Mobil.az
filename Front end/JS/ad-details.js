@@ -258,8 +258,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const images = Array.isArray(ad.images) ? ad.images.filter(Boolean) : [];
+        const watermarkEl    = galleryMain ? galleryMain.querySelector('.gallery-watermark') : null;
 
         if (images.length > 0) {
+            if (watermarkEl) watermarkEl.style.display = '';
             if (mainImg) {
                 mainImg.src = getImageUrl(images[0]);
                 mainImg.alt = adTitle;
@@ -309,6 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } else {
             // No images — show placeholder
+            if (watermarkEl) watermarkEl.style.display = 'none';
             if (mainImg) {
                 mainImg.removeAttribute('src');
                 mainImg.alt = 'Şəkil yoxdur';
