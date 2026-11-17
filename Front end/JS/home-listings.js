@@ -175,6 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
+                    data-model="${escapeHtml(ad.modelName || "")}"
                     data-category="${mapCardCategory(ad.category)}"
                     data-price="${escapeHtml(ad.price || 0)}"
                     data-city="${city}"

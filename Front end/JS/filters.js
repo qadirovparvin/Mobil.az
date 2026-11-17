@@ -25,12 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // If this pill is a category button, immediately filter
+                // If this pill is a category button, immediately update visible sections, brands, models, and filter
                 if (group.getAttribute('data-group') === 'category') {
-                    const activeVal = pill.getAttribute('data-value') || 'all';
+                    const activeVal = pill.getAttribute('data-value') || '';
+                    if (typeof updateVisibleFilterSections === 'function') updateVisibleFilterSections(activeVal);
+                    if (typeof updateBrandOptions === 'function') updateBrandOptions(activeVal);
                     if (typeof window.filterAds === 'function') {
-                        window.filterAds(activeVal);
+                        window.filterAds(activeVal || 'all');
                     }
+                    debouncedApply();
                 }
             });
         });
@@ -290,6 +293,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Basic checks
             if (matches && !exactCheck(filters.brand, card.getAttribute('data-brand'))) matches = false;
+            if (matches && filters.model && filters.model !== 'other') {
+                const cardModel = (card.getAttribute('data-model') || '').toLowerCase();
+                const filterModel = filters.model.toLowerCase();
+                const cardTitle = (card.querySelector('.product-title, .elan-title')?.textContent || '').toLowerCase();
+                if (!cardModel.includes(filterModel) && !cardTitle.includes(filterModel)) {
+                    matches = false;
+                }
+            }
             if (matches && !exactCheck(filters.city, card.getAttribute('data-city'))) matches = false;
             if (matches && !exactCheck(filters.memory, card.getAttribute('data-memory'))) matches = false;
             if (matches && !exactCheck(filters.ram, card.getAttribute('data-ram'))) matches = false;
@@ -371,18 +382,24 @@ document.addEventListener('DOMContentLoaded', () => {
             allModels: 'Bütün modellər',
             selectBrand: 'Əvvəlcə marka seçin',
             otherModel: 'Digər model',
+            allBrands: 'Bütün markalar',
+            otherBrand: 'Digər',
             filterWord: 'filtr'
         },
         ENG: {
             allModels: 'All models',
             selectBrand: 'Select brand first',
             otherModel: 'Other model',
+            allBrands: 'All brands',
+            otherBrand: 'Other',
             filterWord: 'filters'
         },
         RUS: {
             allModels: 'Все модели',
             selectBrand: 'Сначала выберите марку',
             otherModel: 'Другая модель',
+            allBrands: 'Все марки',
+            otherBrand: 'Другие',
             filterWord: 'фильтра'
         }
     };
@@ -470,6 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Re-activate the 'All categories' button (data-value="" so not caught above)
         const allCatBtn = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill[data-value=""]');
         if (allCatBtn) allCatBtn.classList.add('active');
+        if (typeof updateVisibleFilterSections === 'function') updateVisibleFilterSections('');
+        if (typeof updateBrandOptions === 'function') updateBrandOptions('');
 
         // Reset badge counter
         const badge = document.getElementById('filterBadge');
@@ -529,88 +548,292 @@ document.addEventListener('DOMContentLoaded', () => {
     const brandSelect = document.getElementById('brandSelect');
     const modelSelect = document.getElementById('modelSelect');
 
-    const FILTER_PHONE_MODELS = {
-        Apple: [
-            'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
-            'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
-            'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
-            'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13', 'iPhone 13 mini',
-            'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12', 'iPhone 12 mini',
-            'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
-            'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X',
-            'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)',
-            'iPhone 8 Plus', 'iPhone 8', 'iPhone 7 Plus', 'iPhone 7'
-        ],
-        Samsung: [
-            'Galaxy S25 Ultra', 'Galaxy S25+', 'Galaxy S25',
-            'Galaxy S24 Ultra', 'Galaxy S24+', 'Galaxy S24', 'Galaxy S24 FE',
-            'Galaxy S23 Ultra', 'Galaxy S23+', 'Galaxy S23', 'Galaxy S23 FE',
-            'Galaxy S22 Ultra', 'Galaxy S22+', 'Galaxy S22',
-            'Galaxy S21 Ultra', 'Galaxy S21+', 'Galaxy S21',
-            'Galaxy Z Fold 6', 'Galaxy Z Fold 5', 'Galaxy Z Fold 4',
-            'Galaxy Z Flip 6', 'Galaxy Z Flip 5', 'Galaxy Z Flip 4',
-            'Galaxy A55', 'Galaxy A54', 'Galaxy A53', 'Galaxy A52',
-            'Galaxy A35', 'Galaxy A34', 'Galaxy A33',
-            'Galaxy A15', 'Galaxy A14', 'Galaxy A13',
-            'Galaxy M55', 'Galaxy M54', 'Galaxy M34',
-            'Galaxy Note 20 Ultra', 'Galaxy Note 20'
-        ],
-        Xiaomi: [
-            'Xiaomi 14 Ultra', 'Xiaomi 14 Pro', 'Xiaomi 14',
-            'Xiaomi 13 Ultra', 'Xiaomi 13 Pro', 'Xiaomi 13',
-            'Xiaomi 12 Pro', 'Xiaomi 12', 'Xiaomi 12 Lite',
-            'Redmi Note 13 Pro+', 'Redmi Note 13 Pro', 'Redmi Note 13',
-            'Redmi Note 12 Pro+', 'Redmi Note 12 Pro', 'Redmi Note 12',
-            'Redmi 13C', 'Redmi 12', 'Redmi 10C',
-            'POCO X6 Pro', 'POCO X6', 'POCO X5 Pro', 'POCO X5',
-            'POCO M6 Pro', 'POCO M5', 'POCO F5 Pro', 'POCO F5'
-        ],
-        Huawei: [
-            'Pura 70 Ultra', 'Pura 70 Pro+', 'Pura 70 Pro', 'Pura 70',
-            'Mate 60 Pro+', 'Mate 60 Pro', 'Mate 60',
-            'P60 Pro', 'P60 Art', 'P60', 'P50 Pro', 'P50',
-            'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12',
-            'Nova 11 Pro', 'Nova 11 Ultra', 'Nova 11',
-            'Nova 10 Pro', 'Nova 10 SE', 'Y90', 'Y72', 'Y62'
-        ],
-        OPPO: [
-            'Find X8 Pro', 'Find X8', 'Find X7 Ultra', 'Find X7',
-            'Find X6 Pro', 'Find X6',
-            'Reno 12 Pro', 'Reno 12 F', 'Reno 12',
-            'Reno 11 Pro', 'Reno 11 F', 'Reno 11',
-            'Reno 10 Pro+', 'Reno 10 Pro', 'Reno 10',
-            'A3 Pro', 'A3', 'A78', 'A77', 'A55'
-        ],
-        Vivo: [
-            'X100 Ultra', 'X100 Pro', 'X100',
-            'X90 Pro', 'X90',
-            'V30 Pro', 'V30 Lite', 'V30',
-            'V29 Pro', 'V29 Lite', 'V29',
-            'V27 Pro', 'V27 Lite', 'V27',
-            'Y200 Pro', 'Y200', 'Y100', 'Y78', 'Y55', 'Y36'
-        ],
-        Honor: [
-            'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6',
-            'Magic 5 Pro', 'Magic 5 Ultimate', 'Magic 5',
-            '90 Smart', '90', '90 Pro',
-            'X9b', 'X8b', 'X7b',
-            'Play 8T', 'Play 7T', 'Play 6T'
-        ],
-        Realme: [
-            'GT 6T', 'GT 6', 'GT 5 Pro', 'GT 5',
-            '12 Pro+ 5G', '12 Pro 5G', '12 5G',
-            '11 Pro+ 5G', '11 Pro 5G', '11 5G',
-            'C67', 'C55', 'C53', 'C35', 'C33',
-            'Narzo 70 Pro', 'Narzo 60 Pro', 'Narzo 50'
-        ],
-        Nokia: [
-            'Nokia G42', 'Nokia G22', 'Nokia G21', 'Nokia G11',
-            'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
-            'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio'
-        ]
+    const CATEGORY_CATALOG = {
+        Telefon: {
+            brands: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'OPPO', 'Vivo', 'Honor', 'Realme', 'Nokia', 'other'],
+            models: {
+                Apple: [
+                    'iPhone 16 Pro Max', 'iPhone 16 Pro', 'iPhone 16 Plus', 'iPhone 16',
+                    'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
+                    'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
+                    'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13', 'iPhone 13 mini',
+                    'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12', 'iPhone 12 mini',
+                    'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
+                    'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X',
+                    'iPhone SE (3rd gen)', 'iPhone SE (2nd gen)',
+                    'iPhone 8 Plus', 'iPhone 8', 'iPhone 7 Plus', 'iPhone 7'
+                ],
+                Samsung: [
+                    'Galaxy S25 Ultra', 'Galaxy S25+', 'Galaxy S25',
+                    'Galaxy S24 Ultra', 'Galaxy S24+', 'Galaxy S24', 'Galaxy S24 FE',
+                    'Galaxy S23 Ultra', 'Galaxy S23+', 'Galaxy S23', 'Galaxy S23 FE',
+                    'Galaxy S22 Ultra', 'Galaxy S22+', 'Galaxy S22',
+                    'Galaxy S21 Ultra', 'Galaxy S21+', 'Galaxy S21',
+                    'Galaxy Z Fold 6', 'Galaxy Z Fold 5', 'Galaxy Z Fold 4',
+                    'Galaxy Z Flip 6', 'Galaxy Z Flip 5', 'Galaxy Z Flip 4',
+                    'Galaxy A55', 'Galaxy A54', 'Galaxy A53', 'Galaxy A52',
+                    'Galaxy A35', 'Galaxy A34', 'Galaxy A33',
+                    'Galaxy A15', 'Galaxy A14', 'Galaxy A13',
+                    'Galaxy M55', 'Galaxy M54', 'Galaxy M34',
+                    'Galaxy Note 20 Ultra', 'Galaxy Note 20'
+                ],
+                Xiaomi: [
+                    'Xiaomi 14 Ultra', 'Xiaomi 14 Pro', 'Xiaomi 14',
+                    'Xiaomi 13 Ultra', 'Xiaomi 13 Pro', 'Xiaomi 13',
+                    'Xiaomi 12 Pro', 'Xiaomi 12', 'Xiaomi 12 Lite',
+                    'Redmi Note 13 Pro+', 'Redmi Note 13 Pro', 'Redmi Note 13',
+                    'Redmi Note 12 Pro+', 'Redmi Note 12 Pro', 'Redmi Note 12',
+                    'Redmi 13C', 'Redmi 12', 'Redmi 10C',
+                    'POCO X6 Pro', 'POCO X6', 'POCO X5 Pro', 'POCO X5',
+                    'POCO M6 Pro', 'POCO M5', 'POCO F5 Pro', 'POCO F5'
+                ],
+                Huawei: [
+                    'Pura 70 Ultra', 'Pura 70 Pro+', 'Pura 70 Pro', 'Pura 70',
+                    'Mate 60 Pro+', 'Mate 60 Pro', 'Mate 60',
+                    'P60 Pro', 'P60 Art', 'P60', 'P50 Pro', 'P50',
+                    'Nova 12 Pro', 'Nova 12 Ultra', 'Nova 12',
+                    'Nova 11 Pro', 'Nova 11 Ultra', 'Nova 11',
+                    'Nova 10 Pro', 'Nova 10 SE', 'Y90', 'Y72', 'Y62'
+                ],
+                OPPO: [
+                    'Find X8 Pro', 'Find X8', 'Find X7 Ultra', 'Find X7',
+                    'Find X6 Pro', 'Find X6',
+                    'Reno 12 Pro', 'Reno 12 F', 'Reno 12',
+                    'Reno 11 Pro', 'Reno 11 F', 'Reno 11',
+                    'Reno 10 Pro+', 'Reno 10 Pro', 'Reno 10',
+                    'A3 Pro', 'A3', 'A78', 'A77', 'A55'
+                ],
+                Vivo: [
+                    'X100 Ultra', 'X100 Pro', 'X100',
+                    'X90 Pro', 'X90',
+                    'V30 Pro', 'V30 Lite', 'V30',
+                    'V29 Pro', 'V29 Lite', 'V29',
+                    'V27 Pro', 'V27 Lite', 'V27',
+                    'Y200 Pro', 'Y200', 'Y100', 'Y78', 'Y55', 'Y36'
+                ],
+                Honor: [
+                    'Magic 6 Pro', 'Magic 6 Ultimate', 'Magic 6',
+                    'Magic 5 Pro', 'Magic 5 Ultimate', 'Magic 5',
+                    '90 Smart', '90', '90 Pro',
+                    'X9b', 'X8b', 'X7b',
+                    'Play 8T', 'Play 7T', 'Play 6T'
+                ],
+                Realme: [
+                    'GT 6T', 'GT 6', 'GT 5 Pro', 'GT 5',
+                    '12 Pro+ 5G', '12 Pro 5G', '12 5G',
+                    '11 Pro+ 5G', '11 Pro 5G', '11 5G',
+                    'C67', 'C55', 'C53', 'C35', 'C33',
+                    'Narzo 70 Pro', 'Narzo 60 Pro', 'Narzo 50'
+                ],
+                Nokia: [
+                    'Nokia G42', 'Nokia G22', 'Nokia G21', 'Nokia G11',
+                    'Nokia C32', 'Nokia C22', 'Nokia C12', 'Nokia C12+',
+                    'Nokia XR21', 'Nokia XR20', 'Nokia 5710 XpressAudio'
+                ]
+            },
+            hiddenSections: []
+        },
+
+        Planşet: {
+            brands: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Lenovo', 'OPPO', 'other'],
+            models: {
+                Apple: [
+                    'iPad Pro 13" (M4)', 'iPad Pro 11" (M4)',
+                    'iPad Pro 13" (M2)', 'iPad Pro 11" (M2)',
+                    'iPad Air 13" (M2)', 'iPad Air 11" (M2)',
+                    'iPad Air (M1)', 'iPad Air (5th gen)',
+                    'iPad mini 7', 'iPad mini 6',
+                    'iPad (10th gen)', 'iPad (9th gen)', 'iPad (8th gen)'
+                ],
+                Samsung: [
+                    'Galaxy Tab S9 Ultra', 'Galaxy Tab S9+', 'Galaxy Tab S9', 'Galaxy Tab S9 FE',
+                    'Galaxy Tab S8 Ultra', 'Galaxy Tab S8+', 'Galaxy Tab S8',
+                    'Galaxy Tab S7 FE', 'Galaxy Tab S7+', 'Galaxy Tab S7',
+                    'Galaxy Tab A9+', 'Galaxy Tab A9', 'Galaxy Tab A8', 'Galaxy Tab A7 Lite'
+                ],
+                Xiaomi: [
+                    'Xiaomi Pad 6S Pro', 'Xiaomi Pad 6 Pro', 'Xiaomi Pad 6',
+                    'Xiaomi Pad 5 Pro', 'Xiaomi Pad 5',
+                    'Redmi Pad SE', 'Redmi Pad Pro', 'Redmi Pad'
+                ],
+                Huawei: [
+                    'MatePad Pro 13.2"', 'MatePad Pro 11"',
+                    'MatePad 11.5" S', 'MatePad 11.5"', 'MatePad 11"',
+                    'MatePad SE 11"', 'MatePad SE 10.4"',
+                    'MatePad T10s', 'MatePad T10'
+                ],
+                Lenovo: [
+                    'Tab P12 Pro', 'Tab P12', 'Tab P11 Pro Gen 2',
+                    'Tab P11 Gen 2', 'Tab P11', 'Tab M10 Plus Gen 3',
+                    'Tab M10 HD Gen 2', 'Tab M8 Gen 3'
+                ],
+                OPPO: [
+                    'Pad 2', 'Pad Air 2', 'Pad Air'
+                ]
+            },
+            hiddenSections: ['fingerprint']
+        },
+
+        Qulaqlıq: {
+            brands: ['Apple', 'Samsung', 'Sony', 'JBL', 'Xiaomi', 'Huawei', 'Baseus', 'other'],
+            models: {
+                Apple: [
+                    'AirPods Pro 2', 'AirPods 4', 'AirPods 3', 'AirPods Max (USB-C)', 'AirPods Max', 'AirPods Pro', 'AirPods 2'
+                ],
+                Samsung: [
+                    'Galaxy Buds3 Pro', 'Galaxy Buds3', 'Galaxy Buds2 Pro', 'Galaxy Buds2',
+                    'Galaxy Buds FE', 'Galaxy Buds Live'
+                ],
+                Sony: [
+                    'WH-1000XM5', 'WH-1000XM4', 'WH-CH720N', 'WH-CH520',
+                    'WF-1000XM5', 'WF-1000XM4', 'LinkBuds S', 'LinkBuds Open'
+                ],
+                JBL: [
+                    'Tune 770NC', 'Tune 760NC', 'Tune 670NC', 'Tune 520BT',
+                    'Live Pro 2', 'Live Flex', 'Vibe Beam', 'Free NC+'
+                ],
+                Xiaomi: [
+                    'Buds 5 Pro', 'Buds 5', 'Buds 4 Pro', 'Buds 4',
+                    'Redmi Buds 6 Pro', 'Redmi Buds 6', 'Redmi Buds 5 Pro'
+                ],
+                Huawei: [
+                    'FreeBuds Pro 3', 'FreeBuds Pro 2', 'FreeBuds 6i',
+                    'FreeBuds 5i', 'FreeBuds SE 2', 'FreeLace Pro 2'
+                ],
+                Baseus: [
+                    'Bowie EZ10', 'Bowie MA10', 'Bowie WM02',
+                    'Encok W04', 'Encok H04'
+                ]
+            },
+            hiddenSections: ['memory', 'ram', 'screen', 'fingerprint', 'expandable']
+        },
+
+        Aksesuar: {
+            brands: ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'Anker', 'Baseus', 'JBL', 'Sony', 'other'],
+            models: {
+                Apple: [
+                    'Apple 20W USB-C', 'Apple 30W MagSafe', 'Apple 35W Dual', 'MagSafe Charger', 'MagSafe Battery Pack', 'iPhone Case'
+                ],
+                Samsung: [
+                    'Samsung 25W Super Fast', 'Samsung 45W Power Adapter', 'Samsung Wireless Trio', 'Samsung Power Bank 10000mAh'
+                ],
+                Xiaomi: [
+                    'Xiaomi 67W Turbo', 'Xiaomi 120W HyperCharge', 'Xiaomi Power Bank 10000mAh', 'Xiaomi Power Bank 20000mAh'
+                ],
+                Huawei: [
+                    'Huawei 66W SuperCharge', 'Huawei 88W SuperCharge', 'Huawei SuperCharge Wireless'
+                ],
+                Anker: [
+                    'Anker 65W GaN', 'Anker 30W Nano', 'Anker PowerCore 10000', 'Anker PowerCore 20000', 'Anker MagGo'
+                ],
+                Baseus: [
+                    'Baseus 65W GaN', 'Baseus 20000mAh', 'Baseus 30000mAh', 'Baseus Blade 100W'
+                ],
+                JBL: [
+                    'JBL Go 3', 'JBL Clip 4', 'JBL Flip 6', 'JBL Charge 5'
+                ],
+                Sony: [
+                    'Sony SRS-XB13', 'Sony SRS-XB23', 'Sony SRS-XE200'
+                ]
+            },
+            hiddenSections: ['memory', 'ram', 'screen', 'battery', 'fingerprint', 'nfc', 'expandable']
+        }
     };
 
-    function updateModelOptions(selectedBrand, currentSelectedModel = '') {
+    function normalizeCategoryKey(raw) {
+        if (!raw) return '';
+        const s = String(raw).toLowerCase().trim();
+        if (['phone', 'telefon', 'telefonlar'].includes(s)) return 'Telefon';
+        if (['tablet', 'planşet', 'planset', 'planşetlər', 'plansetler'].includes(s)) return 'Planşet';
+        if (['headphone', 'headphones', 'qulaqlıq', 'qulaqliq', 'qulaqcıqlar', 'qulaqciqlar'].includes(s)) return 'Qulaqlıq';
+        if (['accessory', 'accessories', 'aksesuar', 'aksessuar', 'aksesuarlar'].includes(s)) return 'Aksesuar';
+        return '';
+    }
+
+    function getActiveCategory() {
+        const pillCat = document.querySelector('.filter-btn-group[data-group="category"] .filter-pill.active')?.getAttribute('data-value');
+        if (pillCat !== undefined && pillCat !== null && pillCat !== '') return pillCat;
+        return new URLSearchParams(window.location.search).get('category') || '';
+    }
+
+    function getAllBrands() {
+        const brandSet = new Set();
+        Object.values(CATEGORY_CATALOG).forEach(cat => {
+            cat.brands.forEach(b => {
+                if (b !== 'other') brandSet.add(b);
+            });
+        });
+        return [...brandSet, 'other'];
+    }
+
+    function updateVisibleFilterSections(activeCategory) {
+        const norm = normalizeCategoryKey(activeCategory || getActiveCategory());
+        const hiddenGroups = (norm && CATEGORY_CATALOG[norm]) ? CATEGORY_CATALOG[norm].hiddenSections : [];
+
+        ['memory', 'ram', 'screen', 'battery', 'fingerprint', 'nfc', 'waterproof', 'expandable'].forEach(groupName => {
+            const btnGroup = document.querySelector(`.filter-btn-group[data-group="${groupName}"]`);
+            const sectionWrapper = btnGroup ? btnGroup.closest('.filter-group') : null;
+            if (!sectionWrapper) return;
+
+            if (hiddenGroups.includes(groupName)) {
+                sectionWrapper.style.display = 'none';
+                const activePills = btnGroup.querySelectorAll('.filter-pill.active');
+                activePills.forEach(p => {
+                    const val = p.getAttribute('data-value');
+                    if (val !== 'any' && val !== 'both' && val !== '') {
+                        p.classList.remove('active');
+                    }
+                });
+                const anyPill = btnGroup.querySelector('.filter-pill[data-value="any"], .filter-pill[data-value="both"]');
+                if (anyPill) anyPill.classList.add('active');
+            } else {
+                sectionWrapper.style.display = 'block';
+            }
+        });
+    }
+
+    function updateBrandOptions(activeCategory, preferredBrand = '') {
+        if (!brandSelect) return;
+        const norm = normalizeCategoryKey(activeCategory || getActiveCategory());
+        const brands = (norm && CATEGORY_CATALOG[norm]) ? CATEGORY_CATALOG[norm].brands : getAllBrands();
+        const currentVal = preferredBrand || brandSelect.value;
+        const t = getFilterI18n();
+
+        brandSelect.innerHTML = '';
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.className = 'all-brand';
+        defaultOpt.setAttribute('data-translate', 'all-brand');
+        defaultOpt.textContent = t.allBrands;
+        brandSelect.appendChild(defaultOpt);
+
+        let selectedStillExists = false;
+        brands.forEach(b => {
+            const opt = document.createElement('option');
+            if (b === 'other') {
+                opt.value = 'other';
+                opt.setAttribute('data-translate', 'other');
+                opt.textContent = t.otherBrand;
+            } else {
+                opt.value = b;
+                opt.textContent = b;
+            }
+            if (currentVal && (currentVal.toLowerCase() === b.toLowerCase())) {
+                opt.selected = true;
+                selectedStillExists = true;
+            }
+            brandSelect.appendChild(opt);
+        });
+
+        if (!selectedStillExists && currentVal && currentVal !== 'other') {
+            brandSelect.value = '';
+        }
+
+        const currentModel = modelSelect ? modelSelect.value : '';
+        updateModelOptions(brandSelect.value, currentModel, norm);
+    }
+
+    function updateModelOptions(selectedBrand, currentSelectedModel = '', activeCategory = '') {
         if (!modelSelect) return;
         const t = getFilterI18n();
         modelSelect.innerHTML = '';
@@ -620,8 +843,25 @@ document.addEventListener('DOMContentLoaded', () => {
         defaultOpt.setAttribute('data-translate', selectedBrand ? 'all-models' : 'select-brand');
         modelSelect.appendChild(defaultOpt);
 
-        if (selectedBrand && FILTER_PHONE_MODELS[selectedBrand]) {
-            FILTER_PHONE_MODELS[selectedBrand].forEach(m => {
+        if (!selectedBrand) return;
+
+        const norm = normalizeCategoryKey(activeCategory || getActiveCategory());
+        let models = [];
+
+        if (norm && CATEGORY_CATALOG[norm] && CATEGORY_CATALOG[norm].models[selectedBrand]) {
+            models = CATEGORY_CATALOG[norm].models[selectedBrand];
+        } else {
+            Object.keys(CATEGORY_CATALOG).forEach(catKey => {
+                const catModels = CATEGORY_CATALOG[catKey].models[selectedBrand];
+                if (Array.isArray(catModels)) {
+                    models = models.concat(catModels);
+                }
+            });
+            models = [...new Set(models)];
+        }
+
+        if (models.length > 0) {
+            models.forEach(m => {
                 const opt = document.createElement('option');
                 opt.value = m;
                 opt.textContent = m;
@@ -630,22 +870,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 modelSelect.appendChild(opt);
             });
-            const otherOpt = document.createElement('option');
-            otherOpt.value = 'other';
-            otherOpt.textContent = t.otherModel;
-            otherOpt.setAttribute('data-translate', 'other-model');
-            if (currentSelectedModel === 'other' || currentSelectedModel.toLowerCase() === 'digər model' || currentSelectedModel.toLowerCase() === 'other model' || currentSelectedModel.toLowerCase() === 'другая модель') {
-                otherOpt.selected = true;
-            }
-            modelSelect.appendChild(otherOpt);
         }
+
+        const otherOpt = document.createElement('option');
+        otherOpt.value = 'other';
+        otherOpt.textContent = t.otherModel;
+        otherOpt.setAttribute('data-translate', 'other-model');
+        if (currentSelectedModel === 'other' || currentSelectedModel.toLowerCase() === 'digər model' || currentSelectedModel.toLowerCase() === 'other model' || currentSelectedModel.toLowerCase() === 'другая модель') {
+            otherOpt.selected = true;
+        }
+        modelSelect.appendChild(otherOpt);
     }
 
     if (priceMin) priceMin.addEventListener('input', debouncedApply);
     if (priceMax) priceMax.addEventListener('input', debouncedApply);
     if (brandSelect) {
         brandSelect.addEventListener('change', () => {
-            updateModelOptions(brandSelect.value);
+            const curCat = getActiveCategory();
+            updateModelOptions(brandSelect.value, '', curCat);
             debouncedApply();
         });
     }
@@ -653,28 +895,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listen for language changes and refresh models + filter badge/chips immediately
     document.addEventListener('mobilaz:languagechange', () => {
+        const curCat = getActiveCategory();
         const curBrand = brandSelect ? brandSelect.value : '';
         const curModel = modelSelect ? modelSelect.value : '';
-        updateModelOptions(curBrand, curModel);
+        updateBrandOptions(curCat, curBrand);
+        updateModelOptions(curBrand, curModel, curCat);
+        updateVisibleFilterSections(curCat);
         updateActiveBadge();
     });
 
     window.addEventListener('storage', (e) => {
         if (e.key === 'lang') {
+            const curCat = getActiveCategory();
             const curBrand = brandSelect ? brandSelect.value : '';
             const curModel = modelSelect ? modelSelect.value : '';
-            updateModelOptions(curBrand, curModel);
+            updateBrandOptions(curCat, curBrand);
+            updateModelOptions(curBrand, curModel, curCat);
+            updateVisibleFilterSections(curCat);
             updateActiveBadge();
         }
     });
 
-    // Make updateModelOptions accessible globally
+    // Make helpers accessible globally
     window.updateModelOptions = updateModelOptions;
+    window.updateBrandOptions = updateBrandOptions;
+    window.updateVisibleFilterSections = updateVisibleFilterSections;
 
-    // Initialize modelSelect with current language placeholder
+    // Initialize based on current category
+    const curCatInit = getActiveCategory();
+    updateVisibleFilterSections(curCatInit);
+    updateBrandOptions(curCatInit, brandSelect ? brandSelect.value : '');
     const curBrandInit = brandSelect ? brandSelect.value : '';
     const curModelInit = modelSelect ? modelSelect.value : '';
-    updateModelOptions(curBrandInit, curModelInit);
+    updateModelOptions(curBrandInit, curModelInit, curCatInit);
 
     // Catalog helpers
     window.loadCatalog = async function() {
@@ -735,19 +988,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.restoreAndApplyFilters = function(shouldFilterClient = false) {
         const params = new URLSearchParams(window.location.search);
         
-        if (params.has('q') && searchInput) searchInput.value = params.get('q');
-        if (params.has('search') && searchInput && !params.has('q')) searchInput.value = params.get('search');
-        if (params.has('brand') && document.getElementById('brandSelect')) {
-            const bVal = params.get('brand');
-            document.getElementById('brandSelect').value = bVal;
-            updateModelOptions(bVal, params.get('model') || '');
-        } else if (params.has('model') && document.getElementById('modelSelect')) {
-            document.getElementById('modelSelect').value = params.get('model');
-        }
-        if (params.has('minPrice') && document.getElementById('priceMin')) document.getElementById('priceMin').value = params.get('minPrice');
-        if (params.has('maxPrice') && document.getElementById('priceMax') && params.get('maxPrice') !== 'Infinity') document.getElementById('priceMax').value = params.get('maxPrice');
-        if (params.has('city') && document.querySelector('select[data-filter="city"]')) document.querySelector('select[data-filter="city"]').value = params.get('city');
-
         ['category', 'memory', 'ram', 'screen', 'battery', 'fingerprint', 'nfc', 'waterproof', 'expandable', 'condition', 'delivery', 'seller'].forEach(group => {
             if (params.has(group)) {
                 const val = params.get(group);
@@ -758,6 +998,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
+
+        const activeCat = params.get('category') || getActiveCategory();
+        if (typeof updateVisibleFilterSections === 'function') updateVisibleFilterSections(activeCat);
+        if (typeof updateBrandOptions === 'function') updateBrandOptions(activeCat, params.get('brand') || '');
+
+        if (params.has('q') && searchInput) searchInput.value = params.get('q');
+        if (params.has('search') && searchInput && !params.has('q')) searchInput.value = params.get('search');
+        if (params.has('brand') && document.getElementById('brandSelect')) {
+            const bVal = params.get('brand');
+            document.getElementById('brandSelect').value = bVal;
+            if (typeof updateModelOptions === 'function') updateModelOptions(bVal, params.get('model') || '', activeCat);
+        } else if (params.has('model') && document.getElementById('modelSelect')) {
+            document.getElementById('modelSelect').value = params.get('model');
+        }
+        if (params.has('minPrice') && document.getElementById('priceMin')) document.getElementById('priceMin').value = params.get('minPrice');
+        if (params.has('maxPrice') && document.getElementById('priceMax') && params.get('maxPrice') !== 'Infinity') document.getElementById('priceMax').value = params.get('maxPrice');
+        if (params.has('city') && document.querySelector('select[data-filter="city"]')) document.querySelector('select[data-filter="city"]').value = params.get('city');
 
         if (params.has('colors') || params.has('color')) {
             const rawColors = params.get('colors') || params.get('color') || '';
