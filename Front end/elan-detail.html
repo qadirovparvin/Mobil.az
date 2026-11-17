@@ -9,7 +9,7 @@
   <meta name="description" content="Mobilim.az — Elan detalları">
   <link rel="stylesheet" href="CSS/general.css?v=20261117_v6">
   <link rel="stylesheet" href="CSS/style.css?v=20261117_v6">
-  <link rel="stylesheet" href="CSS/elan-detail.css?v=20261117_v8">
+  <link rel="stylesheet" href="CSS/elan-detail.css?v=20261117_v9">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
@@ -867,7 +867,7 @@
 
 
   <!-- Loading Skeleton — shown while JS fetches the real ad -->
-  <div id="adLoadingSkeleton" style="max-width:1200px;margin:40px auto;padding:0 20px;display:flex;gap:32px;animation:pulse 1.5s ease-in-out infinite;">
+  <div id="elanLoadingSkeleton" style="max-width:1200px;margin:40px auto;padding:0 20px;display:flex;gap:32px;animation:pulse 1.5s ease-in-out infinite;">
     <div style="flex:1.2;display:flex;flex-direction:column;gap:16px;">
       <div style="height:420px;border-radius:20px;background:var(--bg-secondary);"></div>
       <div style="display:flex;gap:10px;">
@@ -926,27 +926,27 @@
       </div>
 
       <!-- ── Ad Info Card ── -->
-      <div class="info-card">
-        <div class="ad-meta-top">
-          <span class="ad-category-tag">
+      <div class="info-card elan-info-card item-info-card">
+        <div class="elan-meta-top item-meta-top">
+          <span class="elan-category-tag item-category-tag">
             <i class="fas fa-mobile-alt"></i> Telefon · Samsung
           </span>
-          <div class="ad-date-views">
+          <div class="elan-date-views item-date-views">
             <span><i class="fas fa-clock"></i> Bugün, 14:32</span>
             <span><i class="fas fa-eye"></i> <span id="ad-views-count">--</span> baxış</span>
           </div>
         </div>
 
-        <h1 class="ad-main-title">Elan yüklənir...</h1>
+        <h1 class="elan-main-title item-main-title">Elan yüklənir...</h1>
 
-        <div class="ad-price-row">
+        <div class="elan-price-row item-price-row">
           <div>
-            <div class="ad-main-price">— <span class="ad-currency">AZN</span></div>
-            <div class="ad-price-note" style="display: none;"></div>
+            <div class="elan-main-price item-main-price">— <span class="elan-currency item-currency">AZN</span></div>
+            <div class="elan-price-note item-price-note" style="display: none;"></div>
           </div>
         </div>
 
-        <div class="ad-location-row">
+        <div class="elan-location-row item-location-row">
           <div class="location-item">
             <i class="fas fa-map-marker-alt"></i>
             <span><span data-translate="det-city-label">Şəhər:</span> <strong>Bakı</strong></span>
@@ -1026,7 +1026,7 @@
       </div>
 
       <!-- Ad ID bar -->
-      <div class="ad-id-bar">
+      <div class="elan-id-bar item-id-bar">
         <span><span data-translate="det-ad-no">Elan №:</span> <span>MOB-000000</span></span>
         <span><span data-translate="det-posted">Yerləşdirildi:</span> <span>10 Apr 2026</span></span>
         <span><span data-translate="det-updated">Yeniləndi:</span> <span>Bugün, 14:32</span></span>
@@ -1286,7 +1286,8 @@
   <script src="JS/auth.js?v=20261117_v6"></script>
   <script src="JS/script.js?v=20261117_v6"></script>
   <script src="JS/favorites.js?v=20261117_v6"></script>
-  <script src="JS/ad-details.js?v=20261117_v8"></script>
+  <script src="JS/listing-details.js?v=20261117_v9"></script>
+  <script>if (!window.__listingDetailsLoaded) { document.write('<script src="JS/ad-details.js?v=20261117_v9"><\\/script>'); }</script>
   <script src="JS/components.js?v=20261117_v6"></script>
 </body>
 

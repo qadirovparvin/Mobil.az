@@ -658,7 +658,7 @@ function handleGenericApiError(status) {
                 const isBoostRequest = reqUrl.includes('/boost');
                 const isNotifUnread = reqUrl.includes('/notifications/unread-count');
                 const isRefreshCall = reqUrl.includes('/auth/refresh');
-                const isAdsCall = reqUrl.includes('/ads');
+                const isAdsCall = reqUrl.includes('/ads') || reqUrl.includes('/listings') || reqUrl.includes('/items') || reqUrl.includes('/elanlar');
 
                 if ((res.status === 401 || res.status === 403) && !isLoginRequest && !isBoostRequest && !isNotifUnread && !isRefreshCall && !isAdsCall) {
                     try {
@@ -681,7 +681,9 @@ function handleGenericApiError(status) {
             const isBackgroundCall = reqUrl.includes('/notifications') || 
                                      reqUrl.includes('/health') || 
                                      reqUrl.includes('/auth/csrf-token') || 
-                                     reqUrl.includes('/ads/favorites') ||
+                                     reqUrl.includes('/ads/favorites') || 
+                                     reqUrl.includes('/listings/favorites') ||
+                                     reqUrl.includes('/items/favorites') ||
                                      reqUrl.includes('/favorites') ||
                                      reqUrl.includes('/categories') ||
                                      reqUrl.includes('/auth/refresh');

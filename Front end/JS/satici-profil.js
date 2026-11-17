@@ -45,7 +45,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     // Fetch User Ads
     try {
-        const resAds = await fetch(`${API_BASE}/ads?author=${userId}&limit=50&sortBy=newest`);
+        let resAds = await fetch(`${API_BASE}/listings?author=${userId}&limit=50&sortBy=newest`).catch(() => null);
+        if (!resAds || !resAds.ok) resAds = await fetch(`${API_BASE}/ads?author=${userId}&limit=50&sortBy=newest`);
         const dataAds = await resAds.json();
         
         const ads = dataAds.ads || [];

@@ -36,10 +36,16 @@ document.addEventListener("DOMContentLoaded", () => {
         
         try {
             const apiUrl = getFavoritesApi();
-            const res = await fetch(`${apiUrl}/ads/favorites`, {
+            let res = await fetch(`${apiUrl}/listings/favorites`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 silent: true
             }).catch(() => null);
+            if (!res || !res.ok) {
+                res = await fetch(`${apiUrl}/ads/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    silent: true
+                }).catch(() => null);
+            }
             if (!res || !res.ok) return [];
             const data = await res.json().catch(() => null);
             if (data && data.ads && Array.isArray(data.ads)) {
@@ -60,10 +66,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const res = await fetch(`${getFavoritesApi()}/ads/${adId}/favorite`, {
+            let res = await fetch(`${getFavoritesApi()}/listings/${adId}/favorite`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
-            });
+            }).catch(() => null);
+            if (!res || !res.ok) {
+                res = await fetch(`${getFavoritesApi()}/ads/${adId}/favorite`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            }
             const data = await res.json();
             if (res.ok) {
                 return data.favorites; // Returns updated array of favorite IDs
@@ -211,10 +223,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         try {
-            const res = await fetch(`${getFavoritesApi()}/ads/favorites`, {
+            let res = await fetch(`${getFavoritesApi()}/listings/favorites`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 silent: true
-            });
+            }).catch(() => null);
+            if (!res || !res.ok) {
+                res = await fetch(`${getFavoritesApi()}/ads/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    silent: true
+                });
+            }
             const data = await res.json();
             
             grid.innerHTML = '';

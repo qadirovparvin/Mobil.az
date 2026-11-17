@@ -377,7 +377,7 @@ async function fetchUserFavorites() {
     const token = getAuthToken();
     if (!token) return [];
     try {
-        const url = buildApiUrl("/api/ads/favorites");
+        const url = buildApiUrl("/api/listings/favorites");
         const data = await fetchJson(url, {
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -403,7 +403,7 @@ async function toggleFavoriteApi(adId) {
         return null;
     }
     try {
-        const url = buildApiUrl(`/api/ads/${adId}/favorite`);
+        const url = buildApiUrl(`/api/listings/${adId}/favorite`);
         const data = await fetchJson(url, {
             method: "POST",
             headers: {

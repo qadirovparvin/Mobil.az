@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const sellerParam = activeExtraFilters.seller || params.get('seller');
             const searchQ = activeExtraFilters.q || currentQuery || params.get('q') || params.get('search');
             
-            let apiUrl = new URL(`${API_BASE}/ads`);
+            let apiUrl = new URL(`${API_BASE}/listings`);
             apiUrl.searchParams.set('limit', '20');
             apiUrl.searchParams.set('page', String(currentPage));
             const sortParam = activeExtraFilters.sort || activeExtraFilters.sortBy || params.get('sort') || params.get('sortBy') || document.getElementById('sortingOptions')?.value || 'newest';

@@ -80,7 +80,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadAdDetails(adId, otherUserId) {
         try {
-            const res = await fetch(`${API_BASE}/ads/${adId}`);
+            let res = await fetch(`${API_BASE}/listings/${adId}`).catch(() => null);
+            if (!res || !res.ok) res = await fetch(`${API_BASE}/ads/${adId}`);
             if (res.ok) {
                 const adData = await res.json();
                 document.getElementById('chatAdName').textContent = `${adData.brand || ''} ${adData.modelName || ''} - ${adData.price} AZN`;

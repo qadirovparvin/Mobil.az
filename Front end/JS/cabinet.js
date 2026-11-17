@@ -1714,11 +1714,18 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         try {
-            const response = await fetch(`${API_BASE}/ads/my`, {
+            let response = await fetch(`${API_BASE}/listings/my`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
-            });
+            }).catch(() => null);
+            if (!response || !response.ok) {
+                response = await fetch(`${API_BASE}/ads/my`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            }
 
             if (response.status === 401 || response.status === 403) {
                 if (typeof handleCabinet401 === 'function') {
@@ -1751,12 +1758,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function deleteAd(adId) {
         const token = getToken();
-        const response = await fetch(`${API_BASE}/ads/${adId}`, {
+        let response = await fetch(`${API_BASE}/listings/${adId}`, {
             method: 'DELETE',
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        });
+        }).catch(() => null);
+        if (!response || !response.ok) {
+            response = await fetch(`${API_BASE}/ads/${adId}`, {
+                method: 'DELETE',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+        }
 
         const data = await response.json();
         if (!response.ok) {
@@ -2915,12 +2930,20 @@ window.confirmPromotion = async function () {
             headers['X-CSRF-Signed-Token'] = signedCsrf;
         }
 
-        const response = await fetch(`${base}/ads/${encodeURIComponent(currentPromoAdId)}/boost`, {
+        let response = await fetch(`${base}/listings/${encodeURIComponent(currentPromoAdId)}/boost`, {
             method: 'POST',
             credentials: 'include',
             headers,
             body: JSON.stringify({ promotionType: selectedPkg, idempotencyKey })
-        });
+        }).catch(() => null);
+        if (!response || !response.ok) {
+            response = await fetch(`${base}/ads/${encodeURIComponent(currentPromoAdId)}/boost`, {
+                method: 'POST',
+                credentials: 'include',
+                headers,
+                body: JSON.stringify({ promotionType: selectedPkg, idempotencyKey })
+            });
+        }
 
         const data = await response.json();
 
