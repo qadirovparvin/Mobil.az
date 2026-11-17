@@ -398,9 +398,6 @@ app.use('/images', express.static(path.join(__dirname, '../Front end/images')));
 app.use('/assets', express.static(path.join(__dirname, '../Front end/assets')));
 app.use('/Photo', express.static(path.join(__dirname, '../Front end/Photo')));
 app.use('/photo', express.static(path.join(__dirname, '../Front end/Photo')));
-app.use('/Front end', express.static(path.join(__dirname, '../Front end')));
-app.use('/Frontend', express.static(path.join(__dirname, '../Front end')));
-app.use(express.static(path.join(__dirname, '../Front end')));
 
 // ── API Routes ────────────────────────────────────────────
 app.use('/api/auth',          authLimiter, require('./routes/authRoutes'));

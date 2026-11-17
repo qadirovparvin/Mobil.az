@@ -491,7 +491,7 @@ var COUNTRY_PHONE_CONFIGS = window.COUNTRY_PHONE_CONFIGS || {
         code: '+994',
         digits: 9,
         placeholder: '(50) 000-00-00',
-        allowedPrefixes: ['10', '50', '51', '55', '60', '70', '77', '99'],
+        allowedPrefixes: ['10', '12', '50', '51', '55', '60', '70', '71', '77', '99'],
         format: (digits) => {
             if (!digits) return '';
             let res = '(' + digits.slice(0, 2);
@@ -709,7 +709,7 @@ function validatePhoneNumber(inputId, prefixId) {
         }
         const op = digits.slice(0, 2);
         if (!cfg.allowedPrefixes.includes(op)) {
-            return { valid: false, message: 'Mobil operator prefiksi dəstəklənmir (10, 50, 51, 55, 60, 70, 77, 99)' };
+            return { valid: false, message: 'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 71, 77, 99)' };
         }
         return { valid: true, fullPhone: '+994' + digits, digits, prefix };
     }
