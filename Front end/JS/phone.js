@@ -77,18 +77,18 @@ document.addEventListener("DOMContentLoaded", async function () {
     function getBadgeHtml(ad) {
         const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
         const badgeStyle = ad.sellerType === "store" ? "" : ' style="background:var(--accent-hover);"';
-        let badges = `<span class="ad-badge"${badgeStyle}>${sellerType}</span>`;
+        let badges = `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
         const now = new Date();
         const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
         if (isPromoActive) {
             if (ad.promotionType === "VIP") {
-                badges += ` <span class="ad-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
+                badges += ` <span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
             } else if (ad.promotionType === "PRO") {
-                badges += ` <span class="ad-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
+                badges += ` <span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
             } else if (ad.promotionType === "Premium") {
-                badges += ` <span class="ad-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
+                badges += ` <span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
+                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
             }
         }
         return badges;
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         return `
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
-                <div class="ad-card elan-card product-card${promoClass}"
+                <div class="elan-card product-card item-card${promoClass}"
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
@@ -128,18 +128,18 @@ document.addEventListener("DOMContentLoaded", async function () {
                     data-waterproof="${ad.specs?.features?.waterproof ? "yes" : "no"}"
                     data-expandable="${ad.specs?.features?.expandable ? "yes" : "no"}"
                     data-delivery="${ad.specs?.features?.delivery ? "yes" : "no"}">
-                    <div class="ad-image">
+                    <div class="elan-image product-image">
                         <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(altText)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
                         ${getBadgeHtml(ad)}
                         <button class="favorite-btn" aria-label="Sevimlilərə əlavə et"><i class="far fa-heart"></i></button>
                     </div>
-                    <div class="ad-info">
-                        <div class="ad-price">${formatPrice(ad.price)}</div>
-                        <div class="ad-title">${title}</div>
-                        <div class="ad-location">
+                    <div class="elan-info product-info">
+                        <div class="elan-price product-price">${formatPrice(ad.price)}</div>
+                        <div class="elan-title product-title">${title}</div>
+                        <div class="elan-location product-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>${city}</span>
-                            <span class="ad-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
+                            <span class="elan-city-label">${city}</span>
+                            <span class="elan-date product-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
                         </div>
                     </div>
                 </div>

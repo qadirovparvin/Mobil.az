@@ -69,18 +69,18 @@ document.addEventListener("DOMContentLoaded", async function () {
             a.style.color = 'inherit';
 
             const card = document.createElement('div');
-            card.className = 'ad-card';
+            card.className = 'elan-card product-card item-card';
             card.setAttribute('data-seller', 'private');
 
             const adImage = document.createElement('div');
-            adImage.className = 'ad-image';
+            adImage.className = 'elan-image product-image';
 
             const img = document.createElement('img');
             img.src = imageUrl;
             img.alt = title;
 
             const badge = document.createElement('span');
-            badge.className = 'ad-badge';
+            badge.className = 'elan-badge product-badge';
             badge.style.background = 'var(--accent-hover)';
             badge.textContent = 'Şəxsi';
 
@@ -88,27 +88,28 @@ document.addEventListener("DOMContentLoaded", async function () {
             adImage.appendChild(badge);
 
             const adInfo = document.createElement('div');
-            adInfo.className = 'ad-info';
+            adInfo.className = 'elan-info product-info';
 
             const priceDiv = document.createElement('div');
-            priceDiv.className = 'ad-price';
+            priceDiv.className = 'elan-price product-price';
             priceDiv.textContent = `${Number(ad.price || 0).toLocaleString()} AZN`;
 
             const titleDiv = document.createElement('div');
-            titleDiv.className = 'ad-title';
+            titleDiv.className = 'elan-title product-title';
             titleDiv.textContent = title;
 
             const locDiv = document.createElement('div');
-            locDiv.className = 'ad-location';
+            locDiv.className = 'elan-location product-location';
 
             const marker = document.createElement('i');
             marker.className = 'fas fa-map-marker-alt';
 
             const citySpan = document.createElement('span');
+            citySpan.className = 'elan-city-label';
             citySpan.textContent = ad.city || '';
 
             const dateSpan = document.createElement('span');
-            dateSpan.className = 'ad-date';
+            dateSpan.className = 'elan-date product-date';
             dateSpan.textContent = new Date(ad.createdAt).toLocaleString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
             locDiv.appendChild(marker);

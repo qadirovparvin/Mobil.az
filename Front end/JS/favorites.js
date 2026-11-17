@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initFavoriteButtons() {
-        document.querySelectorAll('.elan-card, .ad-card').forEach(card => {
+        document.querySelectorAll('.elan-card, .product-card, .item-card, .ad-card').forEach(card => {
             const btn = card.querySelector('.favorite-btn');
             if (!btn) return;
             
@@ -238,19 +238,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     aTag.style.cssText = "text-decoration:none;color:inherit;position:relative;display:block;";
                     
                     const card = document.createElement('div');
-                    card.className = 'ad-card';
+                    card.className = 'elan-card product-card item-card';
                     card.setAttribute('data-id', ad._id);
                     card.style.position = 'relative';
 
                     const adImage = document.createElement('div');
-                    adImage.className = 'ad-image';
+                    adImage.className = 'elan-image product-image';
 
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.alt = title;
 
                     const badge = document.createElement('span');
-                    badge.className = 'ad-badge';
+                    badge.className = 'elan-badge product-badge';
                     if (ad.sellerType !== 'store') {
                         badge.style.background = 'var(--accent-hover)';
                     }
@@ -268,27 +268,28 @@ document.addEventListener("DOMContentLoaded", () => {
                     adImage.appendChild(favBtn);
 
                     const adInfo = document.createElement('div');
-                    adInfo.className = 'ad-info';
+                    adInfo.className = 'elan-info product-info';
 
                     const priceDiv = document.createElement('div');
-                    priceDiv.className = 'ad-price';
+                    priceDiv.className = 'elan-price product-price';
                     priceDiv.textContent = price;
 
                     const titleDiv = document.createElement('div');
-                    titleDiv.className = 'ad-title';
+                    titleDiv.className = 'elan-title product-title';
                     titleDiv.textContent = title;
 
                     const locDiv = document.createElement('div');
-                    locDiv.className = 'ad-location';
+                    locDiv.className = 'elan-location product-location';
 
                     const marker = document.createElement('i');
                     marker.className = 'fas fa-map-marker-alt';
 
                     const citySpan = document.createElement('span');
+                    citySpan.className = 'elan-city-label';
                     citySpan.textContent = city;
 
                     const dateSpan = document.createElement('span');
-                    dateSpan.className = 'ad-date';
+                    dateSpan.className = 'elan-date product-date';
                     dateSpan.textContent = date;
 
                     locDiv.appendChild(marker);

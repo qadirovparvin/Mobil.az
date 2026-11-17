@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.searchAdsFromAPI === 'function') {
             window.searchAdsFromAPI(filters).then((res) => {
                 // Server-side filtering succeeded, DOM already updated with server data
-                const count = (res && typeof res.count === 'number') ? res.count : document.querySelectorAll('.all-ads-container .elan-card, .all-ads-container .ad-card').length;
+                const count = (res && typeof res.count === 'number') ? res.count : document.querySelectorAll('.all-ads-container .elan-card, .all-ads-container .product-card, .all-ads-container .item-card, .all-ads-container .ad-card').length;
                 showSearchFeedback(filters.q, count);
             }).catch((err) => {
                 console.warn('Server search failed, applying client-side fallback:', err);
@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Client-side filtering of rendered cards (catalog only, never VIP)
     function applyClientFilters(filters) {
         filters = filters || getActiveFilters();
-        const adCards = document.querySelectorAll('#catalog .elan-card, #catalog .ad-card, .all-ads-container .elan-card, .all-ads-container .ad-card, #phone-ads-container .elan-card, #phone-ads-container .ad-card');
+        const adCards = document.querySelectorAll('#catalog .elan-card, #catalog .product-card, #catalog .item-card, #catalog .ad-card, .all-ads-container .elan-card, .all-ads-container .product-card, .all-ads-container .item-card, .all-ads-container .ad-card, #phone-ads-container .elan-card, #phone-ads-container .product-card, #phone-ads-container .item-card, #phone-ads-container .ad-card');
         
         let visibleCount = 0;
         

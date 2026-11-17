@@ -1648,7 +1648,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const parsed = Number(rawAttr);
                 if (!isNaN(parsed)) return parsed;
             }
-            const text = card.querySelector(".ad-price")?.textContent || "";
+            const text = card.querySelector(".elan-price, .product-price, .ad-price")?.textContent || "";
             // Remove non-numeric characters (handles thousands separator like 1.200 AZN)
             return Number(text.replace(/[^0-9]/g, "")) || 0;
         };
@@ -1663,8 +1663,8 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         ads.sort((a, b) => {
-            const cardA = a.querySelector(".elan-card, .ad-card") || a;
-            const cardB = b.querySelector(".elan-card, .ad-card") || b;
+            const cardA = a.querySelector(".elan-card, .product-card, .item-card, .ad-card") || a;
+            const cardB = b.querySelector(".elan-card, .product-card, .item-card, .ad-card") || b;
             const priceA = getCardPrice(cardA);
             const priceB = getCardPrice(cardB);
             const dateA = getCardDate(cardA);
@@ -1804,7 +1804,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateFavoriteButtons() {
         const favs = getFavorites();
         document.querySelectorAll(".favorite-btn").forEach((btn) => {
-            const card = btn.closest(".elan-card, .ad-card, [data-id]");
+            const card = btn.closest(".elan-card, .product-card, .item-card, .ad-card, [data-id]");
             const id = card ? card.getAttribute("data-id") : null;
             const icon = btn.querySelector("i");
             if (!icon) return;
@@ -1830,7 +1830,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const icon = favBtn.querySelector("i");
         if (!icon) return;
 
-        const card = favBtn.closest(".elan-card, .ad-card, [data-id]");
+        const card = favBtn.closest(".elan-card, .product-card, .item-card, .ad-card, [data-id]");
         const id = card ? card.getAttribute("data-id") : null;
         let favs = getFavorites();
 
@@ -1956,14 +1956,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const isAll = !rawCat || rawCat === 'all' || rawCat === 'hamısı' || rawCat === 'hamisi';
         const targetCategories = isAll ? null : (catAliases[rawCat] || [rawCat]);
 
-        const adCards = catalog.querySelectorAll('.elan-card, .ad-card');
+        const adCards = catalog.querySelectorAll('.elan-card, .product-card, .item-card, .ad-card');
         let visibleCount = 0;
 
         adCards.forEach(card => {
             let matches = true;
             const cardCat = (card.getAttribute('data-category') || '').trim().toLowerCase();
             const cardBrand = (card.getAttribute('data-brand') || '').trim().toLowerCase();
-            const cardTitle = (card.querySelector('.ad-title')?.textContent || '').toLowerCase();
+            const cardTitle = (card.querySelector('.elan-title, .product-title, .ad-title')?.textContent || '').toLowerCase();
             const cardText = (card.textContent || '').toLowerCase();
 
             // 1. Category check

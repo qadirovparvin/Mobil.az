@@ -1029,9 +1029,10 @@ main {
   width: 100%;
 }
 
-.ad-card,
 .elan-card,
-.product-card {
+.product-card,
+.item-card,
+.ad-card {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -1043,24 +1044,31 @@ main {
   box-shadow: var(--card-shadow);
 }
 
-.ad-card:hover,
 .elan-card:hover,
-.product-card:hover {
+.product-card:hover,
+.item-card:hover,
+.ad-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
 }
 
+.elan-image,
+.product-image,
 .ad-image {
   position: relative;
   height: 180px;
 }
 
+.elan-image img,
+.product-image img,
 .ad-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
+.elan-badge,
+.product-badge,
 .ad-badge {
   position: absolute;
   top: 10px;
@@ -1072,6 +1080,8 @@ main {
   font-size: 12px;
 }
 
+.elan-badge.urgent,
+.product-badge.urgent,
 .ad-badge.urgent {
   background: #ef4444 !important;
   color: #ffffff !important;
@@ -1079,6 +1089,8 @@ main {
   box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
 }
 
+.elan-badge.vip,
+.product-badge.vip,
 .ad-badge.vip {
   background: linear-gradient(135deg, #f59e0b, #d97706) !important;
   color: #ffffff !important;
@@ -1086,6 +1098,8 @@ main {
   box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
 }
 
+.elan-badge.premium,
+.product-badge.premium,
 .ad-badge.premium {
   background: linear-gradient(135deg, #8b5cf6, #6d28d9) !important;
   color: #ffffff !important;
@@ -1093,6 +1107,8 @@ main {
   box-shadow: 0 2px 6px rgba(139, 92, 246, 0.4);
 }
 
+.elan-badge.pro,
+.product-badge.pro,
 .ad-badge.pro {
   background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
   color: #ffffff !important;
@@ -1101,12 +1117,16 @@ main {
 }
 
 /* VIP card: subtle warm gold/amber border */
+.elan-card.is-vip,
+.product-card.is-vip,
 .ad-card.is-vip {
   border: 1.5px solid rgba(245, 158, 11, 0.45) !important;
   box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12) !important;
 }
 
 /* PRO card: subtle gradient border and soft shadow (no blinking/flashing) */
+.elan-card.is-pro,
+.product-card.is-pro,
 .ad-card.is-pro {
   border: 1.5px solid rgba(139, 92, 246, 0.45) !important;
   box-shadow: 0 6px 18px rgba(99, 102, 241, 0.14) !important;
@@ -1130,10 +1150,14 @@ main {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+.elan-info,
+.product-info,
 .ad-info {
   padding: 16px;
 }
 
+.elan-price,
+.product-price,
 .ad-price {
   font-size: 19px;
   font-weight: 600;
@@ -1141,6 +1165,8 @@ main {
   margin-bottom: 6px;
 }
 
+.elan-title,
+.product-title,
 .ad-title {
   font-size: 15px;
   margin-bottom: 12px;
@@ -1148,11 +1174,20 @@ main {
   line-height: 1.4;
 }
 
+.elan-location,
+.product-location,
 .ad-location {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.elan-date,
+.product-date,
+.ad-date {
+  font-size: 12px;
   color: var(--text-secondary);
 }
 
