@@ -237,7 +237,632 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (ad && ad.data && typeof ad.data === 'object' && !ad.brand && !ad.modelName) {
             ad = ad.data;
         }
+        
         window.__CURRENT_AD = ad;
+
+        // ══════════════════════════════════════════════════════════════════
+        // ── MULTILINGUAL I18N SYSTEM (AZ / ENG / RUS) ─────────────────────
+        // ══════════════════════════════════════════════════════════════════
+        let phoneRevealed = false;
+        let cachedReviews = [];
+        let cachedRelatedAds = [];
+
+        function getCurrentLang() {
+            let l = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+            if (l === 'EN') l = 'ENG';
+            if (l === 'RU') l = 'RUS';
+            if (l !== 'ENG' && l !== 'RUS') l = 'AZ';
+            return l;
+        }
+
+        function getDateLocale() {
+            const lang = getCurrentLang();
+            if (lang === 'ENG') return 'en-US';
+            if (lang === 'RUS') return 'ru-RU';
+            return 'az-AZ';
+        }
+
+        const I18N = {
+            AZ: {
+                views: 'baxış',
+                today: 'Bugün',
+                noDesc: 'Açıqlama yoxdur.',
+                untitledAd: 'Adsız Elan',
+                category: 'Kateqoriya',
+                brand: 'Marka',
+                model: 'Model',
+                memory: 'Yaddaş',
+                ram: 'RAM',
+                screenSize: 'Ekran ölçüsü',
+                battery: 'Batareya',
+                color: 'Rəng',
+                condition: 'Vəziyyəti',
+                material: 'Material',
+                glassType: 'Qoruyucu növü',
+                connectionType: 'Qoşulma növü',
+                headphoneType: 'Qulaqlıq forması',
+                power: 'Çıxış gücü',
+                portType: 'Port növü',
+                cableType: 'Kabel növü',
+                cableLength: 'Uzunluq',
+                info: 'Məlumat',
+                loading: 'Yüklənir...',
+                yes: 'Bəli',
+                no: 'Xeyr',
+                hasDelivery: 'Var',
+                noDelivery: 'Yoxdur',
+                varCheck: '✓ Var',
+                userFallback: 'İstifadəçi',
+                
+                catPhone: 'Telefon',
+                catTablet: 'Planşet',
+                catHeadphones: 'Qulaqlıqlar',
+                catAccessories: 'Aksesuarlar',
+                
+                condNew: 'Yeni',
+                condUsed: 'İşlənmiş',
+                
+                featNfc: 'NFC',
+                featWaterproof: 'Suya davamlılıq',
+                featWaterproofChip: 'Suya davamlı',
+                featFingerprint: 'Barmaq izi',
+                featMagsafe: 'MagSafe dəstəyi',
+                featAnc: 'Aktiv Küyboğma (ANC)',
+                featMicrophone: 'Mikrofon',
+                featFastCharge: 'Sürətli şarj',
+                featWirelessCharge: 'Simsiz şarj',
+                featOleophobic: 'Oleofobik örtük',
+                featStylus: 'Stylus / Qələm',
+                featSimCard: 'SIM kart (4G/5G)',
+                featExpandable: 'Əlavə yaddaş kartı',
+                featExpandableChip: 'Yaddaş kartı dəstəyi',
+                featDelivery: 'Çatdırılma',
+                
+                personalAccount: 'Şəxsi hesab',
+                storeAccount: 'Mağaza',
+                officialStore: 'Rəsmi Mağaza',
+                showNumber: 'Nömrəni Göstər',
+                revealHint: '(Göstər)',
+                clickToCall: 'Zəng etmək üçün klikləyin',
+                clickToReveal: 'Nömrəni görmək üçün toxunun',
+                chatOnWhatsapp: 'WhatsApp ilə Yazın',
+                sendMessage: 'Mesaj Göndər',
+                viewStore: 'Mağazaya bax',
+                memberSince: 'Üzv olub:',
+                rating: 'Reytinq',
+                reviews: 'Rəy',
+                reviewCountBased: 'rəy əsasında',
+                allSellerReviews: 'Bu satıcının bütün rəyləri',
+                noReviewsTitle: 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!',
+                editAd: 'Düzəliş Et',
+                deleteAd: 'Elanı Sil',
+                deleteConfirm: 'Bu elanı silmək istədiyinizə əminsiniz?',
+                deleteSuccess: 'Elan silindi!',
+                deleteError: 'Silinmə zamanı xəta oldu.',
+                loginToMessage: 'Mesaj yazmaq üçün sistemə daxil olun!',
+                loginToReview: 'Rəy yazmaq üçün daxil olun!',
+                selectRating: 'Zəhmət olmasa reytinq seçin (ulduz)',
+                sending: 'Göndərilir...',
+                reviewSuccess: 'Rəy uğurla əlavə edildi!',
+                reviewError: 'Xəta baş verdi',
+                networkError: 'Şəbəkə xətası baş verdi.',
+                
+                relatedTitle: 'Oxşar Elanlar',
+                badgePersonal: 'Şəxsi',
+                badgeStore: 'Mağaza',
+                
+                adNumberLabel: 'Elan №:',
+                postedLabel: 'Yerləşdirildi:',
+                updatedLabel: 'Yeniləndi:'
+            },
+            ENG: {
+                views: 'views',
+                today: 'Today',
+                noDesc: 'No description provided.',
+                untitledAd: 'Untitled Listing',
+                category: 'Category',
+                brand: 'Brand',
+                model: 'Model',
+                memory: 'Storage',
+                ram: 'RAM',
+                screenSize: 'Screen Size',
+                battery: 'Battery',
+                color: 'Color',
+                condition: 'Condition',
+                material: 'Material',
+                glassType: 'Protection Type',
+                connectionType: 'Connection Type',
+                headphoneType: 'Headphone Type',
+                power: 'Power Output',
+                portType: 'Port Type',
+                cableType: 'Cable Type',
+                cableLength: 'Length',
+                info: 'Information',
+                loading: 'Loading...',
+                yes: 'Yes',
+                no: 'No',
+                hasDelivery: 'Available',
+                noDelivery: 'Not available',
+                varCheck: '✓ Yes',
+                userFallback: 'User',
+                
+                catPhone: 'Phones',
+                catTablet: 'Tablets',
+                catHeadphones: 'Headphones',
+                catAccessories: 'Accessories',
+                
+                condNew: 'New',
+                condUsed: 'Used',
+                
+                featNfc: 'NFC',
+                featWaterproof: 'Water Resistance',
+                featWaterproofChip: 'Waterproof',
+                featFingerprint: 'Fingerprint',
+                featMagsafe: 'MagSafe Support',
+                featAnc: 'Active Noise Cancellation (ANC)',
+                featMicrophone: 'Microphone',
+                featFastCharge: 'Fast Charging',
+                featWirelessCharge: 'Wireless Charging',
+                featOleophobic: 'Oleophobic Coating',
+                featStylus: 'Stylus Support',
+                featSimCard: 'SIM Card (4G/5G)',
+                featExpandable: 'MicroSD Card Slot',
+                featExpandableChip: 'MicroSD Support',
+                featDelivery: 'Delivery',
+                
+                personalAccount: 'Personal account',
+                storeAccount: 'Store',
+                officialStore: 'Official Store',
+                showNumber: 'Show Number',
+                revealHint: '(Show)',
+                clickToCall: 'Click to call',
+                clickToReveal: 'Click to show phone number',
+                chatOnWhatsapp: 'Chat on WhatsApp',
+                sendMessage: 'Send Message',
+                viewStore: 'View store',
+                memberSince: 'Member since:',
+                rating: 'Rating',
+                reviews: 'Reviews',
+                reviewCountBased: 'based on reviews',
+                allSellerReviews: 'All reviews for this seller',
+                noReviewsTitle: 'No reviews yet for this seller. Be the first to write one!',
+                editAd: 'Edit Listing',
+                deleteAd: 'Delete Listing',
+                deleteConfirm: 'Are you sure you want to delete this listing?',
+                deleteSuccess: 'Listing deleted!',
+                deleteError: 'Error occurred while deleting.',
+                loginToMessage: 'Please log in to send a message!',
+                loginToReview: 'Please log in to write a review!',
+                selectRating: 'Please select a rating (stars)',
+                sending: 'Sending...',
+                reviewSuccess: 'Review added successfully!',
+                reviewError: 'An error occurred',
+                networkError: 'Network error occurred.',
+                
+                relatedTitle: 'Similar Ads',
+                badgePersonal: 'Personal',
+                badgeStore: 'Store',
+                
+                adNumberLabel: 'Listing №:',
+                postedLabel: 'Posted:',
+                updatedLabel: 'Updated:'
+            },
+            RUS: {
+                views: 'просмотров',
+                today: 'Сегодня',
+                noDesc: 'Описание отсутствует.',
+                untitledAd: 'Объявление без названия',
+                category: 'Категория',
+                brand: 'Марка',
+                model: 'Модель',
+                memory: 'Память',
+                ram: 'ОЗУ',
+                screenSize: 'Размер экрана',
+                battery: 'Аккумулятор',
+                color: 'Цвет',
+                condition: 'Состояние',
+                material: 'Материал',
+                glassType: 'Тип покрытия',
+                connectionType: 'Тип подключения',
+                headphoneType: 'Тип наушников',
+                power: 'Выходная мощность',
+                portType: 'Тип порта',
+                cableType: 'Тип кабеля',
+                cableLength: 'Длина',
+                info: 'Информация',
+                loading: 'Загрузка...',
+                yes: 'Да',
+                no: 'Нет',
+                hasDelivery: 'Есть',
+                noDelivery: 'Нет',
+                varCheck: '✓ Есть',
+                userFallback: 'Пользователь',
+                
+                catPhone: 'Телефоны',
+                catTablet: 'Планшеты',
+                catHeadphones: 'Наушники',
+                catAccessories: 'Аксессуары',
+                
+                condNew: 'Новый',
+                condUsed: 'Б/У',
+                
+                featNfc: 'NFC',
+                featWaterproof: 'Водозащита',
+                featWaterproofChip: 'Водонепроницаемый',
+                featFingerprint: 'Отпечаток пальца',
+                featMagsafe: 'Поддержка MagSafe',
+                featAnc: 'Активное шумоподавление (ANC)',
+                featMicrophone: 'Микрофон',
+                featFastCharge: 'Быстрая зарядка',
+                featWirelessCharge: 'Беспроводная зарядка',
+                featOleophobic: 'Олеофобное покрытие',
+                featStylus: 'Стилус',
+                featSimCard: 'SIM-карта (4G/5G)',
+                featExpandable: 'Слот для карты памяти',
+                featExpandableChip: 'Поддержка карт памяти',
+                featDelivery: 'Доставка',
+                
+                personalAccount: 'Частное лицо',
+                storeAccount: 'Магазин',
+                officialStore: 'Официальный магазин',
+                showNumber: 'Показать номер',
+                revealHint: '(Показать)',
+                clickToCall: 'Нажмите, чтобы позвонить',
+                clickToReveal: 'Нажмите, чтобы увидеть номер',
+                chatOnWhatsapp: 'Написать в WhatsApp',
+                sendMessage: 'Отправить сообщение',
+                viewStore: 'В магазин',
+                memberSince: 'На сайте с:',
+                rating: 'Рейтинг',
+                reviews: 'Отзывы',
+                reviewCountBased: 'на основе отзывов',
+                allSellerReviews: 'Все отзывы о продавце',
+                noReviewsTitle: 'У этого продавца пока нет отзывов. Будьте первым!',
+                editAd: 'Редактировать',
+                deleteAd: 'Удалить объявление',
+                deleteConfirm: 'Вы уверены, что хотите удалить это объявление?',
+                deleteSuccess: 'Объявление удалено!',
+                deleteError: 'Произошла ошибка при удалении.',
+                loginToMessage: 'Войдите, чтобы отправить сообщение!',
+                loginToReview: 'Войдите, чтобы оставить отзыв!',
+                selectRating: 'Пожалуйста, выберите рейтинг (звезды)',
+                sending: 'Отправка...',
+                reviewSuccess: 'Отзыв успешно добавлен!',
+                reviewError: 'Произошла ошибка',
+                networkError: 'Ошибка сети.',
+                
+                relatedTitle: 'Похожие объявления',
+                badgePersonal: 'Частное',
+                badgeStore: 'Магазин',
+                
+                adNumberLabel: 'Номер объявления:',
+                postedLabel: 'Опубликовано:',
+                updatedLabel: 'Обновлено:'
+            }
+        };
+
+        function getI18n() {
+            const lang = getCurrentLang();
+            return I18N[lang] || I18N.AZ;
+        }
+
+        const CITY_MAP = {
+            'baki': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+            'baku': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+            'баку': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+            'sumqayit': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+            'sumqayıt': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+            'сумгаит': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+            'ganja': { AZ: 'Gəncə', ENG: 'Ganja', RUS: 'Гянджа' },
+            'gəncə': { AZ: 'Gəncə', ENG: 'Ganja', RUS: 'Гянджа' },
+            'гянджа': { AZ: 'Gəncə', ENG: 'Ganja', RUS: 'Гянджа' },
+            'absheron': { AZ: 'Abşeron', ENG: 'Absheron', RUS: 'Апшерон' },
+            'abşeron': { AZ: 'Abşeron', ENG: 'Absheron', RUS: 'Апшерон' },
+            'апшерон': { AZ: 'Abşeron', ENG: 'Absheron', RUS: 'Апшерон' },
+            'agcabedi': { AZ: 'Ağcabədi', ENG: 'Agcabedi', RUS: 'Агджабеди' },
+            'ağcabədi': { AZ: 'Ağcabədi', ENG: 'Agcabedi', RUS: 'Агджабеди' },
+            'agdam': { AZ: 'Ağdam', ENG: 'Agdam', RUS: 'Агдам' },
+            'ağdam': { AZ: 'Ağdam', ENG: 'Agdam', RUS: 'Агдам' },
+            'agdash': { AZ: 'Ağdaş', ENG: 'Agdash', RUS: 'Агдаш' },
+            'ağdaş': { AZ: 'Ağdaş', ENG: 'Agdash', RUS: 'Агдаш' },
+            'agstafa': { AZ: 'Ağstafa', ENG: 'Agstafa', RUS: 'Агстафа' },
+            'ağstafa': { AZ: 'Ağstafa', ENG: 'Agstafa', RUS: 'Агстафа' },
+            'agsu': { AZ: 'Ağsu', ENG: 'Agsu', RUS: 'Агсу' },
+            'ağsu': { AZ: 'Ağsu', ENG: 'Agsu', RUS: 'Агсу' },
+            'astara': { AZ: 'Astara', ENG: 'Astara', RUS: 'Астара' },
+            'balakan': { AZ: 'Balakən', ENG: 'Balakan', RUS: 'Балакен' },
+            'balakən': { AZ: 'Balakən', ENG: 'Balakan', RUS: 'Балакен' },
+            'barda': { AZ: 'Bərdə', ENG: 'Barda', RUS: 'Барда' },
+            'bərdə': { AZ: 'Bərdə', ENG: 'Barda', RUS: 'Барда' },
+            'beylagan': { AZ: 'Beyləqan', ENG: 'Beylagan', RUS: 'Бейлаган' },
+            'beyləqan': { AZ: 'Beyləqan', ENG: 'Beylagan', RUS: 'Бейлаган' },
+            'bilasuvar': { AZ: 'Biləsuvar', ENG: 'Bilasuvar', RUS: 'Билясувар' },
+            'biləsuvar': { AZ: 'Biləsuvar', ENG: 'Bilasuvar', RUS: 'Билясувар' },
+            'dashkasan': { AZ: 'Daşkəsən', ENG: 'Dashkasan', RUS: 'Дашкесан' },
+            'daşkəsən': { AZ: 'Daşkəsən', ENG: 'Dashkasan', RUS: 'Дашкесан' },
+            'fuzuli': { AZ: 'Füzuli', ENG: 'Fuzuli', RUS: 'Физули' },
+            'füzuli': { AZ: 'Füzuli', ENG: 'Fuzuli', RUS: 'Физули' },
+            'gadabay': { AZ: 'Gədəbəy', ENG: 'Gadabay', RUS: 'Гедабек' },
+            'gədəbəy': { AZ: 'Gədəbəy', ENG: 'Gadabay', RUS: 'Гедабек' },
+            'goranboy': { AZ: 'Goranboy', ENG: 'Goranboy', RUS: 'Геранбой' },
+            'goychay': { AZ: 'Göyçay', ENG: 'Goychay', RUS: 'Геокчай' },
+            'göyçay': { AZ: 'Göyçay', ENG: 'Goychay', RUS: 'Геокчай' },
+            'goygol': { AZ: 'Göygöl', ENG: 'Goygol', RUS: 'Гёйгёль' },
+            'göygöl': { AZ: 'Göygöl', ENG: 'Goygol', RUS: 'Гёйгёль' },
+            'hajigabul': { AZ: 'Hacıqabul', ENG: 'Hajigabul', RUS: 'Гаджигабул' },
+            'hacıqabul': { AZ: 'Hacıqabul', ENG: 'Hajigabul', RUS: 'Гаджигабул' },
+            'khachmaz': { AZ: 'Xaçmaz', ENG: 'Khachmaz', RUS: 'Хачмаз' },
+            'xaçmaz': { AZ: 'Xaçmaz', ENG: 'Khachmaz', RUS: 'Хачмаз' },
+            'khankendi': { AZ: 'Xankəndi', ENG: 'Khankendi', RUS: 'Ханкенди' },
+            'xankəndi': { AZ: 'Xankəndi', ENG: 'Khankendi', RUS: 'Ханкенди' },
+            'khizi': { AZ: 'Xızı', ENG: 'Khizi', RUS: 'Хызы' },
+            'xızı': { AZ: 'Xızı', ENG: 'Khizi', RUS: 'Хызы' },
+            'imishli': { AZ: 'İmişli', ENG: 'Imishli', RUS: 'Имишли' },
+            'imişli': { AZ: 'İmişli', ENG: 'Imishli', RUS: 'Имишли' },
+            'ismayilli': { AZ: 'İsmayıllı', ENG: 'Ismayilli', RUS: 'Исмаиллы' },
+            'ismayıllı': { AZ: 'İsmayıllı', ENG: 'Ismayilli', RUS: 'Исмаиллы' },
+            'jabrayil': { AZ: 'Cəbrayıl', ENG: 'Jabrayil', RUS: 'Джебраил' },
+            'cəbrayıl': { AZ: 'Cəbrayıl', ENG: 'Jabrayil', RUS: 'Джебраил' },
+            'jalilabad': { AZ: 'Cəlilabad', ENG: 'Jalilabad', RUS: 'Джалилабад' },
+            'cəlilabad': { AZ: 'Cəlilabad', ENG: 'Jalilabad', RUS: 'Джалилабад' },
+            'kalbajar': { AZ: 'Kəlbəcər', ENG: 'Kalbajar', RUS: 'Кельбаджар' },
+            'kəlbəcər': { AZ: 'Kəlbəcər', ENG: 'Kalbajar', RUS: 'Кельбаджар' },
+            'kurdamir': { AZ: 'Kürdəmir', ENG: 'Kurdamir', RUS: 'Кюрдамир' },
+            'kürdəmir': { AZ: 'Kürdəmir', ENG: 'Kurdamir', RUS: 'Кюрдамир' },
+            'lachin': { AZ: 'Laçın', ENG: 'Lachin', RUS: 'Лачин' },
+            'laçın': { AZ: 'Laçın', ENG: 'Lachin', RUS: 'Лачин' },
+            'lankaran': { AZ: 'Lənkəran', ENG: 'Lankaran', RUS: 'Ленкорань' },
+            'lənkəran': { AZ: 'Lənkəran', ENG: 'Lankaran', RUS: 'Ленкорань' },
+            'lerik': { AZ: 'Lerik', ENG: 'Lerik', RUS: 'Лерик' },
+            'masalli': { AZ: 'Masallı', ENG: 'Masalli', RUS: 'Масаллы' },
+            'masallı': { AZ: 'Masallı', ENG: 'Masalli', RUS: 'Масаллы' },
+            'mingachevir': { AZ: 'Mingəçevir', ENG: 'Mingachevir', RUS: 'Мингечевир' },
+            'mingəçevir': { AZ: 'Mingəçevir', ENG: 'Mingachevir', RUS: 'Мингечевир' },
+            'naftalan': { AZ: 'Naftalan', ENG: 'Naftalan', RUS: 'Нафталан' },
+            'nakhchivan': { AZ: 'Naxçıvan', ENG: 'Nakhchivan', RUS: 'Нахчыван' },
+            'naxçıvan': { AZ: 'Naxçıvan', ENG: 'Nakhchivan', RUS: 'Нахчыван' },
+            'neftchala': { AZ: 'Neftçala', ENG: 'Neftchala', RUS: 'Нефтечала' },
+            'neftçala': { AZ: 'Neftçala', ENG: 'Neftchala', RUS: 'Нефтечала' },
+            'oguz': { AZ: 'Oğuz', ENG: 'Oguz', RUS: 'Огуз' },
+            'oğuz': { AZ: 'Oğuz', ENG: 'Oguz', RUS: 'Огуз' },
+            'qabala': { AZ: 'Qəbələ', ENG: 'Qabala', RUS: 'Габала' },
+            'qəbələ': { AZ: 'Qəbələ', ENG: 'Qabala', RUS: 'Габала' },
+            'qakh': { AZ: 'Qax', ENG: 'Qakh', RUS: 'Гах' },
+            'qax': { AZ: 'Qax', ENG: 'Qakh', RUS: 'Гах' },
+            'qazakh': { AZ: 'Qazax', ENG: 'Qazakh', RUS: 'Газах' },
+            'qazax': { AZ: 'Qazax', ENG: 'Qazakh', RUS: 'Газах' },
+            'qobustan': { AZ: 'Qobustan', ENG: 'Gobustan', RUS: 'Гобустан' },
+            'quba': { AZ: 'Quba', ENG: 'Quba', RUS: 'Губа' },
+            'qubadli': { AZ: 'Qubadlı', ENG: 'Qubadli', RUS: 'Губадлы' },
+            'qubadlı': { AZ: 'Qubadlı', ENG: 'Qubadli', RUS: 'Губадлы' },
+            'qusar': { AZ: 'Qusar', ENG: 'Qusar', RUS: 'Гусар' },
+            'saatli': { AZ: 'Saatlı', ENG: 'Saatli', RUS: 'Саатлы' },
+            'saatlı': { AZ: 'Saatlı', ENG: 'Saatli', RUS: 'Саатлы' },
+            'sabirabad': { AZ: 'Sabirabad', ENG: 'Sabirabad', RUS: 'Сабирабад' },
+            'salyan': { AZ: 'Salyan', ENG: 'Salyan', RUS: 'Сальян' },
+            'shabran': { AZ: 'Şabran', ENG: 'Shabran', RUS: 'Шабран' },
+            'şabran': { AZ: 'Şabran', ENG: 'Shabran', RUS: 'Шабран' },
+            'shaki': { AZ: 'Şəki', ENG: 'Shaki', RUS: 'Шеки' },
+            'şəki': { AZ: 'Şəki', ENG: 'Shaki', RUS: 'Шеки' },
+            'shamakhi': { AZ: 'Şamaxı', ENG: 'Shamakhi', RUS: 'Шамаха' },
+            'şamaxı': { AZ: 'Şamaxı', ENG: 'Shamakhi', RUS: 'Шамаха' },
+            'shamkir': { AZ: 'Şəmkir', ENG: 'Shamkir', RUS: 'Шамкир' },
+            'şəmkir': { AZ: 'Şəmkir', ENG: 'Shamkir', RUS: 'Шамкир' },
+            'shirvan': { AZ: 'Şirvan', ENG: 'Shirvan', RUS: 'Ширван' },
+            'şirvan': { AZ: 'Şirvan', ENG: 'Shirvan', RUS: 'Ширван' },
+            'shusha': { AZ: 'Şuşa', ENG: 'Shusha', RUS: 'Шуша' },
+            'şuşa': { AZ: 'Şuşa', ENG: 'Shusha', RUS: 'Шуша' },
+            'siazan': { AZ: 'Siyəzən', ENG: 'Siazan', RUS: 'Сиязань' },
+            'siyəzən': { AZ: 'Siyəzən', ENG: 'Siazan', RUS: 'Сиязань' },
+            'tartar': { AZ: 'Tərtər', ENG: 'Tartar', RUS: 'Тертер' },
+            'tərtər': { AZ: 'Tərtər', ENG: 'Tartar', RUS: 'Тертер' },
+            'tovuz': { AZ: 'Tovuz', ENG: 'Tovuz', RUS: 'Товуз' },
+            'ujar': { AZ: 'Ucar', ENG: 'Ujar', RUS: 'Уджар' },
+            'ucar': { AZ: 'Ucar', ENG: 'Ujar', RUS: 'Уджар' },
+            'yardimli': { AZ: 'Yardımlı', ENG: 'Yardimli', RUS: 'Ярдымлы' },
+            'yardımlı': { AZ: 'Yardımlı', ENG: 'Yardimli', RUS: 'Ярдымлы' },
+            'yevlakh': { AZ: 'Yevlax', ENG: 'Yevlakh', RUS: 'Евлах' },
+            'yevlax': { AZ: 'Yevlax', ENG: 'Yevlakh', RUS: 'Евлах' },
+            'zangilan': { AZ: 'Zəngilan', ENG: 'Zangilan', RUS: 'Зангилан' },
+            'zəngilan': { AZ: 'Zəngilan', ENG: 'Zangilan', RUS: 'Зангилан' },
+            'zaqatala': { AZ: 'Zaqatala', ENG: 'Zaqatala', RUS: 'Загатала' },
+            'zardab': { AZ: 'Zərdab', ENG: 'Zardab', RUS: 'Зардоб' },
+            'zərdab': { AZ: 'Zərdab', ENG: 'Zardab', RUS: 'Зардоб' }
+        };
+
+        function formatCity(cityName) {
+            if (!cityName) return '';
+            const raw = String(cityName).trim();
+            const lower = raw.toLowerCase();
+            const lang = getCurrentLang();
+            if (CITY_MAP[lower]) {
+                return CITY_MAP[lower][lang] || CITY_MAP[lower].AZ;
+            }
+            for (const mapping of Object.values(CITY_MAP)) {
+                if (mapping.AZ.toLowerCase() === lower || mapping.ENG.toLowerCase() === lower || mapping.RUS.toLowerCase() === lower) {
+                    return mapping[lang] || mapping.AZ;
+                }
+            }
+            return raw;
+        }
+
+        const COLOR_MAP = {
+            'black': { AZ: 'Qara', ENG: 'Black', RUS: 'Черный' },
+            'qara': { AZ: 'Qara', ENG: 'Black', RUS: 'Черный' },
+            'черный': { AZ: 'Qara', ENG: 'Black', RUS: 'Черный' },
+            'white': { AZ: 'Ağ', ENG: 'White', RUS: 'Белый' },
+            'ag': { AZ: 'Ağ', ENG: 'White', RUS: 'Белый' },
+            'ağ': { AZ: 'Ağ', ENG: 'White', RUS: 'Белый' },
+            'белый': { AZ: 'Ağ', ENG: 'White', RUS: 'Белый' },
+            'gold': { AZ: 'Qızılı', ENG: 'Gold', RUS: 'Золотой' },
+            'qizili': { AZ: 'Qızılı', ENG: 'Gold', RUS: 'Золотой' },
+            'qızılı': { AZ: 'Qızılı', ENG: 'Gold', RUS: 'Золотой' },
+            'золотой': { AZ: 'Qızılı', ENG: 'Gold', RUS: 'Золотой' },
+            'silver': { AZ: 'Gümüşü', ENG: 'Silver', RUS: 'Серебристый' },
+            'gumusu': { AZ: 'Gümüşü', ENG: 'Silver', RUS: 'Серебристый' },
+            'gümüşü': { AZ: 'Gümüşü', ENG: 'Silver', RUS: 'Серебристый' },
+            'серебристый': { AZ: 'Gümüşü', ENG: 'Silver', RUS: 'Серебристый' },
+            'grey': { AZ: 'Boz', ENG: 'Grey', RUS: 'Серый' },
+            'gray': { AZ: 'Boz', ENG: 'Gray', RUS: 'Серый' },
+            'boz': { AZ: 'Boz', ENG: 'Grey', RUS: 'Серый' },
+            'серый': { AZ: 'Boz', ENG: 'Grey', RUS: 'Серый' },
+            'graphite': { AZ: 'Qrafit', ENG: 'Graphite', RUS: 'Графит' },
+            'qrafit': { AZ: 'Qrafit', ENG: 'Graphite', RUS: 'Графит' },
+            'графит': { AZ: 'Qrafit', ENG: 'Graphite', RUS: 'Графит' },
+            'blue': { AZ: 'Mavi', ENG: 'Blue', RUS: 'Синий' },
+            'mavi': { AZ: 'Mavi', ENG: 'Blue', RUS: 'Синий' },
+            'göy': { AZ: 'Göy', ENG: 'Blue', RUS: 'Синий' },
+            'goy': { AZ: 'Göy', ENG: 'Blue', RUS: 'Синий' },
+            'синий': { AZ: 'Mavi', ENG: 'Blue', RUS: 'Синий' },
+            'голубой': { AZ: 'Mavi', ENG: 'Light Blue', RUS: 'Голубой' },
+            'darkblue': { AZ: 'Göy (Tünd Mavi)', ENG: 'Dark Blue', RUS: 'Темно-синий' },
+            'green': { AZ: 'Yaşıl', ENG: 'Green', RUS: 'Зеленый' },
+            'yasil': { AZ: 'Yaşıl', ENG: 'Green', RUS: 'Зеленый' },
+            'yaşıl': { AZ: 'Yaşıl', ENG: 'Green', RUS: 'Зеленый' },
+            'зеленый': { AZ: 'Yaşıl', ENG: 'Green', RUS: 'Зеленый' },
+            'emerald': { AZ: 'Zümrüd Yaşılı', ENG: 'Emerald Green', RUS: 'Изумрудно-зеленый' },
+            'yellow': { AZ: 'Sarı', ENG: 'Yellow', RUS: 'Желтый' },
+            'sari': { AZ: 'Sarı', ENG: 'Yellow', RUS: 'Желтый' },
+            'sarı': { AZ: 'Sarı', ENG: 'Yellow', RUS: 'Желтый' },
+            'желтый': { AZ: 'Sarı', ENG: 'Yellow', RUS: 'Желтый' },
+            'red': { AZ: 'Qırmızı', ENG: 'Red', RUS: 'Красный' },
+            'qirmizi': { AZ: 'Qırmızı', ENG: 'Red', RUS: 'Красный' },
+            'qırmızı': { AZ: 'Qırmızı', ENG: 'Red', RUS: 'Красный' },
+            'красный': { AZ: 'Qırmızı', ENG: 'Red', RUS: 'Красный' },
+            'pink': { AZ: 'Çəhrayı', ENG: 'Pink', RUS: 'Розовый' },
+            'cehrayi': { AZ: 'Çəhrayı', ENG: 'Pink', RUS: 'Розовый' },
+            'çəhrayı': { AZ: 'Çəhrayı', ENG: 'Pink', RUS: 'Розовый' },
+            'розовый': { AZ: 'Çəhrayı', ENG: 'Pink', RUS: 'Розовый' },
+            'purple': { AZ: 'Bənövşəyi', ENG: 'Purple', RUS: 'Фиолетовый' },
+            'benovseyi': { AZ: 'Bənövşəyi', ENG: 'Purple', RUS: 'Фиолетовый' },
+            'bənövşəyi': { AZ: 'Bənövşəyi', ENG: 'Purple', RUS: 'Фиолетовый' },
+            'фиолетовый': { AZ: 'Bənövşəyi', ENG: 'Purple', RUS: 'Фиолетовый' },
+            'deeppurple': { AZ: 'Dərin Bənövşəyi', ENG: 'Deep Purple', RUS: 'Темно-фиолетовый' },
+            'orange': { AZ: 'Narıncı', ENG: 'Orange', RUS: 'Оранжевый' },
+            'narinci': { AZ: 'Narıncı', ENG: 'Orange', RUS: 'Оранжевый' },
+            'narıncı': { AZ: 'Narıncı', ENG: 'Orange', RUS: 'Оранжевый' },
+            'оранжевый': { AZ: 'Narıncı', ENG: 'Orange', RUS: 'Оранжевый' },
+            'titanium-black': { AZ: 'Titan Qara', ENG: 'Black Titanium', RUS: 'Черный титан' },
+            'titanium-natural': { AZ: 'Titan Təbii', ENG: 'Natural Titanium', RUS: 'Натуральный титан' },
+            'titanium-white': { AZ: 'Titan Ağ', ENG: 'White Titanium', RUS: 'Белый титан' },
+            'titanium-blue': { AZ: 'Titan Göy', ENG: 'Blue Titanium', RUS: 'Синий титан' },
+            'bronze': { AZ: 'Bürünc', ENG: 'Bronze', RUS: 'Бронзовый' },
+            'bürünc': { AZ: 'Bürünc', ENG: 'Bronze', RUS: 'Бронзовый' },
+            'бронзовый': { AZ: 'Bürünc', ENG: 'Bronze', RUS: 'Бронзовый' },
+            'beige': { AZ: 'Bej', ENG: 'Beige', RUS: 'Бежевый' },
+            'bej': { AZ: 'Bej', ENG: 'Beige', RUS: 'Бежевый' },
+            'бежевый': { AZ: 'Bej', ENG: 'Beige', RUS: 'Бежевый' },
+            'brown': { AZ: 'Qəhvəyi', ENG: 'Brown', RUS: 'Коричневый' },
+            'qəhvəyi': { AZ: 'Qəhvəyi', ENG: 'Brown', RUS: 'Коричневый' },
+            'коричневый': { AZ: 'Qəhvəyi', ENG: 'Brown', RUS: 'Коричневый' },
+            'transparent': { AZ: 'Şəffaf', ENG: 'Transparent', RUS: 'Прозрачный' },
+            'seffaf': { AZ: 'Şəffaf', ENG: 'Transparent', RUS: 'Прозрачный' },
+            'şəffaf': { AZ: 'Şəffaf', ENG: 'Transparent', RUS: 'Прозрачный' },
+            'прозрачный': { AZ: 'Şəffaf', ENG: 'Transparent', RUS: 'Прозрачный' },
+            'other': { AZ: 'Digər', ENG: 'Other', RUS: 'Другой' },
+            'diger': { AZ: 'Digər', ENG: 'Other', RUS: 'Другой' },
+            'digər': { AZ: 'Digər', ENG: 'Other', RUS: 'Другой' },
+            'другой': { AZ: 'Digər', ENG: 'Other', RUS: 'Другой' }
+        };
+
+        function formatColorName(val) {
+            if (!val) return '';
+            const key = String(val).trim().toLowerCase();
+            const lang = getCurrentLang();
+            if (COLOR_MAP[key]) {
+                return COLOR_MAP[key][lang] || COLOR_MAP[key].AZ;
+            }
+            for (const item of Object.values(COLOR_MAP)) {
+                if (item.AZ.toLowerCase() === key || item.ENG.toLowerCase() === key || item.RUS.toLowerCase() === key) {
+                    return item[lang] || item.AZ;
+                }
+            }
+            return String(val).trim();
+        }
+
+        function formatCategory(val) {
+            if (!val) return '';
+            const s = String(val).trim().toLowerCase();
+            const lang = getCurrentLang();
+            const t = I18N[lang] || I18N.AZ;
+            if (s.includes('telefon') || s.includes('phone') || s.includes('smartfon') || s.includes('смартфон')) {
+                return t.catPhone;
+            }
+            if (s.includes('planşet') || s.includes('planset') || s.includes('tablet') || s.includes('планшет')) {
+                return t.catTablet;
+            }
+            if (s.includes('qulaq') || s.includes('headphone') || s.includes('наушник')) {
+                return t.catHeadphones;
+            }
+            if (s.includes('aksesuar') || s.includes('accessory') || s.includes('aksessuar') || s.includes('аксессуар')) {
+                return t.catAccessories;
+            }
+            return String(val).trim();
+        }
+
+        function formatCondition(val) {
+            const lang = getCurrentLang();
+            const t = I18N[lang] || I18N.AZ;
+            const s = String(val || '').trim().toLowerCase();
+            if (s === 'yeni' || s === 'new' || s === 'новый') return t.condNew;
+            if (s === 'işlənmiş' || s === 'islenmis' || s === 'used' || s === 'б/у' || s === 'бу') return t.condUsed;
+            return val || t.condNew;
+        }
+
+        function formatMemory(val) {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '64-dan-az' || s === 'below-64' || s.toLowerCase() === '< 64' || s.toLowerCase() === '<64') return '< 64 GB';
+            if (s === '512-den-cox' || s === '512+' || s === '512-plus') return '512+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        }
+
+        function formatRam(val) {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (s === '16-dan-cox' || s === '16+' || s === '16-plus') return '16+ GB';
+            if (/^\d+$/.test(s)) return `${s} GB`;
+            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
+            return s;
+        }
+
+        function formatScreen(val) {
+            if (!val) return '';
+            const s = String(val).trim().replace(/"/g, '');
+            return `${s}"`;
+        }
+
+        function formatBattery(val) {
+            if (!val) return '';
+            const s = String(val).trim();
+            if (/^\d+$/.test(s)) return `${s} mAh`;
+            return s;
+        }
+
+        function formatCreatedDate(isoDate) {
+            if (!isoDate) return '';
+            const d = new Date(isoDate);
+            if (isNaN(d.getTime())) return '';
+            const lang = getCurrentLang();
+            const t = I18N[lang] || I18N.AZ;
+            const now = new Date();
+            const isToday = d.toDateString() === now.toDateString();
+            const timeStr = d.toLocaleTimeString(getDateLocale(), { hour: '2-digit', minute: '2-digit' });
+            if (isToday) {
+                return `${t.today}, ${timeStr}`;
+            }
+            return d.toLocaleDateString(getDateLocale());
+        }
+
+        function formatMemberSinceDate(isoDate) {
+            if (!isoDate) return '';
+            const d = new Date(isoDate);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleDateString(getDateLocale(), { month: 'long', year: 'numeric' });
+        }
+
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
         const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
@@ -275,8 +900,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ── 4. Date & Views ────────────────────────────────────────
         const dateEl  = document.querySelector('.elan-date-views span:nth-child(1), .ad-date-views span:nth-child(1)');
         const viewsEl = document.querySelector('.elan-date-views span:nth-child(2), .ad-date-views span:nth-child(2)') || document.getElementById('ad-views-count');
-        if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${new Date(ad.createdAt).toLocaleDateString('az-AZ')}`;
-        if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} baxış`;
+        if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${formatCreatedDate(ad.createdAt)}`;
+        if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} ${getI18n().views}`;
 
         // ── 5. Image Gallery ───────────────────────────────────────
         const mainImg        = document.getElementById('mainImage');
@@ -371,228 +996,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nextBtn)         nextBtn.style.display = 'none';
         }
 
-        // ── Spec Formatters ────────────────────────────────────────
-        const COLOR_NAMES_MAP = {
-            'black': 'Qara',
-            'white': 'Ağ',
-            'gold': 'Qızılı',
-            'silver': 'Gümüşü',
-            'grey': 'Boz',
-            'gray': 'Boz',
-            'graphite': 'Qrafit',
-            'blue': 'Mavi',
-            'darkblue': 'Göy (Tünd Mavi)',
-            'green': 'Yaşıl',
-            'emerald': 'Zümrüd Yaşılı',
-            'yellow': 'Sarı',
-            'red': 'Qırmızı',
-            'pink': 'Çəhrayı',
-            'purple': 'Bənövşəyi',
-            'deeppurple': 'Dərin Bənövşəyi',
-            'orange': 'Narıncı',
-            'titanium-black': 'Titan Qara',
-            'titanium-natural': 'Titan Təbii',
-            'titanium-white': 'Titan Ağ',
-            'titanium-blue': 'Titan Göy',
-            'bronze': 'Bürünc',
-            'beige': 'Bej',
-            'brown': 'Qəhvəyi',
-            'transparent': 'Şəffaf',
-            'other': 'Digər'
-        };
-
-        const formatColorName = (val) => {
-            if (!val) return '';
-            const key = String(val).trim().toLowerCase();
-            return COLOR_NAMES_MAP[key] || String(val).trim();
-        };
-
-        const formatMemory = (val) => {
-            if (!val) return '';
-            const s = String(val).trim();
-            if (s === '64-dan-az' || s === 'below-64' || s.toLowerCase() === '< 64' || s.toLowerCase() === '<64') return '< 64 GB';
-            if (s === '512-den-cox' || s === '512+' || s === '512-plus') return '512+ GB';
-            if (/^\d+$/.test(s)) return `${s} GB`;
-            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
-            return s;
-        };
-
-        const formatRam = (val) => {
-            if (!val) return '';
-            const s = String(val).trim();
-            if (s === '16-dan-cox' || s === '16+' || s === '16-plus') return '16+ GB';
-            if (/^\d+$/.test(s)) return `${s} GB`;
-            if (/^\d+\s*gb$/i.test(s)) return s.toUpperCase();
-            return s;
-        };
-
-        const formatScreen = (val) => {
-            if (!val) return '';
-            const s = String(val).trim().replace(/"/g, '');
-            return `${s}"`;
-        };
-
-        const formatBattery = (val) => {
-            if (!val) return '';
-            const s = String(val).trim();
-            if (/^\d+$/.test(s)) return `${s} mAh`;
-            return s;
-        };
-
-        // ── 6. Quick Spec Chips ────────────────────────────────────
-        const quickSpecsEl = document.querySelector('.quick-specs');
-        if (quickSpecsEl) {
-            quickSpecsEl.replaceChildren();
-            const addChip = (iconClass, text) => {
-                if (!text || String(text).trim() === '') return;
-                const chip = document.createElement('span');
-                chip.className = 'spec-chip';
-                const icon = document.createElement('i');
-                icon.className = iconClass;
-                chip.append(icon, document.createTextNode(' ' + text));
-                quickSpecsEl.appendChild(chip);
-            };
-            if (ad.specs?.memory)         addChip('fas fa-memory', `${formatMemory(ad.specs.memory)} Yaddaş`);
-            if (ad.specs?.ram)            addChip('fas fa-microchip', `${formatRam(ad.specs.ram)} RAM`);
-            if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', formatScreen(ad.specs.screenSize));
-            if (ad.specs?.battery)        addChip('fas fa-battery-full', formatBattery(ad.specs.battery));
-            if (ad.specs?.color)          addChip('fas fa-palette', formatColorName(ad.specs.color));
-            if (ad.specs?.material)       addChip('fas fa-shield-alt', String(ad.specs.material));
-            if (ad.specs?.glassType)      addChip('fas fa-shield-virus', String(ad.specs.glassType));
-            if (ad.specs?.connectionType) addChip('fas fa-headphones', String(ad.specs.connectionType));
-            if (ad.specs?.headphoneType)  addChip('fas fa-headset', String(ad.specs.headphoneType));
-            if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
-            if (ad.specs?.portType)       addChip('fas fa-charging-station', String(ad.specs.portType));
-            if (ad.specs?.cableType)      addChip('fas fa-plug', String(ad.specs.cableType));
-            if (ad.specs?.cableLength)    addChip('fas fa-ruler-horizontal', String(ad.specs.cableLength));
-            if (ad.condition)             addChip('fas fa-box-open', String(ad.condition));
-        }
-
-        // ── 6.5 Dynamic Feature Badges ─────────────────────────────
-        const featureBadgesEl = document.querySelector('.feature-badges');
-        if (featureBadgesEl) {
-            featureBadgesEl.replaceChildren();
-            const f = ad.specs?.features || {};
-            const addFeatureBadge = (iconClass, text) => {
-                const badge = document.createElement('span');
-                badge.className = 'feat-badge yes';
-                const icon = document.createElement('i');
-                icon.className = iconClass;
-                badge.append(icon, document.createTextNode(' ' + text));
-                featureBadgesEl.appendChild(badge);
-            };
-
-            if (f.nfc)             addFeatureBadge('fas fa-wifi', 'NFC');
-            if (f.fingerprint)     addFeatureBadge('fas fa-fingerprint', 'Barmaq izi');
-            if (f.waterproof)      addFeatureBadge('fas fa-tint', 'Suya davamlı');
-            if (f.expandable)      addFeatureBadge('fas fa-sd-card', 'Yaddaş kartı dəstəyi');
-            if (f.magsafe)         addFeatureBadge('fas fa-magnet', 'MagSafe');
-            if (f.anc)             addFeatureBadge('fas fa-volume-mute', 'ANC (Küyboğma)');
-            if (f.fastCharge)      addFeatureBadge('fas fa-bolt', 'Sürətli şarj');
-            if (f.wirelessCharge)  addFeatureBadge('fas fa-charging-station', 'Simsiz şarj');
-            if (f.microphone)      addFeatureBadge('fas fa-microphone', 'Mikrofon');
-            if (f.oleophobic)      addFeatureBadge('fas fa-shield-alt', 'Oleofobik örtük');
-            if (f.stylus)          addFeatureBadge('fas fa-pen-nib', 'Stylus / Qələm');
-            if (f.simCard)         addFeatureBadge('fas fa-sim-card', 'SIM kart');
-            if (f.delivery)        addFeatureBadge('fas fa-truck', 'Çatdırılma');
-
-            if (featureBadgesEl.children.length === 0) {
-                featureBadgesEl.style.display = 'none';
-            } else {
-                featureBadgesEl.style.display = 'flex';
-            }
-        }
-
-        // ── 7. Full Specs Grid ─────────────────────────────────────
-        const specsGrid = document.querySelector('.specs-grid');
-        if (specsGrid) {
-            specsGrid.replaceChildren();
-            const addSpecRow = (label, val) => {
-                if (!val || String(val).trim() === '' || String(val).trim() === '-') return;
-                const row = document.createElement('div');
-                row.className = 'spec-row';
-                const lblSpan = document.createElement('span');
-                lblSpan.className = 'spec-label';
-                lblSpan.textContent = label;
-                const valSpan = document.createElement('span');
-                valSpan.className = 'spec-value';
-                valSpan.textContent = String(val);
-                row.append(lblSpan, valSpan);
-                specsGrid.appendChild(row);
-            };
-            if (ad.category) addSpecRow('Kateqoriya', ad.category);
-            if (ad.brand) addSpecRow('Marka', ad.brand);
-            if (ad.modelName) addSpecRow('Model', ad.modelName);
-
-            // Electronics specs (only if exists)
-            if (ad.specs?.memory) addSpecRow('Yaddaş', formatMemory(ad.specs.memory));
-            if (ad.specs?.ram) addSpecRow('RAM', formatRam(ad.specs.ram));
-            if (ad.specs?.screenSize) addSpecRow('Ekran ölçüsü', formatScreen(ad.specs.screenSize));
-            if (ad.specs?.battery) addSpecRow('Batareya', formatBattery(ad.specs.battery));
-
-            // Accessory specs (only if exists)
-            if (ad.specs?.material) addSpecRow('Material', String(ad.specs.material));
-            if (ad.specs?.glassType) addSpecRow('Qoruyucu növü', String(ad.specs.glassType));
-            if (ad.specs?.connectionType) addSpecRow('Qoşulma növü', String(ad.specs.connectionType));
-            if (ad.specs?.headphoneType) addSpecRow('Qulaqlıq forması', String(ad.specs.headphoneType));
-            if (ad.specs?.power) addSpecRow('Çıxış gücü', String(ad.specs.power));
-            if (ad.specs?.portType) addSpecRow('Port növü', String(ad.specs.portType));
-            if (ad.specs?.cableType) addSpecRow('Kabel növü', String(ad.specs.cableType));
-            if (ad.specs?.cableLength) addSpecRow('Uzunluq', String(ad.specs.cableLength));
-
-            // Color & Condition
-            if (ad.specs?.color) addSpecRow('Rəng', formatColorName(ad.specs.color));
-            addSpecRow('Vəziyyəti', ad.condition || 'Yeni');
-
-            // Features (boolean flags)
-            const f = ad.specs?.features || {};
-            if (f.nfc)             addSpecRow('NFC', '✓ Var');
-            if (f.waterproof)      addSpecRow('Suya davamlılıq', '✓ Var');
-            if (f.fingerprint)     addSpecRow('Barmaq izi', '✓ Var');
-            if (f.magsafe)         addSpecRow('MagSafe dəstəyi', '✓ Var');
-            if (f.anc)             addSpecRow('Aktiv Küyboğma (ANC)', '✓ Var');
-            if (f.microphone)      addSpecRow('Mikrofon', '✓ Var');
-            if (f.fastCharge)      addSpecRow('Sürətli şarj', '✓ Var');
-            if (f.wirelessCharge)  addSpecRow('Simsiz şarj', '✓ Var');
-            if (f.oleophobic)      addSpecRow('Oleofobik örtük', '✓ Var');
-            if (f.stylus)          addSpecRow('Stylus / Qələm', '✓ Var');
-            if (f.simCard)         addSpecRow('SIM kart (4G/5G)', '✓ Var');
-            if (f.expandable)      addSpecRow('Əlavə yaddaş kartı', '✓ Var');
-            if (f.delivery)        addSpecRow('Çatdırılma', '✓ Var');
-
-            if (specsGrid.children.length === 0) {
-                specsGrid.innerHTML = '<div class="spec-row"><span class="spec-label">Məlumat</span><span class="spec-value">—</span></div>';
-            }
-        }
-
-        // ── 8. Location & Condition rows ───────────────────────────
-        const locationRows = document.querySelectorAll('.location-item strong');
-        if (locationRows[0]) locationRows[0].textContent = ad.city || 'Bakı';
-        if (locationRows[1]) locationRows[1].textContent = ad.condition || 'Yeni';
-        if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? 'Var' : 'Yoxdur';
-
-        // ── 9. Category tag ────────────────────────────────────────
-        const catTag = document.querySelector('.elan-category-tag, .item-category-tag, .ad-category-tag');
-        if (catTag) {
-            catTag.replaceChildren();
-            const catIcon = document.createElement('i');
-            catIcon.className = 'fas fa-mobile-alt';
-            catTag.append(catIcon, document.createTextNode(` ${ad.category || 'Telefon'} · ${ad.brand || ''}`));
-        }
-
-        // ── 10. Seller Info ────────────────────────────────────────
-        isStore = Boolean(ad.sellerType === 'store' && ad.store);
-        const sellerNameEl = document.getElementById('sellerName') || document.querySelector('.personal-name');
-        const avatarEl = document.getElementById('sellerAvatar') || document.querySelector('.personal-avatar');
-        const sellerTypeTag = document.getElementById('sellerTypeTag');
-        const sellerLocationTag = document.getElementById('sellerLocationTag');
-        const sellerLocationText = document.getElementById('sellerLocationText');
-        const storeProfileLink = document.getElementById('storeProfileLink');
-        const sellerStats = document.getElementById('sellerStats') || document.querySelector('.personal-stats');
-        const sellerSinceRow = document.getElementById('sellerSinceRow') || document.querySelector('.seller-since-row');
-        const sellerSinceText = document.getElementById('sellerSinceText');
-
-        // Phone info & reveal logic
+                // ── Spec Formatters & Dynamic Details ─────────────────────
         const rawPhone = (
             ad.contactPhone ||
             ad.author?.phone ||
@@ -601,11 +1005,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             ''
         ).trim();
         const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
-        let phoneRevealed = false;
 
         function revealSellerPhone() {
             if (phoneRevealed) return;
             phoneRevealed = true;
+            const t = getI18n();
 
             // 1. Reveal in seller card (sellerPhoneTag)
             const sellerPhoneTag = document.getElementById('sellerPhoneTag');
@@ -620,11 +1024,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (sellerPhoneTag) {
                 sellerPhoneTag.classList.add('revealed');
-                const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
-                const callTitle = (lang === 'RUS' || lang === 'RU')
-                    ? 'Нажмите, чтобы позвонить'
-                    : (lang === 'ENG' || lang === 'EN' ? 'Click to call' : 'Zəng etmək üçün klikləyin');
-                sellerPhoneTag.setAttribute('title', callTitle);
+                sellerPhoneTag.setAttribute('title', t.clickToCall);
             }
 
             // 2. Reveal in callBtn
@@ -635,27 +1035,299 @@ document.addEventListener('DOMContentLoaded', async () => {
                 phoneTextEl.removeAttribute('data-translate');
                 callBtnEl.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
                 callBtnEl.classList.add('revealed');
+                callBtnEl.setAttribute('title', t.clickToCall);
             }
         }
 
+        // ── Dynamic UI Rendering Function (Language Aware) ─────────
+        function applyDynamicDetails(ad) {
+            if (!ad) return;
+            const t = getI18n();
+
+            // ── A. Category Tag ──
+            const catTag = document.querySelector('.elan-category-tag, .item-category-tag, .ad-category-tag');
+            if (catTag) {
+                catTag.replaceChildren();
+                const catIcon = document.createElement('i');
+                catIcon.className = 'fas fa-mobile-alt';
+                catTag.append(catIcon, document.createTextNode(` ${formatCategory(ad.category || 'Telefon')} · ${ad.brand || ''}`));
+            }
+
+            // ── B. Date & Views ──
+            const dateEl  = document.querySelector('.elan-date-views span:nth-child(1), .ad-date-views span:nth-child(1)');
+            const viewsEl = document.querySelector('.elan-date-views span:nth-child(2), .ad-date-views span:nth-child(2)') || document.getElementById('ad-views-count');
+            if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${formatCreatedDate(ad.createdAt)}`;
+            if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} ${t.views}`;
+
+            // ── C. Location & Condition rows ──
+            const locationRows = document.querySelectorAll('.location-item strong');
+            if (locationRows[0]) locationRows[0].textContent = formatCity(ad.city || 'Bakı');
+            if (locationRows[1]) locationRows[1].textContent = formatCondition(ad.condition || 'Yeni');
+            if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? t.hasDelivery : t.noDelivery;
+
+            // ── D. Quick Spec Chips ──
+            const quickSpecsEl = document.querySelector('.quick-specs');
+            if (quickSpecsEl) {
+                quickSpecsEl.replaceChildren();
+                const addChip = (iconClass, text) => {
+                    if (!text || String(text).trim() === '') return;
+                    const chip = document.createElement('span');
+                    chip.className = 'spec-chip';
+                    const icon = document.createElement('i');
+                    icon.className = iconClass;
+                    chip.append(icon, document.createTextNode(' ' + text));
+                    quickSpecsEl.appendChild(chip);
+                };
+                if (ad.specs?.memory)         addChip('fas fa-memory', `${formatMemory(ad.specs.memory)} ${t.memory}`);
+                if (ad.specs?.ram)            addChip('fas fa-microchip', `${formatRam(ad.specs.ram)} ${t.ram}`);
+                if (ad.specs?.screenSize)     addChip('fas fa-expand-arrows-alt', formatScreen(ad.specs.screenSize));
+                if (ad.specs?.battery)        addChip('fas fa-battery-full', formatBattery(ad.specs.battery));
+                if (ad.specs?.color)          addChip('fas fa-palette', formatColorName(ad.specs.color));
+                if (ad.specs?.material)       addChip('fas fa-shield-alt', String(ad.specs.material));
+                if (ad.specs?.glassType)      addChip('fas fa-shield-virus', String(ad.specs.glassType));
+                if (ad.specs?.connectionType) addChip('fas fa-headphones', String(ad.specs.connectionType));
+                if (ad.specs?.headphoneType)  addChip('fas fa-headset', String(ad.specs.headphoneType));
+                if (ad.specs?.power)          addChip('fas fa-bolt', String(ad.specs.power));
+                if (ad.specs?.portType)       addChip('fas fa-charging-station', String(ad.specs.portType));
+                if (ad.specs?.cableType)      addChip('fas fa-plug', String(ad.specs.cableType));
+                if (ad.specs?.cableLength)    addChip('fas fa-ruler-horizontal', String(ad.specs.cableLength));
+                if (ad.condition)             addChip('fas fa-box-open', formatCondition(ad.condition));
+            }
+
+            // ── E. Feature Badges ──
+            const featureBadgesEl = document.querySelector('.feature-badges');
+            if (featureBadgesEl) {
+                featureBadgesEl.replaceChildren();
+                const f = ad.specs?.features || {};
+                const addFeatureBadge = (iconClass, text) => {
+                    const badge = document.createElement('span');
+                    badge.className = 'feat-badge yes';
+                    const icon = document.createElement('i');
+                    icon.className = iconClass;
+                    badge.append(icon, document.createTextNode(' ' + text));
+                    featureBadgesEl.appendChild(badge);
+                };
+
+                if (f.nfc)             addFeatureBadge('fas fa-wifi', t.featNfc);
+                if (f.fingerprint)     addFeatureBadge('fas fa-fingerprint', t.featFingerprint);
+                if (f.waterproof)      addFeatureBadge('fas fa-tint', t.featWaterproofChip);
+                if (f.expandable)      addFeatureBadge('fas fa-sd-card', t.featExpandableChip);
+                if (f.magsafe)         addFeatureBadge('fas fa-magnet', t.featMagsafe);
+                if (f.anc)             addFeatureBadge('fas fa-volume-mute', t.featAnc);
+                if (f.fastCharge)      addFeatureBadge('fas fa-bolt', t.featFastCharge);
+                if (f.wirelessCharge)  addFeatureBadge('fas fa-charging-station', t.featWirelessCharge);
+                if (f.microphone)      addFeatureBadge('fas fa-microphone', t.featMicrophone);
+                if (f.oleophobic)      addFeatureBadge('fas fa-shield-alt', t.featOleophobic);
+                if (f.stylus)          addFeatureBadge('fas fa-pen-nib', t.featStylus);
+                if (f.simCard)         addFeatureBadge('fas fa-sim-card', t.featSimCard);
+                if (f.delivery)        addFeatureBadge('fas fa-truck', t.featDelivery);
+
+                featureBadgesEl.style.display = featureBadgesEl.children.length === 0 ? 'none' : 'flex';
+            }
+
+            // ── F. Full Specs Grid ──
+            const specsGrid = document.querySelector('.specs-grid');
+            if (specsGrid) {
+                specsGrid.replaceChildren();
+                const addSpecRow = (label, val) => {
+                    if (!val || String(val).trim() === '' || String(val).trim() === '-') return;
+                    const row = document.createElement('div');
+                    row.className = 'spec-row';
+                    const lblSpan = document.createElement('span');
+                    lblSpan.className = 'spec-label';
+                    lblSpan.textContent = label;
+                    const valSpan = document.createElement('span');
+                    valSpan.className = 'spec-value';
+                    valSpan.textContent = String(val);
+                    row.append(lblSpan, valSpan);
+                    specsGrid.appendChild(row);
+                };
+
+                if (ad.category) addSpecRow(t.category, formatCategory(ad.category));
+                if (ad.brand) addSpecRow(t.brand, ad.brand);
+                if (ad.modelName) addSpecRow(t.model, ad.modelName);
+
+                // Electronics specs
+                if (ad.specs?.memory) addSpecRow(t.memory, formatMemory(ad.specs.memory));
+                if (ad.specs?.ram) addSpecRow(t.ram, formatRam(ad.specs.ram));
+                if (ad.specs?.screenSize) addSpecRow(t.screenSize, formatScreen(ad.specs.screenSize));
+                if (ad.specs?.battery) addSpecRow(t.battery, formatBattery(ad.specs.battery));
+
+                // Accessory specs
+                if (ad.specs?.material) addSpecRow(t.material, String(ad.specs.material));
+                if (ad.specs?.glassType) addSpecRow(t.glassType, String(ad.specs.glassType));
+                if (ad.specs?.connectionType) addSpecRow(t.connectionType, String(ad.specs.connectionType));
+                if (ad.specs?.headphoneType) addSpecRow(t.headphoneType, String(ad.specs.headphoneType));
+                if (ad.specs?.power) addSpecRow(t.power, String(ad.specs.power));
+                if (ad.specs?.portType) addSpecRow(t.portType, String(ad.specs.portType));
+                if (ad.specs?.cableType) addSpecRow(t.cableType, String(ad.specs.cableType));
+                if (ad.specs?.cableLength) addSpecRow(t.cableLength, String(ad.specs.cableLength));
+
+                // Color & Condition
+                if (ad.specs?.color) addSpecRow(t.color, formatColorName(ad.specs.color));
+                addSpecRow(t.condition, formatCondition(ad.condition));
+
+                // Features (boolean flags)
+                const f = ad.specs?.features || {};
+                if (f.nfc)             addSpecRow(t.featNfc, t.varCheck);
+                if (f.waterproof)      addSpecRow(t.featWaterproof, t.varCheck);
+                if (f.fingerprint)     addSpecRow(t.featFingerprint, t.varCheck);
+                if (f.magsafe)         addSpecRow(t.featMagsafe, t.varCheck);
+                if (f.anc)             addSpecRow(t.featAnc, t.varCheck);
+                if (f.microphone)      addSpecRow(t.featMicrophone, t.varCheck);
+                if (f.fastCharge)      addSpecRow(t.featFastCharge, t.varCheck);
+                if (f.wirelessCharge)  addSpecRow(t.featWirelessCharge, t.varCheck);
+                if (f.oleophobic)      addSpecRow(t.featOleophobic, t.varCheck);
+                if (f.stylus)          addSpecRow(t.featStylus, t.varCheck);
+                if (f.simCard)         addSpecRow(t.featSimCard, t.varCheck);
+                if (f.expandable)      addSpecRow(t.featExpandable, t.varCheck);
+                if (f.delivery)        addSpecRow(t.featDelivery, t.varCheck);
+
+                if (specsGrid.children.length === 0) {
+                    specsGrid.innerHTML = `<div class="spec-row"><span class="spec-label">${t.info}</span><span class="spec-value">—</span></div>`;
+                }
+            }
+
+            // ── G. Seller Info ──
+            const isStore = Boolean(ad.sellerType === 'store' && ad.store);
+            const sellerTypeTag = document.getElementById('sellerTypeTag');
+            const sellerLocationText = document.getElementById('sellerLocationText');
+            const storeProfileLink = document.getElementById('storeProfileLink');
+            const sellerSinceText = document.getElementById('sellerSinceText');
+            const sellerPhoneTag = document.getElementById('sellerPhoneTag');
+            const sellerPhoneText = document.getElementById('sellerPhoneText');
+            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
+            const callBtn = document.getElementById('callBtn');
+            const phoneText = document.getElementById('phoneText');
+            const waBtn = document.querySelector('.btn-whatsapp');
+            const msgBtn = document.querySelector('.btn-message');
+
+            // Type Tag
+            if (sellerTypeTag) {
+                sellerTypeTag.replaceChildren();
+                const icon = document.createElement('i');
+                icon.className = isStore ? 'fas fa-store' : 'fas fa-user-circle';
+                const label = document.createElement('span');
+                label.textContent = ` ${isStore ? t.storeAccount : t.personalAccount}`;
+                sellerTypeTag.append(icon, label);
+            }
+
+            // Location Text
+            const locText = isStore ? (ad.store?.city || ad.city || '') : [ad.city, ad.region].filter(Boolean).join(', ');
+            if (sellerLocationText) {
+                sellerLocationText.textContent = ` ${formatCity(locText)}`;
+            }
+
+            // Store Profile Link
+            if (storeProfileLink) {
+                const span = storeProfileLink.querySelector('span');
+                if (span) span.textContent = t.viewStore;
+            }
+
+            // Phone in Seller Card
+            if (sellerPhoneTag && rawPhone) {
+                if (!phoneRevealed) {
+                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${maskPhoneNumber(rawPhone)}`;
+                    if (sellerPhoneHint) {
+                        sellerPhoneHint.textContent = t.revealHint;
+                        sellerPhoneHint.style.display = 'inline';
+                    }
+                    sellerPhoneTag.setAttribute('title', t.clickToReveal);
+                } else {
+                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${rawPhone}`;
+                    if (sellerPhoneHint) sellerPhoneHint.style.display = 'none';
+                    sellerPhoneTag.setAttribute('title', t.clickToCall);
+                }
+            }
+
+            // Call Button
+            if (callBtn && phoneText && rawPhone) {
+                if (!phoneRevealed) {
+                    phoneText.textContent = t.showNumber;
+                    callBtn.setAttribute('title', t.clickToReveal);
+                } else {
+                    phoneText.textContent = rawPhone;
+                    callBtn.setAttribute('title', t.clickToCall);
+                }
+            }
+
+            // WhatsApp Button
+            if (waBtn) {
+                const span = waBtn.querySelector('span');
+                if (span) span.textContent = t.chatOnWhatsapp;
+            }
+
+            // Message Button
+            if (msgBtn) {
+                const span = msgBtn.querySelector('span');
+                if (span) span.textContent = t.sendMessage;
+            }
+
+            // Member Since Date
+            const dateVal = isStore ? (ad.store?.createdAt || ad.createdAt) : ad.author?.createdAt;
+            if (sellerSinceText && dateVal) {
+                sellerSinceText.textContent = ` ${formatMemberSinceDate(dateVal)}`;
+            }
+
+            // ── H. Ad ID Bar ──
+            const adIdBar = document.querySelector('.elan-id-bar, .item-id-bar, .ad-id-bar');
+            if (adIdBar) {
+                const spans = adIdBar.querySelectorAll(':scope > span');
+                if (spans[0]) {
+                    const lbl = spans[0].querySelector('span:first-child');
+                    if (lbl) lbl.textContent = t.adNumberLabel;
+                }
+                if (spans[1]) {
+                    const lbl = spans[1].querySelector('span:first-child');
+                    if (lbl) lbl.textContent = t.postedLabel;
+                    const val = spans[1].querySelector('span:nth-child(2)');
+                    if (val && ad.createdAt) val.textContent = new Date(ad.createdAt).toLocaleDateString(getDateLocale());
+                }
+                if (spans[2]) {
+                    const lbl = spans[2].querySelector('span:first-child');
+                    if (lbl) lbl.textContent = t.updatedLabel;
+                    const val = spans[2].querySelector('span:nth-child(2)');
+                    if (val && (ad.updatedAt || ad.createdAt)) val.textContent = new Date(ad.updatedAt || ad.createdAt).toLocaleDateString(getDateLocale());
+                }
+            }
+
+            // ── I. Reviews Note & Fallbacks ──
+            const revNote = document.querySelector('.reviews-seller-note');
+            if (revNote) revNote.textContent = t.allSellerReviews;
+
+            const descEl = document.querySelector('.desc-text');
+            if (descEl && !ad.description) {
+                descEl.textContent = t.noDesc;
+            }
+        }
+
+        // ── 10. Seller Info Static Setup ───────────────────────────
+        isStore = Boolean(ad.sellerType === 'store' && ad.store);
+        const sellerNameEl = document.getElementById('sellerName') || document.querySelector('.personal-name');
+        const avatarEl = document.getElementById('sellerAvatar') || document.querySelector('.personal-avatar');
+        const sellerLocationTag = document.getElementById('sellerLocationTag');
+        const storeProfileLink = document.getElementById('storeProfileLink');
+        const sellerStats = document.getElementById('sellerStats') || document.querySelector('.personal-stats');
+        const sellerSinceRow = document.getElementById('sellerSinceRow') || document.querySelector('.seller-since-row');
+        const sellerEmailTag = document.getElementById('sellerEmailTag');
+        if (sellerEmailTag) {
+            sellerEmailTag.classList.add('hidden');
+            sellerEmailTag.style.display = 'none';
+        }
+
         if (isStore) {
-            // Mode A: Store Seller
             const store = ad.store;
             const storeName = store.storeName || 'Mağaza';
-
-            // Store Name + Verified Badge
             if (sellerNameEl) {
                 sellerNameEl.textContent = storeName;
                 if (store.isVerified === true) {
                     const verifiedBadge = document.createElement('i');
                     verifiedBadge.className = 'fas fa-check-circle';
                     verifiedBadge.style.cssText = 'color: #007bff; margin-left: 6px; font-size: 15px;';
-                    verifiedBadge.title = 'Rəsmi Mağaza';
+                    verifiedBadge.title = getI18n().officialStore;
                     sellerNameEl.appendChild(verifiedBadge);
                 }
             }
-
-            // Store Logo / Avatar
             if (avatarEl) {
                 avatarEl.replaceChildren();
                 if (store.logoUrl) {
@@ -672,19 +1344,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     avatarEl.textContent = (storeName || 'M').charAt(0).toUpperCase();
                 }
             }
-
-            // Store Tag
-            if (sellerTypeTag) {
-                sellerTypeTag.replaceChildren();
-                const storeIcon = document.createElement('i');
-                storeIcon.className = 'fas fa-store';
-                const storeLabel = document.createElement('span');
-                storeLabel.textContent = ' Mağaza';
-                sellerTypeTag.appendChild(storeIcon);
-                sellerTypeTag.appendChild(storeLabel);
-            }
-
-            // Store Profile Link
             if (storeProfileLink) {
                 if (store._id) {
                     storeProfileLink.href = `store-detail.html?id=${encodeURIComponent(store._id)}`;
@@ -695,20 +1354,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     storeProfileLink.style.display = 'none';
                 }
             }
-
-            // Location
             const storeLoc = (store.city || ad.city || '').trim();
             if (sellerLocationTag) {
                 if (storeLoc) {
-                    if (sellerLocationText) {
-                        sellerLocationText.textContent = ` ${storeLoc}`;
-                    } else {
-                        sellerLocationTag.replaceChildren();
-                        const locIcon = document.createElement('i');
-                        locIcon.className = 'fas fa-map-marker-alt';
-                        sellerLocationTag.appendChild(locIcon);
-                        sellerLocationTag.appendChild(document.createTextNode(` ${storeLoc}`));
-                    }
                     sellerLocationTag.classList.remove('hidden');
                     sellerLocationTag.style.display = 'flex';
                 } else {
@@ -716,84 +1364,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     sellerLocationTag.style.display = 'none';
                 }
             }
-
-            // Stats (Store rating & review count if available)
-            if (sellerStats) {
-                const hasStoreRating = typeof store.rating === 'number' && store.rating > 0;
-                const hasStoreReviews = typeof store.reviewCount === 'number' && store.reviewCount > 0;
-
-                if (hasStoreRating || hasStoreReviews) {
-                    sellerStats.replaceChildren();
-
-                    if (hasStoreRating) {
-                        const statRatingDiv = document.createElement('div');
-                        statRatingDiv.className = 'p-stat';
-                        const rVal = document.createElement('span');
-                        rVal.className = 'val';
-                        rVal.textContent = Number(store.rating).toFixed(1);
-                        const rLbl = document.createElement('span');
-                        rLbl.className = 'lbl';
-                        rLbl.textContent = '★ Reytinq';
-                        statRatingDiv.appendChild(rVal);
-                        statRatingDiv.appendChild(rLbl);
-                        sellerStats.appendChild(statRatingDiv);
-                    }
-
-                    if (hasStoreReviews) {
-                        const statCountDiv = document.createElement('div');
-                        statCountDiv.className = 'p-stat';
-                        const cVal = document.createElement('span');
-                        cVal.className = 'val';
-                        cVal.textContent = String(store.reviewCount);
-                        const cLbl = document.createElement('span');
-                        cLbl.className = 'lbl';
-                        cLbl.textContent = 'Rəy';
-                        statCountDiv.appendChild(cVal);
-                        statCountDiv.appendChild(cLbl);
-                        sellerStats.appendChild(statCountDiv);
-                    }
-
-                    sellerStats.classList.remove('hidden');
-                    sellerStats.style.display = 'grid';
-                } else {
-                    sellerStats.classList.add('hidden');
-                    sellerStats.style.display = 'none';
-                }
-            }
-
-            // Membership / creation date
-            const storeDateVal = store.createdAt || ad.createdAt;
             if (sellerSinceRow) {
-                if (storeDateVal) {
-                    const d = new Date(storeDateVal);
-                    if (!isNaN(d.getTime())) {
-                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
-                        if (sellerSinceText) {
-                            sellerSinceText.textContent = ` ${monthYear}`;
-                        }
-                        sellerSinceRow.classList.remove('hidden');
-                        sellerSinceRow.style.display = '';
-                    } else {
-                        sellerSinceRow.classList.add('hidden');
-                        sellerSinceRow.style.display = 'none';
-                    }
+                if (store.createdAt || ad.createdAt) {
+                    sellerSinceRow.classList.remove('hidden');
+                    sellerSinceRow.style.display = '';
                 } else {
                     sellerSinceRow.classList.add('hidden');
                     sellerSinceRow.style.display = 'none';
                 }
             }
-
         } else {
-            // Mode B: Personal Seller
             const author = ad.author || ad.user || {};
-            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || 'İstifadəçi';
-
-            // Seller Name
+            const authorName = [author.name, author.lastName].filter(Boolean).join(' ') || author.name || getI18n().userFallback;
             if (sellerNameEl) {
                 sellerNameEl.textContent = authorName;
             }
-
-            // Avatar
             if (avatarEl) {
                 avatarEl.replaceChildren();
                 if (author.avatar) {
@@ -810,37 +1395,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     avatarEl.textContent = (author.name || authorName).charAt(0).toUpperCase() || 'S';
                 }
             }
-
-            // Account Tag
-            if (sellerTypeTag) {
-                sellerTypeTag.replaceChildren();
-                const userIcon = document.createElement('i');
-                userIcon.className = 'fas fa-user-circle';
-                const userLabel = document.createElement('span');
-                userLabel.textContent = ' Şəxsi hesab';
-                sellerTypeTag.appendChild(userIcon);
-                sellerTypeTag.appendChild(userLabel);
-            }
-
-            // Store Profile Link (hide)
             if (storeProfileLink) {
                 storeProfileLink.classList.add('hidden');
                 storeProfileLink.style.display = 'none';
             }
-
-            // Location
             const personalLoc = [ad.city, ad.region].filter(Boolean).join(', ').trim();
             if (sellerLocationTag) {
                 if (personalLoc) {
-                    if (sellerLocationText) {
-                        sellerLocationText.textContent = ` ${personalLoc}`;
-                    } else {
-                        sellerLocationTag.replaceChildren();
-                        const locIcon = document.createElement('i');
-                        locIcon.className = 'fas fa-map-marker-alt';
-                        sellerLocationTag.appendChild(locIcon);
-                        sellerLocationTag.appendChild(document.createTextNode(` ${personalLoc}`));
-                    }
                     sellerLocationTag.classList.remove('hidden');
                     sellerLocationTag.style.display = 'flex';
                 } else {
@@ -848,82 +1409,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     sellerLocationTag.style.display = 'none';
                 }
             }
-
-            // Email Tag (never show email in public ads)
-            const sellerEmailTag = document.getElementById('sellerEmailTag');
-            if (sellerEmailTag) {
-                sellerEmailTag.classList.add('hidden');
-                sellerEmailTag.style.display = 'none';
-            }
-
-            // Phone Tag setup in seller card
-            const sellerPhoneTag = document.getElementById('sellerPhoneTag');
-            const sellerPhoneText = document.getElementById('sellerPhoneText');
-            const sellerPhoneHint = document.getElementById('sellerPhoneHint');
-            if (sellerPhoneTag) {
-                if (rawPhone) {
-                    const maskedPhone = maskPhoneNumber(rawPhone);
-                    if (sellerPhoneText) sellerPhoneText.textContent = ` ${maskedPhone}`;
-                    sellerPhoneTag.classList.remove('hidden');
-                    sellerPhoneTag.style.display = 'inline-flex';
-                    sellerPhoneTag.classList.add('phone-clickable');
-
-                    const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
-                    const revealTitle = (lang === 'RUS' || lang === 'RU')
-                        ? 'Нажмите, чтобы увидеть номер'
-                        : (lang === 'ENG' || lang === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
-                    sellerPhoneTag.setAttribute('title', revealTitle);
-
-                    if (sellerPhoneHint) {
-                        sellerPhoneHint.style.display = 'inline';
-                    }
-
-                    sellerPhoneTag.onclick = (e) => {
-                        e.preventDefault();
-                        if (!phoneRevealed) {
-                            revealSellerPhone();
-                        } else {
-                            const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
-                            if (telNumber) window.location.href = `tel:${telNumber}`;
-                        }
-                    };
-                } else {
-                    sellerPhoneTag.classList.add('hidden');
-                    sellerPhoneTag.style.display = 'none';
-                }
-            }
-
-            document.addEventListener('mobilaz:languagechange', (e) => {
-                if (!phoneRevealed && sellerPhoneTag && sellerPhoneTag.style.display !== 'none') {
-                    const l = (e.detail?.lang || localStorage.getItem('lang') || 'AZ').toUpperCase();
-                    const titleText = (l === 'RUS' || l === 'RU')
-                        ? 'Нажмите, чтобы увидеть номер'
-                        : (l === 'ENG' || l === 'EN' ? 'Click to show phone number' : 'Nömrəni görmək üçün toxunun');
-                    sellerPhoneTag.setAttribute('title', titleText);
-                }
-            });
-
-            // Stats (Hide dummy stats for personal seller)
-            if (sellerStats) {
-                sellerStats.classList.add('hidden');
-                sellerStats.style.display = 'none';
-            }
-
-            // Membership date
             if (sellerSinceRow) {
                 if (ad.author?.createdAt) {
-                    const d = new Date(ad.author.createdAt);
-                    if (!isNaN(d.getTime())) {
-                        const monthYear = d.toLocaleDateString('az-AZ', { month: 'long', year: 'numeric' });
-                        if (sellerSinceText) {
-                            sellerSinceText.textContent = ` ${monthYear}`;
-                        }
-                        sellerSinceRow.classList.remove('hidden');
-                        sellerSinceRow.style.display = '';
-                    } else {
-                        sellerSinceRow.classList.add('hidden');
-                        sellerSinceRow.style.display = 'none';
-                    }
+                    sellerSinceRow.classList.remove('hidden');
+                    sellerSinceRow.style.display = '';
                 } else {
                     sellerSinceRow.classList.add('hidden');
                     sellerSinceRow.style.display = 'none';
@@ -931,17 +1420,54 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // ── 11. Ad ID bar (footer) ─────────────────────────────────
-        const adIdBar      = document.querySelector('.elan-id-bar, .item-id-bar, .ad-id-bar');
-        const adIdSpan     = adIdBar ? adIdBar.querySelector('span:nth-child(1) span:nth-child(2)') : null;
-        const postedSpan   = adIdBar ? adIdBar.querySelector('span:nth-child(2) span:nth-child(2)') : null;
-        const updatedSpan  = adIdBar ? adIdBar.querySelector('span:nth-child(3) span:nth-child(2)') : null;
-        const displayAdNumber = ad.adNumber || (ad._id ? (String(ad._id) === '6ad7634079a9d25725d38022' ? 'MOB-5D3802' : `MOB-${String(ad._id).slice(-6).toUpperCase()}`) : '—');
-        if (adIdSpan)    adIdSpan.textContent   = displayAdNumber;
-        if (postedSpan)  postedSpan.textContent  = new Date(ad.createdAt).toLocaleDateString('az-AZ');
-        if (updatedSpan) updatedSpan.textContent = new Date(ad.updatedAt || ad.createdAt).toLocaleDateString('az-AZ');
+        const sellerPhoneTag = document.getElementById('sellerPhoneTag');
+        if (sellerPhoneTag) {
+            if (rawPhone) {
+                sellerPhoneTag.classList.remove('hidden');
+                sellerPhoneTag.style.display = 'inline-flex';
+                sellerPhoneTag.classList.add('phone-clickable');
+                sellerPhoneTag.onclick = (e) => {
+                    e.preventDefault();
+                    if (!phoneRevealed) {
+                        revealSellerPhone();
+                    } else {
+                        const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
+                        if (telNumber) window.location.href = `tel:${telNumber}`;
+                    }
+                };
+            } else {
+                sellerPhoneTag.classList.add('hidden');
+                sellerPhoneTag.style.display = 'none';
+            }
+        }
 
-        // ── 12. Author: Edit/Delete buttons ───────────────────────
+        // Apply dynamic UI now
+        applyDynamicDetails(ad);
+
+        // ── 11. Ad ID bar Number ───────────────────────────────────
+        const adIdBar = document.querySelector('.elan-id-bar, .item-id-bar, .ad-id-bar');
+        const adIdSpan = adIdBar ? adIdBar.querySelector('span:nth-child(1) span:nth-child(2)') : null;
+        const displayAdNumber = ad.adNumber || (ad._id ? (String(ad._id) === '6ad7634079a9d25725d38022' ? 'MOB-5D3802' : `MOB-${String(ad._id).slice(-6).toUpperCase()}`) : '—');
+        if (adIdSpan) adIdSpan.textContent = displayAdNumber;
+
+        // Listen for live language changes and update details without refresh
+        document.addEventListener('mobilaz:languagechange', () => {
+            if (window.__CURRENT_AD) {
+                applyDynamicDetails(window.__CURRENT_AD);
+                renderReviews(cachedReviews);
+                if (cachedRelatedAds.length) renderRelatedAds(cachedRelatedAds);
+            }
+        });
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'lang' && window.__CURRENT_AD) {
+                applyDynamicDetails(window.__CURRENT_AD);
+                renderReviews(cachedReviews);
+                if (cachedRelatedAds.length) renderRelatedAds(cachedRelatedAds);
+            }
+        });
+
+// ── 12. Author: Edit/Delete buttons ───────────────────────
         let isAuthor = false;
         try {
             const userStr = localStorage.getItem('user');
@@ -1049,8 +1575,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const revRes  = await fetch(`${API_BASE}/reviews/${ad.author._id}`);
                     const revData = await revRes.json();
-                    if (revRes.ok) renderReviews(revData.reviews || []);
-                    else renderReviews([]);
+                    if (revRes.ok) { cachedReviews = revData.reviews || []; renderReviews(cachedReviews); }
+                    else { cachedReviews = []; renderReviews([]); }
                 } catch (e) {
                     console.warn('Reviews fetch failed:', e.message);
                     renderReviews([]);
@@ -1126,7 +1652,99 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderReviews([]);
         }
 
-        // ── 15. Related Ads (non-blocking) ──────────────────────────
+                // ── 15. Related Ads (non-blocking) ──────────────────────────
+        function renderRelatedAds(ads) {
+            cachedRelatedAds = Array.isArray(ads) ? ads : [];
+            const relatedSection = document.querySelector('.related-section');
+            const relatedGrid = document.querySelector('.related-grid');
+            if (!relatedGrid || !cachedRelatedAds.length) return;
+
+            const t = getI18n();
+            const relHead = document.querySelector('.related-section h2 span');
+            if (relHead) relHead.textContent = t.relatedTitle;
+
+            relatedGrid.replaceChildren();
+            cachedRelatedAds.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'elan-card product-card item-card';
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    window.location.href = `elan-detail.html?id=${encodeURIComponent(item._id)}`;
+                });
+
+                // Image container
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'elan-image product-image';
+
+                const imgEl = document.createElement('img');
+                const imgSrc = (Array.isArray(item.images) && item.images.length > 0)
+                    ? getImageUrl(item.images[0])
+                    : '';
+                imgEl.src = imgSrc || '/assets/images/default-ad.svg';
+                imgEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = '/assets/images/default-ad.svg';
+                };
+                const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
+                imgEl.alt = itemTitle;
+                imgEl.loading = 'lazy';
+                imgContainer.appendChild(imgEl);
+
+                const badge = document.createElement('span');
+                badge.className = 'elan-badge product-badge';
+                if (item.sellerType === 'personal') {
+                    badge.style.background = '#e67e22';
+                    badge.textContent = t.badgePersonal;
+                } else {
+                    badge.textContent = t.badgeStore;
+                }
+                imgContainer.appendChild(badge);
+                card.appendChild(imgContainer);
+
+                // Info container
+                const infoContainer = document.createElement('div');
+                infoContainer.className = 'elan-info product-info';
+
+                const priceEl = document.createElement('div');
+                priceEl.className = 'elan-price product-price';
+                priceEl.textContent = `${Number(item.price || 0).toLocaleString('az-AZ')} AZN`;
+                infoContainer.appendChild(priceEl);
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'elan-title product-title';
+                titleEl.textContent = itemTitle;
+                infoContainer.appendChild(titleEl);
+
+                const locEl = document.createElement('div');
+                locEl.className = 'elan-location product-location';
+
+                const citySpan = document.createElement('span');
+                citySpan.className = 'elan-city-label';
+                const cityIcon = document.createElement('i');
+                cityIcon.className = 'fas fa-map-marker-alt';
+                citySpan.appendChild(cityIcon);
+                citySpan.appendChild(document.createTextNode(` ${formatCity(item.city || 'Bakı')}`));
+                locEl.appendChild(citySpan);
+
+                const dateSpan = document.createElement('span');
+                if (item.createdAt) {
+                    const d = new Date(item.createdAt);
+                    dateSpan.textContent = !isNaN(d.getTime()) ? d.toLocaleDateString(getDateLocale()) : '';
+                }
+                locEl.appendChild(dateSpan);
+
+                infoContainer.appendChild(locEl);
+                card.appendChild(infoContainer);
+
+                relatedGrid.appendChild(card);
+            });
+
+            if (relatedSection) {
+                relatedSection.classList.remove('hidden');
+                relatedSection.style.display = '';
+            }
+        }
+
         const fetchAndRenderRelated = async () => {
             const relatedSection = document.querySelector('.related-section');
             const relatedGrid = document.querySelector('.related-grid');
@@ -1136,13 +1754,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (relatedSection) {
                     relatedSection.classList.add('hidden');
                     relatedSection.style.display = 'none';
-                }
-            };
-
-            const showRelated = () => {
-                if (relatedSection) {
-                    relatedSection.classList.remove('hidden');
-                    relatedSection.style.display = '';
                 }
             };
 
@@ -1170,92 +1781,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     filtered = fallbackList.filter(item => item && item._id && item._id !== ad._id);
                 }
 
-                const relatedAds = filtered.slice(0, 4);
-
-                if (relatedAds.length === 0) {
+                cachedRelatedAds = filtered.slice(0, 4);
+                if (cachedRelatedAds.length === 0) {
                     hideRelated();
                     return;
                 }
 
-                relatedGrid.replaceChildren();
-
-                relatedAds.forEach(item => {
-                    const card = document.createElement('div');
-                    card.className = 'elan-card product-card item-card';
-                    card.style.cursor = 'pointer';
-                    card.addEventListener('click', () => {
-                        window.location.href = `elan-detail.html?id=${encodeURIComponent(item._id)}`;
-                    });
-
-                    // Image container
-                    const imgContainer = document.createElement('div');
-                    imgContainer.className = 'elan-image product-image';
-
-                    const imgEl = document.createElement('img');
-                    const imgSrc = (Array.isArray(item.images) && item.images.length > 0)
-                        ? getImageUrl(item.images[0])
-                        : '';
-                    imgEl.src = imgSrc || '/assets/images/default-ad.svg';
-                    imgEl.onerror = function() {
-                        this.onerror = null;
-                        this.src = '/assets/images/default-ad.svg';
-                    };
-                    const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
-                    imgEl.alt = itemTitle;
-                    imgEl.loading = 'lazy';
-                    imgContainer.appendChild(imgEl);
-
-                    const badge = document.createElement('span');
-                    badge.className = 'elan-badge product-badge';
-                    if (item.sellerType === 'personal') {
-                        badge.style.background = '#e67e22';
-                        badge.textContent = 'Şəxsi';
-                    } else {
-                        badge.textContent = 'Mağaza';
-                    }
-                    imgContainer.appendChild(badge);
-
-                    card.appendChild(imgContainer);
-
-                    // Info container
-                    const infoContainer = document.createElement('div');
-                    infoContainer.className = 'elan-info product-info';
-
-                    const priceEl = document.createElement('div');
-                    priceEl.className = 'elan-price product-price';
-                    priceEl.textContent = `${Number(item.price || 0).toLocaleString('az-AZ')} AZN`;
-                    infoContainer.appendChild(priceEl);
-
-                    const titleEl = document.createElement('div');
-                    titleEl.className = 'elan-title product-title';
-                    titleEl.textContent = itemTitle;
-                    infoContainer.appendChild(titleEl);
-
-                    const locEl = document.createElement('div');
-                    locEl.className = 'elan-location product-location';
-
-                    const citySpan = document.createElement('span');
-                    citySpan.className = 'elan-city-label';
-                    const cityIcon = document.createElement('i');
-                    cityIcon.className = 'fas fa-map-marker-alt';
-                    citySpan.appendChild(cityIcon);
-                    citySpan.appendChild(document.createTextNode(` ${item.city || 'Bakı'}`));
-                    locEl.appendChild(citySpan);
-
-                    const dateSpan = document.createElement('span');
-                    if (item.createdAt) {
-                        const d = new Date(item.createdAt);
-                        dateSpan.textContent = !isNaN(d.getTime()) ? d.toLocaleDateString('az-AZ') : '';
-                    }
-                    locEl.appendChild(dateSpan);
-
-                    infoContainer.appendChild(locEl);
-                    card.appendChild(infoContainer);
-
-                    relatedGrid.appendChild(card);
-                });
-
-                showRelated();
+                renderRelatedAds(cachedRelatedAds);
             } catch (err) {
                 console.warn('Failed to load related ads:', err);
                 hideRelated();
@@ -1275,10 +1807,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             try { window.applyLanguage(); } catch (e) { /* ignore */ }
         }
     }
-
-    // ── renderReviews helper ────────────────────────────────────────
+    // ── renderReviews helper (Multilingual) ───────────────────────
     function renderReviews(reviews) {
-        reviews = Array.isArray(reviews) ? reviews : [];
+        cachedReviews = Array.isArray(reviews) ? reviews : [];
+        reviews = cachedReviews;
+        const t = getI18n();
         let total = 0;
         const counts = [0, 0, 0, 0, 0];
         reviews.forEach(r => {
@@ -1295,7 +1828,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 realRatingEl.textContent = `${avg} ★`;
             } else {
                 realRatingEl.className = 'no-reviews-title';
-                realRatingEl.textContent = 'Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!';
+                realRatingEl.textContent = t.noReviewsTitle;
             }
         }
         const avgSpan = document.getElementById('avgRating');
@@ -1308,18 +1841,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!reviews.length) {
                 summaryEl.innerHTML = `
                     <div class="empty-state no-reviews-summary" style="width: 100%; text-align: center; padding: 16px;">
-                        <span id="realRating" class="no-reviews-title" style="display:none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>
+                        <span id="realRating" class="no-reviews-title" style="display:none;">${t.noReviewsTitle}</span>
                         <span id="avgRating" style="display:none;">-</span>
                         <span id="reviewCount" style="display:none;">0</span>
                         <div class="rating-stars-lg empty-stars" style="color: #9ca3af; font-size: 16px; margin: 0 0 6px 0; letter-spacing: 2px;">☆☆☆☆☆</div>
-                        <div class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400; text-transform: none;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</div>
+                        <div class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400; text-transform: none;">${t.noReviewsTitle}</div>
                     </div>`;
             } else {
                 summaryEl.innerHTML = `
                     <div>
                         <div class="rating-big"><span id="realRating">${avg} ★</span><span id="avgRating" style="display:none;">${avg}</span></div>
                         <div class="rating-stars-lg">${getStarsHtml(Math.round(Number(avg)))}</div>
-                        <div class="rating-count"><span id="reviewCount">${reviews.length}</span> rəy əsasında</div>
+                        <div class="rating-count"><span id="reviewCount">${reviews.length}</span> ${t.reviewCountBased}</div>
                     </div>
                     <div class="rating-bars" style="flex:1">
                         ${[5,4,3,2,1].map((star, idx) => {
@@ -1346,14 +1879,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = 'no-reviews-empty empty-state';
                 emptyDiv.style.cssText = 'padding: 16px; text-align: center; color: #6b7280; font-size: 14px;';
-                emptyDiv.innerHTML = '<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
+                emptyDiv.innerHTML = `<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">${t.noReviewsTitle}</span>`;
                 section.insertBefore(emptyDiv, writeBlock || null);
             } else {
                 reviews.slice(0, 10).forEach(r => {
                     const div = document.createElement('div');
                     div.className = 'review-card-full';
                     const char = r.author?.name ? r.author.name.charAt(0).toUpperCase() : 'U';
-                    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('az-AZ') : '';
+                    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString(getDateLocale()) : '';
 
                     const header = document.createElement('div');
                     header.className = 'rc-header';
@@ -1366,7 +1899,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const info = document.createElement('div');
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'rc-name';
-                    nameDiv.textContent = r.author?.name || 'İstifadəçi';
+                    nameDiv.textContent = r.author?.name || t.userFallback;
                     const dateDiv = document.createElement('div');
                     dateDiv.className = 'rc-date';
                     dateDiv.textContent = date;
@@ -1395,7 +1928,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const emptyMini = document.createElement('div');
                 emptyMini.className = 'no-reviews-empty empty-state';
                 emptyMini.style.cssText = 'padding: 12px; text-align: center; color: #9ca3af; font-size: 13px;';
-                emptyMini.innerHTML = '<span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!</span>';
+                emptyMini.innerHTML = `<span class="no-reviews-title" style="font-size: 13px; color: #9ca3af; font-weight: 400;">${t.noReviewsTitle}</span>`;
                 miniContainer.appendChild(emptyMini);
             } else {
                 reviews.slice(0, 3).forEach(r => {
@@ -1414,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const nameDiv = document.createElement('div');
                     nameDiv.className = 'mini-name';
-                    nameDiv.textContent = r.author?.name || 'İstifadəçi';
+                    nameDiv.textContent = r.author?.name || t.userFallback;
 
                     const starsDiv = document.createElement('div');
                     starsDiv.className = 'mini-stars';
@@ -1432,7 +1965,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Dynamically show personal seller rating stat if reviews exist
+        // Dynamically show seller rating stat if reviews exist
         const currentSellerStats = document.getElementById('sellerStats') || document.querySelector('.personal-stats');
         const currentIsStore = Boolean(window.__CURRENT_AD?.sellerType === 'store' && window.__CURRENT_AD?.store);
         if (!currentIsStore && currentSellerStats && Array.isArray(reviews) && reviews.length > 0) {
@@ -1445,7 +1978,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             rVal.textContent = avg;
             const rLbl = document.createElement('span');
             rLbl.className = 'lbl';
-            rLbl.textContent = '★ Reytinq';
+            rLbl.textContent = `★ ${t.rating}`;
             statRatingDiv.appendChild(rVal);
             statRatingDiv.appendChild(rLbl);
             currentSellerStats.appendChild(statRatingDiv);
@@ -1457,7 +1990,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cVal.textContent = String(reviews.length);
             const cLbl = document.createElement('span');
             cLbl.className = 'lbl';
-            cLbl.textContent = 'Rəy';
+            cLbl.textContent = t.reviews;
             statCountDiv.appendChild(cVal);
             statCountDiv.appendChild(cLbl);
             currentSellerStats.appendChild(statCountDiv);

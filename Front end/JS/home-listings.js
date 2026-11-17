@@ -89,8 +89,43 @@ document.addEventListener("DOMContentLoaded", function () {
         return condition || "Yeni";
     }
 
+    function getCurrentLang() {
+        let l = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+        if (l === 'EN') l = 'ENG';
+        if (l === 'RU') l = 'RUS';
+        if (l !== 'ENG' && l !== 'RUS') l = 'AZ';
+        return l;
+    }
+
+    const CITY_MAP = {
+        'baki': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+        'baku': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+        'баку': { AZ: 'Bakı', ENG: 'Baku', RUS: 'Баку' },
+        'sumqayit': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+        'sumqayıt': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+        'сумгаит': { AZ: 'Sumqayıt', ENG: 'Sumqayit', RUS: 'Сумгаит' },
+        'ganja': { AZ: 'Gəncə', ENG: 'Ganja', RUS: 'Гянджа' },
+        'gəncə': { AZ: 'Gəncə', ENG: 'Ganja', RUS: 'Гянджа' },
+        'absheron': { AZ: 'Abşeron', ENG: 'Absheron', RUS: 'Апшерон' },
+        'abşeron': { AZ: 'Abşeron', ENG: 'Absheron', RUS: 'Апшерон' }
+    };
+
+    function formatCity(cityName) {
+        if (!cityName) return '';
+        const raw = String(cityName).trim();
+        const lower = raw.toLowerCase();
+        const lang = getCurrentLang();
+        if (CITY_MAP[lower]) {
+            return CITY_MAP[lower][lang] || CITY_MAP[lower].AZ;
+        }
+        return raw;
+    }
+
     function getBadgeHtml(ad) {
-        const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
+        const lang = getCurrentLang();
+        const sellerType = ad.sellerType === "store"
+            ? (lang === 'ENG' ? 'Store' : (lang === 'RUS' ? 'Магазин' : 'Mağaza'))
+            : (lang === 'ENG' ? 'Personal' : (lang === 'RUS' ? 'Частное' : 'Şəxsi'));
         const badgeStyle = ad.sellerType === "store"
             ? ""
             : ' style="background:var(--accent-hover);"';
@@ -108,7 +143,8 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (ad.promotionType === "Premium") {
                 badges += ` <span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
+                const urgentWord = lang === 'ENG' ? 'Urgent' : (lang === 'RUS' ? 'Срочно' : 'Təcili');
+                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> ${urgentWord}</span>`;
             }
         }
 
@@ -118,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function createCardMarkup(ad) {
         const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
-        const city = escapeHtml(ad.city || "");
+        const city = escapeHtml(formatCity(ad.city || ""));
         const rawBrand = String(ad.brand || "").trim();
         const rawModel = String(ad.modelName || "").trim();
         const fullTitle = rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
@@ -409,4 +445,10 @@ document.addEventListener("DOMContentLoaded", function () {
     vipContainer.innerHTML = ``;
     allAdsContainer.innerHTML = ``;
     loadAds();
+
+    document.addEventListener('mobilaz:languagechange', () => {
+        if (typeof window.reloadAllAds === 'function') {
+            window.reloadAllAds();
+        }
+    });
 });
