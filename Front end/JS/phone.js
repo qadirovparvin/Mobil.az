@@ -357,6 +357,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     document.addEventListener('mobilaz:languagechange', () => {
-        window.location.reload();
+        if (Array.isArray(ads) && ads.length > 0 && container) {
+            container.innerHTML = ads.map(createCardMarkup).join('');
+            if (typeof window.syncFavoritesUI === 'function') {
+                window.syncFavoritesUI();
+            }
+        }
     });
 });

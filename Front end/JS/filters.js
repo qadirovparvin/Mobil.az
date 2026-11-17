@@ -366,6 +366,39 @@ document.addEventListener('DOMContentLoaded', () => {
         updateActiveBadge();
     }
 
+    const FILTER_TRANSLATIONS = {
+        AZ: {
+            allModels: 'Bütün modellər',
+            selectBrand: 'Əvvəlcə marka seçin',
+            otherModel: 'Digər model',
+            filterWord: 'filtr'
+        },
+        ENG: {
+            allModels: 'All models',
+            selectBrand: 'Select brand first',
+            otherModel: 'Other model',
+            filterWord: 'filters'
+        },
+        RUS: {
+            allModels: 'Все модели',
+            selectBrand: 'Сначала выберите марку',
+            otherModel: 'Другая модель',
+            filterWord: 'фильтра'
+        }
+    };
+
+    function getFilterLang() {
+        let lang = (localStorage.getItem('lang') || 'AZ').trim().toUpperCase();
+        if (lang === 'RU') lang = 'RUS';
+        if (lang === 'EN') lang = 'ENG';
+        return lang;
+    }
+
+    function getFilterI18n() {
+        const lang = getFilterLang();
+        return FILTER_TRANSLATIONS[lang] || FILTER_TRANSLATIONS.AZ;
+    }
+
     function updateActiveBadge() {
         const badge = document.getElementById('filterBadge');
         if (!badge) return;
@@ -402,7 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeFiltersWrapper.style.display = 'block';
                 const chip = document.createElement('span');
                 chip.className = 'active-chip';
-                chip.innerHTML = `${count} filter <i class="fas fa-times clear-all-btn" style="cursor:pointer;margin-left:5px;"></i>`;
+                const t = getFilterI18n();
+                const lang = getFilterLang();
+                const filterWord = (lang === 'ENG' && count === 1) ? 'filter' : t.filterWord;
+                chip.innerHTML = `${count} ${filterWord} <i class="fas fa-times clear-all-btn" style="cursor:pointer;margin-left:5px;"></i>`;
                 chip.querySelector('.clear-all-btn').onclick = resetFilters;
                 chipsContainer.appendChild(chip);
             } else {
@@ -576,10 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateModelOptions(selectedBrand, currentSelectedModel = '') {
         if (!modelSelect) return;
+        const t = getFilterI18n();
         modelSelect.innerHTML = '';
         const defaultOpt = document.createElement('option');
         defaultOpt.value = '';
-        defaultOpt.textContent = selectedBrand ? 'Bütün modellər' : 'Əvvəlcə marka seçin';
+        defaultOpt.textContent = selectedBrand ? t.allModels : t.selectBrand;
+        defaultOpt.setAttribute('data-translate', selectedBrand ? 'all-models' : 'select-brand');
         modelSelect.appendChild(defaultOpt);
 
         if (selectedBrand && FILTER_PHONE_MODELS[selectedBrand]) {
@@ -594,8 +632,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const otherOpt = document.createElement('option');
             otherOpt.value = 'other';
-            otherOpt.textContent = 'Digər model';
-            if (currentSelectedModel === 'other') otherOpt.selected = true;
+            otherOpt.textContent = t.otherModel;
+            otherOpt.setAttribute('data-translate', 'other-model');
+            if (currentSelectedModel === 'other' || currentSelectedModel.toLowerCase() === 'digər model' || currentSelectedModel.toLowerCase() === 'other model' || currentSelectedModel.toLowerCase() === 'другая модель') {
+                otherOpt.selected = true;
+            }
             modelSelect.appendChild(otherOpt);
         }
     }
@@ -609,6 +650,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     if (modelSelect) modelSelect.addEventListener('change', debouncedApply);
+
+    // Listen for language changes and refresh models + filter badge/chips immediately
+    document.addEventListener('mobilaz:languagechange', () => {
+        const curBrand = brandSelect ? brandSelect.value : '';
+        const curModel = modelSelect ? modelSelect.value : '';
+        updateModelOptions(curBrand, curModel);
+        updateActiveBadge();
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'lang') {
+            const curBrand = brandSelect ? brandSelect.value : '';
+            const curModel = modelSelect ? modelSelect.value : '';
+            updateModelOptions(curBrand, curModel);
+            updateActiveBadge();
+        }
+    });
+
+    // Make updateModelOptions accessible globally
+    window.updateModelOptions = updateModelOptions;
+
+    // Initialize modelSelect with current language placeholder
+    const curBrandInit = brandSelect ? brandSelect.value : '';
+    const curModelInit = modelSelect ? modelSelect.value : '';
+    updateModelOptions(curBrandInit, curModelInit);
 
     // Catalog helpers
     window.loadCatalog = async function() {
