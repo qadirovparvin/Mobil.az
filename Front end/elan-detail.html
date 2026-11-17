@@ -850,8 +850,59 @@
 <body>
 
   <!-- ══════════════════ HEADER ══════════════════ -->
-    <!-- MVP: <a href="stores.html">Mağazalar</a> -->
-    <div id="header-placeholder"></div>
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">
+        <span class="mobil-logo">Mobilim<span>.az</span></span>
+      </a>
+
+      <button class="hamburger" id="hamburgerBtn" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="header-right">
+        <nav class="menu">
+          <ul>
+            <li class="contact-dropdown" data-translate="Contact">
+              <a href="#footer-contact"><i class="fa-solid fa-phone"></i> <span data-translate="header-contact">Əlaqə</span></a>
+              <div class="contact-menu">
+                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+                <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
+                <a href="https://wa.me/994703638808" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                <a href="mailto:info@mobilim.az"><i class="fas fa-envelope"></i> Email</a>
+              </div>
+            </li>
+            <li class="About" data-translate="About">
+              <a href="about.html"><i class="fas fa-info-circle"></i> <span data-translate="header-about">Haqqımızda</span></a>
+            </li>
+            <li class="Stores" data-translate="Stores">
+              <span><i class="fas fa-store"></i> <span data-translate="header-stores-soon">Mağazalar (tezliklə)</span></span>
+            </li>
+            <li class="Favorite" data-translate="Favorite">
+              <a href="favorite.html"><i class="fas fa-heart"></i> <span data-translate="header-favorites">Seçimlər</span></a>
+            </li>
+          </ul>
+        </nav>
+        <div class="button-container">
+          <a href="login.html" class="login-btn" data-translate="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Giriş
+          </a>
+          <a href="signup.html" class="register-btn" data-translate="register-btn">
+            <i class="fas fa-user-plus"></i> Qeydiyyat
+          </a>
+        </div>
+        <div class="theme-lang-container">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+            <i class="fas fa-moon"></i>
+          </button>
+          <button class="language-selector">
+            <i class="fas fa-globe"></i>
+            <span id="current-lang" data-translate="language-selector">AZ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
 
   <!-- ══════════════════ BREADCRUMB ══════════════════ -->
   <nav class="breadcrumb" aria-label="breadcrumb">
@@ -1282,12 +1333,12 @@
 
 
   <script src="JS/axios.min.js"></script>
-  <script src="JS/api.js?v=20261117_v6"></script>
-  <script src="JS/auth.js?v=20261117_v6"></script>
-  <script src="JS/script.js?v=20261117_v6"></script>
-  <script src="JS/favorites.js?v=20261117_v6"></script>
-  <script src="JS/listing-details.js?v=20261117_v9"></script>
-  <script src="JS/components.js?v=20261117_v9"></script>
+  <script src="JS/api.js?v=20261117_v10"></script>
+  <script src="JS/auth.js?v=20261117_v10"></script>
+  <script src="JS/script.js?v=20261117_v10"></script>
+  <script src="JS/components.js?v=20261117_v10"></script>
+  <script src="JS/favorites.js?v=20261117_v10"></script>
+  <script src="JS/listing-details.js?v=20261117_v10"></script>
 </body>
 
 </html>

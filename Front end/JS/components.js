@@ -131,29 +131,30 @@ function loadHeader() {
   const placeholder = document.getElementById('header-placeholder');
   if (placeholder) {
     placeholder.outerHTML = headerTemplate;
-    if (typeof window.updateHeader === 'function') {
-      window.updateHeader();
-    }
-    setupContactNavigation();
+  }
+  if (typeof window.updateHeader === 'function') {
+    window.updateHeader();
+  }
+  setupContactNavigation();
 
-    // Hamburger toggle
-    const hamburger = document.getElementById('hamburgerBtn');
-    const headerRight = document.querySelector('.header-right');
-    if (hamburger && headerRight) {
-      hamburger.addEventListener('click', () => {
-        const isOpen = headerRight.classList.toggle('open');
-        hamburger.classList.toggle('active', isOpen);
-        hamburger.setAttribute('aria-expanded', isOpen);
+  // Hamburger toggle
+  const hamburger = document.getElementById('hamburgerBtn');
+  const headerRight = document.querySelector('.header-right');
+  if (hamburger && headerRight && !hamburger.dataset.bound) {
+    hamburger.dataset.bound = 'true';
+    hamburger.addEventListener('click', () => {
+      const isOpen = headerRight.classList.toggle('open');
+      hamburger.classList.toggle('active', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+    // Close mobile menu when a nav link is clicked
+    headerRight.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        headerRight.classList.remove('open');
+        hamburger.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
       });
-      // Close mobile menu when a nav link is clicked
-      headerRight.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          headerRight.classList.remove('open');
-          hamburger.classList.remove('active');
-          hamburger.setAttribute('aria-expanded', 'false');
-        });
-      });
-    }
+    });
   }
 }
 
