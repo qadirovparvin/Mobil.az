@@ -406,13 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Şikayət et",
             "det-related-title": "Oxşar Elanlar",
             "det-review-name-ph": "Adınız (məs. Əli M.)",
-            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın...",
-            "det-sidebar-review-ph": "Bu satıcı haqqında rəyiniz...",
-            "det-reviews-seller-note": "Bu satıcının bütün rəyləri",
-            "det-rating-based-on": "rəy əsasında",
-            "det-no-reviews": "Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!",
-            "det-view-store": "Mağazaya bax",
-            "footer-copyright": "© 2025 Mobilim.az. Bütün hüquqlar qorunur."
+            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın..."
         },
         ENG: {
             Contact: "Contact",
@@ -819,13 +813,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Report",
             "det-related-title": "Similar Ads",
             "det-review-name-ph": "Your name (e.g. John D.)",
-            "det-review-text-ph": "Share your experience with the seller...",
-            "det-sidebar-review-ph": "Your review about this seller...",
-            "det-reviews-seller-note": "All reviews for this seller",
-            "det-rating-based-on": "based on reviews",
-            "det-no-reviews": "No reviews for this seller yet. Be the first to review!",
-            "det-view-store": "View store",
-            "footer-copyright": "© 2025 Mobilim.az. All rights reserved."
+            "det-review-text-ph": "Share your experience with the seller..."
         },
         RUS: {
             Contact: "Контакт",
@@ -1232,13 +1220,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Пожаловаться",
             "det-related-title": "Похожие объявления",
             "det-review-name-ph": "Ваше имя (напр. Али М.)",
-            "det-review-text-ph": "Поделитесь опытом о продавце...",
-            "det-sidebar-review-ph": "Ваш отзыв об этом продавце...",
-            "det-reviews-seller-note": "Все отзывы об этом продавце",
-            "det-rating-based-on": "на основе отзывов",
-            "det-no-reviews": "Отзывов об этом продавце пока нет. Будьте первым!",
-            "det-view-store": "Перейти в магазин",
-            "footer-copyright": "© 2025 Mobilim.az. Все права защищены."
+            "det-review-text-ph": "Поделитесь опытом о продавце..."
         }
     };
     const authTranslations = {
@@ -1516,10 +1498,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             : translations[newLang][key];
                     }
                 }
-                else if (element.tagName === "OPTION") {
-                    const text = translations[newLang][key];
-                    if (text) element.textContent = text;
-                }
                 else if (element.classList.contains("login-btn") ||
                     element.classList.contains("register-btn")) {
                     const icon = element.querySelector("i");
@@ -1541,11 +1519,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     }
                 }
-            });
-            document.querySelectorAll("select option[data-translate]").forEach((option) => {
-                const key = option.getAttribute("data-translate");
-                const localized = translations[newLang] && translations[newLang][key];
-                if (localized) option.textContent = localized;
             });
             const searchInput = document.querySelector(".search-options input");
             if (searchInput && translations[newLang] && translations[newLang]["search-placeholder"]) {
@@ -1580,14 +1553,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     document.title = translations[newLang][key];
                 }
             });
-            // Translate city/region dropdown options across all pages
-            if (window.MobilazI18n && typeof window.MobilazI18n.translateCity === "function") {
-                document.querySelectorAll('select[data-filter="city"] option, select#city option, select#shopCity option, select[name="city"] option, select[name="region"] option').forEach((opt) => {
-                    if (!opt || !opt.value) return;
-                    if (!opt.dataset.rawCity) opt.dataset.rawCity = opt.textContent.trim();
-                    opt.textContent = window.MobilazI18n.translateCity(opt.dataset.rawCity, newLang);
-                });
-            }
             document.dispatchEvent(new CustomEvent("mobilaz:languagechange", { detail: { lang: newLang } }));
         }
 
@@ -1683,7 +1648,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const parsed = Number(rawAttr);
                 if (!isNaN(parsed)) return parsed;
             }
-            const text = card.querySelector(".ad-price")?.textContent || "";
+            const text = card.querySelector(".elan-price, .product-price, .ad-price")?.textContent || "";
             // Remove non-numeric characters (handles thousands separator like 1.200 AZN)
             return Number(text.replace(/[^0-9]/g, "")) || 0;
         };
@@ -1698,8 +1663,8 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         ads.sort((a, b) => {
-            const cardA = a.querySelector(".elan-card, .ad-card") || a;
-            const cardB = b.querySelector(".elan-card, .ad-card") || b;
+            const cardA = a.querySelector(".elan-card, .product-card, .item-card, .ad-card") || a;
+            const cardB = b.querySelector(".elan-card, .product-card, .item-card, .ad-card") || b;
             const priceA = getCardPrice(cardA);
             const priceB = getCardPrice(cardB);
             const dateA = getCardDate(cardA);
@@ -1839,7 +1804,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateFavoriteButtons() {
         const favs = getFavorites();
         document.querySelectorAll(".favorite-btn").forEach((btn) => {
-            const card = btn.closest(".elan-card, .ad-card, [data-id]");
+            const card = btn.closest(".elan-card, .product-card, .item-card, .ad-card, [data-id]");
             const id = card ? card.getAttribute("data-id") : null;
             const icon = btn.querySelector("i");
             if (!icon) return;
@@ -1865,7 +1830,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const icon = favBtn.querySelector("i");
         if (!icon) return;
 
-        const card = favBtn.closest(".elan-card, .ad-card, [data-id]");
+        const card = favBtn.closest(".elan-card, .product-card, .item-card, .ad-card, [data-id]");
         const id = card ? card.getAttribute("data-id") : null;
         let favs = getFavorites();
 
@@ -1991,14 +1956,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const isAll = !rawCat || rawCat === 'all' || rawCat === 'hamısı' || rawCat === 'hamisi';
         const targetCategories = isAll ? null : (catAliases[rawCat] || [rawCat]);
 
-        const adCards = catalog.querySelectorAll('.elan-card, .ad-card');
+        const adCards = catalog.querySelectorAll('.elan-card, .product-card, .item-card, .ad-card');
         let visibleCount = 0;
 
         adCards.forEach(card => {
             let matches = true;
             const cardCat = (card.getAttribute('data-category') || '').trim().toLowerCase();
             const cardBrand = (card.getAttribute('data-brand') || '').trim().toLowerCase();
-            const cardTitle = (card.querySelector('.ad-title')?.textContent || '').toLowerCase();
+            const cardTitle = (card.querySelector('.elan-title, .product-title, .ad-title')?.textContent || '').toLowerCase();
             const cardText = (card.textContent || '').toLowerCase();
 
             // 1. Category check

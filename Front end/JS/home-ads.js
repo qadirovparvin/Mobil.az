@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function attachImageFallbacks(container) {
-        container.querySelectorAll(".ad-image img").forEach((img) => {
+        container.querySelectorAll(".elan-image img, .product-image img, .ad-image img").forEach((img) => {
             if (img.dataset.fallbackAttached) return;
             img.dataset.fallbackAttached = "true";
             img.addEventListener("error", function handleImageError() {
@@ -56,13 +56,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function formatDateLabel(value) {
-        if (!value) return "";
-        if (window.MobilazI18n && typeof window.MobilazI18n.formatDate === "function") {
-            return window.MobilazI18n.formatDate(value, true);
+        if (!value) {
+            return "";
         }
+
         const date = new Date(value);
-        if (Number.isNaN(date.getTime())) return "";
-        return date.toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+        if (Number.isNaN(date.getTime())) {
+            return "";
+        }
+
+        return date.toLocaleString("az-AZ", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
     }
 
     function mapCardCategory(category) {
@@ -81,28 +90,25 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getBadgeHtml(ad) {
-        const i18n = window.MobilazI18n;
-        const badgeType = ad.sellerType === "store" ? "store" : "private";
-        const sellerType = i18n ? i18n.t(badgeType) : (badgeType === "store" ? "Mağaza" : "Şəxsi");
-        const urgentText = i18n ? i18n.t("urgent") : "Təcili";
+        const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
         const badgeStyle = ad.sellerType === "store"
             ? ""
             : ' style="background:var(--accent-hover);"';
 
-        let badges = `<span class="ad-badge" data-badge-type="${badgeType}"${badgeStyle}>${sellerType}</span>`;
+        let badges = `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
 
         const now = new Date();
         const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
 
         if (isPromoActive) {
             if (ad.promotionType === "VIP") {
-                badges += ` <span class="ad-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
+                badges += ` <span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
             } else if (ad.promotionType === "PRO") {
-                badges += ` <span class="ad-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
+                badges += ` <span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
             } else if (ad.promotionType === "Premium") {
-                badges += ` <span class="ad-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
+                badges += ` <span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                badges += ` <span class="ad-badge urgent"><i class="fas fa-fire"></i> ${urgentText}</span>`;
+                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
             }
         }
 
@@ -112,16 +118,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function createCardMarkup(ad) {
         const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
-        const i18n = window.MobilazI18n;
         const city = escapeHtml(ad.city || "");
-        const displayCity = escapeHtml(i18n ? i18n.translateCity(ad.city || "") : (ad.city || ""));
         const rawBrand = String(ad.brand || "").trim();
         const rawModel = String(ad.modelName || "").trim();
         const fullTitle = rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
             ? rawModel
             : [rawBrand, rawModel].filter(Boolean).join(" ");
         const title = escapeHtml(fullTitle);
-        const altText = hasRealImage ? title : (i18n ? i18n.t("noImageAlt") : "Elan şəkli yoxdur");
+        const altText = hasRealImage ? title : "Elan şəkli yoxdur";
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
         const nowTime = new Date();
         const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > nowTime;
@@ -131,11 +135,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         return `
             <a href="${detailUrl}" style="text-decoration:none;color:inherit">
-                <div class="ad-card elan-card product-card${promoClass}"
+                <div class="elan-card product-card item-card${promoClass}"
                     data-id="${escapeHtml(ad._id)}"
                     data-date="${escapeHtml(ad.createdAt || "")}"
                     data-brand="${escapeHtml(ad.brand || "")}"
-                    data-model="${escapeHtml(ad.modelName || "")}"
                     data-category="${mapCardCategory(ad.category)}"
                     data-price="${escapeHtml(ad.price || 0)}"
                     data-city="${city}"
@@ -151,18 +154,18 @@ document.addEventListener("DOMContentLoaded", function () {
                     data-waterproof="${ad.specs?.features?.waterproof ? "yes" : "no"}"
                     data-expandable="${ad.specs?.features?.expandable ? "yes" : "no"}"
                     data-delivery="${ad.specs?.features?.delivery ? "yes" : "no"}">
-                    <div class="ad-image">
+                    <div class="elan-image product-image">
                         <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(altText)}" onerror="this.onerror=null;this.src='${DEFAULT_AD_IMAGE}';">
                         ${getBadgeHtml(ad)}
                         <button class="favorite-btn"><i class="far fa-heart"></i></button>
                     </div>
-                    <div class="ad-info">
-                        <div class="ad-price">${formatPrice(ad.price)}</div>
-                        <div class="ad-title">${title}</div>
-                        <div class="ad-location">
+                    <div class="elan-info product-info">
+                        <div class="elan-price product-price">${formatPrice(ad.price)}</div>
+                        <div class="elan-title product-title">${title}</div>
+                        <div class="elan-location product-location">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span class="ad-city-label">${displayCity}</span>
-                            <span class="ad-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
+                            <span class="elan-city-label">${city}</span>
+                            <span class="elan-date product-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
                         </div>
                     </div>
                 </div>
@@ -257,17 +260,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 'sellerType', 'promotionType'
             ];
             filterKeys.forEach(key => {
-                let val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '' && activeExtraFilters[key] !== null)
+                const val = (activeExtraFilters[key] !== undefined && activeExtraFilters[key] !== '')
                     ? activeExtraFilters[key]
                     : params.get(key);
-                if (key === 'color' && (!val || val === '') && Array.isArray(activeExtraFilters.colors) && activeExtraFilters.colors.length) {
-                    val = activeExtraFilters.colors.join(',');
+                if (val !== null && val !== undefined && val !== '' && val !== 'any' && val !== 'both' && val !== 'Infinity' && val !== Infinity && val !== '0' && val !== 0) {
+                    if (key === 'minPrice' || key === 'maxPrice') {
+                        if (isFinite(Number(val))) apiUrl.searchParams.set(key, val);
+                    } else {
+                        apiUrl.searchParams.set(key, val);
+                    }
                 }
-                if (val === null || val === undefined || val === '') return;
-                if (typeof val === 'number' && (!Number.isFinite(val) || val === 0)) return;
-                const strVal = String(val).trim();
-                if (!strVal || strVal === 'any' || strVal === 'both' || strVal === 'Infinity' || strVal === 'NaN' || strVal === 'null' || strVal === 'undefined' || strVal === '0') return;
-                apiUrl.searchParams.set(key, strVal);
             });
             
             const response = await fetch(apiUrl.toString());
@@ -407,23 +409,4 @@ document.addEventListener("DOMContentLoaded", function () {
     vipContainer.innerHTML = ``;
     allAdsContainer.innerHTML = ``;
     loadAds();
-
-    document.addEventListener("mobilaz:languagechange", () => {
-        const i18n = window.MobilazI18n;
-        if (!i18n) return;
-        document.querySelectorAll(".ad-card").forEach((card) => {
-            const rawCity = card.dataset.city;
-            const cityEl = card.querySelector(".ad-city-label");
-            if (cityEl && rawCity) cityEl.textContent = i18n.translateCity(rawCity);
-
-            const sellerBadge = card.querySelector(".ad-badge[data-badge-type]");
-            if (sellerBadge) {
-                sellerBadge.textContent = i18n.t(sellerBadge.dataset.badgeType);
-            }
-            const urgentBadge = card.querySelector(".ad-badge.urgent");
-            if (urgentBadge) {
-                urgentBadge.innerHTML = `<i class="fas fa-fire"></i> ${i18n.t("urgent")}`;
-            }
-        });
-    });
 });

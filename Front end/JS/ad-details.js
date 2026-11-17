@@ -1134,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 relatedAds.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'ad-card';
+                    card.className = 'elan-card product-card item-card';
                     card.style.cursor = 'pointer';
                     card.addEventListener('click', () => {
                         window.location.href = `elan-detail.html?id=${encodeURIComponent(item._id)}`;
@@ -1142,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Image container
                     const imgContainer = document.createElement('div');
-                    imgContainer.className = 'ad-image';
+                    imgContainer.className = 'elan-image product-image';
 
                     const imgEl = document.createElement('img');
                     const imgSrc = (Array.isArray(item.images) && item.images.length > 0)
@@ -1159,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     imgContainer.appendChild(imgEl);
 
                     const badge = document.createElement('span');
-                    badge.className = 'ad-badge';
+                    badge.className = 'elan-badge product-badge';
                     if (item.sellerType === 'personal') {
                         badge.style.background = '#e67e22';
                         badge.textContent = 'Şəxsi';
@@ -1172,22 +1172,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     // Info container
                     const infoContainer = document.createElement('div');
-                    infoContainer.className = 'ad-info';
+                    infoContainer.className = 'elan-info product-info';
 
                     const priceEl = document.createElement('div');
-                    priceEl.className = 'ad-price';
+                    priceEl.className = 'elan-price product-price';
                     priceEl.textContent = `${Number(item.price || 0).toLocaleString('az-AZ')} AZN`;
                     infoContainer.appendChild(priceEl);
 
                     const titleEl = document.createElement('div');
-                    titleEl.className = 'ad-title';
+                    titleEl.className = 'elan-title product-title';
                     titleEl.textContent = itemTitle;
                     infoContainer.appendChild(titleEl);
 
                     const locEl = document.createElement('div');
-                    locEl.className = 'ad-location';
+                    locEl.className = 'elan-location product-location';
 
                     const citySpan = document.createElement('span');
+                    citySpan.className = 'elan-city-label';
                     const cityIcon = document.createElement('i');
                     cityIcon.className = 'fas fa-map-marker-alt';
                     citySpan.appendChild(cityIcon);

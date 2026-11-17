@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function initFavoriteButtons() {
-        document.querySelectorAll('.elan-card, .ad-card').forEach(card => {
+        document.querySelectorAll('.elan-card, .product-card, .item-card, .ad-card').forEach(card => {
             const btn = card.querySelector('.favorite-btn');
             if (!btn) return;
             
@@ -228,11 +228,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const city = ad.city || "";
                     const title = [ad.brand, ad.modelName].filter(Boolean).join(" ");
                     const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
-                    const date = window.MobilazI18n ? window.MobilazI18n.formatDate(ad.createdAt, true) : new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                    const date = new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
                     
-                    const i18n = window.MobilazI18n;
-                    const badgeType = ad.sellerType === "store" ? "store" : "private";
-                    const sellerType = i18n ? i18n.t(badgeType) : (badgeType === "store" ? "Mağaza" : "Şəxsi");
+                    const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
                     const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
                     
                     const aTag = document.createElement('a');
@@ -240,21 +238,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     aTag.style.cssText = "text-decoration:none;color:inherit;position:relative;display:block;";
                     
                     const card = document.createElement('div');
-                    card.className = 'ad-card';
+                    card.className = 'elan-card product-card item-card';
                     card.setAttribute('data-id', ad._id);
-                    card.setAttribute('data-city', city);
                     card.style.position = 'relative';
 
                     const adImage = document.createElement('div');
-                    adImage.className = 'ad-image';
+                    adImage.className = 'elan-image product-image';
 
                     const img = document.createElement('img');
                     img.src = imageUrl;
                     img.alt = title;
 
                     const badge = document.createElement('span');
-                    badge.className = 'ad-badge';
-                    badge.setAttribute('data-badge-type', badgeType);
+                    badge.className = 'elan-badge product-badge';
                     if (ad.sellerType !== 'store') {
                         badge.style.background = 'var(--accent-hover)';
                     }
@@ -272,28 +268,28 @@ document.addEventListener("DOMContentLoaded", () => {
                     adImage.appendChild(favBtn);
 
                     const adInfo = document.createElement('div');
-                    adInfo.className = 'ad-info';
+                    adInfo.className = 'elan-info product-info';
 
                     const priceDiv = document.createElement('div');
-                    priceDiv.className = 'ad-price';
+                    priceDiv.className = 'elan-price product-price';
                     priceDiv.textContent = price;
 
                     const titleDiv = document.createElement('div');
-                    titleDiv.className = 'ad-title';
+                    titleDiv.className = 'elan-title product-title';
                     titleDiv.textContent = title;
 
                     const locDiv = document.createElement('div');
-                    locDiv.className = 'ad-location';
+                    locDiv.className = 'elan-location product-location';
 
                     const marker = document.createElement('i');
                     marker.className = 'fas fa-map-marker-alt';
 
                     const citySpan = document.createElement('span');
-                    citySpan.className = 'ad-city-label';
-                    citySpan.textContent = i18n ? i18n.translateCity(city) : city;
+                    citySpan.className = 'elan-city-label';
+                    citySpan.textContent = city;
 
                     const dateSpan = document.createElement('span');
-                    dateSpan.className = 'ad-date';
+                    dateSpan.className = 'elan-date product-date';
                     dateSpan.textContent = date;
 
                     locDiv.appendChild(marker);
@@ -435,19 +431,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Expose init function globally so dynamically loaded ads can re-bind
     window.initializeFavoriteButtons = initFavoriteButtons;
-
-    document.addEventListener("mobilaz:languagechange", () => {
-        const i18n = window.MobilazI18n;
-        if (!i18n) return;
-        document.querySelectorAll(".ad-card").forEach((card) => {
-            const rawCity = card.dataset.city;
-            const cityEl = card.querySelector(".ad-city-label");
-            if (cityEl && rawCity) cityEl.textContent = i18n.translateCity(rawCity);
-
-            const sellerBadge = card.querySelector(".ad-badge[data-badge-type]");
-            if (sellerBadge) sellerBadge.textContent = i18n.t(sellerBadge.dataset.badgeType);
-        });
-    });
 
     // Initial load: fetch favorites, then init buttons and render page
     fetchUserFavorites().then(favs => {

@@ -2,12 +2,12 @@
 <html lang="az">
 
 <head>
-  <script src="JS/config.js?v=20261112_3"></script>
+  <script src="JS/config.js?v=20261117_v6"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mobilim.az - Telefon alqı-satqısı</title>
-  <link rel="stylesheet" href="CSS/general.css">
-  <link rel="stylesheet" href="CSS/style.css">
+  <link rel="stylesheet" href="CSS/general.css?v=20261117_v6">
+  <link rel="stylesheet" href="CSS/style.css?v=20261117_v6">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 
@@ -539,13 +539,13 @@
   </footer>
 
   <script src="JS/axios.min.js"></script>
-  <script src="JS/api.js?v=20261112_3"></script>
-  <script src="JS/auth.js?v=20261112_3"></script>
-  <script src="JS/script.js?v=20261112_3"></script>
-  <script src="JS/components.js?v=20261112_3"></script>
-  <script src="JS/filters.js?v=20261112_3"></script>
-  <script src="JS/favorites.js?v=20261112_3"></script>
-  <script src="JS/home-ads.js?v=20261112_3"></script>
+  <script src="JS/api.js?v=20261117_v6"></script>
+  <script src="JS/auth.js?v=20261117_v6"></script>
+  <script src="JS/script.js?v=20261117_v6"></script>
+  <script src="JS/components.js?v=20261117_v6"></script>
+  <script src="JS/filters.js?v=20261117_v6"></script>
+  <script src="JS/favorites.js?v=20261117_v6"></script>
+  <script src="JS/home-ads.js?v=20261117_v6"></script>
 
   <!-- ── Load user-submitted ads from localStorage ── -->
   <script>
@@ -575,7 +575,7 @@
            </div>`;
 
         const card = document.createElement('div');
-        card.className = 'ad-card user-submitted-ad';
+        card.className = 'elan-card product-card item-card user-submitted-ad';
         card.setAttribute('data-brand', ad.brand);
         card.setAttribute('data-category', ad.category);
         card.setAttribute('data-price', ad.priceRaw);
@@ -592,19 +592,19 @@
 
         card.innerHTML = `
         <a href="elan-detail.html?id=25" style="text-decoration:none;color:inherit;display:contents;">
-          <div class="ad-image" style="position:relative;overflow:hidden;border-radius:12px 12px 0 0;">
+          <div class="elan-image product-image" style="position:relative;overflow:hidden;border-radius:12px 12px 0 0;">
             ${imgHTML}
-            <span class="ad-badge" style="background:var(--accent-hover);">&Scaron;&601;xsi</span>
+            <span class="elan-badge product-badge" style="background:var(--accent-hover);">&Scaron;&601;xsi</span>
             <span style="position:absolute;top:8px;left:8px;background:#10b981;color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px;box-shadow:0 2px 6px rgba(16,185,129,.4);">YEN&#304;</span>
             <button class="favorite-btn"><i class="far fa-heart"></i></button>
           </div>
-          <div class="ad-info">
-            <div class="ad-price">${ad.price}</div>
-            <div class="ad-title">${ad.title}</div>
-            <div class="ad-location">
+          <div class="elan-info product-info">
+            <div class="elan-price product-price">${ad.price}</div>
+            <div class="elan-title product-title">${ad.title}</div>
+            <div class="elan-location product-location">
               <i class="fas fa-map-marker-alt"></i>
-              <span>${ad.city}</span>
-              <span class="ad-date">${ad.dateLabel}</span>
+              <span class="elan-city-label">${ad.city}</span>
+              <span class="elan-date product-date">${ad.dateLabel}</span>
             </div>
           </div>
         </a>`;
