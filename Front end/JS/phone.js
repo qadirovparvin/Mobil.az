@@ -197,11 +197,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             let nextAds = [];
             let totalPages = 1;
             if (window.api && typeof window.api.get === 'function') {
-                const res = await window.api.get(`/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
+                const res = await window.api.get(`/listings?category=${cat}&page=${page}&limit=20${sortQuery}`).catch(() => window.api.get(`/ads?category=${cat}&page=${page}&limit=20${sortQuery}`));
                 nextAds = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
                 totalPages = res.data?.totalPages || 1;
             } else {
-                const res = await fetch(`${API_BASE}/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
+                let res = await fetch(`${API_BASE}/listings?category=${cat}&page=${page}&limit=20${sortQuery}`).catch(() => null);
+                if (!res || !res.ok) res = await fetch(`${API_BASE}/ads?category=${cat}&page=${page}&limit=20${sortQuery}`);
                 const data = await res.json();
                 nextAds = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
                 totalPages = data?.totalPages || 1;
@@ -251,11 +252,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         let ads = [];
         let totalPages = 1;
         if (window.api && typeof window.api.get === 'function') {
-            const res = await window.api.get(`/ads?category=${cat}&page=1&limit=20${sortQuery}`);
+            const res = await window.api.get(`/listings?category=${cat}&page=1&limit=20${sortQuery}`).catch(() => window.api.get(`/ads?category=${cat}&page=1&limit=20${sortQuery}`));
             ads = res.data && Array.isArray(res.data.ads) ? res.data.ads : (Array.isArray(res.data) ? res.data : []);
             totalPages = res.data?.totalPages || 1;
         } else {
-            const res = await fetch(`${API_BASE}/ads?category=${cat}&page=1&limit=20${sortQuery}`);
+            let res = await fetch(`${API_BASE}/listings?category=${cat}&page=1&limit=20${sortQuery}`).catch(() => null);
+            if (!res || !res.ok) res = await fetch(`${API_BASE}/ads?category=${cat}&page=1&limit=20${sortQuery}`);
             const data = await res.json();
             ads = Array.isArray(data.ads) ? data.ads : (Array.isArray(data) ? data : []);
             totalPages = data?.totalPages || 1;

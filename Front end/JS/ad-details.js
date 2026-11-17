@@ -6,6 +6,7 @@
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', async () => {
+    window.__listingDetailsLoaded = true;
 
     // ── Helpers (defined first so they're always available) ────────
 
@@ -78,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // ── Always-reveal function (called in finally) ─────────────────
     function revealPage() {
-        const skeleton = document.getElementById('adLoadingSkeleton');
+        const skeleton = document.getElementById('elanLoadingSkeleton') || document.getElementById('adLoadingSkeleton');
         const wrapper  = document.getElementById('detailWrapper');
         if (skeleton) skeleton.style.display = 'none';
         if (wrapper)  wrapper.style.visibility = 'visible';
@@ -195,8 +196,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         let fetchErr;
         const maxAttempts = 8;
         for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            // Alternate listings and ads endpoints for 100% adblock immunity
+            const endpoint = (attempt % 2 === 1) ? 'listings' : 'ads';
             try {
-                res = await fetch(`${API_BASE}/ads/${encodeURIComponent(adId)}`, {
+                res = await fetch(`${API_BASE}/${endpoint}/${encodeURIComponent(adId)}`, {
                     headers: { 'Accept': 'application/json' },
                     silent: true
                 });
@@ -240,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
         document.title = `${adTitle} — Mobilim.az`;
 
-        const titleEl = document.querySelector('.ad-main-title');
+        const titleEl = document.querySelector('.elan-main-title, .item-main-title, .ad-main-title');
         if (titleEl) titleEl.textContent = adTitle;
 
         const brandBreadcrumb = document.querySelector('.breadcrumb-brand') || document.querySelectorAll('.breadcrumb a')[2];
@@ -262,16 +265,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (modelSep) modelSep.style.display = '';
 
         // ── 2. Price ───────────────────────────────────────────────
-        const priceEl = document.querySelector('.ad-main-price');
-        if (priceEl) priceEl.innerHTML = `${Number(ad.price || 0).toLocaleString('az-AZ')} <span class="ad-currency">AZN</span>`;
+        const priceEl = document.querySelector('.elan-main-price, .item-main-price, .ad-main-price');
+        if (priceEl) priceEl.innerHTML = `${Number(ad.price || 0).toLocaleString('az-AZ')} <span class="elan-currency item-currency ad-currency">AZN</span>`;
 
         // ── 3. Description ─────────────────────────────────────────
         const descEl = document.querySelector('.desc-text');
         if (descEl) descEl.textContent = ad.description || 'Açıqlama yoxdur.';
 
         // ── 4. Date & Views ────────────────────────────────────────
-        const dateEl  = document.querySelector('.ad-date-views span:nth-child(1)');
-        const viewsEl = document.querySelector('.ad-date-views span:nth-child(2)');
+        const dateEl  = document.querySelector('.elan-date-views span:nth-child(1), .ad-date-views span:nth-child(1)');
+        const viewsEl = document.querySelector('.elan-date-views span:nth-child(2), .ad-date-views span:nth-child(2)') || document.getElementById('ad-views-count');
         if (dateEl)  dateEl.innerHTML  = `<i class="fas fa-clock"></i> ${new Date(ad.createdAt).toLocaleDateString('az-AZ')}`;
         if (viewsEl) viewsEl.innerHTML = `<i class="fas fa-eye"></i> ${ad.views || 0} baxış`;
 
@@ -569,7 +572,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (locationRows[2]) locationRows[2].textContent = ad.specs?.features?.delivery ? 'Var' : 'Yoxdur';
 
         // ── 9. Category tag ────────────────────────────────────────
-        const catTag = document.querySelector('.ad-category-tag');
+        const catTag = document.querySelector('.elan-category-tag, .item-category-tag, .ad-category-tag');
         if (catTag) {
             catTag.replaceChildren();
             const catIcon = document.createElement('i');
@@ -929,9 +932,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // ── 11. Ad ID bar (footer) ─────────────────────────────────
-        const adIdSpan     = document.querySelector('.ad-id-bar span:nth-child(1) span:nth-child(2)');
-        const postedSpan   = document.querySelector('.ad-id-bar span:nth-child(2) span:nth-child(2)');
-        const updatedSpan  = document.querySelector('.ad-id-bar span:nth-child(3) span:nth-child(2)');
+        const adIdBar      = document.querySelector('.elan-id-bar, .item-id-bar, .ad-id-bar');
+        const adIdSpan     = adIdBar ? adIdBar.querySelector('span:nth-child(1) span:nth-child(2)') : null;
+        const postedSpan   = adIdBar ? adIdBar.querySelector('span:nth-child(2) span:nth-child(2)') : null;
+        const updatedSpan  = adIdBar ? adIdBar.querySelector('span:nth-child(3) span:nth-child(2)') : null;
         const displayAdNumber = ad.adNumber || (ad._id ? (String(ad._id) === '6ad7634079a9d25725d38022' ? 'MOB-5D3802' : `MOB-${String(ad._id).slice(-6).toUpperCase()}`) : '—');
         if (adIdSpan)    adIdSpan.textContent   = displayAdNumber;
         if (postedSpan)  postedSpan.textContent  = new Date(ad.createdAt).toLocaleDateString('az-AZ');
@@ -966,7 +970,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const token = (typeof window !== "undefined" && window.getAuthToken)
                             ? window.getAuthToken()
                             : (sessionStorage.getItem("token") || sessionStorage.getItem("adminToken") || "");
-                        const delRes = await fetch(`${API_BASE}/ads/${ad._id}`, {
+                        const delRes = await fetch(`${API_BASE}/listings/${ad._id}`, {
                             method: 'DELETE',
                             headers: { Authorization: `Bearer ${token}` }
                         });
@@ -1149,7 +1153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             try {
-                let queryUrl = `${API_BASE}/ads?category=${encodeURIComponent(category)}&limit=5`;
+                let queryUrl = `${API_BASE}/listings?category=${encodeURIComponent(category)}&limit=5`;
                 if (ad.brand && String(ad.brand).trim()) {
                     queryUrl += `&brand=${encodeURIComponent(String(ad.brand).trim())}`;
                 }
@@ -1160,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let filtered = adsList.filter(item => item && item._id && item._id !== ad._id);
                 if (filtered.length === 0 && ad.brand && String(ad.brand).trim()) {
-                    const fallbackRes = await fetch(`${API_BASE}/ads?category=${encodeURIComponent(category)}&limit=5`);
+                    const fallbackRes = await fetch(`${API_BASE}/listings?category=${encodeURIComponent(category)}&limit=5`);
                     const fallbackData = fallbackRes.ok ? await fallbackRes.json() : null;
                     const fallbackList = (fallbackData && Array.isArray(fallbackData.ads)) ? fallbackData.ads : [];
                     filtered = fallbackList.filter(item => item && item._id && item._id !== ad._id);

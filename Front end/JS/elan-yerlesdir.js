@@ -1279,11 +1279,18 @@ async function initEditMode() {
 
     let res;
     try {
-      res = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
+      res = await fetch(`${base}/listings/${encodeURIComponent(editAdId)}`, {
         method: 'GET',
         credentials: 'include',
         headers
-      });
+      }).catch(() => null);
+      if (!res || !res.ok) {
+        res = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
+          method: 'GET',
+          credentials: 'include',
+          headers
+        });
+      }
     } catch (networkErr) {
       throw new Error('Serverlə əlaqə qurulmadı. Zəhmət olmasa internet bağlantınızı və ya serverin aktivliyini yoxlayın.');
     }
@@ -1647,12 +1654,20 @@ if (adFormEl) {
       if (isEditMode) {
         if (btnSpan) btnSpan.textContent = 'Məlumatlar yenilənir…';
 
-        const updateRes = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
+        let updateRes = await fetch(`${base}/listings/${encodeURIComponent(editAdId)}`, {
           method: 'PUT',
           credentials: 'include',
           headers: reqHeaders,
           body: formData
-        });
+        }).catch(() => null);
+        if (!updateRes || !updateRes.ok) {
+          updateRes = await fetch(`${base}/ads/${encodeURIComponent(editAdId)}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: reqHeaders,
+            body: formData
+          });
+        }
 
         if (updateRes.status === 401) {
           try {
@@ -1687,12 +1702,20 @@ if (adFormEl) {
         formData.append('sellerType', isStore ? 'store' : 'personal');
         if (isStore && storeId) formData.append('store', storeId);
 
-        const response = await fetch(`${base}/ads`, {
+        let response = await fetch(`${base}/listings`, {
           method: 'POST',
           credentials: 'include',
           headers: reqHeaders,
           body: formData
-        });
+        }).catch(() => null);
+        if (!response || !response.ok) {
+          response = await fetch(`${base}/ads`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: reqHeaders,
+            body: formData
+          });
+        }
 
         if (response.status === 401) {
           try {
