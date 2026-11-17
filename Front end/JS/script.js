@@ -406,7 +406,20 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Şikayət et",
             "det-related-title": "Oxşar Elanlar",
             "det-review-name-ph": "Adınız (məs. Əli M.)",
-            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın..."
+            "det-review-text-ph": "Satıcı ilə təcrübənizi paylaşın...",
+            "det-reviews-seller-note": "Bu satıcının bütün rəyləri",
+            "det-view-store": "Mağazaya bax",
+            "det-delivery-no": "Yoxdur",
+            "det-condition-used": "İşlənmiş",
+            "det-badge-used": "İşlənmiş",
+            "det-no-reviews": "Bu satıcı üçün hələ rəy yoxdur. İlk rəyi siz yazın!",
+            "det-reviews-based": "rəy əsasında",
+            "det-views-word": "baxış",
+            "header-contact": "Əlaqə",
+            "header-about": "Haqqımızda",
+            "header-stores-soon": "Mağazalar (tezliklə)",
+            "header-favorites": "Seçimlər",
+            "det-sidebar-review-ph": "Bu satıcı haqqında rəyiniz..."
         },
         ENG: {
             Contact: "Contact",
@@ -813,7 +826,20 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Report",
             "det-related-title": "Similar Ads",
             "det-review-name-ph": "Your name (e.g. John D.)",
-            "det-review-text-ph": "Share your experience with the seller..."
+            "det-review-text-ph": "Share your experience with the seller...",
+            "det-reviews-seller-note": "All reviews for this seller",
+            "det-view-store": "View store",
+            "det-delivery-no": "Not available",
+            "det-condition-used": "Used",
+            "det-badge-used": "Used",
+            "det-no-reviews": "No reviews yet for this seller. Be the first to write one!",
+            "det-reviews-based": "based on reviews",
+            "det-views-word": "views",
+            "header-contact": "Contact",
+            "header-about": "About",
+            "header-stores-soon": "Stores (soon)",
+            "header-favorites": "Favorites",
+            "det-sidebar-review-ph": "Your review about this seller..."
         },
         RUS: {
             Contact: "Контакт",
@@ -1220,7 +1246,20 @@ document.addEventListener("DOMContentLoaded", function () {
             "det-btn-report": "Пожаловаться",
             "det-related-title": "Похожие объявления",
             "det-review-name-ph": "Ваше имя (напр. Али М.)",
-            "det-review-text-ph": "Поделитесь опытом о продавце..."
+            "det-review-text-ph": "Поделитесь опытом о продавце...",
+            "det-reviews-seller-note": "Все отзывы о продавце",
+            "det-view-store": "В магазин",
+            "det-delivery-no": "Нет",
+            "det-condition-used": "Б/У",
+            "det-badge-used": "Б/У",
+            "det-no-reviews": "У этого продавца пока нет отзывов. Будьте первым!",
+            "det-reviews-based": "на основе отзывов",
+            "det-views-word": "просмотров",
+            "header-contact": "Контакт",
+            "header-about": "О нас",
+            "header-stores-soon": "Магазины (скоро)",
+            "header-favorites": "Избранное",
+            "det-sidebar-review-ph": "Ваш отзыв об этом продавце..."
         }
     };
     const authTranslations = {
