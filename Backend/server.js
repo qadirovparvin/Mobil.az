@@ -128,7 +128,7 @@ try {
 
 // ── Connect to Database & Auto-Seed Admin ────────────────
 const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Mobilim.az!090803';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Gadirov!090803';
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
     logger.error('❌ CRITICAL ERROR: ADMIN_EMAIL and ADMIN_PASSWORD environment variables are not defined.');
@@ -139,8 +139,8 @@ async function seedAdmin() {
     try {
         const adminsToEnsure = [
             {
-                email: 'mobilim.az@gmail.com',
-                password: 'Mobilim.az!090803',
+                email: ADMIN_EMAIL,
+                password: ADMIN_PASSWORD,
                 name: 'Admin',
                 lastName: 'Mobilim.az',
                 phone: '+994120000000'
