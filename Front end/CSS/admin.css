@@ -1101,6 +1101,22 @@ body {
     background: var(--primary-light);
 }
 
+.btn-icon.promo {
+    color: var(--warning, #f59e0b);
+}
+
+.btn-icon.promo:hover {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.btn-icon.role-btn {
+    color: #6366f1;
+}
+
+.btn-icon.role-btn:hover {
+    background: rgba(99, 102, 241, 0.15);
+}
+
 /* Pagination */
 .pagination-bar {
     padding: 1rem 1.5rem;

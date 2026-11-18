@@ -4,7 +4,8 @@ const {
     getAdminStats, getAllUsers, getUserDetails, getAllAds, getAllTransactions,
     updateAdStatus, deleteUser, updateUserStatus, banUser, revokeUserSessions, deleteAd, purgeAd,
     getAllStores, updateStoreStatus, deleteStore, getAuditLogs, getKycDocument,
-    getPaymentSessions, getPendingPayments, reconcileSingleSession
+    getPaymentSessions, getPendingPayments, reconcileSingleSession,
+    updateUserRole, updateAdPromotion
 } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middlewares/authMiddleware');
 const { csrfProtection } = require('../middlewares/csrfProtection');
@@ -31,11 +32,15 @@ router.get('/users/:id/details', validateObjectIdParam('id'), getUserDetails);
 router.delete('/users/:id', csrfProtection, validateObjectIdParam('id'), deleteUser);
 router.patch('/users/:id/status', csrfProtection, validateObjectIdParam('id'), updateUserStatus);
 router.put('/users/:id/status', csrfProtection, validateObjectIdParam('id'), updateUserStatus);
+router.patch('/users/:id/role', csrfProtection, validateObjectIdParam('id'), updateUserRole);
+router.put('/users/:id/role', csrfProtection, validateObjectIdParam('id'), updateUserRole);
 router.put('/users/:id/ban', csrfProtection, validateObjectIdParam('id'), banUser);
 router.patch('/users/:id/ban', csrfProtection, validateObjectIdParam('id'), banUser);
 router.post('/users/:id/revoke-sessions', csrfProtection, validateObjectIdParam('id'), revokeUserSessions);
 router.get('/ads', getAllAds);
 router.put('/ads/:id/status', csrfProtection, validateObjectIdParam('id'), updateAdStatus);
+router.patch('/ads/:id/promotion', csrfProtection, validateObjectIdParam('id'), updateAdPromotion);
+router.put('/ads/:id/promotion', csrfProtection, validateObjectIdParam('id'), updateAdPromotion);
 router.delete('/ads/:id', csrfProtection, validateObjectIdParam('id'), deleteAd);
 router.delete('/ads/:id/purge', csrfProtection, validateObjectIdParam('id'), purgeAd);
 router.get('/transactions', getAllTransactions);
