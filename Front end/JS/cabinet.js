@@ -1875,11 +1875,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return data;
         }
 
-        async function apiDelete(endpoint) {
-            const res = await fetch(`${API_BASE}/${endpoint}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${getToken()}` }
-            });
+        async function apiDelete(endpoint, body) {
+            const headers = { 'Authorization': `Bearer ${getToken()}` };
+            const opts = { method: 'DELETE', headers };
+            if (body) {
+                headers['Content-Type'] = 'application/json';
+                opts.body = JSON.stringify(body);
+            }
+            const res = await fetch(`${API_BASE}/${endpoint}`, opts);
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
             return data;
@@ -2078,25 +2081,126 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ── Delete Account → DELETE /api/user/delete ─────────
+        // ── Delete Account → PRO Modal Flow (DELETE /api/user/delete) ─────────
         const deleteAccBtn = document.querySelector('.btn-outline-danger');
-        if (deleteAccBtn) {
-            deleteAccBtn.addEventListener('click', async () => {
-                if (!confirm(t('deleteConfirmOne', 'XƏBƏRDARLIQ: Hesabınız və bütün məlumatlarınız həmişəlik silinəcək. Davam etmək istəyirsiniz?'))) return;
-                if (!confirm(t('deleteConfirmTwo', 'Son təsdiq: Bu əməliyyat GERİ QAYTARILA BİLMƏZ. Silmək istəyirsiniz?'))) return;
-                if (!setButtonLoading(deleteAccBtn, true)) return;
-                try {
-                    await apiDelete('user/delete');
-                    toast.show(t('accountDeleted', 'Hesabınız silindi. Yönləndirilirsiniz...'), 'error', 2500);
-                    setTimeout(() => {
-                        ['token', 'user', 'mobilaz_current_user', 'adminToken', 'adminUser'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k); });
-                        window.location.href = 'index.html';
-                    }, 2500);
-                } catch (err) {
-                    toast.show(err.message, 'error');
-                    setButtonLoading(deleteAccBtn, false);
-                }
+        const deleteModal = document.getElementById('deleteAccountModal');
+        const passInput = document.getElementById('deleteConfirmPassword');
+        const wordInput = document.getElementById('deleteConfirmWord');
+        const reasonSelect = document.getElementById('deleteReasonSelect');
+        const finalDeleteBtn = document.getElementById('btnFinalDeleteAccount');
+        const closeDeleteBtn = document.getElementById('closeDeleteModalBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteAccountBtn');
+        const deleteBtnText = document.getElementById('deleteBtnText');
+        let deleteCountdownTimer = null;
+
+        function checkDeleteFormValidity() {
+            if (!wordInput || !passInput || !finalDeleteBtn) return;
+            const isWordMatch = wordInput.value.trim().toUpperCase() === 'HESABIMI SİL';
+            const isPassFilled = passInput.value.trim().length > 0;
+            if (isWordMatch && isPassFilled) {
+                finalDeleteBtn.disabled = false;
+                finalDeleteBtn.style.opacity = '1';
+                finalDeleteBtn.style.cursor = 'pointer';
+            } else {
+                finalDeleteBtn.disabled = true;
+                finalDeleteBtn.style.opacity = '0.45';
+                finalDeleteBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        function closeDeleteModal() {
+            if (deleteCountdownTimer) {
+                clearInterval(deleteCountdownTimer);
+                deleteCountdownTimer = null;
+            }
+            if (deleteModal) {
+                deleteModal.style.display = 'none';
+                deleteModal.classList.remove('active');
+            }
+            if (passInput) passInput.value = '';
+            if (wordInput) wordInput.value = '';
+            if (deleteBtnText) deleteBtnText.textContent = 'Hesabı Həmişəlik Sil';
+            checkDeleteFormValidity();
+        }
+
+        if (deleteAccBtn && deleteModal) {
+            deleteAccBtn.addEventListener('click', () => {
+                if (passInput) passInput.value = '';
+                if (wordInput) wordInput.value = '';
+                if (reasonSelect) reasonSelect.value = '';
+                if (deleteBtnText) deleteBtnText.textContent = 'Hesabı Həmişəlik Sil';
+                checkDeleteFormValidity();
+                deleteModal.style.display = 'flex';
+                deleteModal.classList.add('active');
+                setTimeout(() => passInput?.focus(), 150);
             });
+
+            if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', closeDeleteModal);
+            if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+
+            if (passInput) passInput.addEventListener('input', checkDeleteFormValidity);
+            if (wordInput) wordInput.addEventListener('input', checkDeleteFormValidity);
+
+            if (finalDeleteBtn) {
+                finalDeleteBtn.addEventListener('click', async () => {
+                    const password = passInput.value;
+                    const confirmationText = wordInput.value.trim();
+                    const reason = reasonSelect ? reasonSelect.value : '';
+
+                    if (confirmationText.toUpperCase() !== 'HESABIMI SİL') {
+                        toast.show('Təsdiq mətni düzgün deyil. "HESABIMI SİL" yazmalısınız.', 'warning');
+                        return;
+                    }
+                    if (!password) {
+                        toast.show('Cari şifrənizi daxil edin.', 'warning');
+                        return;
+                    }
+
+                    // 3-second security countdown
+                    let countdown = 3;
+                    finalDeleteBtn.disabled = true;
+                    finalDeleteBtn.style.cursor = 'wait';
+                    if (deleteBtnText) deleteBtnText.textContent = `Təsdiqlənir (${countdown})...`;
+
+                    deleteCountdownTimer = setInterval(async () => {
+                        countdown--;
+                        if (countdown > 0) {
+                            if (deleteBtnText) deleteBtnText.textContent = `Təsdiqlənir (${countdown})...`;
+                        } else {
+                            clearInterval(deleteCountdownTimer);
+                            deleteCountdownTimer = null;
+                            if (deleteBtnText) deleteBtnText.textContent = 'Hesab silinir...';
+
+                            try {
+                                const result = await apiDelete('user/delete', {
+                                    password,
+                                    confirmationText,
+                                    reason
+                                });
+
+                                toast.show(result.message || 'Hesabınız uğurla silindi. Yönləndirilirsiniz...', 'error', 3000);
+                                closeDeleteModal();
+
+                                setTimeout(() => {
+                                    ['token', 'accessToken', 'authToken', 'jwt', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminToken', 'adminUser'].forEach(k => {
+                                        try { localStorage.removeItem(k); } catch (e) {}
+                                        try { sessionStorage.removeItem(k); } catch (e) {}
+                                    });
+                                    window.location.href = 'index.html';
+                                }, 1800);
+                            } catch (err) {
+                                toast.show(err.message || 'Hesab silinərkən xəta baş verdi', 'error', 4000);
+                                if (deleteBtnText) deleteBtnText.textContent = 'Hesabı Həmişəlik Sil';
+                                checkDeleteFormValidity();
+                            }
+                        }
+                    }, 1000);
+                });
+            }
         }
     }
 

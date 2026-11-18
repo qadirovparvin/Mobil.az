@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     unverifiedExpiresAt: { type: Date, default: null },
     status:     { type: String, enum: ['active', 'frozen', 'deleted', 'blocked', 'banned', 'inactive', 'disabled'], default: 'active' },
+    isDeleted:  { type: Boolean, default: false },
+    deletedAt:  { type: Date, default: null },
+    deletionReason: { type: String, default: '' },
 
     // ── Favorites ─────────────────────────────────────────
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ad' }],

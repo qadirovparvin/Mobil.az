@@ -249,44 +249,103 @@ const freezeAccount = async (req, res, next) => {
     }
 };
 
-// @desc    Delete account (Soft delete)
+// @desc    Delete account (Soft delete with security verification)
 // @route   DELETE /api/user/delete
 // @access  Private
 const deleteAccount = async (req, res, next) => {
     const mongoose = require('mongoose');
-    const session = await mongoose.startSession();
     try {
-        const user = await User.findById(req.user._id).select('+refreshTokens');
+        validateAllowedFields(req.body || {}, ['password', 'currentPassword', 'confirmationText', 'reason'], 'body');
+        const currentPassword = req.body?.password || req.body?.currentPassword || '';
+        const confirmationText = String(req.body?.confirmationText || '').trim();
+        const reason = String(req.body?.reason || '').trim();
+
+        const user = await User.findById(req.user._id).select('+password +refreshTokens');
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'İstifadəçi tapılmadı' });
         }
-        
-        await session.withTransaction(async () => {
+
+        // Verify password if user has password set
+        if (user.password) {
+            if (!currentPassword) {
+                return res.status(400).json({ success: false, message: 'Hesabı silmək üçün cari şifrənizi daxil etməlisiniz.' });
+            }
+            const isMatch = await verifyCurrentPassword(user, currentPassword);
+            if (!isMatch) {
+                return res.status(400).json({ success: false, message: 'Daxil edilən cari şifrə yanlışdır.' });
+            }
+        }
+
+        // Verify confirmation word
+        if (confirmationText.toUpperCase() !== 'HESABIMI SİL' && confirmationText.toUpperCase() !== 'DELETE') {
+            return res.status(400).json({ success: false, message: 'Təsdiq mətni düzgün yazılmayıb. "HESABIMI SİL" yazmalısınız.' });
+        }
+
+        let session = null;
+        try {
+            session = await mongoose.startSession();
+            session.startTransaction();
+        } catch (e) {
+            session = null;
+        }
+
+        try {
             user.status = 'deleted';
+            user.isDeleted = true;
+            user.deletedAt = new Date();
+            user.deletionReason = reason || 'İstifadəçi tərəfindən silindi';
             user.refreshTokens = [];
             user.tokenVersion = (user.tokenVersion || 0) + 1;
             user.sessionVersion = (user.sessionVersion || 0) + 1;
-            await user.save({ session });
+            if (session) {
+                await user.save({ session });
+            } else {
+                await user.save();
+            }
 
             const Ad = require('../models/Ad');
-            const { softDeleteAd, DELETED_AD_STATUS } = require('../utils/adLifecycle');
+            const { DELETED_AD_STATUS } = require('../utils/adLifecycle');
             
-            const userAds = await Ad.find({ author: user._id, status: { $ne: DELETED_AD_STATUS } }).session(session);
+            const userAds = session 
+                ? await Ad.find({ author: user._id, status: { $ne: DELETED_AD_STATUS } }).session(session)
+                : await Ad.find({ author: user._id, status: { $ne: DELETED_AD_STATUS } });
             const adIds = userAds.map(ad => ad._id);
             if (adIds.length > 0) {
                 const deletedAt = new Date();
-                await Ad.updateMany({ _id: { $in: adIds } }, { $set: { status: DELETED_AD_STATUS, deletedAt, deletedBy: user._id, deletionReason: 'İstifadəçi hesabı silindi', promotionType: 'none', promotionExpiresAt: null } }, { session });
-                await User.updateMany({ favorites: { $in: adIds } }, { $pull: { favorites: { $in: adIds } } }, { session });
-                const Message = require('../models/Message');
-                await Message.updateMany({ ad: { $in: adIds }, adDeletedAt: null }, { $set: { adDeletedAt: deletedAt, hiddenReason: 'ad_deleted' } }, { session });
+                const adUpdate = {
+                    status: DELETED_AD_STATUS,
+                    deletedAt,
+                    deletedBy: user._id,
+                    deletionReason: 'İstifadəçi hesabı silindi',
+                    promotionType: 'none',
+                    promotionExpiresAt: null
+                };
+                if (session) {
+                    await Ad.updateMany({ _id: { $in: adIds } }, { $set: adUpdate }, { session });
+                    await User.updateMany({ favorites: { $in: adIds } }, { $pull: { favorites: { $in: adIds } } }, { session });
+                    const Message = require('../models/Message');
+                    await Message.updateMany({ ad: { $in: adIds }, adDeletedAt: null }, { $set: { adDeletedAt: deletedAt, hiddenReason: 'ad_deleted' } }, { session });
+                } else {
+                    await Ad.updateMany({ _id: { $in: adIds } }, { $set: adUpdate });
+                    await User.updateMany({ favorites: { $in: adIds } }, { $pull: { favorites: { $in: adIds } } });
+                    const Message = require('../models/Message');
+                    await Message.updateMany({ ad: { $in: adIds }, adDeletedAt: null }, { $set: { adDeletedAt: deletedAt, hiddenReason: 'ad_deleted' } });
+                }
             }
-        });
 
-        res.json({ message: 'Account successfully deleted' });
+            if (session) {
+                await session.commitTransaction();
+            }
+        } catch (opErr) {
+            if (session) await session.abortTransaction();
+            throw opErr;
+        } finally {
+            if (session) await session.endSession();
+        }
+
+        res.json({ success: true, message: 'Hesabınız uğurla silindi.' });
     } catch (error) {
         next(error);
-    } finally {
-        await session.endSession();
     }
 };
 

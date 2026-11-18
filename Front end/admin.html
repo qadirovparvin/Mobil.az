@@ -83,7 +83,13 @@
                         }
                     }
                 }
-                document.body.classList.add('admin-network-error');
+                if (document.body) {
+                    document.body.classList.add('admin-network-error');
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        if (document.body) document.body.classList.add('admin-network-error');
+                    });
+                }
             }
 
             function verifyAdmin(retryCount) {
@@ -125,7 +131,13 @@
                     if (data.authorized && data.role === 'admin') {
                         window.__adminVerified = true;
                         window.__adminVerifyData = data;
-                        document.body.classList.remove('admin-network-error');
+                        if (document.body) {
+                            document.body.classList.remove('admin-network-error');
+                        } else {
+                            document.addEventListener('DOMContentLoaded', function() {
+                                if (document.body) document.body.classList.remove('admin-network-error');
+                            });
+                        }
                     } else {
                         window.location.replace('index.html');
                     }
@@ -399,7 +411,14 @@
                             <h2><i class="fas fa-users text-primary"></i> İstifadəçi İdarəetməsi</h2>
                             <p class="card-sub">Qeydiyyatdan keçmiş bütün istifadəçilərin siyahısı</p>
                         </div>
-                        <div class="card-header-actions">
+                        <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;">
+                            <select id="userStatusFilter" onchange="filterUsers()" style="padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: var(--bg-card, #1e293b); color: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">
+                                <option value="">Bütün Statuslar</option>
+                                <option value="active">Aktiv</option>
+                                <option value="frozen">Dondurulmuş</option>
+                                <option value="deleted">Silinmiş</option>
+                                <option value="banned">Ban olunanlar</option>
+                            </select>
                             <div class="search-wrap">
                                 <i class="fas fa-search"></i>
                                 <input type="text" id="userSearch" placeholder="Ad, email, nömrə axtar…" oninput="filterUsers()">
@@ -750,6 +769,6 @@
 
 <script src="JS/auth.js"></script>
 <script src="JS/api.js"></script>
-<script src="JS/admin.js"></script>
+<script src="JS/admin.js?v=20261118_v2"></script>
 </body>
 </html>

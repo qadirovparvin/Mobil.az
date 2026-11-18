@@ -552,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!users.length) { allUsersTable.innerHTML = emptyRow(10, 'İstifadəçi tapılmadı.'); return; }
         allUsersTable.innerHTML = users.map(u => {
             const name      = esc([u.name, u.lastName].filter(Boolean).join(' ') || '—');
+            const isDeleted = u.status === 'deleted' || u.isDeleted === true;
             const isFroz    = u.status === 'frozen';
             const isBanned  = u.status === 'banned';
             const isAdm     = u.role   === 'admin';
@@ -559,11 +560,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const balance   = Number(u.balance ?? u.walletBalance ?? 0).toFixed(2);
             const refCount  = u.referralCount || 0;
 
-            const statusBadge = isBanned
-                ? '<span class="badge badge-danger">Ban</span>'
-                : isFroz
-                    ? '<span class="badge badge-warning">Dondurulmuş</span>'
-                    : '<span class="badge badge-success">Aktiv</span>';
+            const statusBadge = isDeleted
+                ? '<span class="badge" style="background:rgba(239, 68, 68, 0.15);color:#ef4444;border:1px solid rgba(239, 68, 68, 0.3);font-weight:600;"><i class="fas fa-trash-can" style="font-size:10px;margin-right:4px;"></i>Silinib</span>'
+                : isBanned
+                    ? '<span class="badge badge-danger">Ban</span>'
+                    : isFroz
+                        ? '<span class="badge badge-warning">Dondurulmuş</span>'
+                        : '<span class="badge badge-success">Aktiv</span>';
 
             return `
             <tr data-uid="${esc(u._id)}" data-name="${name}">
@@ -584,23 +587,23 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-icon" title="Detallı bax" onclick="window.openUserDetailModal('${esc(u._id)}')" style="color:var(--primary);">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn-icon freeze" title="${isFroz?'Aktivləşdir':'Dondur'}"
+                        <button class="btn-icon freeze" title="${isDeleted ? 'Silinmiş hesab' : isFroz ? 'Aktivləşdir' : 'Dondur'}"
                             data-action="${isFroz?'unfreeze':'freeze'}" data-id="${esc(u._id)}"
-                            ${isAdm?'disabled title="Admin silinmir"':''}>
+                            ${isAdm || isDeleted ? 'disabled title="Dondurula bilməz"' : ''}>
                             <i class="fas ${isFroz?'fa-play':'fa-snowflake'}"></i>
                         </button>
                         ${!isBanned ? `
-                            <button onclick="banUser('${esc(u._id)}')" class="btn btn-danger btn-sm" ${isAdm ? 'disabled title="Admin ban edilmir"' : 'title="İstifadəçini banla"'}>
+                            <button onclick="banUser('${esc(u._id)}')" class="btn btn-danger btn-sm" ${isAdm || isDeleted ? 'disabled title="Ban edilmir"' : 'title="İstifadəçini banla"'}>
                                 <i class="fas fa-ban"></i> Ban
                             </button>
                         ` : `
-                            <button onclick="unbanUser('${esc(u._id)}')" class="btn btn-success btn-sm" ${isAdm ? 'disabled' : 'title="Banı qaldır"'}>
+                            <button onclick="unbanUser('${esc(u._id)}')" class="btn btn-success btn-sm" ${isAdm || isDeleted ? 'disabled' : 'title="Banı qaldır"'}>
                                 <i class="fas fa-check"></i> Unban
                             </button>
                         `}
-                        <button class="btn-icon delete" title="Sil"
+                        <button class="btn-icon delete" title="${isDeleted ? 'Artıq silinib' : 'Sil'}"
                             data-action="delete-user" data-id="${esc(u._id)}"
-                            ${isAdm?'disabled title="Admin silinmir"':''}>
+                            ${isAdm || isDeleted ? 'disabled title="Silinmiş hesab"' : ''}>
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -615,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await adminApi(`users/${id}/ban`, { method: 'PUT', body: { status: 'banned' } });
             toast('İstifadəçi ban edildi.', 'success');
-            await window.loadUsers(currentUserPage, currentUsersSearch);
+            await window.loadUsers(currentUserPage, currentUsersSearch, currentUsersStatus);
         } catch (err) {
             toast('Xəta baş verdi: ' + (err.message || err), 'error');
         }
@@ -628,7 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             await adminApi(`users/${id}/ban`, { method: 'PUT', body: { status: 'active' } });
             toast('İstifadəçinin banı qaldırıldı.', 'success');
-            await window.loadUsers(currentUserPage, currentUsersSearch);
+            await window.loadUsers(currentUserPage, currentUsersSearch, currentUsersStatus);
         } catch (err) {
             toast('Xəta baş verdi: ' + (err.message || err), 'error');
         }
@@ -641,17 +644,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUserPage = 1;
     const usersPerPage = 20;
     let currentUsersSearch = '';
+    let currentUsersStatus = '';
     let userSearchTimer = null;
 
-    window.loadUsers = async function(page = 1, search = currentUsersSearch) {
+    window.loadUsers = async function(page = 1, search = currentUsersSearch, status = currentUsersStatus) {
         currentUserPage = page;
         currentUsersSearch = search;
+        currentUsersStatus = status;
         const tbody = document.getElementById('allUsersTable');
         if (tbody) tbody.innerHTML = '<tr><td colspan="10" class="text-muted loading-cell">Yüklənir…</td></tr>';
 
         try {
             const queryParam = search ? `&search=${encodeURIComponent(search)}` : '';
-            const data = await adminApi(`users?page=${page}&limit=${usersPerPage}${queryParam}`);
+            const statusParam = status ? `&status=${encodeURIComponent(status)}` : '';
+            const data = await adminApi(`users?page=${page}&limit=${usersPerPage}${queryParam}${statusParam}`);
             const users = data?.users || data?.data || [];
             const totalPages = data?.totalPages || data?.pagination?.totalPages || 1;
             const currentPage = data?.currentPage || data?.pagination?.page || page;
@@ -713,8 +719,9 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(userSearchTimer);
         userSearchTimer = setTimeout(() => {
             const searchValue = document.getElementById('userSearch')?.value.trim() || '';
+            const statusValue = document.getElementById('userStatusFilter')?.value.trim() || '';
             currentUserPage = 1;
-            window.loadUsers(1, searchValue);
+            window.loadUsers(1, searchValue, statusValue);
         }, 300);
     };
 
@@ -724,8 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(userSearchTimer);
             userSearchTimer = setTimeout(() => {
                 const searchValue = userSearchInput.value.trim();
+                const statusValue = document.getElementById('userStatusFilter')?.value.trim() || '';
                 currentUserPage = 1;
-                window.loadUsers(1, searchValue);
+                window.loadUsers(1, searchValue, statusValue);
             }, 300);
         });
     }
