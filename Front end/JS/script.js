@@ -1792,46 +1792,48 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ─── HAMBURGER MENU TOGGLE (MOBILE) ──────────────────────────────────────
-    const hamburgerBtn = document.querySelector(".hamburger") || document.getElementById("hamburgerBtn");
-    const headerRight = document.querySelector(".header-right");
-    if (hamburgerBtn && headerRight) {
-        hamburgerBtn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            const isOpen = headerRight.classList.toggle("open");
-            headerRight.classList.toggle("active", isOpen);
-            headerRight.classList.toggle("hidden", !isOpen);
-            hamburgerBtn.classList.toggle("active", isOpen);
-            hamburgerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        });
+    if (typeof window.initHamburgerMenu === 'function') {
+        window.initHamburgerMenu();
+    } else {
+        const hamburgerBtn = document.querySelector(".hamburger") || document.getElementById("hamburgerBtn");
+        const headerRight = document.querySelector(".header-right");
+        if (hamburgerBtn && headerRight && hamburgerBtn.dataset.bound !== 'true') {
+            hamburgerBtn.dataset.bound = 'true';
+            hamburgerBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const isOpen = headerRight.classList.toggle("open");
+                headerRight.classList.toggle("active", isOpen);
+                headerRight.classList.remove("hidden");
+                hamburgerBtn.classList.toggle("active", isOpen);
+                hamburgerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            });
 
-        document.addEventListener("click", function (e) {
-            if (window.innerWidth <= 768 && !headerRight.contains(e.target) && !hamburgerBtn.contains(e.target)) {
-                headerRight.classList.remove("open");
-                headerRight.classList.remove("active");
-                headerRight.classList.add("hidden");
-                hamburgerBtn.classList.remove("active");
-                hamburgerBtn.setAttribute("aria-expanded", "false");
-            }
-        });
-
-        headerRight.querySelectorAll("a").forEach(function (link) {
-            link.addEventListener("click", function () {
-                if (window.innerWidth <= 768) {
-                    headerRight.classList.remove("open");
-                    headerRight.classList.remove("active");
-                    headerRight.classList.add("hidden");
+            document.addEventListener("click", function (e) {
+                if (window.innerWidth <= 768 && !headerRight.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                    headerRight.classList.remove("open", "active");
                     hamburgerBtn.classList.remove("active");
                     hamburgerBtn.setAttribute("aria-expanded", "false");
                 }
             });
-        });
 
-        window.addEventListener("resize", function () {
-            if (window.innerWidth > 768) {
-                headerRight.classList.remove("hidden");
-                headerRight.classList.remove("open");
-            }
-        });
+            headerRight.querySelectorAll("a").forEach(function (link) {
+                link.addEventListener("click", function () {
+                    if (window.innerWidth <= 768) {
+                        headerRight.classList.remove("open", "active");
+                        hamburgerBtn.classList.remove("active");
+                        hamburgerBtn.setAttribute("aria-expanded", "false");
+                    }
+                });
+            });
+
+            window.addEventListener("resize", function () {
+                if (window.innerWidth > 768) {
+                    headerRight.classList.remove("hidden", "open", "active");
+                    hamburgerBtn.classList.remove("active");
+                    hamburgerBtn.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
     }
 
     // ─── FAVORITE BUTTON HANDLER ─────────────────────────────────────────────
