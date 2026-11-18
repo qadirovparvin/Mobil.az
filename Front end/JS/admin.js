@@ -621,6 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isFroz    = u.status === 'frozen';
             const isBanned  = u.status === 'banned';
             const isAdm     = u.role   === 'admin';
+            const isSuperAdm= (u.email || '').trim().toLowerCase() === 'mobilim.az@gmail.com';
             const adsCount  = u.adsCount || 0;
             const balance   = Number(u.balance ?? u.walletBalance ?? 0).toFixed(2);
             const refCount  = u.referralCount || 0;
@@ -633,15 +634,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         ? '<span class="badge badge-warning">Dondurulmuş</span>'
                         : '<span class="badge badge-success">Aktiv</span>';
 
+            const roleBadge = isSuperAdm
+                ? '<span class="badge" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(245,158,11,0.3);"><i class="fas fa-crown" style="margin-right:4px;"></i>Super Admin</span>'
+                : isAdm
+                    ? '<span class="badge" style="background:rgba(99,102,241,0.18);color:#6366f1;border:1px solid rgba(99,102,241,0.35);font-weight:700;"><i class="fas fa-shield-halved" style="margin-right:4px;"></i>admin</span>'
+                    : '<span class="badge badge-success">user</span>';
+
             return `
             <tr data-uid="${esc(u._id)}" data-name="${name}">
                 <td><div class="user-cell" style="cursor:pointer;" onclick="window.openUserDetailModal('${esc(u._id)}')" title="Detallara baxmaq üçün klikləyin">
-                    <div class="user-avatar" style="background:${isAdm?'rgba(239, 68, 68, 0.15)':''}; color:${isAdm?'#EF4444':''}">${esc((u.name||'?')[0].toUpperCase())}</div>
+                    <div class="user-avatar" style="background:${isSuperAdm?'rgba(245,158,11,0.2)':isAdm?'rgba(99,102,241,0.15)':''}; color:${isSuperAdm?'#f59e0b':isAdm?'#6366F1':''}">${esc((u.name||'?')[0].toUpperCase())}</div>
                     <span><strong>${name}</strong></span>
                 </div></td>
                 <td>${esc(u.email||'—')}</td>
                 <td>${esc(u.phone||'—')}</td>
-                <td><span class="badge ${isAdm?'badge-primary':'badge-success'}">${esc(u.role||'user')}</span></td>
+                <td>${roleBadge}</td>
                 <td><strong>${adsCount}</strong></td>
                 <td><strong style="color:#10b981;">${balance} ₼</strong></td>
                 <td><span class="badge badge-info" style="background:rgba(99, 102, 241, 0.12);color:#6366f1;font-weight:600;">${refCount}</span></td>
@@ -652,23 +659,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="btn-icon" title="Detallı bax" onclick="window.openUserDetailModal('${esc(u._id)}')" style="color:var(--primary);">
                             <i class="fas fa-eye"></i>
                         </button>
+                        <button class="btn-icon role-btn" title="${isSuperAdm ? 'Əsas Super Admin (Toxunulmazdır)' : isDeleted ? 'Silinmiş hesab' : isAdm ? 'Rolu dəyiş (Admin statusundan çıxar)' : 'Rolu dəyiş (Admin təyin et)'}"
+                            onclick="window.openRoleChangeModal('${esc(u._id)}', '${name}', '${esc(u.email||'')}', '${isAdm ? 'admin' : 'user'}')"
+                            ${isSuperAdm || isDeleted ? 'disabled' : ''}>
+                            <i class="fas ${isSuperAdm ? 'fa-crown' : isAdm ? 'fa-user-shield' : 'fa-user-gear'}"></i>
+                        </button>
                         <button class="btn-icon freeze" title="${isDeleted ? 'Silinmiş hesab' : isFroz ? 'Aktivləşdir' : 'Dondur'}"
                             data-action="${isFroz?'unfreeze':'freeze'}" data-id="${esc(u._id)}"
-                            ${isAdm || isDeleted ? 'disabled title="Dondurula bilməz"' : ''}>
+                            ${isSuperAdm || isAdm || isDeleted ? 'disabled title="Dondurula bilməz"' : ''}>
                             <i class="fas ${isFroz?'fa-play':'fa-snowflake'}"></i>
                         </button>
                         ${!isBanned ? `
-                            <button onclick="banUser('${esc(u._id)}')" class="btn btn-danger btn-sm" ${isAdm || isDeleted ? 'disabled title="Ban edilmir"' : 'title="İstifadəçini banla"'}>
+                            <button onclick="banUser('${esc(u._id)}')" class="btn btn-danger btn-sm" ${isSuperAdm || isAdm || isDeleted ? 'disabled title="Ban edilmir"' : 'title="İstifadəçini banla"'}>
                                 <i class="fas fa-ban"></i> Ban
                             </button>
                         ` : `
-                            <button onclick="unbanUser('${esc(u._id)}')" class="btn btn-success btn-sm" ${isAdm || isDeleted ? 'disabled' : 'title="Banı qaldır"'}>
+                            <button onclick="unbanUser('${esc(u._id)}')" class="btn btn-success btn-sm" ${isSuperAdm || isAdm || isDeleted ? 'disabled' : 'title="Banı qaldır"'}>
                                 <i class="fas fa-check"></i> Unban
                             </button>
                         `}
                         <button class="btn-icon delete" title="${isDeleted ? 'Artıq silinib' : 'Sil'}"
                             data-action="delete-user" data-id="${esc(u._id)}"
-                            ${isAdm || isDeleted ? 'disabled title="Silinmiş hesab"' : ''}>
+                            ${isSuperAdm || isAdm || isDeleted ? 'disabled title="Admin silinə bilməz"' : ''}>
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -1020,21 +1032,36 @@ document.addEventListener('DOMContentLoaded', () => {
             const title  = esc([a.brand, a.modelName].filter(Boolean).join(' ') || a.title || '—');
             const author = esc(a.author?.name || a.author?.email || '—');
             const status = esc(a.status || '—');
-            const promo  = esc(a.promotionType || 'yoxdur');
+            const promo  = esc(a.promotionType || 'none');
             const stLower = (a.status || '').toLowerCase();
             const statusBadge = stLower === 'active' ? 'badge-success'
                               : stLower === 'rejected' ? 'badge-danger'
                               : stLower === 'pending'  ? 'badge-warning' : 'badge-primary';
+
+            let promoBadge = '<span class="badge" style="background:rgba(148,163,184,0.15);color:#94a3b8;">Standart</span>';
+            if (promo === 'VIP') {
+                promoBadge = '<span class="badge" style="background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;font-weight:700;"><i class="fas fa-crown" style="margin-right:3px;"></i>VIP</span>';
+            } else if (promo === 'PRO') {
+                promoBadge = '<span class="badge" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-weight:700;"><i class="fas fa-bolt" style="margin-right:3px;"></i>PRO</span>';
+            } else if (promo === 'Premium') {
+                promoBadge = '<span class="badge" style="background:linear-gradient(135deg,#ec4899,#be185d);color:#fff;font-weight:700;"><i class="fas fa-gem" style="margin-right:3px;"></i>Premium</span>';
+            } else if (promo === 'BumpUp' || a.isBoosted) {
+                promoBadge = '<span class="badge" style="background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.3);"><i class="fas fa-arrow-trend-up" style="margin-right:3px;"></i>İrəli</span>';
+            }
+
             return `
             <tr data-adid="${esc(a._id)}" data-title="${title}">
                 <td><strong>${title}</strong></td>
                 <td>${esc(a.price??'—')} ₼</td>
                 <td>${author}</td>
                 <td><span class="badge ${statusBadge}">${status}</span></td>
-                <td><span class="badge ${promo!=='yoxdur'?'badge-primary':'badge-success'}">${promo}</span></td>
+                <td>${promoBadge}</td>
                 <td>${fmtDate(a.createdAt)}</td>
                 <td>
-                    <div class="action-btns">
+                    <div class="action-btns" style="display:flex;align-items:center;gap:6px;">
+                        <button class="btn-icon promo" title="Promosiya təyin et (VIP / PRO)" onclick="window.openPromoteAdModal('${esc(a._id)}', '${title}', '${promo}')">
+                            <i class="fas fa-crown"></i>
+                        </button>
                         <button class="btn-icon approve" title="Təsdiqlə" data-action="approve-ad" data-id="${esc(a._id)}">
                             <i class="fas fa-check"></i>
                         </button>
@@ -1324,6 +1351,160 @@ document.addEventListener('DOMContentLoaded', () => {
             window.loadPaymentSessions(currentPaymentSessionsStatus, currentPaymentSessionsPage + 1);
         });
     }
+
+    /* ══════════════════════════════════════════════════════════════
+       USER ROLE MANAGEMENT MODAL
+       ═══════════════════════════════════════════════════════════ */
+    let currentRoleUserId = null;
+
+    window.openRoleChangeModal = function(userId, userName, userEmail, currentRole) {
+        currentRoleUserId = userId;
+        const modal = document.getElementById('roleModal');
+        const nameEl = document.getElementById('roleModalUserName');
+        const emailEl = document.getElementById('roleModalUserEmail');
+        const warnEl = document.getElementById('roleAdminWarning');
+        const radioUser = document.getElementById('roleChoiceUser');
+        const radioAdmin = document.getElementById('roleChoiceAdmin');
+
+        if (nameEl) nameEl.textContent = userName || 'İstifadəçi';
+        if (emailEl) emailEl.textContent = userEmail || '';
+
+        if (currentRole === 'admin') {
+            if (radioAdmin) radioAdmin.checked = true;
+            if (warnEl) warnEl.style.display = 'block';
+        } else {
+            if (radioUser) radioUser.checked = true;
+            if (warnEl) warnEl.style.display = 'none';
+        }
+
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeRoleModal = function() {
+        currentRoleUserId = null;
+        const modal = document.getElementById('roleModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // Toggle admin warning on radio choice
+    const rAdmin = document.getElementById('roleChoiceAdmin');
+    const rUser  = document.getElementById('roleChoiceUser');
+    if (rAdmin && rUser) {
+        rAdmin.addEventListener('change', () => {
+            const warnEl = document.getElementById('roleAdminWarning');
+            if (warnEl) warnEl.style.display = rAdmin.checked ? 'block' : 'none';
+        });
+        rUser.addEventListener('change', () => {
+            const warnEl = document.getElementById('roleAdminWarning');
+            if (warnEl) warnEl.style.display = 'none';
+        });
+    }
+
+    window.submitRoleChange = async function() {
+        if (!currentRoleUserId) return;
+        const selectedRole = document.querySelector('input[name="userRoleChoice"]:checked')?.value || 'user';
+        const btn = document.getElementById('btnSaveUserRole');
+
+        try {
+            if (btn) { btn.disabled = true; btn.textContent = 'Yadda saxlanılır…'; }
+            const res = await adminApi(`users/${currentRoleUserId}/role`, {
+                method: 'PATCH',
+                body: { role: selectedRole }
+            });
+
+            toast(res?.message || 'İstifadəçi rolu uğurla yeniləndi.', 'success');
+            window.closeRoleModal();
+            await window.loadUsers(currentUserPage, currentUsersSearch, currentUsersStatus);
+        } catch (err) {
+            toast(err.message || 'Rolu dəyişərkən xəta baş verdi', 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Yadda Saxla'; }
+        }
+    };
+
+    /* ══════════════════════════════════════════════════════════════
+       MANUAL AD PROMOTION MODAL
+       ═══════════════════════════════════════════════════════════ */
+    let currentPromoteAdId = null;
+
+    window.openPromoteAdModal = function(adId, adTitle, currentPromo) {
+        currentPromoteAdId = adId;
+        const modal = document.getElementById('promoteAdModal');
+        const titleEl = document.getElementById('promoteModalAdTitle');
+        const statusEl = document.getElementById('promoteModalCurrentStatus');
+        const typeSelect = document.getElementById('promoteTypeSelect');
+
+        if (titleEl) titleEl.textContent = adTitle || 'Elan';
+        if (statusEl) {
+            statusEl.textContent = currentPromo && currentPromo !== 'none' ? currentPromo : 'Standart (Promosiyasız)';
+            statusEl.className = currentPromo && currentPromo !== 'none' ? 'badge badge-primary' : 'badge badge-secondary';
+        }
+
+        if (typeSelect) {
+            typeSelect.value = (currentPromo && ['VIP', 'PRO', 'Premium', 'BumpUp'].includes(currentPromo)) ? currentPromo : 'VIP';
+        }
+
+        window.handlePromoTypeChange();
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closePromoteAdModal = function() {
+        currentPromoteAdId = null;
+        const modal = document.getElementById('promoteAdModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.handlePromoTypeChange = function() {
+        const typeSelect = document.getElementById('promoteTypeSelect');
+        const durGroup = document.getElementById('promoteDurationGroup');
+        if (!typeSelect || !durGroup) return;
+
+        const val = typeSelect.value;
+        if (val === 'none' || val === 'BumpUp') {
+            durGroup.style.display = 'none';
+        } else {
+            durGroup.style.display = 'block';
+        }
+    };
+
+    window.submitAdPromotion = async function() {
+        if (!currentPromoteAdId) return;
+        const typeSelect = document.getElementById('promoteTypeSelect');
+        const durSelect = document.getElementById('promoteDurationSelect');
+        const btn = document.getElementById('btnSaveAdPromotion');
+
+        const promotionType = typeSelect?.value || 'none';
+        const durationDays = durSelect?.value ? parseInt(durSelect.value, 10) : 7;
+
+        try {
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Tətbiq edilir…'; }
+            const res = await adminApi(`ads/${currentPromoteAdId}/promotion`, {
+                method: 'PATCH',
+                body: { promotionType, durationDays }
+            });
+
+            toast(res?.message || 'Promosiya uğurla tətbiq edildi.', 'success');
+            window.closePromoteAdModal();
+
+            // Update local cachedAds and re-render
+            const found = cachedAds.find(a => String(a._id || a.id) === String(currentPromoteAdId));
+            if (found && res?.data) {
+                found.promotionType = res.data.promotionType;
+                found.promotionExpiresAt = res.data.promotionExpiresAt;
+                found.isBoosted = res.data.isBoosted;
+                renderAds(cachedAds);
+            } else {
+                await window.loadAllData();
+            }
+        } catch (err) {
+            toast(err.message || 'Promosiya tətbiq edilərkən xəta baş verdi', 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check" style="margin-right: 6px;"></i>Tətbiq et';
+            }
+        }
+    };
 
     /* ══════════════════════════════════════════════════════════════
        LOAD ALL DATA

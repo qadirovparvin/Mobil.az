@@ -163,7 +163,7 @@
     </script>
     <style> body { visibility: hidden; } body.admin-ready, body.admin-network-error { visibility: visible; } </style>
 
-    <link rel="stylesheet" href="CSS/admin.css?v=20261118_v3">
+    <link rel="stylesheet" href="CSS/admin.css?v=20261118_v4">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <script>
@@ -762,6 +762,117 @@
     </div>
 </div>
 
+<!-- ── USER ROLE MODAL ────────────────────────────────────────────── -->
+<div id="roleModal" class="modal-overlay hidden" style="z-index: 9600;">
+    <div class="modal-card" style="max-width: 480px; width: 90%; text-align: left; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+            <div style="display:flex; align-items:center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #6366f1; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">İstifadəçi Rolu</h3>
+                    <p class="text-muted" style="margin: 2px 0 0; font-size: 0.8rem;">Giriş hüquqlarının dəyişdirilməsi</p>
+                </div>
+            </div>
+            <button type="button" class="btn-icon" onclick="window.closeRoleModal()" style="font-size: 1.25rem; border: none; background: transparent; cursor: pointer; color: var(--text-muted);">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div style="background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);" id="roleModalUserName">İstifadəçi Adı</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;" id="roleModalUserEmail">user@mail.com</div>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.6rem;">Rol Seçin:</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <label class="role-radio-label" style="display:flex; align-items:center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--bg-main);">
+                    <input type="radio" name="userRoleChoice" value="user" id="roleChoiceUser">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">User</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Adi istifadəçi</div>
+                    </div>
+                </label>
+                <label class="role-radio-label" style="display:flex; align-items:center; gap: 10px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--bg-main);">
+                    <input type="radio" name="userRoleChoice" value="admin" id="roleChoiceAdmin">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.9rem; color: #6366f1;">Admin</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">İnzibatçı hüququ</div>
+                    </div>
+                </label>
+            </div>
+            <div id="roleAdminWarning" class="alert-box" style="margin-top: 1rem; display: none; background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; color: #818cf8; line-height: 1.4;">
+                <i class="fas fa-circle-exclamation" style="margin-right: 6px;"></i>
+                Diqqət: İstifadəçini <strong>Admin</strong> etdikdə o, İdarəetmə Panelinə və bütün elan/istifadəçi parametrlərinə tam giriş əldə edəcək.
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn-cancel" onclick="window.closeRoleModal()">Ləğv et</button>
+            <button type="button" class="btn-primary" id="btnSaveUserRole" onclick="window.submitRoleChange()">Yadda Saxla</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── AD PROMOTION MODAL ─────────────────────────────────────────── -->
+<div id="promoteAdModal" class="modal-overlay hidden" style="z-index: 9600;">
+    <div class="modal-card" style="max-width: 520px; width: 92%; text-align: left; padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+            <div style="display:flex; align-items:center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: #f59e0b; display:flex; align-items:center; justify-content:center; font-size: 1.25rem;">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-main);">Elan Promosiyası</h3>
+                    <p class="text-muted" style="margin: 2px 0 0; font-size: 0.8rem;">VIP / PRO / Premium status təyini</p>
+                </div>
+            </div>
+            <button type="button" class="btn-icon" onclick="window.closePromoteAdModal()" style="font-size: 1.25rem; border: none; background: transparent; cursor: pointer; color: var(--text-muted);">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div style="background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 1.25rem;">
+            <div style="font-size: 0.95rem; font-weight: 600; color: var(--text-main);" id="promoteModalAdTitle">Elan Başlığı</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; display:flex; align-items:center; gap: 8px;">
+                <span>Cari status:</span>
+                <span id="promoteModalCurrentStatus" class="badge badge-secondary">—</span>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 1.25rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Promosiya Növü:</label>
+            <select id="promoteTypeSelect" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); font-size: 0.95rem; font-weight: 500;" onchange="window.handlePromoTypeChange()">
+                <option value="VIP">👑 VIP Elan (Ana səhifədə VIP vitrin)</option>
+                <option value="PRO">⚡ PRO Elan (Xüsusi nişan & ön sıra)</option>
+                <option value="Premium">💎 Premium Paket (Maksimum görünüş)</option>
+                <option value="BumpUp">🚀 İrəli Çək (Siyahının ən başına gətir)</option>
+                <option value="none">❌ Promosiyanı Ləğv et (Standart elan et)</option>
+            </select>
+        </div>
+
+        <div id="promoteDurationGroup" style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">Müddət:</label>
+            <select id="promoteDurationSelect" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); font-size: 0.95rem; font-weight: 500;">
+                <option value="3">3 Gün</option>
+                <option value="7" selected>7 Gün (Standart)</option>
+                <option value="15">15 Gün</option>
+                <option value="30">30 Gün (1 Ay)</option>
+                <option value="0">⭐ Limitsiz / Daimi (Admin xüsusi təyinatı)</option>
+            </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn-cancel" onclick="window.closePromoteAdModal()">Ləğv et</button>
+            <button type="button" class="btn-primary" id="btnSaveAdPromotion" onclick="window.submitAdPromotion()" style="background: linear-gradient(135deg, #f59e0b, #d97706); border: none; font-weight: 600;">
+                <i class="fas fa-check" style="margin-right: 6px;"></i>Tətbiq et
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- ── CONFIRM MODAL ─────────────────────────────────────────────── -->
 <div id="confirmModal" class="modal-overlay hidden">
     <div class="modal-card">
@@ -777,6 +888,6 @@
 
 <script src="JS/auth.js"></script>
 <script src="JS/api.js"></script>
-<script src="JS/admin.js?v=20261118_v3"></script>
+<script src="JS/admin.js?v=20261118_v4"></script>
 </body>
 </html>

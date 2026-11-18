@@ -15,6 +15,14 @@ const { invalidateCache } = require('../utils/redisClient');
 const { safeJoinPrivate } = require('../utils/privateFileService');
 const { readBoolean, readEnum, readObjectId, readString, safePageLimit, validateAllowedFields } = require('../utils/securityValidation');
 
+const SUPER_ADMIN_EMAIL = 'mobilim.az@gmail.com';
+
+const isSuperAdminUser = (user) => {
+    if (!user) return false;
+    const email = String(user.email || '').trim().toLowerCase();
+    return email === SUPER_ADMIN_EMAIL;
+};
+
 const writeAudit = async (req, { targetModel, target, action, previousState, newState, reason = '', metadata = null }) => {
     await AuditLog.create({
         actor: req.user?._id || null,
@@ -448,7 +456,7 @@ module.exports = {
         try {
             const user = await User.findById(req.params.id).select('+refreshTokens');
             if (!user) return res.status(404).json({ success: false, message: 'İstifadəçi tapılmadı' });
-            if (user.role === 'admin') return res.status(403).json({ success: false, message: 'Admin silinə bilməz' });
+            if (user.role === 'admin' || isSuperAdminUser(user)) return res.status(403).json({ success: false, message: 'Admin silinə bilməz' });
             const previousStatus = user.status;
 
             await session.withTransaction(async () => {
@@ -491,7 +499,7 @@ module.exports = {
 
             const user = await User.findById(req.params.id).select('+refreshTokens');
             if (!user) return res.status(404).json({ success: false, message: 'İstifadəçi tapılmadı' });
-            if (user.role === 'admin') return res.status(403).json({ success: false, message: 'Admin statusu dəyişdirilə bilməz' });
+            if (user.role === 'admin' || isSuperAdminUser(user)) return res.status(403).json({ success: false, message: 'Admin statusu dəyişdirilə bilməz' });
 
             const previousStatus = user.status;
             user.status = cleanStatus;
@@ -871,6 +879,138 @@ module.exports = {
         } catch (err) {
             if (next) next(err);
             else res.status(500).json({ message: err.message });
+        }
+    },
+
+    // @desc    Update user role (user / admin)
+    // @route   PATCH /api/admin/users/:id/role
+    // @access  Private/Admin
+    updateUserRole: async (req, res, next) => {
+        try {
+            validateAllowedFields(req.body, ['role'], 'body');
+            const { role } = req.body;
+            const cleanRole = readEnum(role, ['user', 'admin'], { fieldName: 'role', required: true, maxLength: 20 });
+
+            const user = await User.findById(req.params.id).select('+refreshTokens');
+            if (!user) return res.status(404).json({ success: false, message: 'İstifadəçi tapılmadı' });
+
+            if (isSuperAdminUser(user)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Əsas super admin hesabının (mobilim.az@gmail.com) rolu dəyişdirilə bilməz'
+                });
+            }
+
+            if (req.user && req.user._id && req.user._id.toString() === user._id.toString() && cleanRole !== 'admin') {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Öz admin rolunuzu ləğv edə bilməzsiniz'
+                });
+            }
+
+            const previousRole = user.role;
+            user.role = cleanRole;
+            user.refreshTokens = [];
+            user.tokenVersion = (user.tokenVersion || 0) + 1;
+            user.sessionVersion = (user.sessionVersion || 0) + 1;
+            await user.save();
+
+            await writeAudit(req, {
+                targetModel: 'User',
+                target: user._id,
+                action: 'user.role_changed',
+                previousState: { role: previousRole },
+                newState: { role: user.role }
+            });
+
+            return res.json({
+                success: true,
+                message: `İstifadəçinin rolu uğurla '${cleanRole}' olaraq təyin edildi`,
+                data: {
+                    _id: user._id,
+                    role: user.role
+                }
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // @desc    Manually assign or remove ad promotion (VIP / PRO / Premium / BumpUp / none)
+    // @route   PATCH /api/admin/ads/:id/promotion
+    // @access  Private/Admin
+    updateAdPromotion: async (req, res, next) => {
+        try {
+            validateAllowedFields(req.body, ['promotionType', 'durationDays'], 'body');
+            const { promotionType, durationDays } = req.body;
+            const allowedPromos = ['none', 'VIP', 'PRO', 'Premium', 'BumpUp', 'Urgent'];
+            const cleanType = readEnum(promotionType, allowedPromos, { fieldName: 'promotionType', required: true, maxLength: 20 });
+            const days = Math.max(0, parseInt(durationDays, 10) || 0);
+
+            const ad = await Ad.findById(req.params.id);
+            if (!ad) return res.status(404).json({ success: false, message: 'Elan tapılmadı' });
+            if (ad.status === DELETED_AD_STATUS) {
+                return res.status(400).json({ success: false, message: 'Silinmiş elana promosiya təyin edilə bilməz' });
+            }
+
+            const previousPromo = {
+                promotionType: ad.promotionType,
+                promotionStartedAt: ad.promotionStartedAt,
+                promotionExpiresAt: ad.promotionExpiresAt,
+                isBoosted: ad.isBoosted
+            };
+
+            const now = new Date();
+            if (cleanType === 'none') {
+                ad.promotionType = 'none';
+                ad.promotionStartedAt = null;
+                ad.promotionExpiresAt = null;
+                ad.isBoosted = false;
+            } else if (cleanType === 'BumpUp') {
+                ad.isBoosted = true;
+                ad.boostedAt = now;
+                ad.boostCount = (ad.boostCount || 0) + 1;
+                ad.createdAt = now;
+            } else {
+                ad.promotionType = cleanType;
+                ad.promotionStartedAt = now;
+                if (days > 0) {
+                    ad.promotionExpiresAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+                } else {
+                    ad.promotionExpiresAt = new Date(now.getTime() + 3650 * 24 * 60 * 60 * 1000); // 10 years / permanent
+                }
+            }
+
+            await ad.save();
+
+            try {
+                await invalidateCache('ads:VIP:cache:*');
+                await invalidateCache('ads:PRO:cache:*');
+                await invalidateCache('ads:cache:*');
+                await invalidateCache('ads:search:*');
+            } catch (cacheErr) {}
+
+            await writeAudit(req, {
+                targetModel: 'Ad',
+                target: ad._id,
+                action: 'ad.promotion_updated',
+                previousState: previousPromo,
+                newState: {
+                    promotionType: ad.promotionType,
+                    promotionExpiresAt: ad.promotionExpiresAt,
+                    isBoosted: ad.isBoosted
+                }
+            });
+
+            return res.json({
+                success: true,
+                message: cleanType === 'none'
+                    ? 'Elanın promosiya statusu ləğv edildi (Standart elan)'
+                    : `Elan uğurla '${cleanType}' statusuna keçirildi (${days > 0 ? days + ' gün' : 'Daimi / Limitsiz'})`,
+                data: ad
+            });
+        } catch (error) {
+            next(error);
         }
     }
 };
