@@ -67,12 +67,13 @@ const getAdminStats = async (req, res, next) => {
 // @access  Private/Admin
 const getAllUsers = async (req, res, next) => {
     try {
-        validateAllowedFields(req.query, ['page', 'limit', 'search', 'q'], 'query');
+        validateAllowedFields(req.query, ['page', 'limit', 'search', 'q', 'status'], 'query');
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 20;
         const skip = (page - 1) * limit;
 
         const search = String(req.query.search || req.query.q || '').trim();
+        const status = String(req.query.status || '').trim();
         const filter = {};
         if (search) {
             const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -82,6 +83,16 @@ const getAllUsers = async (req, res, next) => {
                 { email: { $regex: escaped, $options: 'i' } },
                 { phone: { $regex: escaped, $options: 'i' } }
             ];
+        }
+        if (status) {
+            if (status === 'deleted') {
+                filter.status = 'deleted';
+            } else if (status === 'active') {
+                filter.status = 'active';
+                filter.isDeleted = { $ne: true };
+            } else {
+                filter.status = status;
+            }
         }
 
         const totalUsers = await User.countDocuments(filter);
