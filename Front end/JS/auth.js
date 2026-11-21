@@ -219,6 +219,21 @@ function updateHeader() {
             const safeEmail = escapeHtml(currentUser.email || '');
             const safePhone = escapeHtml(currentUser.phone || '');
             const isAdmin = currentUser.role === 'admin';
+            const isVip = currentUser.activePackage === 'VIP' || currentUser.role === 'vip';
+            const isPro = currentUser.activePackage === 'PRO' || currentUser.role === 'pro';
+
+            let roleBadgeKey = 'cab-standard-acc';
+            let roleBadgeDefault = 'Standart Hesab';
+            if (isAdmin) {
+                roleBadgeKey = 'cab-admin-acc';
+                roleBadgeDefault = 'Admin Hesab';
+            } else if (isVip) {
+                roleBadgeKey = 'cab-vip-acc';
+                roleBadgeDefault = 'VIP Hesab';
+            } else if (isPro) {
+                roleBadgeKey = 'cab-pro-acc';
+                roleBadgeDefault = 'PRO Hesab';
+            }
 
             buttonContainer.innerHTML = `
                 <!-- BİLDİRİŞ - AYRI DROPDOWN -->
@@ -229,18 +244,18 @@ function updateHeader() {
                     </button>
                     <div id="notifDropdown" class="dropdown-panel notif-panel hidden">
                         <div class="dropdown-header">
-                            <span class="dropdown-title">Bildirişlər</span>
-                            <button type="button" id="markAllRead" class="btn-mark-all-read">Hamısını oxu</button>
+                            <span class="dropdown-title" data-translate="notif-title">Bildirişlər</span>
+                            <button type="button" id="markAllRead" class="btn-mark-all-read" data-translate="notif-mark-all">Hamısını oxu</button>
                         </div>
                         <div id="notifList" class="notif-list-container">
-                            <div class="notif-empty-state">Yüklənir...</div>
+                            <div class="notif-empty-state" data-translate="notif-loading">Yüklənir...</div>
                         </div>
                     </div>
                 </div>
 
                 ${isAdmin ? `
                 <a href="admin.html" class="admin-panel-btn-header" style="background: linear-gradient(135deg, #e53935, #d32f2f); color: white; border: none; padding: 8px 14px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; font-size: 14px; margin-right: 4px; box-shadow: 0 2px 6px rgba(229,57,53,0.3);">
-                    <i class="fas fa-shield-alt"></i> Admin Panel
+                    <i class="fas fa-shield-alt"></i> <span data-translate="header-admin-panel">Admin Panel</span>
                 </a>
                 ` : ''}
 
@@ -257,16 +272,16 @@ function updateHeader() {
                                 <div class="profile-name">${safeDisplayName}</div>
                                 ${safeEmail ? `<div class="profile-email"><i class="fas fa-envelope" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${safeEmail}</div>` : ''}
                                 ${safePhone ? `<div class="profile-phone" style="font-size:12px;color:var(--text-secondary,#aaa);margin-top:2px;"><i class="fas fa-phone" style="opacity:0.6;font-size:10px;margin-right:4px;"></i>${safePhone}</div>` : ''}
-                                <span class="role-badge">${isAdmin ? 'ADMİN HESAB' : 'STANDART HESAB'}</span>
+                                <span class="role-badge" data-translate="${roleBadgeKey}">${roleBadgeDefault}</span>
                             </div>
                         </div>
                         <div class="profile-menu-links">
-                            <a href="cabinet.html#tab-profile"><i class="fas fa-chart-pie"></i> İdarə Paneli</a>
-                            <a href="cabinet.html#tab-ads"><i class="fas fa-list-alt"></i> Mənim elanlarım</a>
-                            <a href="cabinet.html#tab-messages"><i class="fas fa-envelope"></i> Mesajlar</a>
-                            <a href="cabinet.html#tab-settings"><i class="fas fa-cog"></i> Tənzimləmələr</a>
-                            ${isAdmin ? '<a href="admin.html" class="admin-link"><i class="fas fa-shield-alt"></i> Adminliyə keç</a>' : ''}
-                            <a href="#" class="header-logout-btn text-danger"><i class="fas fa-sign-out-alt"></i> Çıxış</a>
+                            <a href="cabinet.html#tab-profile"><i class="fas fa-chart-pie"></i> <span data-translate="cab-dashboard">İdarə Paneli</span></a>
+                            <a href="cabinet.html#tab-ads"><i class="fas fa-list-alt"></i> <span data-translate="cab-my-ads">Mənim elanlarım</span></a>
+                            <a href="cabinet.html#tab-messages"><i class="fas fa-envelope"></i> <span data-translate="cab-messages">Mesajlar</span></a>
+                            <a href="cabinet.html#tab-settings"><i class="fas fa-cog"></i> <span data-translate="cab-settings">Tənzimləmələr</span></a>
+                            ${isAdmin ? '<a href="admin.html" class="admin-link"><i class="fas fa-shield-alt"></i> <span data-translate="cab-admin-switch">Adminliyə keç</span></a>' : ''}
+                            <a href="#" class="header-logout-btn text-danger"><i class="fas fa-sign-out-alt"></i> <span data-translate="cab-logout">Çıxış</span></a>
                         </div>
                     </div>
                 </div>
@@ -347,12 +362,50 @@ function updateHeader() {
                 </a>
             `;
         }
+
+        applyHeaderTranslations(buttonContainer);
     });
 
     if (loggedIn && token) {
         fetchUnreadCount(token);
     }
 }
+
+// Translate header dropdown elements according to current language
+function applyHeaderTranslations(container) {
+    let lang = localStorage.getItem("lang") || "AZ";
+    lang = lang.trim().toUpperCase();
+    if (lang === 'RU') lang = 'RUS';
+    if (lang === 'EN') lang = 'ENG';
+    const dict = (typeof window !== 'undefined' && window.translations && window.translations[lang]) ? window.translations[lang] : null;
+    if (!dict) return;
+
+    const root = container || document;
+    const targets = container ? container.querySelectorAll("[data-translate]") : document.querySelectorAll(".button-container [data-translate]");
+    targets.forEach((element) => {
+        const key = element.getAttribute("data-translate");
+        if (key && dict[key]) {
+            const icon = element.querySelector("i");
+            if (icon) {
+                element.innerHTML = icon.outerHTML + " " + dict[key];
+            } else {
+                element.textContent = dict[key];
+            }
+        }
+    });
+
+    const notifBells = root.querySelectorAll("#notifBell");
+    if (dict["notif-title"]) {
+        notifBells.forEach(bell => {
+            bell.setAttribute('aria-label', dict["notif-title"]);
+            bell.setAttribute('title', dict["notif-title"]);
+        });
+    }
+}
+window.applyHeaderTranslations = applyHeaderTranslations;
+window.addEventListener("mobilaz:languagechange", () => { applyHeaderTranslations(); });
+document.addEventListener("mobilaz:languagechange", () => { applyHeaderTranslations(); });
+window.addEventListener("langchange", () => { applyHeaderTranslations(); });
 
 // Global outside click handler to close dropdowns
 document.addEventListener('click', () => {
@@ -363,9 +416,16 @@ document.addEventListener('click', () => {
 async function loadNotifications() {
     const listEl = document.getElementById('notifList');
     if (!listEl) return;
+    let lang = localStorage.getItem("lang") || "AZ";
+    lang = lang.trim().toUpperCase();
+    if (lang === 'RU') lang = 'RUS';
+    if (lang === 'EN') lang = 'ENG';
+    const dict = (typeof window !== 'undefined' && window.translations && window.translations[lang]) ? window.translations[lang] : null;
+    const tNotif = (key, fallback) => (dict && dict[key]) || fallback;
+
     const token = getToken();
     if (!token) {
-        listEl.innerHTML = '<div class="notif-empty-state">Daxil olmamısınız</div>';
+        listEl.innerHTML = `<div class="notif-empty-state" data-translate="notif-not-logged-in">${tNotif('notif-not-logged-in', 'Daxil olmamısınız')}</div>`;
         return;
     }
 
@@ -377,7 +437,7 @@ async function loadNotifications() {
         const data = await res.json();
         const items = Array.isArray(data) ? data : (data.notifications || []);
         if (items.length === 0) {
-            listEl.innerHTML = '<div class="notif-empty-state">Bildiriş yoxdur</div>';
+            listEl.innerHTML = `<div class="notif-empty-state" data-translate="notif-none">${tNotif('notif-none', 'Bildiriş yoxdur')}</div>`;
             return;
         }
         listEl.replaceChildren();
@@ -411,7 +471,7 @@ async function loadNotifications() {
             listEl.appendChild(itemDiv);
         });
     } catch (err) {
-        listEl.innerHTML = '<div class="notif-empty-state">Bildirişlər yüklənə bilmədi</div>';
+        listEl.innerHTML = `<div class="notif-empty-state" data-translate="notif-failed">${tNotif('notif-failed', 'Bildirişlər yüklənə bilmədi')}</div>`;
     }
 }
 window.loadNotifications = loadNotifications;
