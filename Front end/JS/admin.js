@@ -596,8 +596,9 @@ document.addEventListener('DOMContentLoaded', () => {
        ═══════════════════════════════════════════════════════════ */
     function renderRecentUsers(users) {
         if (!recentUsersTable) return;
-        if (!users.length) { recentUsersTable.innerHTML = emptyRow(4, 'İstifadəçi tapılmadı.'); return; }
-        recentUsersTable.innerHTML = users.slice(0,5).map(u => `
+        const validUsers = (users || []).filter(u => u.status !== 'deleted' && u.isDeleted !== true);
+        if (!validUsers.length) { recentUsersTable.innerHTML = emptyRow(4, 'İstifadəçi tapılmadı.'); return; }
+        recentUsersTable.innerHTML = validUsers.slice(0,5).map(u => `
             <tr>
                 <td><div class="user-cell">
                     <div class="user-avatar">${esc((u.name||'?')[0].toUpperCase())}</div>
@@ -614,8 +615,11 @@ document.addEventListener('DOMContentLoaded', () => {
        ═══════════════════════════════════════════════════════════ */
     function renderUsers(users) {
         if (!allUsersTable) return;
-        if (!users.length) { allUsersTable.innerHTML = emptyRow(10, 'İstifadəçi tapılmadı.'); return; }
-        allUsersTable.innerHTML = users.map(u => {
+        const displayUsers = currentUsersStatus === 'deleted'
+            ? users
+            : (users || []).filter(u => u.status !== 'deleted' && u.isDeleted !== true);
+        if (!displayUsers.length) { allUsersTable.innerHTML = emptyRow(10, 'İstifadəçi tapılmadı.'); return; }
+        allUsersTable.innerHTML = displayUsers.map(u => {
             const name      = esc([u.name, u.lastName].filter(Boolean).join(' ') || '—');
             const isDeleted = u.status === 'deleted' || u.isDeleted === true;
             const isFroz    = u.status === 'frozen';
@@ -831,7 +835,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     await adminApi(`users/${id}`, { method: 'DELETE' });
                     toast(`${name} silindi.`, 'success');
-                    await window.loadUsers(currentUserPage, currentUsersSearch);
+                    await window.loadUsers(currentUserPage, currentUsersSearch, currentUsersStatus);
+                    try {
+                        const stats = await adminApi('stats');
+                        if (stats?.data) renderStats(stats.data);
+                    } catch (_) {}
                 } catch(err) { toast(err.message, 'error'); }
             }
 
