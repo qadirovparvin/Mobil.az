@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     // ── Core ───────────────────────────────────────────────
     name:       { type: String, required: true },
     lastName:   { type: String, default: '' },
+    username:   { type: String, sparse: true, lowercase: true, trim: true },
     email:      { type: String, required: false, unique: true, sparse: true, lowercase: true, trim: true, default: undefined },
     pendingEmail: { type: String, default: '', lowercase: true, trim: true },
     pendingEmailTokenHash: { type: String, default: null, select: false },
