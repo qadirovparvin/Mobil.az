@@ -44,7 +44,7 @@ const writeAudit = async (req, { targetModel, target, action, previousState, new
 // @access  Private/Admin
 const getAdminStats = async (req, res, next) => {
     try {
-        const totalUsers = await User.countDocuments();
+        const totalUsers = await User.countDocuments({ status: { $ne: 'deleted' }, isDeleted: { $ne: true } });
         const totalAds = await Ad.countDocuments();
         const activeAds = await Ad.countDocuments({ status: 'active' });
         const totalStores = await Store.countDocuments();
@@ -82,26 +82,32 @@ const getAllUsers = async (req, res, next) => {
 
         const search = String(req.query.search || req.query.q || '').trim();
         const status = String(req.query.status || '').trim();
-        const filter = {};
+        const andConditions = [];
         if (search) {
             const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            filter.$or = [
-                { name: { $regex: escaped, $options: 'i' } },
-                { lastName: { $regex: escaped, $options: 'i' } },
-                { email: { $regex: escaped, $options: 'i' } },
-                { phone: { $regex: escaped, $options: 'i' } }
-            ];
+            andConditions.push({
+                $or: [
+                    { name: { $regex: escaped, $options: 'i' } },
+                    { lastName: { $regex: escaped, $options: 'i' } },
+                    { email: { $regex: escaped, $options: 'i' } },
+                    { phone: { $regex: escaped, $options: 'i' } }
+                ]
+            });
         }
-        if (status) {
-            if (status === 'deleted') {
-                filter.status = 'deleted';
-            } else if (status === 'active') {
-                filter.status = 'active';
-                filter.isDeleted = { $ne: true };
-            } else {
-                filter.status = status;
-            }
+        if (status === 'deleted') {
+            andConditions.push({
+                $or: [{ status: 'deleted' }, { isDeleted: true }]
+            });
+        } else if (status) {
+            andConditions.push({ status: status, isDeleted: { $ne: true } });
+        } else {
+            // Standart istifadəçi siyahısında silinmiş istifadəçilər əks olunmur
+            andConditions.push({
+                status: { $ne: 'deleted' },
+                isDeleted: { $ne: true }
+            });
         }
+        const filter = andConditions.length > 0 ? { $and: andConditions } : {};
 
         const totalUsers = await User.countDocuments(filter);
         const users = await User.find(filter)
@@ -461,6 +467,9 @@ module.exports = {
 
             await session.withTransaction(async () => {
                 user.status = 'deleted';
+                user.isDeleted = true;
+                user.deletedAt = new Date();
+                user.deletionReason = 'Admin tərəfindən silindi';
                 user.refreshTokens = [];
                 user.tokenVersion = (user.tokenVersion || 0) + 1;
                 user.sessionVersion = (user.sessionVersion || 0) + 1;
