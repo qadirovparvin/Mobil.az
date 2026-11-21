@@ -389,8 +389,9 @@ resetSelectOptions(brandSelect, _t.brandPlaceholder);
 resetSelectOptions(modelSelect, _t.modelPlaceholderCat);
 
 // Sync with the central language switcher
-document.addEventListener('langchange', (e) => {
-  const t = e.detail.t;
+function handleElanLanguageChange(e) {
+  const lang = e?.detail?.lang || localStorage.getItem('lang') || 'AZ';
+  const t = e?.detail?.t || (window.translations && (window.translations[lang] || window.translations['AZ'])) || {};
   if (!t) return;
   _t.brandPlaceholder = t['opt-brand-placeholder'] || _t.brandPlaceholder;
   _t.modelPlaceholderCat = t['opt-model-placeholder-cat'] || _t.modelPlaceholderCat;
@@ -431,7 +432,9 @@ document.addEventListener('langchange', (e) => {
       setEditFormEnabled(false);
     }
   }
-});
+}
+document.addEventListener('langchange', handleElanLanguageChange);
+document.addEventListener('mobilaz:languagechange', handleElanLanguageChange);
 
 /* =========================================================
    DYNAMIC SPECS ENGINE BY CATEGORY & BRAND
