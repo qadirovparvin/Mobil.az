@@ -610,6 +610,16 @@
                 <button class="btn-primary w-100" id="btnPayPromo" onclick="confirmPromotion()">
                     <i class="fas fa-check-circle"></i> <span data-translate="mon-pay-btn">Ödəniş et</span>
                 </button>
+                <div style="margin-top: 14px; text-align: center;">
+                    <div style="position: relative; margin: 12px 0; text-align: center;">
+                        <span style="background: var(--card-bg, #1e293b); padding: 0 10px; color: var(--text-muted, #94a3b8); font-size: 12px; position: relative; z-index: 1;">VƏ YA</span>
+                        <hr style="position: absolute; top: 50%; left: 0; right: 0; border: none; border-top: 1px solid var(--border-color, #334155); margin: 0; z-index: 0;">
+                    </div>
+                    <button type="button" class="btn-outline w-100" id="btnRequestPromoAdmin" onclick="submitPromotionRequestToAdmin()" style="width: 100%; padding: 12px; border: 1px solid #8b5cf6; background: rgba(139, 92, 246, 0.12); color: #c4b5fd; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                        <i class="fas fa-crown" style="color: #f59e0b;"></i> <span id="promoRequestBtnText">Adminə VIP Sorğusu Göndər</span>
+                    </button>
+                    <p style="font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 6px;">Admin təsdiq etdikdən sonra elanınız VIP / PRO bölməsində vurğulanacaq.</p>
+                </div>
             </div>
         </div>
     </div>

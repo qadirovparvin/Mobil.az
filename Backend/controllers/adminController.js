@@ -256,21 +256,76 @@ const getUserDetails = async (req, res, next) => {
     }
 };
 
-// @desc    Get all ads (paginated)
+// @desc    Get all ads (paginated & filtered)
 // @route   GET /api/admin/ads
 // @access  Private/Admin
 const getAllAds = async (req, res, next) => {
     try {
-        validateAllowedFields(req.query, ['page', 'limit'], 'query');
-        const { page, limit, skip } = safePageLimit(req.query, { defaultLimit: 10, maxLimit: 100 });
+        validateAllowedFields(req.query, ['page', 'limit', 'search', 'q', 'status', 'promoRequest', 'promotionType'], 'query');
+        const { page, limit, skip } = safePageLimit(req.query, { defaultLimit: 20, maxLimit: 100 });
 
-        const ads = await Ad.find().populate('author', 'name email').sort({ createdAt: -1 }).skip(skip).limit(limit);
-        const total = await Ad.countDocuments();
+        const search = String(req.query.search || req.query.q || '').trim();
+        const status = String(req.query.status || '').trim();
+        const promoRequest = String(req.query.promoRequest || '').trim();
+        const promotionType = String(req.query.promotionType || '').trim();
 
-        const totalPages = Math.ceil(total / limit);
+        const andConditions = [
+            { status: { $ne: DELETED_AD_STATUS } }
+        ];
+
+        if (search) {
+            const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            andConditions.push({
+                $or: [
+                    { title: { $regex: escaped, $options: 'i' } },
+                    { brand: { $regex: escaped, $options: 'i' } },
+                    { modelName: { $regex: escaped, $options: 'i' } },
+                    { city: { $regex: escaped, $options: 'i' } },
+                    { contactPhone: { $regex: escaped, $options: 'i' } }
+                ]
+            });
+        }
+
+        if (status === 'promo_requests' || promoRequest === 'pending') {
+            andConditions.push({ promotionRequestStatus: 'pending' });
+        } else if (status === 'pending') {
+            andConditions.push({ status: 'pending' });
+        } else if (status === 'active') {
+            andConditions.push({ status: 'active' });
+        } else if (status === 'rejected') {
+            andConditions.push({ status: 'rejected' });
+        } else if (status === 'vip') {
+            andConditions.push({ promotionType: 'VIP' });
+        } else if (status === 'pro') {
+            andConditions.push({ promotionType: 'PRO' });
+        } else if (status && status !== 'all') {
+            andConditions.push({ status: status });
+        }
+
+        if (promotionType && promotionType !== 'all') {
+            andConditions.push({ promotionType: promotionType });
+        }
+
+        const filter = andConditions.length > 0 ? { $and: andConditions } : {};
+
+        const [ads, total, pendingCount, promoRequestsCount, activeCount] = await Promise.all([
+            Ad.find(filter).populate('author', 'name lastName email phone').sort({ createdAt: -1 }).skip(skip).limit(limit),
+            Ad.countDocuments(filter),
+            Ad.countDocuments({ status: 'pending' }),
+            Ad.countDocuments({ status: { $ne: DELETED_AD_STATUS }, promotionRequestStatus: 'pending' }),
+            Ad.countDocuments({ status: 'active' })
+        ]);
+
+        const totalPages = Math.ceil(total / limit) || 1;
         res.json({
             success: true,
             data: ads,
+            counts: {
+                total,
+                pending: pendingCount,
+                promoRequests: promoRequestsCount,
+                active: activeCount
+            },
             pagination: { page, limit, totalAds: total, totalPages, hasNextPage: page < totalPages, hasPreviousPage: page > 1 }
         });
     } catch (error) {
@@ -1016,6 +1071,97 @@ module.exports = {
                 message: cleanType === 'none'
                     ? 'Elanın promosiya statusu ləğv edildi (Standart elan)'
                     : `Elan uğurla '${cleanType}' statusuna keçirildi (${days > 0 ? days + ' gün' : 'Daimi / Limitsiz'})`,
+                data: ad
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // @desc    Approve VIP / PRO promotion request
+    // @route   PUT /api/admin/ads/:id/approve-promo
+    // @access  Private/Admin
+    approvePromotionRequest: async (req, res, next) => {
+        try {
+            validateAllowedFields(req.body, ['promotionType', 'days'], 'body');
+            const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } });
+            if (!ad) return res.status(404).json({ success: false, message: 'Elan tapılmadı' });
+
+            const targetPromo = (req.body.promotionType || ad.promotionRequest || 'VIP').toUpperCase();
+            const validPromo = ['VIP', 'PRO', 'PREMIUM'].includes(targetPromo) ? (targetPromo === 'PREMIUM' ? 'PRO' : targetPromo) : 'VIP';
+            const days = parseInt(req.body.days, 10) || (validPromo === 'PRO' ? 15 : 7);
+
+            ad.promotionType = validPromo;
+            ad.promotionRequestStatus = 'approved';
+            ad.isBoosted = true;
+            ad.boostedAt = new Date();
+            ad.promotionStartedAt = new Date();
+            ad.promotionExpiresAt = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+
+            if (ad.status === 'pending') {
+                ad.status = 'active';
+                ad.publishedAt = new Date();
+                ad.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+            }
+            await ad.save();
+            await invalidateCache('ads:VIP:cache:*');
+            await invalidateCache('ads:PRO:cache:*');
+
+            await Notification.create({
+                user: ad.author,
+                type: 'ad_status',
+                title: `Elanınız ${validPromo} oldu! 👑`,
+                body: `"${ad.brand} ${ad.modelName}" elanınız üçün ${validPromo} sorğusu təsdiqləndi (${days} gün aktivdir).`,
+                link: `/elan/${ad._id}`
+            });
+
+            await writeAudit(req, {
+                targetModel: 'Ad',
+                target: ad._id,
+                action: 'ad.promo_approved',
+                newState: { promotionType: ad.promotionType, promotionExpiresAt: ad.promotionExpiresAt }
+            });
+
+            res.json({
+                success: true,
+                message: `Elan uğurla ${validPromo} statusuna yüksəldildi!`,
+                data: ad
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // @desc    Reject VIP / PRO promotion request
+    // @route   PUT /api/admin/ads/:id/reject-promo
+    // @access  Private/Admin
+    rejectPromotionRequest: async (req, res, next) => {
+        try {
+            const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } });
+            if (!ad) return res.status(404).json({ success: false, message: 'Elan tapılmadı' });
+
+            const oldRequest = ad.promotionRequest || 'Promo';
+            ad.promotionRequestStatus = 'rejected';
+            await ad.save();
+
+            await Notification.create({
+                user: ad.author,
+                type: 'ad_status',
+                title: `${oldRequest} Sorğusu Qəbul Edilmədi`,
+                body: `"${ad.brand} ${ad.modelName}" elanınız üçün ${oldRequest} istəyi hazırda qəbul edilmədi.`,
+                link: '/cabinet.html#my-ads'
+            });
+
+            await writeAudit(req, {
+                targetModel: 'Ad',
+                target: ad._id,
+                action: 'ad.promo_rejected',
+                newState: { promotionRequestStatus: 'rejected' }
+            });
+
+            res.json({
+                success: true,
+                message: `${oldRequest} sorğusu rədd edildi`,
                 data: ad
             });
         } catch (error) {

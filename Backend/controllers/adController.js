@@ -1117,4 +1117,54 @@ const getFavoriteAds = async (req, res, next) => {
     }
 };
 
-module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds };
+// @desc    Request VIP / PRO promotion for an existing ad
+// @route   POST /api/ads/:id/request-promotion
+// @access  Private
+const requestAdPromotion = async (req, res, next) => {
+    try {
+        validateAllowedFields(req.body, ['promotionType', 'type', 'note', 'days'], 'body');
+        const reqType = String(req.body.promotionType || req.body.type || 'VIP').trim().toUpperCase();
+        if (!['VIP', 'PRO', 'PREMIUM'].includes(reqType)) {
+            return res.status(400).json({ message: 'Yanlış promosiya növü. Yalnız VIP və ya PRO seçilə bilər.' });
+        }
+        const cleanType = reqType === 'PREMIUM' ? 'PRO' : reqType;
+
+        const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } });
+        if (!ad) {
+            return res.status(404).json({ message: 'Elan tapılmadı' });
+        }
+
+        // Must be the author or an admin
+        if (String(ad.author) !== String(req.user._id) && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Bu elan üçün sorğu göndərmək hüququnuz yoxdur' });
+        }
+
+        ad.promotionRequest = cleanType;
+        ad.promotionRequestStatus = 'pending';
+        ad.promotionRequestedAt = new Date();
+        ad.promotionRequestNote = String(req.body.note || '').trim().slice(0, 300);
+        await ad.save();
+
+        await Notification.create({
+            user: req.user._id,
+            type: 'ad_status',
+            title: `${cleanType} Sorğunuz Göndərildi 🚀`,
+            body: `"${ad.brand} ${ad.modelName}" elanınız üçün ${cleanType} statusu sorğusu moderatora göndərildi. Təsdiq edildikdə bildiriş alacaqsınız.`,
+            link: '/cabinet.html#my-ads'
+        });
+
+        res.json({
+            success: true,
+            message: `${cleanType} sorğunuz uğurla göndərildi. Admin tərəfindən baxıldıqdan sonra aktivləşdiriləcək.`,
+            ad: {
+                _id: ad._id,
+                promotionRequest: ad.promotionRequest,
+                promotionRequestStatus: ad.promotionRequestStatus
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds, requestAdPromotion };
