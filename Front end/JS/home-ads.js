@@ -90,29 +90,27 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function getBadgeHtml(ad) {
-        const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
-        const badgeStyle = ad.sellerType === "store"
-            ? ""
-            : ' style="background:var(--accent-hover);"';
-
-        let badges = `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
-
         const now = new Date();
         const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
 
         if (isPromoActive) {
             if (ad.promotionType === "VIP") {
-                badges += ` <span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
+                return `<span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
             } else if (ad.promotionType === "PRO") {
-                badges += ` <span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
+                return `<span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
             } else if (ad.promotionType === "Premium") {
-                badges += ` <span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
+                return `<span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
             } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
+                return `<span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> Təcili</span>`;
             }
         }
 
-        return badges;
+        const sellerType = ad.sellerType === "store" ? "Mağaza" : "Şəxsi";
+        const badgeStyle = ad.sellerType === "store"
+            ? ""
+            : ' style="background:var(--accent-hover);"';
+
+        return `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
     }
 
     function createCardMarkup(ad) {

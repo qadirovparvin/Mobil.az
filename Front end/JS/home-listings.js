@@ -123,6 +123,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function getBadgeHtml(ad) {
         const lang = getCurrentLang();
+        const now = new Date();
+        const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
+
+        if (isPromoActive) {
+            if (ad.promotionType === "VIP") {
+                return `<span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
+            } else if (ad.promotionType === "PRO") {
+                return `<span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
+            } else if (ad.promotionType === "Premium") {
+                return `<span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
+            } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
+                const urgentWord = lang === 'ENG' ? 'Urgent' : (lang === 'RUS' ? 'Срочно' : 'Təcili');
+                return `<span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> ${urgentWord}</span>`;
+            }
+        }
+
         const sellerType = ad.sellerType === "store"
             ? (lang === 'ENG' ? 'Store' : (lang === 'RUS' ? 'Магазин' : 'Mağaza'))
             : (lang === 'ENG' ? 'Personal' : (lang === 'RUS' ? 'Частное' : 'Şəxsi'));
@@ -130,25 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
             ? ""
             : ' style="background:var(--accent-hover);"';
 
-        let badges = `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
-
-        const now = new Date();
-        const isPromoActive = ad.promotionExpiresAt && new Date(ad.promotionExpiresAt) > now;
-
-        if (isPromoActive) {
-            if (ad.promotionType === "VIP") {
-                badges += ` <span class="elan-badge product-badge vip"><i class="fas fa-crown"></i> VIP</span>`;
-            } else if (ad.promotionType === "PRO") {
-                badges += ` <span class="elan-badge product-badge pro"><i class="fas fa-bolt"></i> PRO</span>`;
-            } else if (ad.promotionType === "Premium") {
-                badges += ` <span class="elan-badge product-badge premium"><i class="fas fa-bolt"></i> Premium</span>`;
-            } else if (ad.promotionType === "Urgent" || ad.promotionType === "BumpUp") {
-                const urgentWord = lang === 'ENG' ? 'Urgent' : (lang === 'RUS' ? 'Срочно' : 'Təcili');
-                badges += ` <span class="elan-badge product-badge urgent"><i class="fas fa-fire"></i> ${urgentWord}</span>`;
-            }
-        }
-
-        return badges;
+        return `<span class="elan-badge product-badge"${badgeStyle}>${sellerType}</span>`;
     }
 
     function createCardMarkup(ad) {
