@@ -566,6 +566,28 @@ main {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
+[data-theme="dark"] .filter-label,
+[data-theme="dark"] .filter-label span {
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .filter-label i {
+  color: #818cf8;
+}
+
+[data-theme="dark"] .price-input-group span {
+  color: #cbd5e1;
+}
+
+[data-theme="dark"] .filter-group {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .btn-reset {
+  color: #cbd5e1;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
 .filter-body.active {
   display: block;
   animation: filterSlideIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1749,6 +1771,70 @@ main {
   .filter-pill {
     max-width: 100% !important;
     box-sizing: border-box !important;
+  }
+
+  /* Mobil filter başlıqları və yüksək kontrast */
+  .filter-panel .filter-label,
+  .filter-panel .filter-label span,
+  .filter-body .filter-label,
+  .filter-body .filter-label span,
+  #filterBody .filter-label,
+  #filterBody .filter-label span,
+  #filterPanel .filter-label,
+  #filterPanel .filter-label span,
+  .filter-label,
+  .filter-label span {
+    color: #f8fafc !important;
+    letter-spacing: 0.6px !important;
+    font-weight: 600 !important;
+  }
+
+  .filter-panel .filter-label i,
+  .filter-body .filter-label i,
+  #filterBody .filter-label i,
+  #filterPanel .filter-label i,
+  .filter-label i {
+    color: #818cf8 !important;
+    font-size: 14px !important;
+  }
+
+  .filter-panel .filter-group,
+  .filter-body .filter-group,
+  #filterBody .filter-group,
+  #filterPanel .filter-group {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  }
+
+  .filter-panel .price-input-group span,
+  .filter-body .price-input-group span,
+  #filterBody .price-input-group span,
+  #filterPanel .price-input-group span {
+    color: #cbd5e1 !important;
+    font-weight: 600 !important;
+  }
+
+  .filter-panel .btn-reset,
+  .filter-body .btn-reset,
+  #filterBody .btn-reset,
+  #filterPanel .btn-reset {
+    color: #e2e8f0 !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+  }
+
+  .filter-panel .btn-reset:hover,
+  .filter-body .btn-reset:hover,
+  #filterBody .btn-reset:hover,
+  #filterPanel .btn-reset:hover {
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+    background-color: rgba(239, 68, 68, 0.15) !important;
+  }
+
+  .filter-panel .active-filters-title,
+  .filter-body .active-filters-title,
+  #filterBody .active-filters-title,
+  #filterPanel .active-filters-title {
+    color: #818cf8 !important;
   }
 
   /* Kataloq arxada qalmasın */
