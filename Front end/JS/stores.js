@@ -156,3 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStores();
   initStoreSearch();
 });
+
+document.addEventListener('mobilaz:languagechange', () => {
+  loadStores();
+});
