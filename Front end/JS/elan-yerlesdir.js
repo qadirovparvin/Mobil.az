@@ -432,6 +432,10 @@ function handleElanLanguageChange(e) {
       setEditFormEnabled(false);
     }
   }
+
+  if (typeof renderAllImagePreviews === 'function') {
+    renderAllImagePreviews();
+  }
 }
 document.addEventListener('langchange', handleElanLanguageChange);
 document.addEventListener('mobilaz:languagechange', handleElanLanguageChange);
@@ -604,6 +608,25 @@ const fileInput = document.getElementById('images');
 const previewGrid = document.getElementById('imagePreviewGrid');
 
 let existingImages = [];
+let selectedNewFiles = [];
+
+function getElanLang() {
+  const l = (localStorage.getItem('lang') || localStorage.getItem('selectedLanguage') || 'AZ').toUpperCase();
+  if (l.startsWith('RU')) return 'RU';
+  if (l.startsWith('EN')) return 'ENG';
+  return 'AZ';
+}
+
+function syncFileInput() {
+  if (!fileInput) return;
+  try {
+    const dt = new DataTransfer();
+    selectedNewFiles.forEach(f => dt.items.add(f));
+    fileInput.files = dt.files;
+  } catch (e) {
+    console.warn('DataTransfer sync error:', e);
+  }
+}
 
 function getDisplayImageUrl(img) {
   if (!img) return '';
@@ -614,10 +637,29 @@ function getDisplayImageUrl(img) {
 
 function updateImageRequirement() {
   if (!fileInput) return;
-  if (existingImages.length > 0) {
+  const totalCount = existingImages.length + selectedNewFiles.length;
+  if (totalCount > 0) {
     fileInput.removeAttribute('required');
   } else if (!isEditMode) {
     fileInput.setAttribute('required', 'required');
+  }
+}
+
+function removeExistingImage(index) {
+  if (isEditMode && (!isEditLoaded || isEditLoading)) return;
+  if (index >= 0 && index < existingImages.length) {
+    existingImages.splice(index, 1);
+    renderAllImagePreviews();
+    updateImageRequirement();
+  }
+}
+
+function removeNewFile(index) {
+  if (index >= 0 && index < selectedNewFiles.length) {
+    selectedNewFiles.splice(index, 1);
+    syncFileInput();
+    renderAllImagePreviews();
+    updateImageRequirement();
   }
 }
 
@@ -625,11 +667,12 @@ function renderAllImagePreviews() {
   if (!previewGrid) return;
   previewGrid.innerHTML = '';
 
+  const lang = getElanLang();
+
   // 1. Existing images from edit mode
   existingImages.forEach((imgSrc, index) => {
     const container = document.createElement('div');
     container.className = 'preview-thumb-container';
-    container.style.cssText = 'position:relative;display:inline-block;margin:4px;';
 
     const img = document.createElement('img');
     img.src = getDisplayImageUrl(imgSrc);
@@ -640,17 +683,12 @@ function renderAllImagePreviews() {
     removeBtn.type = 'button';
     removeBtn.className = 'preview-remove-btn';
     removeBtn.innerHTML = '&times;';
-    removeBtn.title = 'Şəkli sil';
-    removeBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;background:#dc3545;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.3);';
+    removeBtn.title = lang === 'RU' ? 'Удалить фото' : (lang === 'ENG' ? 'Delete photo' : 'Şəkli sil');
 
     removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      if (isEditMode && (!isEditLoaded || isEditLoading)) {
-        return;
-      }
-      existingImages.splice(index, 1);
-      renderAllImagePreviews();
-      updateImageRequirement();
+      removeExistingImage(index);
     });
 
     container.appendChild(img);
@@ -658,118 +696,204 @@ function renderAllImagePreviews() {
     previewGrid.appendChild(container);
   });
 
-  // 2. Newly selected files (already validated and limited)
-  const files = (fileInput && fileInput.files)
-    ? Array.from(fileInput.files)
-    : [];
+  // 2. Newly selected files
+  selectedNewFiles.forEach((file, index) => {
+    const container = document.createElement('div');
+    container.className = 'preview-thumb-container';
 
-  files.forEach(file => {
-    if (!file.type || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      const container = document.createElement('div');
-      container.className = 'preview-thumb-container';
-      container.style.cssText = 'position:relative;display:inline-block;margin:4px;';
+    const img = document.createElement('img');
+    img.className = 'preview-thumb';
+    img.alt = file.name || `Şəkil ${index + 1}`;
+    try {
+      img.src = URL.createObjectURL(file);
+    } catch (e) {
+      const reader = new FileReader();
+      reader.onload = ev => { img.src = ev.target.result; };
+      reader.readAsDataURL(file);
+    }
 
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.className = 'preview-thumb';
-      img.alt = file.name;
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'preview-remove-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.title = lang === 'RU' ? 'Удалить фото' : (lang === 'ENG' ? 'Delete photo' : 'Şəkli sil');
 
-      container.appendChild(img);
-      previewGrid.appendChild(container);
-    };
-    reader.readAsDataURL(file);
+    removeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      removeNewFile(index);
+    });
+
+    container.appendChild(img);
+    container.appendChild(removeBtn);
+    previewGrid.appendChild(container);
   });
 
-  const totalCount = existingImages.length + files.length;
+  const totalCount = existingImages.length + selectedNewFiles.length;
+
+  // 3. "+ Add more" card when 1 <= totalCount < 10
+  if (totalCount > 0 && totalCount < 10) {
+    const addCard = document.createElement('div');
+    addCard.className = 'preview-add-card';
+    const addLabel = lang === 'RU' ? '+ Еще' : (lang === 'ENG' ? '+ More' : '+ Əlavə et');
+    addCard.innerHTML = `<i class="fas fa-plus" style="font-size:16px;"></i><span>${addLabel}</span>`;
+    addCard.title = lang === 'RU' ? 'Добавить еще фото' : (lang === 'ENG' ? 'Add more photos' : 'Daha çox şəkil əlavə et');
+    addCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (fileInput) fileInput.click();
+    });
+    previewGrid.appendChild(addCard);
+  }
+
+  // 4. Update status text
   const p = fileUploadArea ? fileUploadArea.querySelector('.file-upload-content p') : null;
   if (p) {
     if (totalCount > 0) {
-      if (existingImages.length > 0) {
-        p.innerHTML = `<strong>${totalCount} şəkil (${existingImages.length} mövcud, ${files.length} yeni)</strong> — dəyişmək üçün yenidən seçin`;
+      if (totalCount >= 10) {
+        if (lang === 'RU') {
+          p.innerHTML = `<strong>10 / 10 фото выбрано</strong> (Максимальный лимит)`;
+        } else if (lang === 'ENG') {
+          p.innerHTML = `<strong>10 / 10 photos selected</strong> (Maximum limit reached)`;
+        } else {
+          p.innerHTML = `<strong>10 / 10 şəkil seçildi</strong> (Maksimum limit doldu)`;
+        }
       } else {
-        p.innerHTML = `<strong>${files.length} şəkil seçildi</strong> — dəyişmək üçün yenidən seçin`;
+        if (lang === 'RU') {
+          p.innerHTML = `<strong>${totalCount} / 10 фото выбрано</strong> — нажмите, чтобы добавить еще`;
+        } else if (lang === 'ENG') {
+          p.innerHTML = `<strong>${totalCount} / 10 photos selected</strong> — click to add more`;
+        } else {
+          p.innerHTML = `<strong>${totalCount} / 10 şəkil seçildi</strong> — daha çox şəkil əlavə etmək üçün klikləyin`;
+        }
       }
     } else {
-      p.innerHTML = `<span data-translate="elan-upload-text">Şəkilləri buraya sürükleyin və ya</span> <span data-translate="elan-upload-span" style="color:#6a35b5;font-weight:600;text-decoration:underline">seçin</span>`;
+      if (lang === 'RU') {
+        p.innerHTML = `<span data-translate="elan-upload-text">Перетащите фотографии сюда или</span> <span data-translate="elan-upload-span" style="color:#6a35b5;font-weight:600;text-decoration:underline">выберите</span>`;
+      } else if (lang === 'ENG') {
+        p.innerHTML = `<span data-translate="elan-upload-text">Drag and drop photos here or</span> <span data-translate="elan-upload-span" style="color:#6a35b5;font-weight:600;text-decoration:underline">browse</span>`;
+      } else {
+        p.innerHTML = `<span data-translate="elan-upload-text">Şəkilləri buraya sürükleyin və ya</span> <span data-translate="elan-upload-span" style="color:#6a35b5;font-weight:600;text-decoration:underline">seçin</span>`;
+      }
     }
   }
 }
 
-let isUpdatingFileInput = false;
-
-function validateAndSetFiles(sourceFiles) {
-  if (!fileInput || isUpdatingFileInput) return;
+function appendFiles(sourceFiles) {
   if (isEditMode && (!isEditLoaded || isEditLoading)) return;
-  isUpdatingFileInput = true;
-  try {
-    const rawFiles = Array.from(sourceFiles || []);
-    if (!rawFiles.length) {
-      try {
-        fileInput.files = new DataTransfer().files;
-      } catch (e) {}
-      renderAllImagePreviews();
-      updateImageRequirement();
-      return;
+
+  const rawFiles = Array.from(sourceFiles || []);
+  if (!rawFiles.length) return;
+
+  const lang = getElanLang();
+
+  // 1. Filter image files
+  const imageFiles = rawFiles.filter(f => f.type && f.type.startsWith('image/'));
+  const hasNonImages = imageFiles.length < rawFiles.length;
+  if (hasNonImages) {
+    const msg = lang === 'RU'
+      ? 'Принимаются только файлы изображений (JPG, PNG, WEBP и др.).'
+      : (lang === 'ENG' ? 'Only image files are accepted (JPG, PNG, WEBP, etc.).' : 'Yalnız şəkil faylları qəbul olunur (JPG, PNG, WEBP və s.).');
+    alert(msg);
+  }
+
+  if (!imageFiles.length) return;
+
+  // 2. Filter file size (5MB limit)
+  const validSizeFiles = [];
+  const oversizedFiles = [];
+  imageFiles.forEach(f => {
+    if (f.size > 5 * 1024 * 1024) {
+      oversizedFiles.push(f.name);
+    } else {
+      validSizeFiles.push(f);
     }
+  });
 
-    const imageFiles = rawFiles.filter(f => f.type && f.type.startsWith('image/'));
-    const hasNonImages = imageFiles.length < rawFiles.length;
-    const currentExistingCount = Array.isArray(existingImages) ? existingImages.length : 0;
-    const remainingSlots = Math.max(0, 10 - currentExistingCount);
-    const exceedsLimit = imageFiles.length > remainingSlots;
-    const limitedFiles = imageFiles.slice(0, remainingSlots);
+  if (oversizedFiles.length > 0) {
+    const msg = lang === 'RU'
+      ? `Следующие файлы превышают 5МБ и не были добавлены: ${oversizedFiles.join(', ')}`
+      : (lang === 'ENG'
+          ? `The following files exceed 5MB and were skipped: ${oversizedFiles.join(', ')}`
+          : `Bu faylların ölçüsü 5MB-dən böyükdür və əlavə edilmədi: ${oversizedFiles.join(', ')}`);
+    alert(msg);
+  }
 
-    try {
-      const dt = new DataTransfer();
-      limitedFiles.forEach(f => dt.items.add(f));
-      fileInput.files = dt.files;
-    } catch (e) {
-      console.warn('DataTransfer failed to set fileInput.files:', e);
-    }
+  if (!validSizeFiles.length) return;
 
-    renderAllImagePreviews();
-    updateImageRequirement();
+  // 3. Avoid duplicate files by name, size, lastModified
+  const uniqueFilesToAdd = validSizeFiles.filter(newF => {
+    return !selectedNewFiles.some(existingF =>
+      existingF.name === newF.name && existingF.size === newF.size && existingF.lastModified === newF.lastModified
+    );
+  });
 
-    if (currentExistingCount >= 10) {
-      if (hasNonImages) {
-        alert('Yalnız şəkil faylları qəbul olunur. Bu elanda artıq maksimum 10 şəkil var, yeni şəkil əlavə edilə bilməz.');
-      } else {
-        alert('Bu elanda artıq maksimum 10 şəkil var. Yeni şəkil əlavə edə bilməzsiniz.');
-      }
-    } else if (hasNonImages && exceedsLimit) {
-      if (currentExistingCount > 0) {
-        alert(`Yalnız şəkil faylları qəbul olunur və bu elana maksimum 10 şəkil yüklənə bilər (hazırda ${currentExistingCount} mövcuddur). Yalnız daha ${remainingSlots} şəkil əlavə edə bilərsiniz. Qeyri-şəkil faylları ləğv edildi və yalnız ilk ${remainingSlots} şəkil qəbul edildi.`);
-      } else {
-        alert('Yalnız şəkil faylları qəbul olunur və maksimum 10 şəkil yüklənə bilər. Qeyri-şəkil faylları ləğv edildi və yalnız ilk 10 şəkil qəbul edildi.');
-      }
-    } else if (hasNonImages) {
-      alert('Yalnız şəkil faylları qəbul olunur. Qeyri-şəkil faylları ləğv edildi.');
-    } else if (exceedsLimit) {
-      if (currentExistingCount > 0) {
-        alert(`Maksimum 10 şəkil seçə bilərsiniz (hazırda ${currentExistingCount} mövcuddur). Siz yalnız daha ${remainingSlots} şəkil əlavə edə bilərsiniz. Yalnız ilk ${remainingSlots} şəkil qəbul edildi.`);
-      } else {
-        alert('Maksimum 10 şəkil seçə bilərsiniz. Yalnız ilk 10 şəkil qəbul edildi.');
-      }
-    }
-  } finally {
-    isUpdatingFileInput = false;
+  if (!uniqueFilesToAdd.length) {
+    return;
+  }
+
+  // 4. Calculate available slots
+  const currentTotal = existingImages.length + selectedNewFiles.length;
+  const remainingSlots = Math.max(0, 10 - currentTotal);
+
+  if (remainingSlots <= 0) {
+    const msg = lang === 'RU'
+      ? 'Уже выбрано максимум 10 фото. Новые фото не могут быть добавлены.'
+      : (lang === 'ENG'
+          ? 'Maximum of 10 photos reached. No more photos can be added.'
+          : 'Artıq maksimum 10 şəkil seçilib. Yeni şəkil əlavə edilə bilməz.');
+    alert(msg);
+    return;
+  }
+
+  const filesToAdd = uniqueFilesToAdd.slice(0, remainingSlots);
+  const exceedsLimit = uniqueFilesToAdd.length > remainingSlots;
+
+  // 5. Append new files cumulatively
+  selectedNewFiles.push(...filesToAdd);
+
+  // 6. Synchronize fileInput.files via DataTransfer
+  syncFileInput();
+
+  // 7. Re-render UI
+  renderAllImagePreviews();
+  updateImageRequirement();
+
+  if (exceedsLimit) {
+    const msg = lang === 'RU'
+      ? `Максимум 10 фото. Добавлено только ${filesToAdd.length} фото.`
+      : (lang === 'ENG'
+          ? `Maximum 10 photos allowed. Only ${filesToAdd.length} photos were added.`
+          : `Maksimum 10 şəkil əlavə edilə bilər. Yalnız ilk ${filesToAdd.length} şəkil əlavə edildi.`);
+    alert(msg);
   }
 }
-
 
 if (fileInput) {
-  fileInput.addEventListener('change', () => {
-    if (isEditMode && (!isEditLoaded || isEditLoading)) {
-      try {
-        fileInput.files = new DataTransfer().files;
-      } catch (e) {
-        fileInput.value = '';
-      }
+  fileInput.addEventListener('click', (e) => {
+    const currentTotal = existingImages.length + selectedNewFiles.length;
+    if (currentTotal >= 10) {
+      e.preventDefault();
+      const lang = getElanLang();
+      const msg = lang === 'RU'
+        ? 'Можно загрузить максимум 10 фото. Чтобы добавить новое фото, сначала удалите одно из текущих.'
+        : (lang === 'ENG'
+            ? 'You can upload up to 10 photos. To add a new photo, please remove an existing one first.'
+            : 'Maksimum 10 şəkil yükləyə bilərsiniz. Yeni şəkil əlavə etmək üçün əvvəlcə mövcud şəkillərdən birini silin.');
+      alert(msg);
       return;
     }
-    validateAndSetFiles(fileInput.files);
+    fileInput.value = '';
+  });
+
+  fileInput.addEventListener('change', () => {
+    if (isEditMode && (!isEditLoaded || isEditLoading)) {
+      syncFileInput();
+      return;
+    }
+    if (fileInput.files && fileInput.files.length) {
+      appendFiles(fileInput.files);
+    }
   });
 }
 
@@ -789,8 +913,8 @@ if (fileUploadArea) {
       return;
     }
     const dt = e.dataTransfer;
-    if (dt && dt.files && fileInput) {
-      validateAndSetFiles(dt.files);
+    if (dt && dt.files && dt.files.length) {
+      appendFiles(dt.files);
     }
   });
 }
@@ -1123,6 +1247,8 @@ function populateFormWithAd(ad) {
 
   // 10. Existing Images
   existingImages = Array.isArray(ad.images) ? [...ad.images] : [];
+  selectedNewFiles = [];
+  syncFileInput();
   renderAllImagePreviews();
   updateImageRequirement();
 }
@@ -1360,6 +1486,8 @@ async function initEditMode() {
     isEditLoading = false;
     isEditLoaded = false;
     existingImages = [];
+    selectedNewFiles = [];
+    syncFileInput();
     renderAllImagePreviews();
     updateImageRequirement();
     setEditFormEnabled(false);
@@ -1475,9 +1603,12 @@ if (adFormEl) {
     }
 
     // ── 2. Basic validation ─────────────────────────────────
-    const imgInput = document.getElementById('imageInput') || document.getElementById('images') || fileInput;
-    const files = imgInput?.files;
-    if (files && files.length > 10) {
+    syncFileInput();
+    const currentExistingCount = (isEditMode && Array.isArray(existingImages)) ? existingImages.length : 0;
+    const newFileCount = selectedNewFiles.length;
+    const totalImageCount = newFileCount + currentExistingCount;
+
+    if (totalImageCount > 10) {
       alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
       return;
     }
@@ -1519,21 +1650,16 @@ if (adFormEl) {
       finalPhone = phone;
     }
 
-    const currentExistingCount = (isEditMode && Array.isArray(existingImages)) ? existingImages.length : 0;
-    const newFileCount = files ? files.length : 0;
-    const totalImageCount = newFileCount + currentExistingCount;
-
     if (totalImageCount < 1) {
       alert('Ən az 1 şəkil seçin.');
       return;
     }
-    if (newFileCount > 10 || totalImageCount > 10) {
+    if (totalImageCount > 10) {
       alert('Maksimum 10 şəkil yükləyə bilərsiniz.');
       return;
     }
 
-    const rawImageFiles = (files && files.length) ? Array.from(files) : [];
-    const validImageFiles = rawImageFiles.filter(f => f.type && f.type.startsWith('image/'));
+    const validImageFiles = selectedNewFiles.filter(f => f.type && f.type.startsWith('image/'));
     const oversizedFile = validImageFiles.find(f => f.size > 5 * 1024 * 1024);
     if (oversizedFile) {
       alert(`"${oversizedFile.name}" faylının ölçüsü 5MB-dən böyükdür. Zəhmət olmasa hər biri 5MB-dən kiçik şəkillər seçin.`);
