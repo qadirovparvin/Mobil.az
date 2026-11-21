@@ -1676,11 +1676,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span><i class="fas fa-calendar-alt"></i> ${escapeHtml(formatDate(ad.createdAt))}</span>
                         </div>
                         <p class="ad-price">${Number(ad.price || 0).toLocaleString(getLocale())} AZN</p>
+                        ${ad.promotionRequestStatus === 'pending' ? `
+                            <div style="margin-top:6px;">
+                                <span style="display:inline-flex; align-items:center; gap:4px; font-size:11px; background:rgba(245,158,11,0.18); color:#f59e0b; padding:3px 8px; border-radius:6px; font-weight:700; border:1px solid rgba(245,158,11,0.3);">
+                                    <i class="fas fa-crown"></i> ${escapeHtml(ad.promotionRequest || 'VIP')} Sorğusu Gözləyir
+                                </span>
+                            </div>
+                        ` : ''}
                     </div>
                 </a>
                 <div class="my-ad-controls">
-                    <button class="btn-boost" data-id="${escapeHtml(ad._id)}">
-                        <i class="fas fa-rocket"></i> <span>${escapeHtml(window.translations?.[getCurrentLang()]?.['mon-promote-ad'] || 'Tanıt')}</span>
+                    <button class="btn-boost" data-id="${escapeHtml(ad._id)}" title="VIP / PRO statusu üçün müraciət et">
+                        <i class="fas fa-crown"></i> <span>VIP / PRO Sorğusu</span>
                     </button>
                     <div class="my-ad-actions">
                         <button class="btn-action edit-action" data-id="${escapeHtml(ad._id)}"><i class="fas fa-edit"></i></button>
@@ -2971,7 +2978,76 @@ window.selectPackage = function (pkg) {
         if (input) input.checked = (input.value === pkg);
     });
 
+    const btnText = document.getElementById('promoRequestBtnText');
+    if (btnText) {
+        btnText.textContent = `Adminə ${pkg === 'Premium' ? 'PRO' : pkg} Sorğusu Göndər`;
+    }
+
     updateTotal();
+};
+
+window.submitPromotionRequestToAdmin = async function() {
+    if (!currentPromoAdId) {
+        if (typeof window.showToast === 'function') window.showToast('Elan seçilməyib', 'error');
+        return;
+    }
+    const token = typeof getToken === 'function' ? getToken() : (localStorage.getItem('token') || sessionStorage.getItem('token'));
+    if (!token) {
+        if (typeof window.showToast === 'function') window.showToast('Zəhmət olmasa daxil olun', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('btnRequestPromoAdmin');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Göndərilir...';
+    }
+
+    try {
+        const promoType = selectedPkg === 'Premium' ? 'PRO' : (selectedPkg || 'VIP');
+        const apiBase = window.API_URL || window.API_BASE || (window.location && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
+        
+        let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+        if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+            try { csrfToken = await window.fetchCsrfToken(); } catch (_) {}
+        }
+
+        const res = await fetch(`${apiBase.replace(/\/+$/, '')}/ads/${encodeURIComponent(currentPromoAdId)}/request-promotion`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
+            body: JSON.stringify({ promotionType: promoType })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Sorğu göndərilə bilmədi');
+
+        if (typeof window.showToast === 'function') {
+            window.showToast(data.message || `${promoType} sorğunuz adminə göndərildi!`, 'success');
+        } else {
+            alert(data.message || `${promoType} sorğunuz adminə göndərildi!`);
+        }
+
+        window.closePromotionModal();
+        if (typeof loadMyAds === 'function') {
+            await loadMyAds();
+        }
+    } catch (err) {
+        if (typeof window.showToast === 'function') {
+            window.showToast(err.message, 'error');
+        } else {
+            alert(err.message);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-crown" style="color: #f59e0b;"></i> <span id="promoRequestBtnText">Adminə ${selectedPkg === 'Premium' ? 'PRO' : (selectedPkg || 'VIP')} Sorğusu Göndər</span>`;
+        }
+    }
 };
 
 window.updateTotal = function () {

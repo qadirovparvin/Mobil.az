@@ -466,9 +466,18 @@
                     <div class="card-header">
                         <div>
                             <h2><i class="fas fa-rectangle-ad text-primary"></i> Elan İdarəetməsi</h2>
-                            <p class="card-sub">Saytdakı elanların moderasiyası və tənzimlənməsi</p>
+                            <p class="card-sub">Saytdakı elanların moderasiyası, normal elan istəkləri və VIP/PRO sorğuları</p>
                         </div>
-                        <div class="card-header-actions">
+                        <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                            <select id="adStatusFilter" onchange="filterAdsByStatus()" style="padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: var(--bg-card, #1e293b); color: inherit; font-size: 13px; font-weight: 500; cursor: pointer;">
+                                <option value="all">Bütün Elanlar</option>
+                                <option value="pending">Normal Elan İstəkləri (Gözləyən)</option>
+                                <option value="promo_requests">VIP / PRO Sorğuları</option>
+                                <option value="active">Aktiv Elanlar</option>
+                                <option value="vip">Yalnız VIP</option>
+                                <option value="pro">Yalnız PRO</option>
+                                <option value="rejected">Rədd Edilənlər</option>
+                            </select>
                             <div class="search-wrap">
                                 <i class="fas fa-search"></i>
                                 <input type="text" id="adSearch" placeholder="Başlıq, marka axtar…" oninput="filterAds()">
@@ -479,6 +488,26 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Quick Filter Badges / Pills -->
+                    <div class="admin-quick-tabs" style="display:flex; gap:8px; padding:0 1.5rem 1rem 1.5rem; border-bottom:1px solid var(--border); overflow-x:auto;">
+                        <button type="button" class="quick-tab-btn active" id="tabAdAll" data-ad-filter="all" onclick="selectAdFilterTab('all')" style="padding:7px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:inherit; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center;">
+                            Hamısı <span class="badge" id="adCountAll" style="margin-left:6px; font-size:11px; padding:2px 6px;">0</span>
+                        </button>
+                        <button type="button" class="quick-tab-btn" id="tabAdPending" data-ad-filter="pending" onclick="selectAdFilterTab('pending')" style="padding:7px 14px; border-radius:8px; border:1px solid rgba(245,158,11,0.3); background:var(--bg-card); color:#f59e0b; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center;">
+                            <i class="fas fa-clock" style="margin-right:6px;"></i> Normal Elan İstəkləri 
+                            <span class="badge" id="adCountPending" style="margin-left:6px; font-size:11px; background:rgba(245,158,11,0.2); color:#f59e0b; padding:2px 6px;">0</span>
+                        </button>
+                        <button type="button" class="quick-tab-btn" id="tabAdPromoRequests" data-ad-filter="promo_requests" onclick="selectAdFilterTab('promo_requests')" style="padding:7px 14px; border-radius:8px; border:1px solid rgba(139,92,246,0.3); background:var(--bg-card); color:#a78bfa; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center;">
+                            <i class="fas fa-crown" style="margin-right:6px; color:#f59e0b;"></i> VIP / PRO Sorğuları 
+                            <span class="badge" id="adCountPromoRequests" style="margin-left:6px; font-size:11px; background:rgba(139,92,246,0.2); color:#a78bfa; padding:2px 6px;">0</span>
+                        </button>
+                        <button type="button" class="quick-tab-btn" id="tabAdActive" data-ad-filter="active" onclick="selectAdFilterTab('active')" style="padding:7px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-card); color:inherit; font-weight:600; font-size:13px; cursor:pointer; display:inline-flex; align-items:center;">
+                            <i class="fas fa-check-circle" style="margin-right:6px; color:#10b981;"></i> Aktiv Elanlar 
+                            <span class="badge" id="adCountActive" style="margin-left:6px; font-size:11px; padding:2px 6px;">0</span>
+                        </button>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="admin-table">
                             <thead>

@@ -5,7 +5,8 @@ const {
     updateAdStatus, deleteUser, updateUserStatus, banUser, revokeUserSessions, deleteAd, purgeAd,
     getAllStores, updateStoreStatus, deleteStore, getAuditLogs, getKycDocument,
     getPaymentSessions, getPendingPayments, reconcileSingleSession,
-    updateUserRole, updateAdPromotion
+    updateUserRole, updateAdPromotion,
+    approvePromotionRequest, rejectPromotionRequest
 } = require('../controllers/adminController');
 const { protect, adminOnly } = require('../middlewares/authMiddleware');
 const { csrfProtection } = require('../middlewares/csrfProtection');
@@ -41,6 +42,8 @@ router.get('/ads', getAllAds);
 router.put('/ads/:id/status', csrfProtection, validateObjectIdParam('id'), updateAdStatus);
 router.patch('/ads/:id/promotion', csrfProtection, validateObjectIdParam('id'), updateAdPromotion);
 router.put('/ads/:id/promotion', csrfProtection, validateObjectIdParam('id'), updateAdPromotion);
+router.put('/ads/:id/approve-promo', csrfProtection, validateObjectIdParam('id'), approvePromotionRequest);
+router.put('/ads/:id/reject-promo', csrfProtection, validateObjectIdParam('id'), rejectPromotionRequest);
 router.delete('/ads/:id', csrfProtection, validateObjectIdParam('id'), deleteAd);
 router.delete('/ads/:id/purge', csrfProtection, validateObjectIdParam('id'), purgeAd);
 router.get('/transactions', getAllTransactions);

@@ -1031,8 +1031,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     /* ══════════════════════════════════════════════════════════════
-       RENDER: Ads (with approve / reject / delete)
+       RENDER: Ads (with approve / reject / promo requests / delete)
        ═══════════════════════════════════════════════════════════ */
+    let currentAdFilter = 'all';
+
     function renderAds(ads) {
         if (!allAdsTable) return;
         if (!ads.length) { allAdsTable.innerHTML = emptyRow(7, 'Elan tapılmadı.'); return; }
@@ -1042,12 +1044,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = esc(a.status || '—');
             const promo  = esc(a.promotionType || 'none');
             const stLower = (a.status || '').toLowerCase();
-            const statusBadge = stLower === 'active' ? 'badge-success'
-                              : stLower === 'rejected' ? 'badge-danger'
-                              : stLower === 'pending'  ? 'badge-warning' : 'badge-primary';
+            const hasPromoReq = a.promotionRequestStatus === 'pending';
+            const reqPromoType = a.promotionRequest || 'VIP';
+
+            const statusBadge = stLower === 'pending'
+                ? '<span class="badge badge-warning" style="font-weight:700;"><i class="fas fa-clock" style="margin-right:3px;"></i>İstək (Gözləyir)</span>'
+                : stLower === 'active'
+                    ? '<span class="badge badge-success">Aktiv</span>'
+                    : stLower === 'rejected'
+                        ? '<span class="badge badge-danger">Rədd edildi</span>'
+                        : `<span class="badge badge-primary">${status}</span>`;
 
             let promoBadge = '<span class="badge" style="background:rgba(148,163,184,0.15);color:#94a3b8;">Standart</span>';
-            if (promo === 'VIP') {
+            if (hasPromoReq) {
+                promoBadge = `<span class="badge" style="background:linear-gradient(135deg,#f59e0b,#8b5cf6);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(245,158,11,0.35);animation:pulse 2s infinite;"><i class="fas fa-crown" style="margin-right:3px;"></i>${reqPromoType} Sorğusu!</span>`;
+            } else if (promo === 'VIP') {
                 promoBadge = '<span class="badge" style="background:linear-gradient(135deg,#f59e0b,#b45309);color:#fff;font-weight:700;"><i class="fas fa-crown" style="margin-right:3px;"></i>VIP</span>';
             } else if (promo === 'PRO') {
                 promoBadge = '<span class="badge" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:#fff;font-weight:700;"><i class="fas fa-bolt" style="margin-right:3px;"></i>PRO</span>';
@@ -1062,18 +1073,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong>${title}</strong></td>
                 <td>${esc(a.price??'—')} ₼</td>
                 <td>${author}</td>
-                <td><span class="badge ${statusBadge}">${status}</span></td>
+                <td>${statusBadge}</td>
                 <td>${promoBadge}</td>
                 <td>${fmtDate(a.createdAt)}</td>
                 <td>
                     <div class="action-btns" style="display:flex;align-items:center;gap:6px;">
+                        ${hasPromoReq ? `
+                            <button class="btn-icon" style="background:rgba(245,158,11,0.2);color:#f59e0b;border:1px solid rgba(245,158,11,0.4);" title="${reqPromoType} Sorğusunu Təsdiqlə" onclick="window.approvePromoRequest('${esc(a._id)}', '${reqPromoType}', '${title}')">
+                                <i class="fas fa-crown"></i>
+                            </button>
+                            <button class="btn-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);" title="Promo Sorğusunu Rədd et" onclick="window.rejectPromoRequest('${esc(a._id)}', '${title}')">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                        ` : ''}
                         <button class="btn-icon promo" title="Promosiya təyin et (VIP / PRO)" onclick="window.openPromoteAdModal('${esc(a._id)}', '${title}', '${promo}')">
                             <i class="fas fa-crown"></i>
                         </button>
-                        <button class="btn-icon approve" title="Təsdiqlə" data-action="approve-ad" data-id="${esc(a._id)}">
+                        <button class="btn-icon approve" title="${stLower === 'pending' ? 'Normal Elanı Təsdiqlə (Aktiv et)' : 'Təsdiqlə'}" data-action="approve-ad" data-id="${esc(a._id)}">
                             <i class="fas fa-check"></i>
                         </button>
-                        <button class="btn-icon reject" title="Rədd et" data-action="reject-ad" data-id="${esc(a._id)}">
+                        <button class="btn-icon reject" title="${stLower === 'pending' ? 'Normal Elanı Rədd et' : 'Rədd et'}" data-action="reject-ad" data-id="${esc(a._id)}">
                             <i class="fas fa-xmark"></i>
                         </button>
                         <button class="btn-icon delete" title="Sil" data-action="delete-ad" data-id="${esc(a._id)}">
@@ -1085,11 +1104,97 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
+    window.updateAdCountBadges = function(ads, counts) {
+        const total = counts?.total ?? ads.length;
+        const pending = counts?.pending ?? ads.filter(a => (a.status || '').toLowerCase() === 'pending').length;
+        const promoReqs = counts?.promoRequests ?? ads.filter(a => a.promotionRequestStatus === 'pending').length;
+        const active = counts?.active ?? ads.filter(a => (a.status || '').toLowerCase() === 'active').length;
+
+        const elAll = document.getElementById('adCountAll');
+        const elPending = document.getElementById('adCountPending');
+        const elPromoReqs = document.getElementById('adCountPromoRequests');
+        const elActive = document.getElementById('adCountActive');
+
+        if (elAll) elAll.textContent = total;
+        if (elPending) elPending.textContent = pending;
+        if (elPromoReqs) elPromoReqs.textContent = promoReqs;
+        if (elActive) elActive.textContent = active;
+    };
+
+    window.filterAdsByStatus = function() {
+        const sel = document.getElementById('adStatusFilter');
+        currentAdFilter = sel ? sel.value : 'all';
+        applyAdsFilter();
+    };
+
+    window.selectAdFilterTab = function(filterKey) {
+        currentAdFilter = filterKey;
+        const sel = document.getElementById('adStatusFilter');
+        if (sel) sel.value = filterKey;
+        document.querySelectorAll('.admin-quick-tabs .quick-tab-btn').forEach(btn => {
+            const match = btn.getAttribute('data-ad-filter') === filterKey;
+            btn.classList.toggle('active', match);
+            btn.style.boxShadow = match ? '0 0 0 2px var(--primary)' : 'none';
+        });
+        applyAdsFilter();
+    };
+
+    function applyAdsFilter() {
+        const q = (document.getElementById('adSearch')?.value || '').trim().toLowerCase();
+        let filtered = cachedAds;
+
+        if (currentAdFilter === 'pending') {
+            filtered = filtered.filter(a => (a.status || '').toLowerCase() === 'pending');
+        } else if (currentAdFilter === 'promo_requests') {
+            filtered = filtered.filter(a => a.promotionRequestStatus === 'pending');
+        } else if (currentAdFilter === 'active') {
+            filtered = filtered.filter(a => (a.status || '').toLowerCase() === 'active');
+        } else if (currentAdFilter === 'vip') {
+            filtered = filtered.filter(a => a.promotionType === 'VIP');
+        } else if (currentAdFilter === 'pro') {
+            filtered = filtered.filter(a => a.promotionType === 'PRO');
+        } else if (currentAdFilter === 'rejected') {
+            filtered = filtered.filter(a => (a.status || '').toLowerCase() === 'rejected');
+        }
+
+        if (q) {
+            filtered = filtered.filter(a =>
+                ([a.brand, a.modelName, a.title, a.author?.name, a.author?.email].filter(Boolean).join(' ')).toLowerCase().includes(q)
+            );
+        }
+
+        renderAds(filtered);
+    }
+
     window.filterAds = function() {
-        const q = document.getElementById('adSearch')?.value.toLowerCase() || '';
-        renderAds(cachedAds.filter(a =>
-            ([a.brand,a.modelName,a.title].filter(Boolean).join(' ')).toLowerCase().includes(q)
-        ));
+        applyAdsFilter();
+    };
+
+    window.approvePromoRequest = async function(id, type, title) {
+        const ok = await confirm('Promo Sorğusunu Təsdiqlə', `"${title || 'Bu elan'}" üçün ${type || 'VIP'} statusu təsdiqlənsin?`);
+        if (!ok) return;
+        try {
+            await adminApi(`ads/${id}/approve-promo`, {
+                method: 'PUT',
+                body: JSON.stringify({ promotionType: type })
+            });
+            toast(`Elan uğurla ${type} statusuna yüksəldildi!`, 'success');
+            await window.loadAllData();
+        } catch(err) {
+            toast(err.message || 'Xəta baş verdi', 'error');
+        }
+    };
+
+    window.rejectPromoRequest = async function(id, title) {
+        const ok = await confirm('Promo Sorğusunu Rədd et', `"${title || 'Bu elan'}" üçün promo sorğusu rədd edilsin?`);
+        if (!ok) return;
+        try {
+            await adminApi(`ads/${id}/reject-promo`, { method: 'PUT' });
+            toast('Promo sorğusu rədd edildi.', 'info');
+            await window.loadAllData();
+        } catch(err) {
+            toast(err.message || 'Xəta baş verdi', 'error');
+        }
     };
 
     if (allAdsTable) {
@@ -1538,6 +1643,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cachedAds = Array.isArray(adsR.value.data) ? adsR.value.data : [];
             renderAds(cachedAds);
             renderRecentAds(cachedAds);
+            if (typeof window.updateAdCountBadges === 'function') {
+                window.updateAdCountBadges(cachedAds, adsR.value.counts);
+            }
         }
         if (statsR.status === 'fulfilled' && statsR.value?.data) {
             renderStats(statsR.value.data);
