@@ -161,6 +161,7 @@ async function seedAdmin() {
                 existing.twoFactorEnabled = false;
                 existing.loginAttempts = 0;
                 existing.lockUntil = null;
+                if (!existing.username) existing.username = 'admin';
                 if (!existing.phone) existing.phone = adm.phone;
                 await existing.save();
                 logger.info('✅ Admin account updated & verified: ' + cleanEmail);
@@ -299,7 +300,7 @@ const globalLimiter = rateLimit({
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,  // 15 minutes
-    max: 30,                    // max 30 login/register attempts per 15min
+    max: 60,                    // max 60 login/register attempts per 15min
     store: createServerLimiterStore('rl:auth:'),
     passOnStoreError: false,
     standardHeaders: true,
