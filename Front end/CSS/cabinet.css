@@ -670,36 +670,25 @@
     align-items: flex-end;
 }
 
-.btn-bump-ad {
+.btn-quick-bump {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     border: none;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
-    display: inline-flex;
+    transition: 0.25s ease;
+    display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;
+    font-size: 12.5px;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
-.btn-bump-ad:hover {
+.btn-quick-bump:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
-}
-
-.bump-bonus-badge {
-    background: rgba(255, 255, 255, 0.25);
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.45);
 }
 
 .btn-boost {

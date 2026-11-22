@@ -794,19 +794,15 @@ const boostAd = async (req, res, next) => {
 
         let responsePayload;
         let session = null;
-        let isFreeBump = false;
         try {
             session = await mongoose.startSession();
             session.startTransaction();
 
             const user = await User.findById(req.user._id).session(session);
-            isFreeBump = Boolean(promotionType === 'BumpUp' && (user?.bumpBonus || 0) > 0);
-            const actualCost = isFreeBump ? 0 : cost;
-
-            if (!user || (!isFreeBump && user.walletBalance < actualCost)) {
+            if (!user || user.walletBalance < cost) {
                 throw httpError(400, {
                     message: 'Balans kifayət deyil',
-                    required: actualCost,
+                    required: cost,
                     current: user?.walletBalance || 0
                 });
             }
@@ -817,12 +813,8 @@ const boostAd = async (req, res, next) => {
                 throw httpError(400, { message: 'Yalnız aktiv elanlar reklam edilə bilər' });
             }
 
-            // Deduct user wallet balance or bumpBonus with session
-            if (isFreeBump) {
-                user.bumpBonus = Math.max(0, (user.bumpBonus || 0) - 1);
-            } else {
-                user.walletBalance -= actualCost;
-            }
+            // Deduct user wallet balance with session
+            user.walletBalance -= cost;
             await user.save({ session });
 
             // Update ad promotion with session
@@ -841,9 +833,6 @@ const boostAd = async (req, res, next) => {
                 boostedAt: now,
                 boostCount: (oldAd.boostCount || ad.boostCount || 0) + 1
             };
-            if (promotionType === 'BumpUp') {
-                updateData.createdAt = now;
-            }
             if (!ad.publishedAt) updateData.publishedAt = now;
             if (!ad.expiresAt) updateData.expiresAt = new Date(now.getTime() + Number(process.env.NORMAL_LISTING_LIFETIME_DAYS || 30) * 24 * 60 * 60 * 1000);
 
@@ -856,11 +845,9 @@ const boostAd = async (req, res, next) => {
             // Log transaction with session
             await Transaction.create([{
                 user:        user._id,
-                amount:      -actualCost,
-                type:        isFreeBump ? 'referral_spend' : 'ad_boost',
-                description: isFreeBump 
-                    ? `Pulsuz İrəli Çək bonusu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName} (Qalan bonus: ${user.bumpBonus})`
-                    : `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
+                amount:      -cost,
+                type:        'ad_boost',
+                description: `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
                 ad:          updatedAd._id,
                 balanceAfter: user.walletBalance
             }], { session });
@@ -869,23 +856,17 @@ const boostAd = async (req, res, next) => {
             await Notification.create([{
                 user:        user._id,
                 type:        'promo',
-                title:       isFreeBump ? 'Elanınız irəli çəkildi! 🚀' : `${promotionType} aktivləşdirildi! ⚡`,
-                body:        isFreeBump 
-                    ? `Elanınız siyahının ən başına gətirildi. Qalan pulsuz irəli çəkmə sayı: ${user.bumpBonus}`
-                    : `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
+                title:       `${promotionType} aktivləşdirildi! ⚡`,
+                body:        `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
                 link:        `/cabinet.html#my-ads`,
                 relatedId:   updatedAd._id,
                 relatedType: 'Ad'
             }], { session });
 
             responsePayload = {
-                message: isFreeBump 
-                    ? `Elanınız uğurla irəli çəkildi! (1 pulsuz bonus istifadə edildi, qalan bonus: ${user.bumpBonus})`
-                    : `${promotionType} uğurla aktivləşdirildi`,
+                message: `${promotionType} uğurla aktivləşdirildi`,
                 ad: updatedAd,
-                walletBalance: user.walletBalance,
-                bumpBonus: user.bumpBonus || 0,
-                usedFreeBump: isFreeBump
+                walletBalance: user.walletBalance
             };
 
             // Save idempotency key record with session
@@ -931,25 +912,16 @@ const boostAd = async (req, res, next) => {
             if (isTxUnsupported) {
                 logger.warn('MongoDB transactions not supported on current topology; executing boost with compensating rollback');
                 let userDeducted = false;
-                let userBumpDeducted = false;
                 let transactionId = null;
                 let notificationId = null;
                 try {
                     const user = await User.findById(req.user._id);
-                    const isFallbackFreeBump = Boolean(promotionType === 'BumpUp' && (user?.bumpBonus || 0) > 0);
-                    const actualCost = isFallbackFreeBump ? 0 : cost;
-
-                    if (!user || (!isFallbackFreeBump && user.walletBalance < actualCost)) {
-                        throw httpError(400, { message: 'Balans kifayət deyil', required: actualCost, current: user?.walletBalance || 0 });
+                    if (!user || user.walletBalance < cost) {
+                        throw httpError(400, { message: 'Balans kifayət deyil', required: cost, current: user?.walletBalance || 0 });
                     }
-                    if (isFallbackFreeBump) {
-                        user.bumpBonus = Math.max(0, (user.bumpBonus || 0) - 1);
-                        userBumpDeducted = true;
-                    } else {
-                        user.walletBalance -= actualCost;
-                        userDeducted = true;
-                    }
+                    user.walletBalance -= cost;
                     await user.save();
+                    userDeducted = true;
 
                     const ad = await Ad.findOne({ _id: req.params.id, status: { $ne: DELETED_AD_STATUS } });
                     if (!ad) throw httpError(404, { message: 'Elan tapılmadı' });
@@ -968,9 +940,6 @@ const boostAd = async (req, res, next) => {
                         boostedAt: now,
                         boostCount: (oldAd.boostCount || ad.boostCount || 0) + 1
                     };
-                    if (promotionType === 'BumpUp') {
-                        updateData.createdAt = now;
-                    }
                     if (!ad.publishedAt) updateData.publishedAt = now;
                     if (!ad.expiresAt) updateData.expiresAt = new Date(now.getTime() + Number(process.env.NORMAL_LISTING_LIFETIME_DAYS || 30) * 24 * 60 * 60 * 1000);
 
@@ -982,11 +951,9 @@ const boostAd = async (req, res, next) => {
 
                     const transaction = await Transaction.create({
                         user: user._id,
-                        amount: -actualCost,
-                        type: isFallbackFreeBump ? 'referral_spend' : 'ad_boost',
-                        description: isFallbackFreeBump
-                            ? `Pulsuz İrəli Çək bonusu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName} (Qalan bonus: ${user.bumpBonus})`
-                            : `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
+                        amount: -cost,
+                        type: 'ad_boost',
+                        description: `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
                         ad: updatedAd._id,
                         balanceAfter: user.walletBalance
                     });
@@ -995,10 +962,8 @@ const boostAd = async (req, res, next) => {
                     const notification = await Notification.create({
                         user: user._id,
                         type: 'promo',
-                        title: isFallbackFreeBump ? 'Elanınız irəli çəkildi! 🚀' : `${promotionType} aktivləşdirildi! ⚡`,
-                        body: isFallbackFreeBump 
-                            ? `Elanınız siyahının ən başına gətirildi. Qalan pulsuz irəli çəkmə sayı: ${user.bumpBonus}`
-                            : `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
+                        title: `${promotionType} aktivləşdirildi! ⚡`,
+                        body: `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
                         link: `/cabinet.html#my-ads`,
                         relatedId: updatedAd._id,
                         relatedType: 'Ad'
@@ -1006,13 +971,9 @@ const boostAd = async (req, res, next) => {
                     notificationId = notification?._id;
 
                     responsePayload = {
-                        message: isFallbackFreeBump 
-                            ? `Elanınız uğurla irəli çəkildi! (1 pulsuz bonus istifadə edildi, qalan bonus: ${user.bumpBonus})`
-                            : `${promotionType} uğurla aktivləşdirildi`,
+                        message: `${promotionType} uğurla aktivləşdirildi`,
                         ad: updatedAd,
-                        walletBalance: user.walletBalance,
-                        bumpBonus: user.bumpBonus || 0,
-                        usedFreeBump: isFallbackFreeBump
+                        walletBalance: user.walletBalance
                     };
 
                     // 3. SUCCESS-də:
@@ -1022,7 +983,7 @@ const boostAd = async (req, res, next) => {
                             {
                                 status: 'completed',
                                 promotionType,
-                                cost: actualCost,
+                                cost,
                                 response: responsePayload,
                                 responsePayload
                             }
@@ -1030,13 +991,6 @@ const boostAd = async (req, res, next) => {
                     }
                 } catch (fallbackErr) {
                     // 2. FALLBACK CATCH BLOK: FULL COMPENSATION
-                    if (userBumpDeducted) {
-                        try {
-                            await User.updateOne({ _id: req.user._id }, { $inc: { bumpBonus: 1 } });
-                        } catch (e) {
-                            console.error('CRITICAL rollback User bumpBonus failed', e);
-                        }
-                    }
                     if (userDeducted) {
                         try {
                             await User.updateOne({ _id: req.user._id }, { $inc: { walletBalance: cost } });
@@ -1232,4 +1186,133 @@ const requestAdPromotion = async (req, res, next) => {
     }
 };
 
-module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds, requestAdPromotion };
+// @desc    Use referral bonus (bump or VIP) on an ad
+// @route   POST /api/ads/:id/use-bonus
+// @access  Private
+const useAdBonus = async (req, res, next) => {
+    try {
+        validateAllowedFields(req.body, ['bonusType'], 'body');
+        const bonusType = String(req.body.bonusType || '').trim().toLowerCase();
+        const id = req.params.id;
+
+        if (!['bump', 'vip'].includes(bonusType)) {
+            return res.status(400).json({ message: 'Yanlış bonus növü. "bump" və ya "vip" seçilməlidir.' });
+        }
+
+        const ad = await Ad.findOne({ _id: id, status: { $ne: DELETED_AD_STATUS } });
+        if (!ad) {
+            return res.status(404).json({ message: 'Elan tapılmadı' });
+        }
+
+        if (String(ad.author) !== String(req.user._id) && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Bu elan üçün bonus tətbiq etmək hüququnuz yoxdur' });
+        }
+
+        if (ad.status !== 'active') {
+            return res.status(400).json({ message: 'Yalnız aktiv elanlar üçün bonus istifadə edilə bilər' });
+        }
+
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'İstifadəçi tapılmadı' });
+        }
+
+        const now = new Date();
+
+        if (bonusType === 'bump') {
+            if (!user.referralBumps || user.referralBumps < 1) {
+                return res.status(400).json({ message: 'Balansınızda "İrəli çək" bonusu yoxdur' });
+            }
+
+            user.referralBumps -= 1;
+            await user.save();
+
+            // Bump ad to top
+            ad.createdAt = now;
+            ad.boostedAt = now;
+            ad.isBoosted = true;
+            ad.promotionType = 'BumpUp';
+            ad.promotionStartedAt = now;
+            ad.promotionExpiresAt = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+            ad.boostCount = (ad.boostCount || 0) + 1;
+            await ad.save();
+
+            await Transaction.create({
+                user: user._id,
+                amount: 0,
+                type: 'ad_boost',
+                description: `İrəli çək bonusu istifadə edildi — ${ad.brand || ''} ${ad.modelName || ''}`
+            });
+
+            await Notification.create({
+                user: user._id,
+                type: 'promo',
+                title: 'Elanınız irəli çəkildi! 🚀',
+                body: `${ad.brand || ''} ${ad.modelName || ''} elanınız referral bonusu ilə ən ön sıraya çəkildi.`,
+                link: `/elan-detail.html?id=${ad._id}`
+            });
+
+            await invalidateCache('ads:VIP:cache:*').catch(() => {});
+
+            return res.json({
+                success: true,
+                message: 'Elanınız uğurla ən ön sıraya çəkildi! 🚀',
+                referralBumps: user.referralBumps,
+                referralVips: user.referralVips || 0,
+                ad
+            });
+        }
+
+        if (bonusType === 'vip') {
+            if (!user.referralVips || user.referralVips < 1) {
+                return res.status(400).json({ message: 'Balansınızda 1 həftəlik VIP bonusu yoxdur' });
+            }
+
+            user.referralVips -= 1;
+            await user.save();
+
+            const currentPromoBase = ad.promotionExpiresAt && ad.promotionExpiresAt > now
+                ? new Date(ad.promotionExpiresAt)
+                : now;
+            const expiresAt = new Date(currentPromoBase);
+            expiresAt.setDate(expiresAt.getDate() + 7); // 1 week
+
+            ad.isBoosted = true;
+            ad.promotionType = 'VIP';
+            ad.promotionStartedAt = ad.promotionStartedAt || now;
+            ad.promotionExpiresAt = expiresAt;
+            ad.boostedAt = now;
+            ad.boostCount = (ad.boostCount || 0) + 1;
+            await ad.save();
+
+            await Transaction.create({
+                user: user._id,
+                amount: 0,
+                type: 'ad_boost',
+                description: `1 həftəlik VIP bonusu istifadə edildi — ${ad.brand || ''} ${ad.modelName || ''}`
+            });
+
+            await Notification.create({
+                user: user._id,
+                type: 'promo',
+                title: '1 Həftəlik VIP Aktivləşdirildi! 👑',
+                body: `${ad.brand || ''} ${ad.modelName || ''} elanınız 7 gün ərzində VIP bölməsində vurğulanacaq.`,
+                link: `/elan-detail.html?id=${ad._id}`
+            });
+
+            await invalidateCache('ads:VIP:cache:*').catch(() => {});
+
+            return res.json({
+                success: true,
+                message: 'Elanınız 1 həftəlik VIP statusu qazandı! 👑',
+                referralBumps: user.referralBumps || 0,
+                referralVips: user.referralVips,
+                ad
+            });
+        }
+    } catch (error) {
+        next(error);
+    }
+};
+
+module.exports = { getAds, getAdById, createAd, updateAd, deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds, requestAdPromotion, useAdBonus };

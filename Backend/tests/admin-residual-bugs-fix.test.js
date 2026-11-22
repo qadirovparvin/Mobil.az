@@ -42,7 +42,7 @@ async function runTests() {
     const guardIdx  = adminHtml.indexOf('guardAdminPage');
     const authIdx   = adminHtml.indexOf('src="JS/auth.js"');
     const apiIdx    = adminHtml.indexOf('src="JS/api.js"');
-    const adminIdx  = adminHtml.indexOf('src="JS/admin.js"');
+    const adminIdx  = adminHtml.indexOf('src="JS/admin.js');
 
     assert(configIdx > 0, 'config.js must be present in admin.html');
     assert(guardIdx > 0, 'guardAdminPage must be present in admin.html');

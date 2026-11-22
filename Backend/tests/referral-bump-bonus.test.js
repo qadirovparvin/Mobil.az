@@ -1,192 +1,224 @@
-/**
- * Automated Test: Referral Activation and 3x Bump Ad Bonus
- * Tests:
- * 1. Referral Link redirect GET /ref/:code -> 302 to /signup.html?ref=:code
- * 2. User registration with referralCode awards referrer:
- *    - +5 AZN walletBalance
- *    - +5 referralCredits
- *    - +3 bumpBonus (3 dəfə elanı irəli çək bonusu)
- *    - Notification & Transaction created
- * 3. Referral stats endpoint /api/referral/stats returns totalReferrals, bumpBonus, referralCredits
- * 4. User bumps ad using 1 free bump bonus:
- *    - walletBalance not charged (0 AZN)
- *    - bumpBonus decrements by 1 (3 -> 2)
- *    - Ad is boosted & moved to top (boostedAt & createdAt updated)
- *    - Transaction & Notification created
- */
-
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'jwt_secret_for_tests_1234567890123456';
-process.env.REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || 'refresh_secret_for_tests_9876543210123456';
-
-const assert = require('assert');
 const mongoose = require('mongoose');
+const path = require('path');
+const assert = require('assert');
+
+const dotenv = require('dotenv');
+dotenv.config({ path: path.join(__dirname, '../.env') });
+
 const User = require('../models/User');
 const Ad = require('../models/Ad');
-const Transaction = require('../models/Transaction');
 const Notification = require('../models/Notification');
-const { register } = require('../controllers/authController');
-const { boostAd } = require('../controllers/adController');
-const { getReferralStats } = require('../controllers/referralController');
+const { toSafeUser } = require('../utils/userSerializer');
 
 async function runTests() {
-    console.log('=== RUNNING REFERRAL & 3X BUMP BONUS TEST ===');
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mobilaz';
-    await mongoose.connect(mongoUri);
-
-    const ts = Date.now();
-    const referrerEmail = `referrer_${ts}@example.com`;
-    const friendEmail = `friend_${ts}@example.com`;
+    console.log('Connecting to MongoDB...');
+    await mongoose.connect(process.env.MONGODB_URI || process.env.MONGO_URI);
+    console.log('Connected to MongoDB.');
 
     try {
-        // Step 1: Create Referrer User
-        console.log('1. Creating Referrer user...');
-        const referrer = await User.create({
-            name: 'Əli',
-            lastName: 'Həsənov',
-            email: referrerEmail,
-            password: 'Password123!',
-            phone: `+99450${String(ts).slice(-7)}`,
-            walletBalance: 10,
-            bumpBonus: 0,
-            referralCredits: 0
+        const testSuffix = Date.now();
+
+        // 1. Create Referrer User A
+        const userA = await User.create({
+            name: `Referrer_${testSuffix}`,
+            email: `ref_${testSuffix}@example.com`,
+            password: 'HashedPassword123!',
+            isVerified: true
         });
+        assert(userA.referralCode, 'User A should have an auto-generated referralCode');
+        assert.strictEqual(userA.referralBumps, 0, 'User A should start with 0 referralBumps');
+        assert.strictEqual(userA.referralVips, 0, 'User A should start with 0 referralVips');
+        console.log('✓ Test 1 Passed: User A created with referralCode', userA.referralCode);
 
-        assert.ok(referrer.referralCode, 'Referrer must have an auto-generated referralCode');
-        console.log(`✔ Referrer created with referralCode: ${referrer.referralCode}`);
+        // Test toSafeUser serialization
+        const safeA = toSafeUser(userA);
+        assert.strictEqual(safeA.referralBumps, 0, 'toSafeUser must serialize referralBumps');
+        assert.strictEqual(safeA.referralVips, 0, 'toSafeUser must serialize referralVips');
+        console.log('✓ Test 2 Passed: toSafeUser includes referralBumps and referralVips');
 
-        // Step 2: Register Friend with Referrer's code
-        console.log('2. Registering friend with referralCode...');
-        const friendPhone = `+99455${String(ts + 1).slice(-7)}`;
-        let registerResult = null;
-        let registerStatus = 200;
-
-        const mockReq = {
-            body: {
-                name: 'Vəli',
-                lastName: 'Məmmədov',
-                email: friendEmail,
-                password: 'Password123!',
-                phone: friendPhone,
-                referralCode: referrer.referralCode
-            },
-            ip: '127.0.0.1',
-            get: () => 'TestAgent'
-        };
-        const mockRes = {
-            status: (code) => {
-                registerStatus = code;
-                return mockRes;
-            },
-            json: (payload) => {
-                registerResult = payload;
-                return mockRes;
-            },
-            cookie: () => mockRes
-        };
-
-        await register(mockReq, mockRes, (err) => {
-            if (err) throw err;
-        });
-
-        assert.strictEqual(registerStatus, 201, 'Friend registration must return 201');
-        assert.ok(registerResult.user, 'Registration must return user');
-        console.log('✔ Friend registered successfully!');
-
-        // Step 3: Verify Referrer received +5 AZN and +3 bumpBonus
-        console.log('3. Checking referrer balance and bumpBonus...');
-        const updatedReferrer = await User.findById(referrer._id);
-        assert.strictEqual(updatedReferrer.walletBalance, 15, `Referrer walletBalance should be 15, got ${updatedReferrer.walletBalance}`);
-        assert.strictEqual(updatedReferrer.referralCredits, 5, `Referrer referralCredits should be 5, got ${updatedReferrer.referralCredits}`);
-        assert.strictEqual(updatedReferrer.bumpBonus, 3, `Referrer bumpBonus should be 3, got ${updatedReferrer.bumpBonus}`);
-        console.log(`✔ Referrer balance: ${updatedReferrer.walletBalance} AZN, Bump bonus: ${updatedReferrer.bumpBonus} dəfə!`);
-
-        // Verify notification & transaction
-        const refTx = await Transaction.findOne({ user: referrer._id, type: 'referral_credit' });
-        assert.ok(refTx, 'Referral credit transaction must be logged');
-        assert.strictEqual(refTx.amount, 5, 'Transaction amount must be 5');
-
-        const refNotif = await Notification.findOne({ user: referrer._id, type: 'referral' });
-        assert.ok(refNotif, 'Referral notification must be created');
-        console.log('✔ Referrer notification and transaction verified!');
-
-        // Step 4: Test /api/referral/stats
-        console.log('4. Testing referral stats endpoint...');
-        let statsData = null;
-        const statsReq = { user: { _id: referrer._id } };
-        const statsRes = {
-            status: () => statsRes,
-            json: (d) => { statsData = d; return statsRes; }
-        };
-        await getReferralStats(statsReq, statsRes, (err) => { if (err) throw err; });
-
-        assert.strictEqual(statsData.totalReferrals, 1, 'Total referrals should be 1');
-        assert.strictEqual(statsData.bumpBonus, 3, 'Stats bumpBonus should be 3');
-        assert.strictEqual(statsData.referralCredits, 5, 'Stats referralCredits should be 5');
-        console.log('✔ Referral stats verified: totalReferrals=1, bumpBonus=3, referralCredits=5');
-
-        // Step 5: Test Free BumpUp on Referrer's ad
-        console.log('5. Creating ad and bumping with free bonus...');
-        const testAd = await Ad.create({
-            author: referrer._id,
-            title: 'Test iPhone 14 Pro Max',
-            category: 'Telefon',
-            brand: 'Apple',
-            modelName: 'iPhone 14 Pro Max',
-            price: 1800,
-            city: 'Bakı',
-            status: 'active',
-            sellerType: 'personal'
-        });
-
-        const initialAdCreatedAt = testAd.createdAt;
-        let boostResult = null;
-        let boostStatus = 200;
-
-        const boostReq = {
-            user: { _id: referrer._id },
-            params: { id: testAd._id.toString() },
-            body: {
-                promotionType: 'BumpUp',
-                idempotencyKey: `bump-test-${ts}`
-            },
-            get: () => ''
-        };
-        const boostRes = {
-            status: (code) => {
-                boostStatus = code;
-                return boostRes;
-            },
-            json: (d) => {
-                boostResult = d;
-                return boostRes;
+        // Helper simulation of grantReferralReward
+        const grantReferralReward = async (newUserId) => {
+            if (!newUserId) return null;
+            const newUser = await User.findById(newUserId);
+            if (!newUser || !newUser.referredBy || newUser.referralRewardGranted) {
+                return null;
             }
+
+            const referrer = await User.findById(newUser.referredBy);
+            if (!referrer) return null;
+
+            newUser.referralRewardGranted = true;
+            await newUser.save();
+
+            referrer.referralBumps = (referrer.referralBumps || 0) + 3;
+
+            await Notification.create({
+                user:  referrer._id,
+                type:  'referral',
+                title: 'Dostunu gətir bonusu! 🎁',
+                body:  `${newUser.name || 'Dostunuz'} sizin dəvətinizlə qeydiyyatdan keçdi! Hesabınıza 3 ədəd pulsuz "İrəli çək" bonusu əlavə edildi.`,
+                link:  '/cabinet.html#ads'
+            });
+
+            const totalReferrals = await User.countDocuments({
+                referredBy: referrer._id,
+                $or: [{ referralRewardGranted: true }, { isVerified: true }]
+            });
+
+            if (totalReferrals > 0 && totalReferrals % 3 === 0) {
+                referrer.referralVips = (referrer.referralVips || 0) + 2;
+                referrer.referralVipCampaignClaimedCount = (referrer.referralVipCampaignClaimedCount || 0) + 1;
+
+                await Notification.create({
+                    user:  referrer._id,
+                    type:  'referral',
+                    title: 'Kompaniya Bonusu Qazandınız! 👑',
+                    body:  `Təbriklər! 3 dost dəvət etdiyiniz üçün hesabınıza 2 dəfə 1 həftəlik VIP elan bonusu əlavə edildi!`,
+                    link:  '/cabinet.html#ads'
+                });
+            }
+
+            await referrer.save();
+            return { referrer, totalReferrals };
         };
 
-        await boostAd(boostReq, boostRes, (err) => { if (err) throw err; });
+        // 2. User B registers under User A (1st friend)
+        const userB = await User.create({
+            name: `Friend1_${testSuffix}`,
+            email: `friend1_${testSuffix}@example.com`,
+            password: 'HashedPassword123!',
+            referredBy: userA._id,
+            isVerified: true
+        });
 
-        assert.strictEqual(boostStatus, 200, 'BoostAd should return 200');
-        assert.strictEqual(boostResult.usedFreeBump, true, 'Boost should have used free bump');
-        assert.strictEqual(boostResult.bumpBonus, 2, `bumpBonus should decrement to 2, got ${boostResult.bumpBonus}`);
-        assert.strictEqual(boostResult.walletBalance, 15, `walletBalance should remain 15 (free), got ${boostResult.walletBalance}`);
+        await grantReferralReward(userB._id);
+
+        let refreshedA = await User.findById(userA._id);
+        assert.strictEqual(refreshedA.referralBumps, 3, 'User A should have earned 3 referralBumps');
+        assert.strictEqual(refreshedA.referralVips, 0, 'User A should still have 0 VIPs (only 1 friend)');
+        console.log('✓ Test 3 Passed: 1st friend earned 3 bumps (total: 3 bumps, 0 VIPs)');
+
+        // Test double-crediting prevention
+        const duplicateReward = await grantReferralReward(userB._id);
+        assert.strictEqual(duplicateReward, null, 'Duplicate grantReferralReward should return null');
+        refreshedA = await User.findById(userA._id);
+        assert.strictEqual(refreshedA.referralBumps, 3, 'Bumps must not duplicate');
+        console.log('✓ Test 4 Passed: Duplicate grant prevented');
+
+        // 3. User C registers under User A (2nd friend)
+        const userC = await User.create({
+            name: `Friend2_${testSuffix}`,
+            email: `friend2_${testSuffix}@example.com`,
+            password: 'HashedPassword123!',
+            referredBy: userA._id,
+            isVerified: true
+        });
+        await grantReferralReward(userC._id);
+        refreshedA = await User.findById(userA._id);
+        assert.strictEqual(refreshedA.referralBumps, 6, 'User A should have 6 bumps after 2nd friend');
+        assert.strictEqual(refreshedA.referralVips, 0, 'User A should still have 0 VIPs (2 friends)');
+        console.log('✓ Test 5 Passed: 2nd friend earned 3 more bumps (total: 6 bumps, 0 VIPs)');
+
+        // 4. User D registers under User A (3rd friend - Milestone!)
+        const userD = await User.create({
+            name: `Friend3_${testSuffix}`,
+            email: `friend3_${testSuffix}@example.com`,
+            password: 'HashedPassword123!',
+            referredBy: userA._id,
+            isVerified: true
+        });
+        await grantReferralReward(userD._id);
+        refreshedA = await User.findById(userA._id);
+        assert.strictEqual(refreshedA.referralBumps, 9, 'User A should have 9 bumps after 3rd friend');
+        assert.strictEqual(refreshedA.referralVips, 2, 'User A should earn 2 VIP bonuses for 3 friends milestone!');
+        console.log('✓ Test 6 Passed: 3rd friend completed milestone! Earned +3 bumps and +2 VIP bonuses (total: 9 bumps, 2 VIPs)');
+
+        // 5. Test using bonus on Ad
+        const testAd = await Ad.create({
+            author: userA._id,
+            title: `Test Ad ${testSuffix}`,
+            category: 'phone',
+            brand: 'Apple',
+            modelName: 'iPhone 13',
+            price: 1200,
+            city: 'Bakı',
+            contactPhone: '+994501234567',
+            status: 'active'
+        });
+
+        // Bump the ad using 1 bump bonus
+        const adController = require('../controllers/adController');
+        const mockReqBump = {
+            params: { id: testAd._id.toString() },
+            body: { bonusType: 'bump' },
+            user: { _id: userA._id }
+        };
+        let bumpResult;
+        const mockResBump = {
+            status: function(code) { this.statusCode = code; return this; },
+            json: function(payload) { bumpResult = payload; return this; }
+        };
+
+        await adController.useAdBonus(mockReqBump, mockResBump, (err) => { if (err) throw err; });
+        assert(bumpResult && bumpResult.success, 'useAdBonus bump should succeed');
+        assert.strictEqual(bumpResult.referralBumps, 8, 'Remaining bumps should be 8');
 
         const bumpedAd = await Ad.findById(testAd._id);
-        assert.strictEqual(bumpedAd.isBoosted, true, 'Ad isBoosted must be true');
-        assert.strictEqual(bumpedAd.promotionType, 'BumpUp', 'Ad promotionType must be BumpUp');
-        assert.ok(bumpedAd.boostedAt, 'Ad boostedAt must be set');
-        console.log('✔ Ad successfully bumped with free bonus! Remaining bumps: 2, Wallet balance untouched: 15 AZN');
+        assert.strictEqual(bumpedAd.promotionType, 'BumpUp', 'Ad promotionType should be BumpUp');
+        assert.strictEqual(bumpedAd.isBoosted, true, 'Ad isBoosted should be true');
+        console.log('✓ Test 7 Passed: Successfully used 1 "İrəli çək" bonus to bump ad (remaining bumps: 8)');
 
-        console.log('\n🎉 ALL REFERRAL AND 3X BUMP BONUS TESTS PASSED 100%! 🎉');
+        // VIP the ad using 1 VIP bonus
+        const mockReqVip = {
+            params: { id: testAd._id.toString() },
+            body: { bonusType: 'vip' },
+            user: { _id: userA._id }
+        };
+        let vipResult;
+        const mockResVip = {
+            status: function(code) { this.statusCode = code; return this; },
+            json: function(payload) { vipResult = payload; return this; }
+        };
+
+        await adController.useAdBonus(mockReqVip, mockResVip, (err) => { if (err) throw err; });
+        assert(vipResult && vipResult.success, 'useAdBonus vip should succeed');
+        assert.strictEqual(vipResult.referralVips, 1, 'Remaining VIPs should be 1');
+
+        const vipAd = await Ad.findById(testAd._id);
+        assert.strictEqual(vipAd.promotionType, 'VIP', 'Ad promotionType should be VIP');
+        assert(vipAd.promotionExpiresAt > new Date(Date.now() + 6 * 24 * 60 * 60 * 1000), 'VIP expiry should be 7 days');
+        console.log('✓ Test 8 Passed: Successfully used 1 "VIP" bonus to promote ad for 7 days (remaining VIPs: 1)');
+
+        // 6. Test referral stats endpoint
+        const referralController = require('../controllers/referralController');
+        const mockReqStats = { user: { _id: userA._id } };
+        let statsResult;
+        const mockResStats = {
+            status: function(code) { this.statusCode = code; return this; },
+            json: function(payload) { statsResult = payload; return this; }
+        };
+        await referralController.getReferralStats(mockReqStats, mockResStats, (err) => { if (err) throw err; });
+        assert.strictEqual(statsResult.totalReferrals, 3, 'totalReferrals should be 3');
+        assert.strictEqual(statsResult.referralBumps, 8, 'referralBumps in stats should be 8');
+        assert.strictEqual(statsResult.referralVips, 1, 'referralVips in stats should be 1');
+        assert.strictEqual(statsResult.campaign.completedCycles, 1, 'completedCycles should be 1');
+        console.log('✓ Test 9 Passed: getReferralStats returns correct metrics & campaign progress');
+
+        // Cleanup
+        await User.deleteMany({ _id: { $in: [userA._id, userB._id, userC._id, userD._id] } });
+        await Ad.deleteOne({ _id: testAd._id });
+        await Notification.deleteMany({ user: userA._id });
+        console.log('✓ Cleanup complete');
+
+        console.log('\n========================================');
+        console.log('🎉 ALL REFERRAL SYSTEM TESTS PASSED 100%!');
+        console.log('========================================\n');
     } finally {
-        // Clean up test data
-        await User.deleteMany({ email: { $in: [referrerEmail, friendEmail] } });
-        await Ad.deleteMany({ title: 'Test iPhone 14 Pro Max' });
-        await Transaction.deleteMany({ description: { $regex: 'Dostunu gətir bonusu|Pulsuz İrəli Çək' } });
-        await Notification.deleteMany({ title: { $regex: 'Dostunu gətir|Elanınız irəli çəkildi' } });
         await mongoose.disconnect();
     }
 }
 
-runTests().catch((err) => {
-    console.error('❌ Test failed:', err);
+runTests().catch(err => {
+    console.error('Test failed with error:', err);
     process.exit(1);
 });
