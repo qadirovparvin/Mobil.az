@@ -1,23 +1,23 @@
 "use strict";
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[id^="toggle"]');
-    if (!btn) return;
-    e.preventDefault();
-    const targetId = btn.dataset.target || btn.id.replace('toggle','').toLowerCase();
-    const input = document.getElementById(targetId) || document.getElementById('loginPassword') || document.querySelector('input[type="password"], input[type="text"]');
-    if (input) {
-      input.type = input.type === 'password' ? 'text' : 'password';
-      if (btn.classList.contains('fa-eye')) {
-        btn.classList.remove('fa-eye');
-        btn.classList.add('fa-eye-slash');
-      } else if (btn.classList.contains('fa-eye-slash')) {
-        btn.classList.remove('fa-eye-slash');
-        btn.classList.add('fa-eye');
-      }
-    }
-  });
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[id^="toggle"]');
+        if (!btn) return;
+        e.preventDefault();
+        const targetId = btn.dataset.target || btn.id.replace('toggle', '').toLowerCase();
+        const input = document.getElementById(targetId) || document.getElementById('loginPassword') || document.querySelector('input[type="password"], input[type="text"]');
+        if (input) {
+            input.type = input.type === 'password' ? 'text' : 'password';
+            if (btn.classList.contains('fa-eye')) {
+                btn.classList.remove('fa-eye');
+                btn.classList.add('fa-eye-slash');
+            } else if (btn.classList.contains('fa-eye-slash')) {
+                btn.classList.remove('fa-eye-slash');
+                btn.classList.add('fa-eye');
+            }
+        }
+    });
 });
 
 
@@ -38,10 +38,10 @@ function getStoredToken() {
         if (tok) return tok;
     }
     if (typeof localStorage === 'undefined') return '';
-    const token = localStorage.getItem('token') || 
-                  sessionStorage.getItem('token') || 
-                  localStorage.getItem('adminToken') || 
-                  sessionStorage.getItem('adminToken') || '';
+    const token = localStorage.getItem('token') ||
+        sessionStorage.getItem('token') ||
+        localStorage.getItem('adminToken') ||
+        sessionStorage.getItem('adminToken') || '';
     return token.trim().replace(/^["']+|["']+$/g, '');
 }
 if (typeof window !== 'undefined') {
@@ -89,65 +89,65 @@ function persistSession(data, rememberMeParam) {
 
     const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach((key) => {
-        try { localStorage.removeItem(key); } catch(e) {}
-        try { sessionStorage.removeItem(key); } catch(e) {}
+        try { localStorage.removeItem(key); } catch (e) { }
+        try { sessionStorage.removeItem(key); } catch (e) { }
     });
 
     const userStr = JSON.stringify(userPayload);
     const userKeys = ['user', 'mobilaz_current_user', 'mobilaz_user'];
 
     if (rememberMe) {
-        try { localStorage.setItem('token', token); } catch(e) {}
-        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
-        userKeys.forEach(k => { try { localStorage.setItem(k, userStr); } catch(e) {} });
+        try { localStorage.setItem('token', token); } catch (e) { }
+        try { localStorage.setItem('rememberMe', 'true'); } catch (e) { }
+        userKeys.forEach(k => { try { localStorage.setItem(k, userStr); } catch (e) { } });
         if (userPayload.email) {
-            try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
-            try { localStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) { }
+            try { localStorage.setItem('userEmail', userPayload.email); } catch (e) { }
         }
         if (userPayload.role) {
-            try { localStorage.setItem('userRole', userPayload.role); } catch(e) {}
+            try { localStorage.setItem('userRole', userPayload.role); } catch (e) { }
         }
         if (userPayload.role === 'admin') {
-            try { localStorage.setItem('adminToken', token); } catch(e) {}
-            try { localStorage.setItem('adminUser', userStr); } catch(e) {}
+            try { localStorage.setItem('adminToken', token); } catch (e) { }
+            try { localStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     } else {
-        try { sessionStorage.setItem('token', token); } catch(e) {}
-        try { localStorage.removeItem('rememberMe'); } catch(e) {}
-        userKeys.forEach(k => { try { sessionStorage.setItem(k, userStr); } catch(e) {} });
+        try { sessionStorage.setItem('token', token); } catch (e) { }
+        try { localStorage.removeItem('rememberMe'); } catch (e) { }
+        userKeys.forEach(k => { try { sessionStorage.setItem(k, userStr); } catch (e) { } });
         if (userPayload.email) {
-            try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
-            try { sessionStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+            try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) { }
+            try { sessionStorage.setItem('userEmail', userPayload.email); } catch (e) { }
         }
         if (userPayload.role) {
-            try { sessionStorage.setItem('userRole', userPayload.role); } catch(e) {}
+            try { sessionStorage.setItem('userRole', userPayload.role); } catch (e) { }
         }
         if (userPayload.role === 'admin') {
-            try { sessionStorage.setItem('adminToken', token); } catch(e) {}
-            try { sessionStorage.setItem('adminUser', userStr); } catch(e) {}
+            try { sessionStorage.setItem('adminToken', token); } catch (e) { }
+            try { sessionStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     }
 
     if (typeof window.setAuthToken === 'function') {
-        try { window.setAuthToken(token); } catch(e) {}
+        try { window.setAuthToken(token); } catch (e) { }
     }
     if (typeof window.updateHeader === 'function') {
-        try { window.updateHeader(); } catch(e) {}
+        try { window.updateHeader(); } catch (e) { }
     }
     if (typeof window.updateAuthUI === 'function') {
-        try { window.updateAuthUI(); } catch(e) {}
+        try { window.updateAuthUI(); } catch (e) { }
     }
     if (typeof window.checkAuth === 'function') {
-        try { window.checkAuth(); } catch(e) {}
+        try { window.checkAuth(); } catch (e) { }
     }
-    try { window.dispatchEvent(new Event('authChanged')); } catch(e) {}
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) { }
 }
 window.persistSession = persistSession;
 window.persistAuthSession = persistSession;
 
 function onLoginSuccess(token, user, rememberMe, redirectTarget) {
     window.loginFormSubmitted = true;
-    try { sessionStorage.setItem('manualLoginInProgress', 'true'); } catch(e) {}
+    try { sessionStorage.setItem('manualLoginInProgress', 'true'); } catch (e) { }
 
     // Loop flag-ləri tam sil
     sessionStorage.removeItem('lastRedirectTime');
@@ -160,22 +160,22 @@ function onLoginSuccess(token, user, rememberMe, redirectTarget) {
     if (window.location.search.includes('expired') || window.location.search.includes('reason')) {
         try {
             window.history.replaceState({}, document.title, window.location.pathname);
-        } catch(e) {}
+        } catch (e) { }
     }
 
     // Token-i DÜZGÜN saxla - rememberMe true-dursa localStorage, false-dursa sessionStorage
     const tokenKeys = ['token', 'accessToken', 'authToken', 'adminToken', 'jwt'];
     tokenKeys.forEach(k => {
-        try { localStorage.removeItem(k); } catch(e) {}
-        try { sessionStorage.removeItem(k); } catch(e) {}
+        try { localStorage.removeItem(k); } catch (e) { }
+        try { sessionStorage.removeItem(k); } catch (e) { }
     });
 
     if (rememberMe) {
-        try { localStorage.setItem('token', token); } catch(e) {}
-        try { localStorage.setItem('rememberMe', 'true'); } catch(e) {}
+        try { localStorage.setItem('token', token); } catch (e) { }
+        try { localStorage.setItem('rememberMe', 'true'); } catch (e) { }
     } else {
-        try { sessionStorage.setItem('token', token); } catch(e) {}
-        try { localStorage.setItem('rememberMe', 'false'); } catch(e) {}
+        try { sessionStorage.setItem('token', token); } catch (e) { }
+        try { localStorage.setItem('rememberMe', 'false'); } catch (e) { }
     }
 
     const userPayload = {
@@ -189,30 +189,30 @@ function onLoginSuccess(token, user, rememberMe, redirectTarget) {
     };
     const userStr = JSON.stringify(userPayload);
     ['user', 'mobilaz_current_user', 'mobilaz_user'].forEach(k => {
-        try { localStorage.setItem(k, userStr); } catch(e) {}
-        try { sessionStorage.setItem(k, userStr); } catch(e) {}
+        try { localStorage.setItem(k, userStr); } catch (e) { }
+        try { sessionStorage.setItem(k, userStr); } catch (e) { }
     });
 
     if (userPayload.email) {
-        try { localStorage.setItem('savedEmail', userPayload.email); } catch(e) {}
-        try { localStorage.setItem('userEmail', userPayload.email); } catch(e) {}
+        try { localStorage.setItem('savedEmail', userPayload.email); } catch (e) { }
+        try { localStorage.setItem('userEmail', userPayload.email); } catch (e) { }
     }
     if (userPayload.role) {
-        try { localStorage.setItem('userRole', userPayload.role); } catch(e) {}
+        try { localStorage.setItem('userRole', userPayload.role); } catch (e) { }
     }
 
     if (userPayload.role === 'admin') {
         if (rememberMe) {
-            try { localStorage.setItem('adminToken', token); } catch(e) {}
-            try { localStorage.setItem('adminUser', userStr); } catch(e) {}
+            try { localStorage.setItem('adminToken', token); } catch (e) { }
+            try { localStorage.setItem('adminUser', userStr); } catch (e) { }
         } else {
-            try { sessionStorage.setItem('adminToken', token); } catch(e) {}
-            try { sessionStorage.setItem('adminUser', userStr); } catch(e) {}
+            try { sessionStorage.setItem('adminToken', token); } catch (e) { }
+            try { sessionStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     }
 
     if (typeof window.updateHeader === 'function') {
-        try { window.updateHeader(); } catch(e) {}
+        try { window.updateHeader(); } catch (e) { }
     }
 
     if (window.showToast) {
@@ -223,7 +223,7 @@ function onLoginSuccess(token, user, rememberMe, redirectTarget) {
     const target = redirectTarget || defaultTarget;
 
     setTimeout(() => {
-        try { sessionStorage.removeItem('manualLoginInProgress'); } catch(e) {}
+        try { sessionStorage.removeItem('manualLoginInProgress'); } catch (e) { }
         window.location.href = target;
     }, 500);
 }
@@ -232,16 +232,16 @@ window.onLoginSuccess = onLoginSuccess;
 function clearSession() {
     const keys = ['token', 'accessToken', 'authToken', 'adminToken', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminUser', 'userRole', 'userEmail'];
     keys.forEach((key) => {
-        try { sessionStorage.removeItem(key); } catch(e) {}
-        try { localStorage.removeItem(key); } catch(e) {}
+        try { sessionStorage.removeItem(key); } catch (e) { }
+        try { localStorage.removeItem(key); } catch (e) { }
     });
     if (typeof window.updateHeader === 'function') {
-        try { window.updateHeader(); } catch(e) {}
+        try { window.updateHeader(); } catch (e) { }
     }
     if (typeof window.updateAuthUI === 'function') {
-        try { window.updateAuthUI(); } catch(e) {}
+        try { window.updateAuthUI(); } catch (e) { }
     }
-    try { window.dispatchEvent(new Event('authChanged')); } catch(e) {}
+    try { window.dispatchEvent(new Event('authChanged')); } catch (e) { }
 }
 window.clearSession = clearSession;
 window.clearAuthSession = clearSession;
@@ -263,7 +263,7 @@ function validateClientPassword(pwd) {
 function showToast(msg, type = 'info') {
     const toast = document.getElementById('authToast');
     const msgEl = document.getElementById('toastMsg');
-    const icon  = document.getElementById('toastIcon');
+    const icon = document.getElementById('toastIcon');
     if (!toast) return;
 
     // Translation map for toast messages (exact AZ strings used in JS)
@@ -331,12 +331,12 @@ function showToast(msg, type = 'info') {
     }
 
     toast.className = `auth-toast ${type}`;
-    icon.className  = type === 'success' ? 'fas fa-check-circle'
-                    : type === 'error'   ? 'fas fa-times-circle'
-                    : 'fas fa-info-circle';
+    icon.className = type === 'success' ? 'fas fa-check-circle'
+        : type === 'error' ? 'fas fa-times-circle'
+            : 'fas fa-info-circle';
     msgEl.textContent = translatedMsg;
     toast.classList.add('show');
-    
+
     if (window.toastTimer) clearTimeout(window.toastTimer);
     window.toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
 }
@@ -349,7 +349,7 @@ function setLoading(btn, on) {
 
 /* ── Password visibility toggle ────────────────────────────── */
 window.togglePwd = function togglePwd(inputId, iconId) {
-    const inp  = document.getElementById(inputId);
+    const inp = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
     if (!inp) return;
     const now = Date.now();
@@ -368,8 +368,8 @@ window.togglePwd = function togglePwd(inputId, iconId) {
 function checkPasswordStrength(val) {
     const fillId = document.getElementById('strengthFill') ? 'strengthFill' : 'strengthFillE';
     const textId = document.getElementById('strengthText') ? 'strengthText' : 'strengthTextE';
-    const fill   = document.getElementById(fillId);
-    const text   = document.getElementById(textId);
+    const fill = document.getElementById(fillId);
+    const text = document.getElementById(textId);
     if (!fill || !text) return;
 
     let score = 0;
@@ -433,7 +433,7 @@ function clearOtp(containerId) {
 
 /* ── Countdown timer ────────────────────────────────────────── */
 function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
-    const timerEl  = document.getElementById(timerSpanId);
+    const timerEl = document.getElementById(timerSpanId);
     const resendEl = document.getElementById(resendBtnId);
     if (!timerEl || !resendEl) return;
     let s = seconds;
@@ -704,13 +704,13 @@ function setupPhoneInputMask(inputId, prefixId) {
 
         if (type === 'invalidPrefix') {
             return isRu ? 'Префикс оператора не поддерживается (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
-                   isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
-                   'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)';
+                isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                    'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)';
         }
         if (type === 'invalidLength') {
             return isRu ? 'Азербайджанский номер должен состоять из 9 цифр. Пример: (50) 123-45-67' :
-                   isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
-                   'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67';
+                isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
+                    'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67';
         }
         return isRu ? 'Введите номер телефона' : isEn ? 'Enter phone number' : 'Telefon nömrəsini daxil edin';
     }
@@ -805,8 +805,8 @@ function validatePhoneNumber(inputId, prefixId) {
             return {
                 valid: false,
                 message: isRu ? 'Азербайджанский номер должен состоять из 9 цифр. Пример: (50) 123-45-67' :
-                         isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
-                         'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67'
+                    isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
+                        'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67'
             };
         }
         const op = digits.slice(0, 2);
@@ -814,8 +814,8 @@ function validatePhoneNumber(inputId, prefixId) {
             return {
                 valid: false,
                 message: isRu ? 'Префикс оператора не поддерживается (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
-                         isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
-                         'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)'
+                    isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                        'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)'
             };
         }
         return { valid: true, fullPhone: '+994' + digits, digits, prefix };
@@ -826,8 +826,8 @@ function validatePhoneNumber(inputId, prefixId) {
             return {
                 valid: false,
                 message: isRu ? 'Международный номер должен содержать от 7 до 15 цифр' :
-                         isEn ? 'International phone number must be between 7 and 15 digits' :
-                         'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır'
+                    isEn ? 'International phone number must be between 7 and 15 digits' :
+                        'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır'
             };
         }
         return { valid: true, fullPhone: '+' + digits, digits, prefix };
@@ -837,8 +837,8 @@ function validatePhoneNumber(inputId, prefixId) {
         return {
             valid: false,
             message: isRu ? (`${cfg.name} номер должен состоять из ${cfg.digits} цифр`) :
-                     isEn ? (`${cfg.name} number must be exactly ${cfg.digits} digits`) :
-                     (`${cfg.name} nömrəsi tam ${cfg.digits} rəqəmdən ibarət olmalıdır`)
+                isEn ? (`${cfg.name} number must be exactly ${cfg.digits} digits`) :
+                    (`${cfg.name} nömrəsi tam ${cfg.digits} rəqəmdən ibarət olmalıdır`)
         };
     }
 
@@ -1033,7 +1033,7 @@ async function sendLoginSMS() {
         wireOtpInputs('smsOtpInputs');
         startCountdown('smsTimer', 'smsResendBtn');
         showToast('SMS kodu göndərildi!', 'success');
-    } catch(e) {
+    } catch (e) {
         showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1068,7 +1068,7 @@ async function sendLoginEmail() {
         wireOtpInputs('emailOtpInputs');
         startCountdown('emailTimer', 'emailResendBtn');
         showToast('Email kodu göndərildi!', 'success');
-    } catch(e) {
+    } catch (e) {
         showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1117,15 +1117,15 @@ function updateStepDots(step) {
         const dot = document.getElementById('stepDot' + i);
         if (!dot) continue;
         dot.className = 'step-dot';
-        if (i < step)  dot.classList.add('done');
+        if (i < step) dot.classList.add('done');
         if (i === step) dot.classList.add('active');
     }
 }
 
 /* ── Signup: Send SMS ───────────────────────────────────────── */
 async function sendSignupSMS() {
-    const fn  = document.getElementById('signupFirstName')?.value.trim();
-    const ln  = document.getElementById('signupLastName')?.value.trim();
+    const fn = document.getElementById('signupFirstName')?.value.trim();
+    const ln = document.getElementById('signupLastName')?.value.trim();
     if (!fn || !ln) { showToast('Ad və soyad daxil edin', 'error'); return; }
 
     const phoneCheck = validatePhoneNumber('signupPhone', 'signupPhonePrefix');
@@ -1134,7 +1134,7 @@ async function sendSignupSMS() {
         return;
     }
     const phone = phoneCheck.fullPhone;
-    const btn   = document.getElementById('sendPhoneSignupBtn');
+    const btn = document.getElementById('sendPhoneSignupBtn');
     setLoading(btn, true);
 
     try {
@@ -1168,7 +1168,7 @@ async function sendSignupSMS() {
         startCountdown('signupSmsTimer', 'signupSmsResendBtn');
         showToast('SMS kodu göndərildi!', 'success');
         updateStepDots(2);
-    } catch(e) {
+    } catch (e) {
         showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1202,7 +1202,7 @@ async function verifySignupSMS() {
         document.getElementById('phoneSignupStep3').classList.add('visible');
         showToast('Nömrəniz uğurla təsdiqləndi!', 'success');
         updateStepDots(3);
-    } catch(e) {
+    } catch (e) {
         showToast('Yanlış kod. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1211,12 +1211,12 @@ async function verifySignupSMS() {
 
 /* ── Signup: Send Email code ────────────────────────────────── */
 async function sendSignupEmail() {
-    const fn    = document.getElementById('signupFirstNameE')?.value.trim();
-    const ln    = document.getElementById('signupLastNameE')?.value.trim();
+    const fn = document.getElementById('signupFirstNameE')?.value.trim();
+    const ln = document.getElementById('signupLastNameE')?.value.trim();
     const email = document.getElementById('signupEmailVerify')?.value.trim();
 
-    if (!fn || !ln)                        { showToast('Ad və soyad daxil edin', 'error'); return; }
-    if (!email || !email.includes('@'))    { showToast('Düzgün email daxil edin', 'error'); return; }
+    if (!fn || !ln) { showToast('Ad və soyad daxil edin', 'error'); return; }
+    if (!email || !email.includes('@')) { showToast('Düzgün email daxil edin', 'error'); return; }
 
     const btn = document.getElementById('sendEmailSignupBtn');
     setLoading(btn, true);
@@ -1230,7 +1230,7 @@ async function sendSignupEmail() {
         startCountdown('signupEmailTimer', 'signupEmailResendBtn');
         showToast('Email kodu göndərildi!', 'success');
         updateStepDots(2);
-    } catch(e) {
+    } catch (e) {
         showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1263,7 +1263,7 @@ async function verifySignupEmail() {
         document.getElementById('emailSignupStep3').classList.add('visible');
         showToast('Email uğurla təsdiqləndi!', 'success');
         updateStepDots(3);
-    } catch(e) {
+    } catch (e) {
         showToast('Yanlış kod. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
@@ -1302,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pre-fetch OAuth config
     fetchOAuthConfig();
 
-    ['smsOtpInputs','emailOtpInputs','signupSmsOtpInputs','signupEmailOtpInputs'].forEach(id => {
+    ['smsOtpInputs', 'emailOtpInputs', 'signupSmsOtpInputs', 'signupEmailOtpInputs'].forEach(id => {
         if (document.getElementById(id)) wireOtpInputs(id);
     });
 
@@ -1349,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             setTimeout(() => codeInput.focus(), 100);
                         }
                         document.getElementById('twoFactorModal').style.display = 'flex';
-                        
+
                         const twoFactorForm = document.getElementById('twoFactorForm');
                         twoFactorForm.onsubmit = async (e2) => {
                             e2.preventDefault();
@@ -1383,7 +1383,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             && !/\\/.test(redirect)) {
                                             return redirect;
                                         }
-                                    } catch (e) {}
+                                    } catch (e) { }
                                     return fallback;
                                 }
 
@@ -1417,7 +1417,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             && !/\\/.test(redirect)) {
                             return redirect;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                     return fallback;
                 }
 
@@ -1470,14 +1470,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phoneSignupForm) {
         phoneSignupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const pwd  = document.getElementById('signupPassword')?.value;
+            const pwd = document.getElementById('signupPassword')?.value;
             const conf = document.getElementById('signupConfirm')?.value;
             const terms = document.getElementById('signupTermsPhone')?.checked;
 
-            if (pwd !== conf)  { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
-            if (!terms)        { showToast('Şərtləri qəbul edin', 'error'); return; }
+            if (pwd !== conf) { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
+            if (!terms) { showToast('Şərtləri qəbul edin', 'error'); return; }
             const pwdError = validateClientPassword(pwd);
-            if (pwdError)      { showToast(pwdError, 'error'); return; }
+            if (pwdError) { showToast(pwdError, 'error'); return; }
 
             const btn = document.getElementById('finalPhoneSignupBtn');
             setLoading(btn, true);
@@ -1497,7 +1497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 password: pwd,
                 ...(refCode ? { referralCode: refCode } : {})
             };
-                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+                const res = await fetch(`${window.API_URL}/auth/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
                     const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');
@@ -1508,7 +1508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
-            } catch(err) {
+            } catch (err) {
                 console.error('Phone signup fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı', 'error');
             } finally { setLoading(btn, false); }
@@ -1520,21 +1520,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (emailSignupForm) {
         emailSignupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const pwd   = document.getElementById('signupPasswordE')?.value;
-            const conf  = document.getElementById('signupConfirmE')?.value;
+            const pwd = document.getElementById('signupPasswordE')?.value;
+            const conf = document.getElementById('signupConfirmE')?.value;
             const terms = document.getElementById('signupTermsEmail')?.checked;
 
-            if (pwd !== conf)  { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
-            if (!terms)        { showToast('Şərtləri qəbul edin', 'error'); return; }
+            if (pwd !== conf) { showToast('Şifrələr uyğun gəlmir!', 'error'); return; }
+            if (!terms) { showToast('Şərtləri qəbul edin', 'error'); return; }
             const pwdError = validateClientPassword(pwd);
-            if (pwdError)      { showToast(pwdError, 'error'); return; }
+            if (pwdError) { showToast(pwdError, 'error'); return; }
 
             const btn = document.getElementById('finalEmailSignupBtn');
             setLoading(btn, true);
             try {
                 const refCode = getCapturedReferralCode();
                 const body = {
-                    name:     document.getElementById('signupFirstNameE')?.value.trim(),
+                    name: document.getElementById('signupFirstNameE')?.value.trim(),
                     lastName: document.getElementById('signupLastNameE')?.value.trim(),
                     email:    document.getElementById('signupEmailVerify')?.value.trim(),
                     phone:    (() => {
@@ -1546,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: pwd,
                     ...(refCode ? { referralCode: refCode } : {})
                 };
-                const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+                const res = await fetch(`${window.API_URL}/auth/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
                     const errorText = Array.isArray(data.errors) && data.errors.length > 0 ? data.errors.join('. ') : (data.message || 'Qeydiyyat xətası');
@@ -1557,7 +1557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
-            } catch(err) {
+            } catch (err) {
                 console.error('Email signup fetch error:', err);
                 showToast('Serverlə əlaqə yaradılmadı', 'error');
             } finally { setLoading(btn, false); }
@@ -1605,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetPasswordForm) {
         resetPasswordForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
             if (!token) {

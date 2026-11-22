@@ -2696,7 +2696,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 url.searchParams.set("sort", val);
                 url.searchParams.set("sortBy", val);
                 window.history.replaceState({}, "", url.toString());
-            } catch (e) {}
+            } catch (e) { }
             sortAds(val);
         });
     }
@@ -2864,7 +2864,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function saveFavorites(favs) {
         try {
             localStorage.setItem("mobilaz_favorites", JSON.stringify(favs));
-        } catch (e) {}
+        } catch (e) { }
     }
 
     function updateFavoriteButtons() {
@@ -2975,11 +2975,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ─── CATALOG & ADS FILTER LOGIC ──────────────────────────────────────────
     function filterAds(category, brand, query) {
-        const catalog = document.getElementById('catalog') || 
-                        document.querySelector('.phone-grid') || 
-                        document.getElementById('phone-ads-container') || 
-                        document.querySelector('.all-ads-container');
-        
+        const catalog = document.getElementById('catalog') ||
+            document.querySelector('.phone-grid') ||
+            document.getElementById('phone-ads-container') ||
+            document.querySelector('.all-ads-container');
+
         // Safety check: ensure container exists before operating
         if (!catalog) return 0;
 

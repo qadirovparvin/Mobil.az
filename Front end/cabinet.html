@@ -8,23 +8,25 @@
     <title data-translate-title="cabinet-title">Şəxsi Kabinet - Mobilim.az</title>
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
-    <link rel="stylesheet" href="CSS/cabinet.css?v=20261118_v1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    
+    <link rel="stylesheet" href="CSS/cabinet.css?v=20261122_v2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
     <script>
-        (function() {
+        (function () {
             try {
                 const theme = localStorage.getItem('mobilaz_theme');
                 if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                     document.documentElement.setAttribute('data-theme', 'dark');
                 }
-            } catch (e) {}
+            } catch (e) { }
         })();
     </script>
 </head>
 
 <body>
-      <div id="header-placeholder"></div>
+    <div id="header-placeholder"></div>
 
     <main class="cabinet-main">
         <div class="cabinet-wrapper">
@@ -35,40 +37,53 @@
                         <i class="fas fa-user"></i>
                     </div>
                     <h3 id="sidebarUserName">—</h3>
-                    <p id="sidebarUserEmail" style="display:flex;align-items:center;justify-content:center;gap:6px;margin:2px 0;font-size:12.5px;color:var(--text-secondary,#aaa);"><i class="fas fa-envelope" style="opacity:0.6;font-size:11px;"></i> <span class="val">—</span></p>
-                    <p id="sidebarUserPhone" style="display:flex;align-items:center;justify-content:center;gap:6px;margin:2px 0 6px 0;font-size:12.5px;color:var(--text-secondary,#aaa);"><i class="fas fa-phone" style="opacity:0.6;font-size:11px;"></i> <span class="val">—</span></p>
-                    <span class="user-role-badge" id="sidebarUserRole" data-translate="cab-standard-acc">Standart Hesab</span>
+                    <p id="sidebarUserEmail"
+                        style="display:flex;align-items:center;justify-content:center;gap:6px;margin:2px 0;font-size:12.5px;color:var(--text-secondary,#aaa);">
+                        <i class="fas fa-envelope" style="opacity:0.6;font-size:11px;"></i> <span class="val">—</span>
+                    </p>
+                    <p id="sidebarUserPhone"
+                        style="display:flex;align-items:center;justify-content:center;gap:6px;margin:2px 0 6px 0;font-size:12.5px;color:var(--text-secondary,#aaa);">
+                        <i class="fas fa-phone" style="opacity:0.6;font-size:11px;"></i> <span class="val">—</span>
+                    </p>
+                    <span class="user-role-badge" id="sidebarUserRole" data-translate="cab-standard-acc">Standart
+                        Hesab</span>
                 </div>
 
                 <ul class="cabinet-menu">
                     <li>
                         <a href="#" class="tab-link active" data-target="tab-profile">
-                            <span class="menu-left"><i class="fas fa-chart-pie"></i> <span data-translate="cab-dashboard">İdarə Paneli</span></span>
+                            <span class="menu-left"><i class="fas fa-chart-pie"></i> <span
+                                    data-translate="cab-dashboard">İdarə Paneli</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-ads">
-                            <span class="menu-left"><i class="fas fa-list-alt"></i> <span data-translate="cab-my-ads">Mənim elanlarım</span></span>
+                            <span class="menu-left"><i class="fas fa-list-alt"></i> <span
+                                    data-translate="cab-my-ads">Mənim elanlarım</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-messages">
-                            <span class="menu-left"><i class="fas fa-envelope"></i> <span data-translate="cab-messages">Mesajlar</span></span>
+                            <span class="menu-left"><i class="fas fa-envelope"></i> <span
+                                    data-translate="cab-messages">Mesajlar</span></span>
                         </a>
                     </li>
                     <li>
                         <a href="#" class="tab-link" data-target="tab-settings">
-                            <span class="menu-left"><i class="fas fa-cog"></i> <span data-translate="cab-settings">Tənzimləmələr</span></span>
+                            <span class="menu-left"><i class="fas fa-cog"></i> <span
+                                    data-translate="cab-settings">Tənzimləmələr</span></span>
                         </a>
                     </li>
                     <li id="adminPanelNav" hidden>
                         <a href="admin.html">
-                            <span class="menu-left"><i class="fas fa-shield-halved"></i> <span data-translate="cab-admin-switch">Adminliyə keç</span></span>
+                            <span class="menu-left"><i class="fas fa-shield-halved"></i> <span
+                                    data-translate="cab-admin-switch">Adminliyə keç</span></span>
                         </a>
                     </li>
                     <li style="margin-top: 30px;">
                         <a href="index.html" class="logout-link">
-                            <span class="menu-left"><i class="fas fa-sign-out-alt"></i> <span data-translate="cab-logout">Çıxış</span></span>
+                            <span class="menu-left"><i class="fas fa-sign-out-alt"></i> <span
+                                    data-translate="cab-logout">Çıxış</span></span>
                         </a>
                     </li>
                 </ul>
@@ -87,7 +102,7 @@
                             Yeni Elan
                         </a>
                     </div>
-    
+
                     <!-- Dashboard Top Grid -->
                     <div class="dashboard-top-grid">
                         <div class="wallet-card cab-glass">
@@ -106,7 +121,9 @@
                                     <div class="stat-value">0</div>
                                 </div>
                                 <span data-translate="cab-total-views-month">Ümumi baxış (Bu ay)</span>
-                                <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
+                                <div class="stat-progress">
+                                    <div class="stat-progress-bar" style="width: 0%;"></div>
+                                </div>
                             </div>
                             <div class="stat-card cab-glass">
                                 <div class="stat-card-top">
@@ -114,7 +131,9 @@
                                     <div class="stat-value">0</div>
                                 </div>
                                 <span data-translate="cab-wa-clicks">WhatsApp keçidləri</span>
-                                <div class="stat-progress"><div class="stat-progress-bar" style="width: 0%;"></div></div>
+                                <div class="stat-progress">
+                                    <div class="stat-progress-bar" style="width: 0%;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -122,47 +141,51 @@
                     <!-- Dashboard Bottom Grid -->
                     <div class="dashboard-bottom-grid">
                         <!-- Referral Card -->
-                        <div class="referral-card cab-glass">
+                        <div class="referral-card">
                             <div class="referral-content">
                                 <div class="referral-icon">
                                     <i class="fas fa-gift"></i>
                                 </div>
                                 <h2 data-translate="mon-referral-title">Dostunu gətir, elanı irəli çək!</h2>
-                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə 3 dəfə elanı irəli çəkmə bonusu qazanın.</p>
+                                <p class="ref-desc" data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə 3 dəfə elanı irəli çəkmə bonusu qazanın.</p>
                                 
-                                <div class="referral-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0;">
-                                    <div class="ref-stat">
+                                <div class="referral-stats-grid">
+                                    <div class="ref-stat-card">
+                                        <div class="ref-stat-icon" style="color: #6ee7b7;"><i class="fas fa-rocket"></i></div>
                                         <span class="ref-stat-label" data-translate="mon-referral-bumps">İrəli çəkmə bonusu</span>
                                         <span class="ref-stat-value"><span id="referralBumpsValue">0</span> <small>dəfə</small></span>
                                     </div>
-                                    <div class="ref-stat">
+                                    <div class="ref-stat-card">
+                                        <div class="ref-stat-icon" style="color: #fde047;"><i class="fas fa-crown"></i></div>
                                         <span class="ref-stat-label" data-translate="mon-referral-vips">VIP bonusu</span>
                                         <span class="ref-stat-value"><span id="referralVipsValue">0</span> <small>ədəd</small></span>
                                     </div>
-                                    <div class="ref-stat">
+                                    <div class="ref-stat-card">
+                                        <div class="ref-stat-icon" style="color: #93c5fd;"><i class="fas fa-user-friends"></i></div>
                                         <span class="ref-stat-label" data-translate="mon-referral-friends">Dəvətlər</span>
                                         <span class="ref-stat-value" id="referralCount">0</span>
                                     </div>
                                 </div>
 
-                                <!-- Campaign Milestone Box -->
-                                <div class="referral-campaign-box" style="background: rgba(245, 158, 11, 0.09); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; text-align: left;">
-                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
-                                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; color: #f59e0b; font-size: 13px;">
+                                <!-- Campaign Milestone Box (High Contrast) -->
+                                <div class="referral-campaign-box">
+                                    <div class="campaign-header-row">
+                                        <div class="campaign-title">
                                             <i class="fas fa-crown"></i>
                                             <span data-translate="mon-referral-campaign-title">Xüsusi Kompaniya: 3 dost dəvət et, 2 dəfə 1 həftəlik VIP qazan!</span>
                                         </div>
-                                        <span id="referralCampaignCounter" style="font-size: 12px; font-weight: 700; color: #f59e0b; white-space: nowrap;">0 / 3</span>
+                                        <span class="campaign-badge" id="referralCampaignCounter">0 / 3</span>
                                     </div>
-                                    <p data-translate="mon-referral-campaign-sub" style="font-size: 11.5px; color: var(--text-secondary, #94a3b8); margin: 0 0 8px 0; line-height: 1.4;">Hər 3 dost tamamlandıqda hesabınıza 2 ədəd 7 günlük VIP elan bonusu hədiyyə olunur.</p>
-                                    <div style="background: rgba(255,255,255,0.08); border-radius: 999px; height: 7px; overflow: hidden;">
-                                        <div id="referralCampaignBar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24); height: 100%; width: 0%; transition: width 0.4s ease; border-radius: 999px;"></div>
+                                    <p class="campaign-subtext" data-translate="mon-referral-campaign-sub">Hər 3 dost tamamlandıqda hesabınıza 2 ədəd 7 günlük VIP elan bonusu hədiyyə olunur.</p>
+                                    <div class="campaign-bar-track">
+                                        <div class="campaign-bar-fill" id="referralCampaignBar"></div>
                                     </div>
                                 </div>
 
                                 <div class="copy-link-box">
-                                    <input type="text" readonly id="referralLink">
-                                    <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i> <span data-translate="mon-copy-link">Kopyala</span></button>
+                                    <input type="text" readonly id="referralLink" aria-label="Referal Linki">
+                                    <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i>
+                                        <span data-translate="mon-copy-link">Kopyala</span></button>
                                 </div>
                             </div>
                         </div>
@@ -185,7 +208,8 @@
                                     <div class="timeline-dot"></div>
                                     <div class="timeline-content">
                                         <h4 data-translate="cab-sys-login">Sistem Girişi</h4>
-                                        <p data-translate="cab-sys-login-desc">Hesabınıza yeni giriş aşkarlandı (Bakı, 192.168.1.1)</p>
+                                        <p data-translate="cab-sys-login-desc">Hesabınıza yeni giriş aşkarlandı (Bakı,
+                                            192.168.1.1)</p>
                                         <span class="timeline-time">Dünən 14:20</span>
                                     </div>
                                 </div>
@@ -208,10 +232,14 @@
 
                     <div class="tab-content-box cab-glass">
                         <div class="ad-filters">
-                            <button class="filter-pill active" data-filter="all"><span data-translate="cab-filter-all">Bütün elanlar</span> (0)</button>
-                            <button class="filter-pill" data-filter="active"><span data-translate="cab-filter-active">Aktiv</span> (0)</button>
-                            <button class="filter-pill" data-filter="pending"><span data-translate="cab-filter-pending">Yoxlanılır</span> (0)</button>
-                            <button class="filter-pill" data-filter="expired"><span data-translate="cab-filter-expired">Müddəti bitmiş</span> (0)</button>
+                            <button class="filter-pill active" data-filter="all"><span
+                                    data-translate="cab-filter-all">Bütün elanlar</span> (0)</button>
+                            <button class="filter-pill" data-filter="active"><span
+                                    data-translate="cab-filter-active">Aktiv</span> (0)</button>
+                            <button class="filter-pill" data-filter="pending"><span
+                                    data-translate="cab-filter-pending">Yoxlanılır</span> (0)</button>
+                            <button class="filter-pill" data-filter="expired"><span
+                                    data-translate="cab-filter-expired">Müddəti bitmiş</span> (0)</button>
                         </div>
 
                         <div class="my-ads-list">
@@ -227,18 +255,20 @@
                             <p data-translate="cab-messages-desc">Alıcı və satıcılarla əlaqə</p>
                         </div>
                     </div>
-                    
+
                     <div class="chat-container cab-glass">
                         <!-- Sidebar Contacts -->
                         <div class="chat-sidebar">
                             <div class="chat-search">
                                 <div class="chat-search-wrap">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" placeholder="Mesaj axtar..." data-translate-placeholder="cab-search-msg">
+                                    <input type="text" placeholder="Mesaj axtar..."
+                                        data-translate-placeholder="cab-search-msg">
                                 </div>
                             </div>
                             <div class="chat-list">
-                                <div class="empty-state" style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);">
+                                <div class="empty-state"
+                                    style="padding: 20px; font-size: 14px; text-align: center; color: var(--text-muted);">
                                     <span data-translate="cab-msg-empty">Mesaj qutunuz boşdur.</span>
                                 </div>
                             </div>
@@ -249,18 +279,22 @@
                             <div class="chat-header">
                                 <div class="chat-header-info">
                                     <h3 data-translate="cab-no-user">İstifadəçi seçilməyib</h3>
-                                    <p><i class="fas fa-info-circle"></i> <span data-translate="cab-select-msg">Söhbətə başlamaq üçün soldan mesaj seçin</span></p>
+                                    <p><i class="fas fa-info-circle"></i> <span data-translate="cab-select-msg">Söhbətə
+                                            başlamaq üçün soldan mesaj seçin</span></p>
                                 </div>
-                                <button class="btn-action" style="opacity: 0.5;"><i class="fas fa-ellipsis-v"></i></button>
+                                <button class="btn-action" style="opacity: 0.5;"><i
+                                        class="fas fa-ellipsis-v"></i></button>
                             </div>
                             <div class="chat-messages">
                                 <!-- empty state messages area -->
-                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
+                                <div
+                                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; opacity: 0.2;">
                                     <i class="fas fa-comments" style="font-size: 64px; margin-bottom: 20px;"></i>
                                 </div>
                             </div>
                             <div class="chat-input">
-                                <input type="text" placeholder="Mesajınızı yazın..." data-translate-placeholder="cab-write-msg">
+                                <input type="text" placeholder="Mesajınızı yazın..."
+                                    data-translate-placeholder="cab-write-msg">
                                 <button class="btn-send"><i class="fas fa-paper-plane"></i></button>
                             </div>
                         </div>
@@ -279,12 +313,21 @@
                     <div class="settings-grid">
                         <!-- Navigation -->
                         <div class="settings-nav cab-glass" style="padding: 15px;">
-                            <button class="active" onclick="showSettingsPanel('panel-personal', this)"><i class="fas fa-user-edit"></i> <span data-translate="cab-personal-info">Şəxsi Məlumatlar</span></button>
-                            <button onclick="showSettingsPanel('panel-notifications', this)"><i class="fas fa-bell"></i> <span data-translate="cab-notifications">Bildirişlər</span></button>
-                            <button onclick="showSettingsPanel('panel-security', this)"><i class="fas fa-lock"></i> <span data-translate="cab-security">Təhlükəsizlik</span></button>
-                            <button onclick="showSettingsPanel('panel-privacy', this)"><i class="fas fa-user-shield"></i> <span data-translate="cab-privacy">Məxfilik</span></button>
-                            <button onclick="showSettingsPanel('panel-social', this)"><i class="fas fa-link"></i> <span data-translate="cab-social-title">Sosial Hesablar</span></button>
-                            <button onclick="showSettingsPanel('panel-billing', this)"><i class="fas fa-credit-card"></i> <span data-translate="cab-billing">Paket & Ödənişlər</span></button>
+                            <button class="active" onclick="showSettingsPanel('panel-personal', this)"><i
+                                    class="fas fa-user-edit"></i> <span data-translate="cab-personal-info">Şəxsi
+                                    Məlumatlar</span></button>
+                            <button onclick="showSettingsPanel('panel-notifications', this)"><i class="fas fa-bell"></i>
+                                <span data-translate="cab-notifications">Bildirişlər</span></button>
+                            <button onclick="showSettingsPanel('panel-security', this)"><i class="fas fa-lock"></i>
+                                <span data-translate="cab-security">Təhlükəsizlik</span></button>
+                            <button onclick="showSettingsPanel('panel-privacy', this)"><i
+                                    class="fas fa-user-shield"></i> <span
+                                    data-translate="cab-privacy">Məxfilik</span></button>
+                            <button onclick="showSettingsPanel('panel-social', this)"><i class="fas fa-link"></i> <span
+                                    data-translate="cab-social-title">Sosial Hesablar</span></button>
+                            <button onclick="showSettingsPanel('panel-billing', this)"><i
+                                    class="fas fa-credit-card"></i> <span data-translate="cab-billing">Paket &
+                                    Ödənişlər</span></button>
                         </div>
 
                         <!-- Detail Panels -->
@@ -292,60 +335,75 @@
                             <!-- Personal Settings -->
                             <div id="panel-personal" class="settings-panel active">
                                 <h3 data-translate="cab-personal-info">Şəxsi Məlumatlar</h3>
-                                <div class="user-avatar" style="width: 80px; height: 80px; margin-bottom: 20px; font-size: 30px;">
+                                <div class="user-avatar"
+                                    style="width: 80px; height: 80px; margin-bottom: 20px; font-size: 30px;">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <form id="formPersonal">
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label data-translate="cab-name">Ad</label>
-                                            <input type="text" id="profileFirstName" class="form-control" placeholder="Ad">
+                                            <input type="text" id="profileFirstName" class="form-control"
+                                                placeholder="Ad">
                                         </div>
                                         <div class="form-group">
                                             <label data-translate="cab-surname">Soyad</label>
-                                            <input type="text" id="profileLastName" class="form-control" placeholder="Soyad">
+                                            <input type="text" id="profileLastName" class="form-control"
+                                                placeholder="Soyad">
                                         </div>
                                         <div class="form-group">
                                             <label data-translate="cab-email">Email</label>
-                                            <input type="email" id="profileEmail" class="form-control" placeholder="example@email.com">
+                                            <input type="email" id="profileEmail" class="form-control"
+                                                placeholder="example@email.com">
                                         </div>
                                         <div class="form-group">
                                             <label data-translate="cab-phone">Telefon</label>
-                                            <input type="tel" id="profilePhone" class="form-control" placeholder="+994 70 000 00 00">
+                                            <input type="tel" id="profilePhone" class="form-control"
+                                                placeholder="+994 70 000 00 00">
                                         </div>
                                     </div>
-                                    <button type="button" id="btnSaveProfile" class="btn-primary" data-translate="cab-save">Yadda saxla</button>
+                                    <button type="button" id="btnSaveProfile" class="btn-primary"
+                                        data-translate="cab-save">Yadda saxla</button>
                                 </form>
                             </div>
 
                             <!-- Notifications Settings -->
                             <div id="panel-notifications" class="settings-panel">
                                 <h3 data-translate="cab-notifications">Bildirişlər</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-notif-desc">Platformadan hansı məlumatları necə almaq istədiyinizi seçin.</p>
-                                
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;"
+                                    data-translate="cab-notif-desc">Platformadan hansı məlumatları necə almaq
+                                    istədiyinizi seçin.</p>
+
                                 <div class="settings-section">
-                                    <h4 style="margin-bottom: 20px; font-size: 16px; color: var(--text-main);" data-translate="cab-email-notifs">Email Bildirişləri</h4>
+                                    <h4 style="margin-bottom: 20px; font-size: 16px; color: var(--text-main);"
+                                        data-translate="cab-email-notifs">Email Bildirişləri</h4>
                                     <div class="toggle-group">
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-new-msgs">Yeni Mesajlar</label>
-                                                <span data-translate="cab-new-msgs-desc">Kimsə sizə alıcı və ya satıcı kimi mesaj yazdıqda dərhal email alın</span>
+                                                <span data-translate="cab-new-msgs-desc">Kimsə sizə alıcı və ya satıcı
+                                                    kimi mesaj yazdıqda dərhal email alın</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" checked><span
+                                                    class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-ad-status">Elan Statusu</label>
-                                                <span data-translate="cab-ad-status-desc">Elanınız təsdiqləndikdə, rədd edildikdə və ya müddəti bitdikdə</span>
+                                                <span data-translate="cab-ad-status-desc">Elanınız təsdiqləndikdə, rədd
+                                                    edildikdə və ya müddəti bitdikdə</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" checked><span
+                                                    class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-news-camp">Xəbərlər və Kampaniyalar</label>
-                                                <span data-translate="cab-news-camp-desc">Mobilim.az-dan yeniliklər, endirimlər və xüsusi təkliflər barədə xəbərlər</span>
+                                                <span data-translate="cab-news-camp-desc">Mobilim.az-dan yeniliklər,
+                                                    endirimlər və xüsusi təkliflər barədə xəbərlər</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox"><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox"><span
+                                                    class="slider round"></span></label>
                                         </div>
                                     </div>
                                 </div>
@@ -365,28 +423,37 @@
                                     </div>
                                     <div class="checkbox-group" style="margin-top: 20px;">
                                         <input type="checkbox" id="two_fa">
-                                        <label for="two_fa" data-translate="cab-2fa">İki mərhələli təsdiqləməni (2FA) aktiv et</label>
+                                        <label for="two_fa" data-translate="cab-2fa">İki mərhələli təsdiqləməni (2FA)
+                                            aktiv et</label>
                                     </div>
-                                    <button type="button" id="btnSaveSecurity" class="btn-primary" style="margin-top: 15px;" data-translate="cab-update">Yenilə</button>
+                                    <button type="button" id="btnSaveSecurity" class="btn-primary"
+                                        style="margin-top: 15px;" data-translate="cab-update">Yenilə</button>
                                 </form>
 
-                                <hr style="border: 0; height: 1px; background: var(--cab-glass-border); margin: 40px 0;">
-                                
-                                <h4 style="color: var(--danger); margin-bottom: 20px;" data-translate="cab-acc-manage">Hesabın İdarəedilməsi</h4>
+                                <hr
+                                    style="border: 0; height: 1px; background: var(--cab-glass-border); margin: 40px 0;">
+
+                                <h4 style="color: var(--danger); margin-bottom: 20px;" data-translate="cab-acc-manage">
+                                    Hesabın İdarəedilməsi</h4>
                                 <div class="account-danger-zone">
                                     <div class="danger-item">
                                         <div class="danger-info">
                                             <h5 data-translate="cab-freeze-acc">Hesabı Dondur</h5>
-                                            <p data-translate="cab-freeze-desc">Hesabınız və bütün aktiv elanlarınız müvəqqəti olaraq gizlədiləcək.</p>
+                                            <p data-translate="cab-freeze-desc">Hesabınız və bütün aktiv elanlarınız
+                                                müvəqqəti olaraq gizlədiləcək.</p>
                                         </div>
-                                        <button class="btn-outline-warning" data-translate="cab-freeze-btn">Dondur</button>
+                                        <button class="btn-outline-warning"
+                                            data-translate="cab-freeze-btn">Dondur</button>
                                     </div>
                                     <div class="danger-item">
                                         <div class="danger-info">
-                                            <h5 style="color: var(--danger);" data-translate="cab-del-acc">Hesabı Sil</h5>
-                                            <p data-translate="cab-del-desc">Bütün məlumatlarınız və elanlarınız həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.</p>
+                                            <h5 style="color: var(--danger);" data-translate="cab-del-acc">Hesabı Sil
+                                            </h5>
+                                            <p data-translate="cab-del-desc">Bütün məlumatlarınız və elanlarınız
+                                                həmişəlik silinəcək. Bu əməliyyat geri qaytarıla bilməz.</p>
                                         </div>
-                                        <button class="btn-outline-danger" data-translate="cab-del-btn">Hesabı Sil</button>
+                                        <button class="btn-outline-danger" data-translate="cab-del-btn">Hesabı
+                                            Sil</button>
                                     </div>
                                 </div>
                             </div>
@@ -394,41 +461,52 @@
                             <!-- Privacy Settings -->
                             <div id="panel-privacy" class="settings-panel">
                                 <h3 data-translate="cab-privacy">Məxfilik</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-priv-desc">Məlumatlarınızın platformada necə görünəcəyini idarə edin.</p>
-                                
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;"
+                                    data-translate="cab-priv-desc">Məlumatlarınızın platformada necə görünəcəyini idarə
+                                    edin.</p>
+
                                 <div class="settings-section">
                                     <div class="toggle-group">
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-show-num">Nömrəni Göstər</label>
-                                                <span data-translate="cab-show-num-desc">Bütün elanlarınızda əlaqə nömrəniz alıcılara göstərilsin</span>
+                                                <span data-translate="cab-show-num-desc">Bütün elanlarınızda əlaqə
+                                                    nömrəniz alıcılara göstərilsin</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" id="privacyShowPhone" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyShowPhone"
+                                                    checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-allow-msg">Mesajlara İcazə Ver</label>
-                                                <span data-translate="cab-allow-msg-desc">Digər istifadəçilər daxili sistem vasitəsilə sizə mesaj yaza bilsin</span>
+                                                <span data-translate="cab-allow-msg-desc">Digər istifadəçilər daxili
+                                                    sistem vasitəsilə sizə mesaj yaza bilsin</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" id="privacyAllowMessages" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyAllowMessages"
+                                                    checked><span class="slider round"></span></label>
                                         </div>
                                         <div class="toggle-item">
                                             <div class="toggle-info">
                                                 <label data-translate="cab-online-status">Onlayn Statusu</label>
-                                                <span data-translate="cab-online-desc">Profilinizdə nə vaxt onlayn olduğunuz görünsün</span>
+                                                <span data-translate="cab-online-desc">Profilinizdə nə vaxt onlayn
+                                                    olduğunuz görünsün</span>
                                             </div>
-                                            <label class="switch"><input type="checkbox" id="privacyShowOnline" checked><span class="slider round"></span></label>
+                                            <label class="switch"><input type="checkbox" id="privacyShowOnline"
+                                                    checked><span class="slider round"></span></label>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="btnSavePrivacy" class="btn-primary" style="margin-top:20px;" data-translate="cab-save">Yadda saxla</button>
+                                <button type="button" id="btnSavePrivacy" class="btn-primary" style="margin-top:20px;"
+                                    data-translate="cab-save">Yadda saxla</button>
                             </div>
 
                             <!-- Social Accounts -->
                             <div id="panel-social" class="settings-panel">
                                 <h3 data-translate="cab-social-title">Sosial Hesablar</h3>
-                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;" data-translate="cab-social-desc">Daha sürətli və təhlükəsiz giriş üçün sosial media hesablarınızı bağlayın.</p>
-                                
+                                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;"
+                                    data-translate="cab-social-desc">Daha sürətli və təhlükəsiz giriş üçün sosial media
+                                    hesablarınızı bağlayın.</p>
+
                                 <div class="social-links-grid">
                                     <div class="social-connect-card">
                                         <div class="social-icon google"><i class="fab fa-google"></i></div>
@@ -444,7 +522,8 @@
                                             <h4>Facebook</h4>
                                             <span>—</span>
                                         </div>
-                                        <button class="btn-disconnect" aria-label="Ayır"><i class="fas fa-times"></i></button>
+                                        <button class="btn-disconnect" aria-label="Ayır"><i
+                                                class="fas fa-times"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -453,26 +532,33 @@
                             <div id="panel-billing" class="settings-panel">
                                 <section id="billing-panel" class="billing-simple">
                                     <div class="billing-simple__inner">
-                                        
+
                                         <!-- ÜST: Cari vəziyyət 1 sətir -->
                                         <div class="billing-current-row">
                                             <span>Cari paket: <b id="billingCurrentPackageName">Standart</b></span>
                                             <span>Balans: <b id="billingCurrentBalance">0.00 AZN</b></span>
-                                            <button id="billingTopUpBtn" type="button" class="btn-topup-simple">Balansı artır</button>
-                                            <button id="cashOutBtn" type="button" class="btn-cashout-simple">Vəsaiti Çıxar</button>
+                                            <button id="billingTopUpBtn" type="button" class="btn-topup-simple">Balansı
+                                                artır</button>
+                                            <button id="cashOutBtn" type="button" class="btn-cashout-simple">Vəsaiti
+                                                Çıxar</button>
                                         </div>
 
                                         <!-- ORTA: 2 sütun - SOL paketlər, SAĞ ödəniş+xülasə -->
                                         <div class="billing-grid">
-                                            
+
                                             <!-- SOL: Paketlər yan-yana 3 kart - KOMPAKT -->
                                             <div class="billing-left">
                                                 <div class="billing-head-row">
                                                     <div>
-                                                        <h2 class="billing-title" data-billing-i18n="choosePackage">Paket seçin</h2>
-                                                        <p class="billing-subtitle" style="font-size:13px; color:var(--text-secondary, #94a3b8); margin:4px 0 0 0;" data-billing-i18n="package30DaysNotice">Bütün paketlər alış tarixindən başlayaraq 30 gün qüvvədədir</p>
+                                                        <h2 class="billing-title" data-billing-i18n="choosePackage">
+                                                            Paket seçin</h2>
+                                                        <p class="billing-subtitle"
+                                                            style="font-size:13px; color:var(--text-secondary, #94a3b8); margin:4px 0 0 0;"
+                                                            data-billing-i18n="package30DaysNotice">Bütün paketlər alış
+                                                            tarixindən başlayaraq 30 gün qüvvədədir</p>
                                                     </div>
-                                                    <div class="duration-badge-pill" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); border-radius:20px; font-size:13px; font-weight:600; color:var(--accent-color, #a855f7);">
+                                                    <div class="duration-badge-pill"
+                                                        style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); border-radius:20px; font-size:13px; font-weight:600; color:var(--accent-color, #a855f7);">
                                                         <i class="fas fa-clock"></i> <span>30 gün</span>
                                                     </div>
                                                 </div>
@@ -481,7 +567,8 @@
                                                     <!-- JS dolduracaq - KOMPAKT KARTLAR -->
                                                 </div>
 
-                                                <h3 class="pay-title" data-billing-i18n="paymentMethod">Ödəniş üsulu</h3>
+                                                <h3 class="pay-title" data-billing-i18n="paymentMethod">Ödəniş üsulu
+                                                </h3>
                                                 <div class="pay-row" id="billingMethodsRow">
                                                     <!-- 3 sadə düymə yan-yana -->
                                                 </div>
@@ -491,19 +578,35 @@
                                             <!-- SAĞ: Xülasə - KOMPAKT, STICKY YOX, sadə kart -->
                                             <div class="billing-right">
                                                 <div class="summary-box" id="billingSummaryBox">
-                                                    <div class="summary-label" data-billing-i18n="orderSummary">SİFARİŞ XÜLASƏSİ</div>
-                                                    <div class="summary-line"><span data-billing-i18n="summaryPackage">Paket</span><strong id="summaryPackage">PRO</strong></div>
-                                                    <div class="summary-line"><span data-billing-i18n="summaryDuration">Müddət</span><strong id="summaryDuration">30 gün</strong></div>
-                                                    <div class="summary-line"><span data-billing-i18n="summaryMethod">Üsul</span><strong id="summaryMethod">Daxili balans</strong></div>
-                                                    <div class="summary-total"><span data-billing-i18n="summaryTotal">Yekun</span><strong id="summaryTotal">19.90 AZN</strong></div>
-                                                    
-                                                    <div id="billingBalanceWarnBox" style="display:none; margin: 12px 0 6px 0; padding: 10px 12px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; font-size: 12.5px; color: #f87171; line-height: 1.4;">
-                                                        <i class="fas fa-exclamation-triangle"></i> <span id="billingBalanceWarnText">Balans çatmır</span>
+                                                    <div class="summary-label" data-billing-i18n="orderSummary">SİFARİŞ
+                                                        XÜLASƏSİ</div>
+                                                    <div class="summary-line"><span
+                                                            data-billing-i18n="summaryPackage">Paket</span><strong
+                                                            id="summaryPackage">PRO</strong></div>
+                                                    <div class="summary-line"><span
+                                                            data-billing-i18n="summaryDuration">Müddət</span><strong
+                                                            id="summaryDuration">30 gün</strong></div>
+                                                    <div class="summary-line"><span
+                                                            data-billing-i18n="summaryMethod">Üsul</span><strong
+                                                            id="summaryMethod">Daxili balans</strong></div>
+                                                    <div class="summary-total"><span
+                                                            data-billing-i18n="summaryTotal">Yekun</span><strong
+                                                            id="summaryTotal">19.90 AZN</strong></div>
+
+                                                    <div id="billingBalanceWarnBox"
+                                                        style="display:none; margin: 12px 0 6px 0; padding: 10px 12px; background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; font-size: 12.5px; color: #f87171; line-height: 1.4;">
+                                                        <i class="fas fa-exclamation-triangle"></i> <span
+                                                            id="billingBalanceWarnText">Balans çatmır</span>
                                                     </div>
 
-                                                    <button id="billingConfirmBtn" type="button" class="btn-buy" data-billing-i18n="confirmPurchase">Paketi aktivləşdir</button>
-                                                    <button id="billingGoWalletBtn" type="button" class="btn-topup-simple" style="display:none; width: 100%; margin-top: 8px;">Balansı artır</button>
-                                                    <div class="trust">🔒 <span data-billing-i18n="secure">Təhlükəsiz ödəniş</span></div>
+                                                    <button id="billingConfirmBtn" type="button" class="btn-buy"
+                                                        data-billing-i18n="confirmPurchase">Paketi aktivləşdir</button>
+                                                    <button id="billingGoWalletBtn" type="button"
+                                                        class="btn-topup-simple"
+                                                        style="display:none; width: 100%; margin-top: 8px;">Balansı
+                                                        artır</button>
+                                                    <div class="trust">🔒 <span data-billing-i18n="secure">Təhlükəsiz
+                                                            ödəniş</span></div>
                                                 </div>
                                             </div>
 
@@ -511,35 +614,75 @@
 
                                         <!-- Paket qaydaları və şərtlər -->
                                         <div class="billing-rules-card cab-glass">
-                                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                                                <i class="fas fa-shield-alt" style="color: #8b5cf6; font-size: 18px;"></i>
-                                                <h3 style="margin: 0; font-size: 16px; font-weight: 700;" data-billing-i18n="packageRulesTitle">Paket qaydaları və şərtlər</h3>
+                                            <div
+                                                style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                                                <i class="fas fa-shield-alt"
+                                                    style="color: #8b5cf6; font-size: 18px;"></i>
+                                                <h3 style="margin: 0; font-size: 16px; font-weight: 700;"
+                                                    data-billing-i18n="packageRulesTitle">Paket qaydaları və şərtlər
+                                                </h3>
                                             </div>
                                             <ul class="billing-rules-list">
-                                                <li><strong data-billing-i18n="ruleLimitTitle">Elan limiti:</strong> <span data-billing-i18n="ruleLimitDesc">Eyni anda aktiv olan elanların sayını ifadə edir (Standart: 2, VIP: 10, PRO: 25).</span></li>
-                                                <li><strong data-billing-i18n="ruleRotationTitle">Növbəli VIP nümayiş:</strong> <span data-billing-i18n="ruleRotationDesc">VIP bölməsində elanlar növbəli göstərilir; daimi ilk yer vədi verilmir.</span></li>
-                                                <li><strong data-billing-i18n="rulePeriodTitle">Dövrün başa çatması:</strong> <span data-billing-i18n="rulePeriodDesc">Dövr bitəndə istifadə olunmamış reklam hüquqları sıfırlanır və aktiv paket reklamları dayanır.</span></li>
-                                                <li><strong data-billing-i18n="ruleWarningTitle">Tam müddət xəbərdarlığı:</strong> <span data-billing-i18n="ruleWarningDesc">Tam reklam müddəti qalmadıqda kampaniyaya başlamazdan əvvəl xəbərdarlıq göstərilir.</span></li>
-                                                <li><strong data-billing-i18n="ruleDowngradeTitle">Standarta keçid:</strong> <span data-billing-i18n="ruleDowngradeDesc">Paket yenilənməzsə hesab Standarta keçir; istifadəçi 2 aktiv elan seçir, qalanları silinmədən dayandırılır.</span></li>
-                                                <li><strong data-billing-i18n="ruleDataTitle">Məlumatların qorunması:</strong> <span data-billing-i18n="ruleDataDesc">Elanlar və keçmiş statistika silinmir; yeni dövrün göstəriciləri ayrıca hesablanır.</span></li>
-                                                <li><strong data-billing-i18n="ruleClicksTitle">Əlaqə statistikası:</strong> <span data-billing-i18n="ruleClicksDesc">Əlaqə düyməsinə klik zəng və ya mesajın baş tutması kimi göstərilmir (yalnız klik sayı əks olunur).</span></li>
-                                                <li><strong data-billing-i18n="ruleTransparencyTitle">Dəqiq xidmət:</strong> <span data-billing-i18n="ruleTransparencyDesc">Hazır olmayan heç bir funksiya aktiv və işlək kimi təqdim edilmir.</span></li>
+                                                <li><strong data-billing-i18n="ruleLimitTitle">Elan limiti:</strong>
+                                                    <span data-billing-i18n="ruleLimitDesc">Eyni anda aktiv olan
+                                                        elanların sayını ifadə edir (Standart: 2, VIP: 10, PRO:
+                                                        25).</span>
+                                                </li>
+                                                <li><strong data-billing-i18n="ruleRotationTitle">Növbəli VIP
+                                                        nümayiş:</strong> <span data-billing-i18n="ruleRotationDesc">VIP
+                                                        bölməsində elanlar növbəli göstərilir; daimi ilk yer vədi
+                                                        verilmir.</span></li>
+                                                <li><strong data-billing-i18n="rulePeriodTitle">Dövrün başa
+                                                        çatması:</strong> <span data-billing-i18n="rulePeriodDesc">Dövr
+                                                        bitəndə istifadə olunmamış reklam hüquqları sıfırlanır və aktiv
+                                                        paket reklamları dayanır.</span></li>
+                                                <li><strong data-billing-i18n="ruleWarningTitle">Tam müddət
+                                                        xəbərdarlığı:</strong> <span
+                                                        data-billing-i18n="ruleWarningDesc">Tam reklam müddəti
+                                                        qalmadıqda kampaniyaya başlamazdan əvvəl xəbərdarlıq
+                                                        göstərilir.</span></li>
+                                                <li><strong data-billing-i18n="ruleDowngradeTitle">Standarta
+                                                        keçid:</strong> <span
+                                                        data-billing-i18n="ruleDowngradeDesc">Paket yenilənməzsə hesab
+                                                        Standarta keçir; istifadəçi 2 aktiv elan seçir, qalanları
+                                                        silinmədən dayandırılır.</span></li>
+                                                <li><strong data-billing-i18n="ruleDataTitle">Məlumatların
+                                                        qorunması:</strong> <span
+                                                        data-billing-i18n="ruleDataDesc">Elanlar və keçmiş statistika
+                                                        silinmir; yeni dövrün göstəriciləri ayrıca hesablanır.</span>
+                                                </li>
+                                                <li><strong data-billing-i18n="ruleClicksTitle">Əlaqə
+                                                        statistikası:</strong> <span
+                                                        data-billing-i18n="ruleClicksDesc">Əlaqə düyməsinə klik zəng və
+                                                        ya mesajın baş tutması kimi göstərilmir (yalnız klik sayı əks
+                                                        olunur).</span></li>
+                                                <li><strong data-billing-i18n="ruleTransparencyTitle">Dəqiq
+                                                        xidmət:</strong> <span
+                                                        data-billing-i18n="ruleTransparencyDesc">Hazır olmayan heç bir
+                                                        funksiya aktiv və işlək kimi təqdim edilmir.</span></li>
                                             </ul>
                                         </div>
 
                                         <!-- Tranzaksiya Tarixçəsi -->
-                                        <div class="billing-history-card cab-glass" style="margin-top: 24px; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color, rgba(255,255,255,0.08));">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                                <h3 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                                                    <i class="fas fa-history" style="color: #10b981;"></i> Tranzaksiya Tarixçəsi
+                                        <div class="billing-history-card cab-glass"
+                                            style="margin-top: 24px; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color, rgba(255,255,255,0.08));">
+                                            <div
+                                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                                <h3
+                                                    style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                                    <i class="fas fa-history" style="color: #10b981;"></i> Tranzaksiya
+                                                    Tarixçəsi
                                                 </h3>
-                                                <button type="button" id="refreshTransactionsBtn" class="btn-secondary" style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-color, #334155); color: inherit;">
+                                                <button type="button" id="refreshTransactionsBtn" class="btn-secondary"
+                                                    style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: transparent; border: 1px solid var(--border-color, #334155); color: inherit;">
                                                     <i class="fas fa-sync-alt"></i> Yenilə
                                                 </button>
                                             </div>
                                             <!-- Filters: type, date range -->
-                                            <div id="txFilterBar" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;">
-                                                <select id="txFilterType" class="form-select" style="padding: 6px 12px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;">
+                                            <div id="txFilterBar"
+                                                style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center;">
+                                                <select id="txFilterType" class="form-select"
+                                                    style="padding: 6px 12px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;">
                                                     <option value="">Bütün növlər</option>
                                                     <option value="deposit">Balans artımı</option>
                                                     <option value="package_purchase">Paket alışı</option>
@@ -548,9 +691,14 @@
                                                     <option value="referral_credit">Referral qazancı</option>
                                                     <option value="refund">Geri qaytarılma</option>
                                                 </select>
-                                                <input type="date" id="txFilterStartDate" style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;" title="Başlanğıc tarixi">
-                                                <input type="date" id="txFilterEndDate" style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;" title="Son tarix">
-                                                <button type="button" id="txFilterApplyBtn" class="btn-primary" style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: #10b981; border: none; color: #fff;">
+                                                <input type="date" id="txFilterStartDate"
+                                                    style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;"
+                                                    title="Başlanğıc tarixi">
+                                                <input type="date" id="txFilterEndDate"
+                                                    style="padding: 6px 10px; font-size: 13px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color, #334155); color: inherit;"
+                                                    title="Son tarix">
+                                                <button type="button" id="txFilterApplyBtn" class="btn-primary"
+                                                    style="padding: 6px 14px; font-size: 13px; border-radius: 8px; cursor: pointer; background: #10b981; border: none; color: #fff;">
                                                     <i class="fas fa-filter"></i> Filterlə
                                                 </button>
                                             </div>
@@ -569,7 +717,7 @@
         </div>
     </main>
 
-      <div id="footer-placeholder"></div>
+    <div id="footer-placeholder"></div>
 
     <!-- Promotion Modal -->
     <div id="promotionModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="promotion-title">
@@ -578,7 +726,7 @@
                 <h2 id="promotion-title" data-translate="mon-promote-ad">Elanı Tanıt</h2>
                 <button class="btn-close-modal" onclick="closePromotionModal()"><i class="fas fa-times"></i></button>
             </div>
-            
+
             <!-- Referral Bonus Usage Banner in Modal -->
             <div id="promoBonusSection" style="display:none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
                 <div style="font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
@@ -611,7 +759,8 @@
                 <div class="promo-pkg-card" onclick="selectPackage('Urgent')">
                     <input type="radio" name="promoPack" id="pkg-urgent" value="Urgent">
                     <label for="pkg-urgent" class="pkg-label">
-                        <div class="pkg-icon bump" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fas fa-fire"></i></div>
+                        <div class="pkg-icon bump" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i
+                                class="fas fa-fire"></i></div>
                         <div class="pkg-info">
                             <h4>Təcili</h4>
                             <p>3 gün ərzində qırmızı "Təcili" nişanı ilə vurğulayın</p>
@@ -658,58 +807,89 @@
                 </button>
                 <div style="margin-top: 14px; text-align: center;">
                     <div style="position: relative; margin: 12px 0; text-align: center;">
-                        <span style="background: var(--card-bg, #1e293b); padding: 0 10px; color: var(--text-muted, #94a3b8); font-size: 12px; position: relative; z-index: 1;">VƏ YA</span>
-                        <hr style="position: absolute; top: 50%; left: 0; right: 0; border: none; border-top: 1px solid var(--border-color, #334155); margin: 0; z-index: 0;">
+                        <span
+                            style="background: var(--card-bg, #1e293b); padding: 0 10px; color: var(--text-muted, #94a3b8); font-size: 12px; position: relative; z-index: 1;">VƏ
+                            YA</span>
+                        <hr
+                            style="position: absolute; top: 50%; left: 0; right: 0; border: none; border-top: 1px solid var(--border-color, #334155); margin: 0; z-index: 0;">
                     </div>
-                    <button type="button" class="btn-outline w-100" id="btnRequestPromoAdmin" onclick="submitPromotionRequestToAdmin()" style="width: 100%; padding: 12px; border: 1px solid #8b5cf6; background: rgba(139, 92, 246, 0.12); color: #c4b5fd; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-                        <i class="fas fa-crown" style="color: #f59e0b;"></i> <span id="promoRequestBtnText">Adminə VIP Sorğusu Göndər</span>
+                    <button type="button" class="btn-outline w-100" id="btnRequestPromoAdmin"
+                        onclick="submitPromotionRequestToAdmin()"
+                        style="width: 100%; padding: 12px; border: 1px solid #8b5cf6; background: rgba(139, 92, 246, 0.12); color: #c4b5fd; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
+                        <i class="fas fa-crown" style="color: #f59e0b;"></i> <span id="promoRequestBtnText">Adminə VIP
+                            Sorğusu Göndər</span>
                     </button>
-                    <p style="font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 6px;">Admin təsdiq etdikdən sonra elanınız VIP / PRO bölməsində vurğulanacaq.</p>
+                    <p style="font-size: 11px; color: var(--text-muted, #94a3b8); margin-top: 6px;">Admin təsdiq
+                        etdikdən sonra elanınız VIP / PRO bölməsində vurğulanacaq.</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Top-Up Modal -->
-    <div id="topUpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="topup-modal-title" style="display:none;">
+    <div id="topUpModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="topup-modal-title"
+        style="display:none;">
         <div class="modal-card cab-glass" style="max-width: 440px;">
             <div class="modal-header">
-                <h2 id="topup-modal-title"><i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i> Balansı Artır</h2>
-                <button class="btn-close-modal" id="closeTopUpModalBtn" aria-label="Bağla"><i class="fas fa-times"></i></button>
+                <h2 id="topup-modal-title"><i class="fas fa-wallet" style="color: #10b981; margin-right: 8px;"></i>
+                    Balansı Artır</h2>
+                <button class="btn-close-modal" id="closeTopUpModalBtn" aria-label="Bağla"><i
+                        class="fas fa-times"></i></button>
             </div>
             <div style="padding: 15px 0;">
-                <label style="display:block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">Məbləğ seçin:</label>
-                <div class="topup-presets" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
-                    <button type="button" class="btn-preset active" data-amount="5" style="padding: 10px; border-radius: 8px; border: 1px solid #10b981; background: rgba(16,185,129,0.12); color: inherit; font-weight: 600; cursor: pointer;">5 ₼</button>
-                    <button type="button" class="btn-preset" data-amount="10" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">10 ₼</button>
-                    <button type="button" class="btn-preset" data-amount="20" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">20 ₼</button>
-                    <button type="button" class="btn-preset" data-amount="50" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">50 ₼</button>
+                <label style="display:block; font-size: 14px; font-weight: 600; margin-bottom: 10px;">Məbləğ
+                    seçin:</label>
+                <div class="topup-presets"
+                    style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px;">
+                    <button type="button" class="btn-preset active" data-amount="5"
+                        style="padding: 10px; border-radius: 8px; border: 1px solid #10b981; background: rgba(16,185,129,0.12); color: inherit; font-weight: 600; cursor: pointer;">5
+                        ₼</button>
+                    <button type="button" class="btn-preset" data-amount="10"
+                        style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">10
+                        ₼</button>
+                    <button type="button" class="btn-preset" data-amount="20"
+                        style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">20
+                        ₼</button>
+                    <button type="button" class="btn-preset" data-amount="50"
+                        style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color, #334155); background: transparent; color: inherit; font-weight: 600; cursor: pointer;">50
+                        ₼</button>
                 </div>
-                <label for="customTopUpAmount" style="display:block; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 6px;">Və ya digər məbləğ daxil edin:</label>
+                <label for="customTopUpAmount"
+                    style="display:block; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 6px;">Və
+                    ya digər məbləğ daxil edin:</label>
                 <div style="position: relative; margin-bottom: 16px;">
-                    <input type="number" id="customTopUpAmount" min="1" max="10000" step="1" value="5" placeholder="Məs: 15" style="width: 100%; padding: 12px 42px 12px 14px; border-radius: 10px; border: 1px solid var(--border-color, #334155); background: var(--input-bg, rgba(15,23,42,0.5)); color: inherit; font-size: 16px; box-sizing: border-box;">
-                    <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #10b981;">AZN</span>
+                    <input type="number" id="customTopUpAmount" min="1" max="10000" step="1" value="5"
+                        placeholder="Məs: 15"
+                        style="width: 100%; padding: 12px 42px 12px 14px; border-radius: 10px; border: 1px solid var(--border-color, #334155); background: var(--input-bg, rgba(15,23,42,0.5)); color: inherit; font-size: 16px; box-sizing: border-box;">
+                    <span
+                        style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-weight: 700; color: #10b981;">AZN</span>
                 </div>
-                <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <div
+                    style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 10px; padding: 12px; font-size: 13px; color: var(--text-secondary, #94a3b8); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-shield-alt" style="color: #10b981; font-size: 18px;"></i>
                     <span>Payriff 3D Secure təhlükəsiz ödəniş. Visa və MasterCard dəstəklənir.</span>
                 </div>
-                <button type="button" id="btnSubmitTopUp" class="btn-primary w-100" style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer;">
+                <button type="button" id="btnSubmitTopUp" class="btn-primary w-100"
+                    style="width: 100%; padding: 14px; font-size: 15px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer;">
                     <i class="fas fa-credit-card"></i> Payriff ilə Ödənişə Keç
                 </button>
             </div>
         </div>
     </div>
 
-    <div id="cashOutModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cashout-modal-title" style="display:none;">
+    <div id="cashOutModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="cashout-modal-title"
+        style="display:none;">
         <div class="modal-card cab-glass cashout-modal-card">
             <div class="modal-header">
-                <h2 id="cashout-modal-title"><i class="fas fa-money-bill-transfer" aria-hidden="true"></i> Vəsaiti çıxar</h2>
-                <button type="button" class="btn-close-modal" id="closeCashOutModalBtn" aria-label="Bağla"><i class="fas fa-times" aria-hidden="true"></i></button>
+                <h2 id="cashout-modal-title"><i class="fas fa-money-bill-transfer" aria-hidden="true"></i> Vəsaiti çıxar
+                </h2>
+                <button type="button" class="btn-close-modal" id="closeCashOutModalBtn" aria-label="Bağla"><i
+                        class="fas fa-times" aria-hidden="true"></i></button>
             </div>
             <form id="cashOutForm" class="cashout-form">
                 <label for="cashOutAmount">Məbləğ (AZN)</label>
-                <input id="cashOutAmount" name="amount" type="number" min="1" max="5000" step="0.01" inputmode="decimal" required>
+                <input id="cashOutAmount" name="amount" type="number" min="1" max="5000" step="0.01" inputmode="decimal"
+                    required>
 
                 <label for="cashOutMethod">Çıxarış üsulu</label>
                 <select id="cashOutMethod" name="method" required>
@@ -718,8 +898,11 @@
                 </select>
 
                 <label id="cashOutDetailsLabel" for="cashOutDetails">IBAN</label>
-                <input id="cashOutDetails" name="accountHolderDetails" type="text" maxlength="500" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="AZ00 XXXX 0000 0000 0000 0000 0000" required>
-                <p id="cashOutDetailsHint" class="cashout-hint">IBAN boşluqsuz 15–34 simvol olmalıdır. Sorğu təsdiq üçün göndəriləcək.</p>
+                <input id="cashOutDetails" name="accountHolderDetails" type="text" maxlength="500" autocomplete="off"
+                    autocapitalize="characters" spellcheck="false" placeholder="AZ00 XXXX 0000 0000 0000 0000 0000"
+                    required>
+                <p id="cashOutDetailsHint" class="cashout-hint">IBAN boşluqsuz 15–34 simvol olmalıdır. Sorğu təsdiq üçün
+                    göndəriləcək.</p>
 
                 <div class="cashout-actions">
                     <button type="button" class="btn-secondary" id="cancelCashOutBtn">Ləğv et</button>
@@ -730,25 +913,36 @@
     </div>
 
     <!-- ══ PRO Account Deletion Modal ══ -->
-    <div id="deleteAccountModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="delete-account-title" style="display:none;">
-        <div class="modal-card cab-glass delete-modal-card" style="max-width: 520px; border: 1.5px solid rgba(239, 68, 68, 0.4); box-shadow: 0 20px 45px -10px rgba(239, 68, 68, 0.35); border-radius: 20px;">
-            <div class="modal-header" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2); padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <div id="deleteAccountModal" class="modal-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="delete-account-title" style="display:none;">
+        <div class="modal-card cab-glass delete-modal-card"
+            style="max-width: 520px; border: 1.5px solid rgba(239, 68, 68, 0.4); box-shadow: 0 20px 45px -10px rgba(239, 68, 68, 0.35); border-radius: 20px;">
+            <div class="modal-header"
+                style="border-bottom: 1px solid rgba(239, 68, 68, 0.2); padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 20px;">
+                    <div
+                        style="width: 42px; height: 42px; border-radius: 12px; background: rgba(239, 68, 68, 0.15); display: flex; align-items: center; justify-content: center; color: #ef4444; font-size: 20px;">
                         <i class="fas fa-triangle-exclamation"></i>
                     </div>
                     <div>
-                        <h2 id="delete-account-title" style="margin: 0; font-size: 18px; font-weight: 700; color: #ef4444;">Hesabı Həmişəlik Sil</h2>
-                        <span style="font-size: 12.5px; color: var(--text-secondary, #94a3b8);">Bu əməliyyat geri qaytarıla bilməz</span>
+                        <h2 id="delete-account-title"
+                            style="margin: 0; font-size: 18px; font-weight: 700; color: #ef4444;">Hesabı Həmişəlik Sil
+                        </h2>
+                        <span style="font-size: 12.5px; color: var(--text-secondary, #94a3b8);">Bu əməliyyat geri
+                            qaytarıla bilməz</span>
                     </div>
                 </div>
-                <button type="button" class="btn-close-modal" id="closeDeleteModalBtn" aria-label="Bağla" style="background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; padding: 4px 8px;"><i class="fas fa-times"></i></button>
+                <button type="button" class="btn-close-modal" id="closeDeleteModalBtn" aria-label="Bağla"
+                    style="background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; padding: 4px 8px;"><i
+                        class="fas fa-times"></i></button>
             </div>
 
             <div class="delete-modal-body">
                 <!-- Consequence Warning Box -->
-                <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; color: inherit;">
-                    <p style="margin: 0 0 8px 0; font-weight: 700; color: #ef4444; display:flex; align-items:center; gap:6px;">
+                <div
+                    style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; color: inherit;">
+                    <p
+                        style="margin: 0 0 8px 0; font-weight: 700; color: #ef4444; display:flex; align-items:center; gap:6px;">
                         <i class="fas fa-shield-alt"></i> Nəzərə alınacaq vacib məqamlar:
                     </p>
                     <ul style="margin: 0; padding-left: 18px; color: var(--text-muted, #cbd5e1); line-height: 1.7;">
@@ -761,8 +955,11 @@
                 <form id="deleteAccountForm" onsubmit="return false;">
                     <!-- Səbəb seçimi -->
                     <div class="form-group" style="margin-bottom: 16px;">
-                        <label for="deleteReasonSelect" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">Silmə səbəbini qeyd edin (istəyə görə):</label>
-                        <select id="deleteReasonSelect" class="form-control" style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 13.5px; box-sizing: border-box;">
+                        <label for="deleteReasonSelect"
+                            style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">Silmə
+                            səbəbini qeyd edin (istəyə görə):</label>
+                        <select id="deleteReasonSelect" class="form-control"
+                            style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 13.5px; box-sizing: border-box;">
                             <option value="">Səbəb seçin...</option>
                             <option value="Artıq istifadə etmirəm">Artıq platformadan istifadə etmirəm</option>
                             <option value="Başqa hesabım var">Başqa hesabım var</option>
@@ -773,24 +970,35 @@
 
                     <!-- Şifrə təsdiqi -->
                     <div class="form-group" style="margin-bottom: 16px;">
-                        <label for="deleteConfirmPassword" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">
+                        <label for="deleteConfirmPassword"
+                            style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">
                             Təsdiq üçün cari şifrənizi daxil edin: <span style="color: #ef4444;">*</span>
                         </label>
-                        <input type="password" id="deleteConfirmPassword" class="form-control" placeholder="Cari şifrəniz" autocomplete="current-password" required style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 14px; box-sizing: border-box;">
+                        <input type="password" id="deleteConfirmPassword" class="form-control"
+                            placeholder="Cari şifrəniz" autocomplete="current-password" required
+                            style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 14px; box-sizing: border-box;">
                     </div>
 
                     <!-- Təsdiq sözü yazılması -->
                     <div class="form-group" style="margin-bottom: 22px;">
-                        <label for="deleteConfirmWord" style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">
-                            Təsdiq üçün xanaya <span style="color: #ef4444; font-family: monospace; font-size: 14px; font-weight: 700; background: rgba(239,68,68,0.15); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.3);">HESABIMI SİL</span> yazın: <span style="color: #ef4444;">*</span>
+                        <label for="deleteConfirmWord"
+                            style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: inherit;">
+                            Təsdiq üçün xanaya <span
+                                style="color: #ef4444; font-family: monospace; font-size: 14px; font-weight: 700; background: rgba(239,68,68,0.15); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.3);">HESABIMI
+                                SİL</span> yazın: <span style="color: #ef4444;">*</span>
                         </label>
-                        <input type="text" id="deleteConfirmWord" class="form-control" placeholder="HESABIMI SİL" autocomplete="off" spellcheck="false" required style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; box-sizing: border-box;">
+                        <input type="text" id="deleteConfirmWord" class="form-control" placeholder="HESABIMI SİL"
+                            autocomplete="off" spellcheck="false" required
+                            style="width: 100%; padding: 11px 14px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: var(--input-bg, rgba(15,23,42,0.6)); color: inherit; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; box-sizing: border-box;">
                     </div>
 
                     <!-- Düymələr -->
-                    <div style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-top: 10px;">
-                        <button type="button" id="cancelDeleteAccountBtn" class="btn-secondary" style="padding: 11px 20px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: transparent; color: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">İmtina</button>
-                        <button type="button" id="btnFinalDeleteAccount" class="btn-danger" disabled style="padding: 11px 22px; border-radius: 10px; border: none; background: #ef4444; color: #ffffff; font-size: 14px; font-weight: 700; cursor: not-allowed; opacity: 0.45; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                    <div
+                        style="display: flex; gap: 12px; justify-content: flex-end; align-items: center; margin-top: 10px;">
+                        <button type="button" id="cancelDeleteAccountBtn" class="btn-secondary"
+                            style="padding: 11px 20px; border-radius: 10px; border: 1px solid var(--cab-glass-border, #334155); background: transparent; color: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">İmtina</button>
+                        <button type="button" id="btnFinalDeleteAccount" class="btn-danger" disabled
+                            style="padding: 11px 22px; border-radius: 10px; border: none; background: #ef4444; color: #ffffff; font-size: 14px; font-weight: 700; cursor: not-allowed; opacity: 0.45; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;">
                             <i class="fas fa-trash-alt"></i> <span id="deleteBtnText">Hesabı Həmişəlik Sil</span>
                         </button>
                     </div>
@@ -800,17 +1008,26 @@
     </div>
 
     <!-- Payriff Redirect Loading Overlay -->
-    <div id="topUpRedirectOverlay" class="topup-redirect-overlay" style="display:none; position: fixed; inset: 0; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
-        <div style="width: 60px; height: 60px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: #10b981; border-radius: 50%; animation: topup-spin 0.8s linear infinite; margin-bottom: 20px;"></div>
-        <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 10px 0; color: #ffffff;">Payriff-ə yönləndirilir...</h3>
-        <p style="font-size: 15px; color: #94a3b8; max-width: 380px; margin: 0; line-height: 1.5;">Zəhmət olmasa gözləyin, təhlükəsiz ödəniş səhifəsi açılır.</p>
+    <div id="topUpRedirectOverlay" class="topup-redirect-overlay"
+        style="display:none; position: fixed; inset: 0; background: rgba(11, 15, 25, 0.85); backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; flex-direction: column; text-align: center; color: #ffffff;">
+        <div
+            style="width: 60px; height: 60px; border: 4px solid rgba(16, 185, 129, 0.2); border-top-color: #10b981; border-radius: 50%; animation: topup-spin 0.8s linear infinite; margin-bottom: 20px;">
+        </div>
+        <h3 style="font-size: 22px; font-weight: 700; margin: 0 0 10px 0; color: #ffffff;">Payriff-ə yönləndirilir...
+        </h3>
+        <p style="font-size: 15px; color: #94a3b8; max-width: 380px; margin: 0; line-height: 1.5;">Zəhmət olmasa
+            gözləyin, təhlükəsiz ödəniş səhifəsi açılır.</p>
     </div>
     <style>
-    @keyframes topup-spin { to { transform: rotate(360deg); } }
+        @keyframes topup-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const tabs = document.querySelectorAll('.tab-link:not(.logout-link)');
             const contents = document.querySelectorAll('.cabinet-tab');
 
@@ -826,7 +1043,7 @@
                     return;
                 }
                 const tabId = normalizedId === 'messages' ? 'tab-messages' : normalizedId;
-                
+
                 const targetLink = document.querySelector(`.tab-link[data-target="${tabId}"]`);
                 const targetContent = document.getElementById(tabId);
                 if (!targetContent) return;
@@ -842,16 +1059,16 @@
                 targetContent.style.display = 'block';
                 targetContent.classList.add('active');
             }
-            
+
             tabs.forEach(tab => {
-                tab.addEventListener('click', function(e) {
+                tab.addEventListener('click', function (e) {
                     e.preventDefault();
                     const targetId = this.getAttribute('data-target');
                     activateTab(targetId);
                     if (targetId) {
                         try {
                             history.replaceState(null, '', `#${targetId}`);
-                        } catch (err) {}
+                        } catch (err) { }
                     }
                 });
             });
@@ -860,7 +1077,7 @@
                 activateTab(window.location.hash);
             }
 
-            window.addEventListener('hashchange', function() {
+            window.addEventListener('hashchange', function () {
                 if (window.location.hash) {
                     activateTab(window.location.hash);
                 }
@@ -868,7 +1085,7 @@
         });
 
         // Function to handle sub-navigation inside Settings Tab
-        window.showSettingsPanel = function(panelId, btn) {
+        window.showSettingsPanel = function (panelId, btn) {
             // Remove active from all nav buttons
             const navButtons = btn.parentElement.querySelectorAll('button');
             navButtons.forEach(b => b.classList.remove('active'));
@@ -883,7 +1100,7 @@
             });
             // Show target panel
             const target = document.getElementById(panelId);
-            if(target) {
+            if (target) {
                 target.style.display = 'block';
                 // Trigger reflow for animation
                 void target.offsetWidth;
@@ -909,6 +1126,7 @@
     <script src="JS/script.js?v=20261122_v1"></script>
     <script src="JS/cabinet.js?v=20261122_v1"></script>
     <script src="JS/favorites.js"></script>
-  <script src="JS/components.js"></script>
+    <script src="JS/components.js"></script>
 </body>
+
 </html>

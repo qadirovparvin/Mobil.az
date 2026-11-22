@@ -2248,8 +2248,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 setTimeout(() => {
                                     ['token', 'accessToken', 'authToken', 'jwt', 'user', 'mobilaz_current_user', 'mobilaz_user', 'adminToken', 'adminUser'].forEach(k => {
-                                        try { localStorage.removeItem(k); } catch (e) {}
-                                        try { sessionStorage.removeItem(k); } catch (e) {}
+                                        try { localStorage.removeItem(k); } catch (e) { }
+                                        try { sessionStorage.removeItem(k); } catch (e) { }
                                     });
                                     window.location.href = 'index.html';
                                 }, 1800);
@@ -3176,7 +3176,7 @@ window.selectPackage = function (pkg) {
     updateTotal();
 };
 
-window.submitPromotionRequestToAdmin = async function() {
+window.submitPromotionRequestToAdmin = async function () {
     if (!currentPromoAdId) {
         if (typeof window.showToast === 'function') window.showToast('Elan seçilməyib', 'error');
         return;
@@ -3196,10 +3196,10 @@ window.submitPromotionRequestToAdmin = async function() {
     try {
         const promoType = selectedPkg === 'Premium' ? 'PRO' : (selectedPkg || 'VIP');
         const apiBase = window.API_URL || window.API_BASE || (window.location && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
-        
+
         let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
         if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
-            try { csrfToken = await window.fetchCsrfToken(); } catch (_) {}
+            try { csrfToken = await window.fetchCsrfToken(); } catch (_) { }
         }
 
         const res = await fetch(`${apiBase.replace(/\/+$/, '')}/ads/${encodeURIComponent(currentPromoAdId)}/request-promotion`, {

@@ -1,8 +1,8 @@
-const Ad          = require('../models/Ad');
+const Ad = require('../models/Ad');
 const logger = require('../utils/logger');
-const mongoose    = require('mongoose');
-const User        = require('../models/User');
-const Store       = require('../models/Store');
+const mongoose = require('mongoose');
+const User = require('../models/User');
+const Store = require('../models/Store');
 const Transaction = require('../models/Transaction');
 const Notification = require('../models/Notification');
 const BoostIdempotency = require('../models/BoostIdempotency');
@@ -30,7 +30,7 @@ const { normalizePhone } = require('../utils/phoneUtils');
 
 // ─── Promotion pricing (AZN) ────────────────────────────────
 const BOOST_PRICES = { Urgent: 3, BumpUp: 3, VIP: 5, Premium: 10, PRO: 10 };
-const BOOST_DAYS   = { Urgent: 3, BumpUp: 3, VIP: 7, Premium: 15, PRO: 15 };
+const BOOST_DAYS = { Urgent: 3, BumpUp: 3, VIP: 7, Premium: 15, PRO: 15 };
 const ALLOWED_CATEGORIES = ['Telefon', 'Planşet', 'Aksesuar', 'Qulaqlıq'];
 
 const httpError = (status, payload) => {
@@ -245,7 +245,7 @@ const getAds = async (req, res, next) => {
             .skip(skip)
             .limit(normalizedLimit)
             .populate('author', 'name lastName email avatar phone')
-            .populate('store',  'storeName logoUrl isVerified rating')
+            .populate('store', 'storeName logoUrl isVerified rating')
             .lean();
         ads.forEach((ad) => {
             if (!hasActiveVip(ad, now) && ad.promotionType === 'VIP') {
@@ -264,9 +264,9 @@ const getAds = async (req, res, next) => {
         const totalPages = Math.ceil(total / normalizedLimit);
         const responseData = {
             ads,
-            page:       normalizedPage,
-            limit:      normalizedLimit,
-            totalAds:   total,
+            page: normalizedPage,
+            limit: normalizedLimit,
+            totalAds: total,
             totalPages,
             hasNextPage: normalizedPage < totalPages,
             hasPreviousPage: normalizedPage > 1
@@ -314,7 +314,7 @@ const getAdById = async (req, res, next) => {
                 _id: idParam
             })
                 .populate('author', 'name lastName email avatar phone createdAt rating')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+                .populate('store', 'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
             ad = (queryObj && typeof queryObj.lean === 'function') ? await queryObj.lean() : await queryObj;
         }
 
@@ -330,7 +330,7 @@ const getAdById = async (req, res, next) => {
                 adNumber: { $in: candidates }
             })
                 .populate('author', 'name lastName email avatar phone createdAt rating')
-                .populate('store',  'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
+                .populate('store', 'storeName logoUrl coverUrl isVerified rating reviewCount contactNumber socialLinks');
             ad = (queryObj && typeof queryObj.lean === 'function') ? await queryObj.lean() : await queryObj;
         }
 
@@ -448,7 +448,7 @@ const createAd = async (req, res, next) => {
 
         let parsedSpecs = specs;
         if (typeof parsedSpecs === 'string') {
-            try { parsedSpecs = JSON.parse(parsedSpecs); } catch (e) {}
+            try { parsedSpecs = JSON.parse(parsedSpecs); } catch (e) { }
         }
         const cleanSpecs = sanitizeSpecs(parsedSpecs);
         const cleanYaddas = sanitizePlainText(yaddas || cleanSpecs?.memory || '', { maxLength: 80 }) || null;
@@ -515,23 +515,23 @@ const createAd = async (req, res, next) => {
             yaddas: cleanYaddas,
             ram: cleanRam,
             description: sanitizePlainText(description || '', { maxLength: 5000 }),
-            images:      cleanImages || [],
+            images: cleanImages || [],
             city: cleanCity,
             region: sanitizePlainText(region || '', { maxLength: 80 }),
             contactPhone: normalizedContactPhone || sanitizePlainText(contactPhone || req.user.phone || '', { maxLength: 40 }),
-            sellerType:  listingSellerType,
-            store:       listingStore,
-            specs:       cleanSpecs,
-            status:      'pending'
+            sellerType: listingSellerType,
+            store: listingStore,
+            specs: cleanSpecs,
+            status: 'pending'
         });
 
         await Notification.create({
-            user:      req.user._id,
-            type:      'ad_status',
-            title:     'Elanınız göndərildi',
-            body:      `"${ad.brand} ${ad.modelName}" elanı yoxlama üçün göndərildi.`,
-            link:      `/cabinet.html#my-ads`,
-            relatedId:   ad._id,
+            user: req.user._id,
+            type: 'ad_status',
+            title: 'Elanınız göndərildi',
+            body: `"${ad.brand} ${ad.modelName}" elanı yoxlama üçün göndərildi.`,
+            link: `/cabinet.html#my-ads`,
+            relatedId: ad._id,
             relatedType: 'Ad'
         });
 
@@ -582,14 +582,14 @@ const updateAd = async (req, res, next) => {
             req.body.images = curImgs.concat([uploadedUrl]);
         }
         if (typeof req.body.specs === 'string') {
-            try { req.body.specs = JSON.parse(req.body.specs); } catch (e) {}
+            try { req.body.specs = JSON.parse(req.body.specs); } catch (e) { }
         }
         if (typeof req.body.images === 'string') {
             try { req.body.images = JSON.parse(req.body.images); } catch (e) { req.body.images = [req.body.images]; }
         }
 
         const allowed = ['category', 'brand', 'modelName', 'price', 'condition', 'description', 'images',
-                         'city', 'region', 'contactPhone', 'specs', 'yaddas', 'ram'];
+            'city', 'region', 'contactPhone', 'specs', 'yaddas', 'ram'];
         const adminOnlyAllowed = ['status'];
         validateAllowedFields(req.body, req.user.role === 'admin' ? allowed.concat(adminOnlyAllowed) : allowed, 'body');
 
@@ -702,15 +702,15 @@ const getMyAds = async (req, res, next) => {
         }
 
         const total = await Ad.countDocuments(filter);
-        const ads   = await Ad.find(filter)
+        const ads = await Ad.find(filter)
             .sort({ createdAt: -1 })
             .skip(paging.skip)
             .limit(paging.limit);
 
         const totalPages = Math.ceil(total / paging.limit);
-        res.json({ 
-            ads, 
-            page: paging.page, 
+        res.json({
+            ads,
+            page: paging.page,
             limit: paging.limit,
             totalAds: total,
             totalPages,
@@ -767,7 +767,7 @@ const boostAd = async (req, res, next) => {
         }
 
         if (!BOOST_PRICES[promotionType]) {
-            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => { });
             return res.status(400).json({ message: 'Yanlış promosyon növü' });
         }
 
@@ -775,17 +775,17 @@ const boostAd = async (req, res, next) => {
             '_id author status isBoosted promotionType promotionStartedAt promotionExpiresAt boostedAt boostCount publishedAt expiresAt brand modelName'
         );
         if (!oldAd) {
-            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => { });
             return res.status(404).json({ message: 'Elan tapılmadı' });
         }
 
         if (oldAd.author.toString() !== req.user._id.toString()) {
-            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => { });
             return res.status(403).json({ message: 'İcazəniz yoxdur' });
         }
 
         if (oldAd.status !== 'active') {
-            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => {});
+            if (idempotencyKey) await BoostIdempotency.deleteOne({ user: req.user._id, ad: id, idempotencyKey }).catch(() => { });
             return res.status(400).json({ message: 'Yalnız aktiv elanlar reklam edilə bilər' });
         }
 
@@ -844,22 +844,22 @@ const boostAd = async (req, res, next) => {
 
             // Log transaction with session
             await Transaction.create([{
-                user:        user._id,
-                amount:      -cost,
-                type:        'ad_boost',
+                user: user._id,
+                amount: -cost,
+                type: 'ad_boost',
                 description: `${promotionType} promosyonu — ${updatedAd.brand || ad.brand} ${updatedAd.modelName || ad.modelName}`,
-                ad:          updatedAd._id,
+                ad: updatedAd._id,
                 balanceAfter: user.walletBalance
             }], { session });
 
             // Notification with session
             await Notification.create([{
-                user:        user._id,
-                type:        'promo',
-                title:       `${promotionType} aktivləşdirildi! ⚡`,
-                body:        `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
-                link:        `/cabinet.html#my-ads`,
-                relatedId:   updatedAd._id,
+                user: user._id,
+                type: 'promo',
+                title: `${promotionType} aktivləşdirildi! ⚡`,
+                body: `Elanınız ${days} gün ərzində ${promotionType} kimi görünəcək.`,
+                link: `/cabinet.html#my-ads`,
+                relatedId: updatedAd._id,
                 relatedType: 'Ad'
             }], { session });
 
@@ -887,7 +887,7 @@ const boostAd = async (req, res, next) => {
             await session.commitTransaction();
         } catch (error) {
             if (session) {
-                await session.abortTransaction().catch(() => {});
+                await session.abortTransaction().catch(() => { });
             }
 
             // If concurrent duplicate idempotency key arrived:
@@ -905,9 +905,9 @@ const boostAd = async (req, res, next) => {
             const isTxUnsupported = Boolean(
                 error &&
                 (error.message?.includes('replica set member') ||
-                 error.message?.includes('Transaction numbers are only allowed') ||
-                 error.code === 20 ||
-                 error.codeName === 'IllegalOperation')
+                    error.message?.includes('Transaction numbers are only allowed') ||
+                    error.code === 20 ||
+                    error.codeName === 'IllegalOperation')
             );
             if (isTxUnsupported) {
                 logger.warn('MongoDB transactions not supported on current topology; executing boost with compensating rollback');
@@ -1001,8 +1001,8 @@ const boostAd = async (req, res, next) => {
                     try {
                         await Ad.updateOne(
                             { _id: id },
-                            { 
-                                $set: { 
+                            {
+                                $set: {
                                     isBoosted: Boolean(oldAd.isBoosted),
                                     promotionType: oldAd.promotionType || 'none',
                                     promotionStartedAt: oldAd.promotionStartedAt || null,
@@ -1011,7 +1011,7 @@ const boostAd = async (req, res, next) => {
                                     boostCount: oldAd.boostCount || 0,
                                     publishedAt: oldAd.publishedAt,
                                     expiresAt: oldAd.expiresAt
-                                } 
+                                }
                             }
                         );
                     } catch (e) {
@@ -1058,7 +1058,7 @@ const boostAd = async (req, res, next) => {
             }
         } finally {
             if (session) {
-                await session.endSession().catch(() => {});
+                await session.endSession().catch(() => { });
             }
         }
 
@@ -1078,8 +1078,8 @@ const boostAd = async (req, res, next) => {
 // @access  Private
 const toggleFavorite = async (req, res, next) => {
     try {
-        const user   = await User.findById(req.user._id);
-        const adId   = req.params.id;
+        const user = await User.findById(req.user._id);
+        const adId = req.params.id;
         const adExists = await Ad.findOne({ _id: adId, ...activeListingFilter(new Date()) });
 
         if (!adExists) return res.status(404).json({ message: 'Elan tapılmadı' });
