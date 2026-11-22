@@ -7,6 +7,7 @@ const User      = require('../models/User');
 const Otp       = require('../models/Otp');
 const Store     = require('../models/Store');
 const Notification = require('../models/Notification');
+const Transaction = require('../models/Transaction');
 const {
     buildAuthResponse,
     clearRefreshTokenCookie,
@@ -332,6 +333,36 @@ const register = async (req, res, next) => {
 
 
         await createWelcomeNotification(user._id);
+
+        if (referrer) {
+            try {
+                referrer.referralCredits = (referrer.referralCredits || 0) + 5;
+                referrer.walletBalance   = (referrer.walletBalance || 0) + 5;
+                referrer.bumpBonus       = (referrer.bumpBonus || 0) + 3;
+                await referrer.save();
+
+                await Transaction.create({
+                    user: referrer._id,
+                    amount: 5,
+                    type: 'referral_credit',
+                    description: `Dostunu gətir bonusu (${user.name || 'Dostunuz'}) + 3x İrəli çək`,
+                    balanceAfter: referrer.walletBalance
+                }).catch(err => logger.error('Referral transaction create error:', err));
+
+                await Notification.create({
+                    user:  referrer._id,
+                    type:  'referral',
+                    title: 'Dostunu gətir bonusu! 🎁',
+                    body:  `${user.name || 'Dostunuz'} sizin dəvət linkinizdən qeydiyyatdan keçdi. Balansınıza 5 AZN və 3 dəfə "Elanı İrəli Çək" bonusu əlavə edildi!`,
+                    link:  '/cabinet.html#tab-profile'
+                }).catch(err => logger.error('Referral notification create error:', err));
+
+                user.referralAwarded = true;
+                await user.save();
+            } catch (refErr) {
+                logger.error('Failed to award referral in registration:', refErr);
+            }
+        }
 
         await issueRefreshToken(user, req, res, req.body?.rememberMe);
         const accessToken = generateAccessToken(user, req.body?.rememberMe);
@@ -846,20 +877,30 @@ const verifyOtp = async (req, res, next) => {
             userToVerify.isVerified = true;
             userToVerify.unverifiedExpiresAt = null;
             
-            if (userToVerify.referredBy) {
+            if (userToVerify.referredBy && !userToVerify.referralAwarded) {
                 const referrer = await User.findById(userToVerify.referredBy);
                 if (referrer) {
                     referrer.referralCredits += 5;
                     referrer.walletBalance   += 5;
+                    referrer.bumpBonus       = (referrer.bumpBonus || 0) + 3;
                     await referrer.save();
+
+                    await Transaction.create({
+                        user: referrer._id,
+                        amount: 5,
+                        type: 'referral_credit',
+                        description: `Dostunu gətir bonusu (${userToVerify.name || 'Dostunuz'}) + 3x İrəli çək`,
+                        balanceAfter: referrer.walletBalance
+                    }).catch(err => logger.error('Referral transaction create error:', err));
 
                     await Notification.create({
                         user:  referrer._id,
                         type:  'referral',
-                        title: 'Referral bonusu! 🎁',
-                        body:  `${userToVerify.name} sizin dəvət linkinizdən qeydiyyatdan keçdi və hesabını təsdiqlədi. 5 AZN hesabınıza əlavə edildi.`,
-                        link:  '/cabinet.html#wallet'
+                        title: 'Dostunu gətir bonusu! 🎁',
+                        body:  `${userToVerify.name} sizin dəvət linkinizdən qeydiyyatdan keçdi və hesabını təsdiqlədi. Balansınıza 5 AZN və 3 dəfə "Elanı İrəli Çək" bonusu əlavə edildi!`,
+                        link:  '/cabinet.html#tab-profile'
                     });
+                    userToVerify.referralAwarded = true;
                 }
             }
             
@@ -901,20 +942,30 @@ const verifyEmailLink = async (req, res, next) => {
         user.emailVerificationToken = null;
         user.emailVerificationTokenExpiry = null;
 
-        if (user.referredBy) {
+        if (user.referredBy && !user.referralAwarded) {
             const referrer = await User.findById(user.referredBy);
             if (referrer) {
                 referrer.referralCredits += 5;
                 referrer.walletBalance   += 5;
+                referrer.bumpBonus       = (referrer.bumpBonus || 0) + 3;
                 await referrer.save();
+
+                await Transaction.create({
+                    user: referrer._id,
+                    amount: 5,
+                    type: 'referral_credit',
+                    description: `Dostunu gətir bonusu (${user.name || 'Dostunuz'}) + 3x İrəli çək`,
+                    balanceAfter: referrer.walletBalance
+                }).catch(err => logger.error('Referral transaction create error:', err));
 
                 await Notification.create({
                     user:  referrer._id,
                     type:  'referral',
-                    title: 'Referral bonusu! 🎁',
-                    body:  `${user.name} sizin dəvət linkinizdən qeydiyyatdan keçdi və hesabını təsdiqlədi. 5 AZN hesabınıza əlavə edildi.`,
-                    link:  '/cabinet.html#wallet'
+                    title: 'Dostunu gətir bonusu! 🎁',
+                    body:  `${user.name} sizin dəvət linkinizdən qeydiyyatdan keçdi və hesabını təsdiqlədi. Balansınıza 5 AZN və 3 dəfə "Elanı İrəli Çək" bonusu əlavə edildi!`,
+                    link:  '/cabinet.html#tab-profile'
                 });
+                user.referralAwarded = true;
             }
         }
 

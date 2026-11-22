@@ -45,6 +45,8 @@ const userSchema = new mongoose.Schema({
     referralCode:    { type: String, unique: true, sparse: true },
     referredBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     referralCredits: { type: Number, default: 0 },
+    bumpBonus:       { type: Number, default: 0, min: 0 },
+    referralAwarded: { type: Boolean, default: false },
 
     // ── Security ──────────────────────────────────────────
     tokenVersion:     { type: Number, default: 0 },

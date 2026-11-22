@@ -46,6 +46,7 @@ const toSafeUser = (user) => {
         walletBalance: object.walletBalance,
         referralCode: object.referralCode,
         referralCredits: object.referralCredits,
+        bumpBonus: object.bumpBonus || 0,
         activePackage: object.activePackage,
         packageExpiresAt: object.packageExpiresAt,
         billingExpiresAt: object.packageExpiresAt,
