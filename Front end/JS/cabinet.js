@@ -3362,11 +3362,26 @@ window.confirmPromotion = async function () {
 
 window.copyReferralLink = function () {
     const linkInput = document.getElementById('referralLink');
-    if (!linkInput) return;
+    if (!linkInput || !linkInput.value) return;
 
     linkInput.select();
     linkInput.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(linkInput.value);
+    try {
+        navigator.clipboard.writeText(linkInput.value);
+    } catch (_) {
+        document.execCommand('copy');
+    }
+
+    const copyBtn = document.getElementById('btnCopyReferral') || document.querySelector('.btn-copy');
+    if (copyBtn) {
+        const originalHtml = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> <span>Kopyalandı!</span>';
+        copyBtn.style.background = 'linear-gradient(135deg, #059669, #047857)';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalHtml;
+            copyBtn.style.background = '';
+        }, 2000);
+    }
 
     const t = window.toast || { show: (message) => alert(message) };
     const translate = window.cabinetT || ((key, fallback) => fallback);
