@@ -8,7 +8,7 @@
     <title data-translate-title="cabinet-title">Şəxsi Kabinet - Mobilim.az</title>
     <link rel="stylesheet" href="CSS/general.css">
     <link rel="stylesheet" href="CSS/style.css">
-    <link rel="stylesheet" href="CSS/cabinet.css?v=20261122_v2">
+    <link rel="stylesheet" href="CSS/cabinet.css?v=20261123_v1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
         integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
         crossorigin="anonymous" referrerpolicy="no-referrer">
@@ -141,7 +141,7 @@
                     <!-- Dashboard Bottom Grid -->
                     <div class="dashboard-bottom-grid">
                         <!-- Referral Card -->
-                        <div class="referral-card">
+                        <div class="referral-card cab-glass">
                             <div class="referral-content">
                                 <div class="referral-icon">
                                     <i class="fas fa-gift"></i>
@@ -149,42 +149,39 @@
                                 <h2 data-translate="mon-referral-title">Dostunu gətir, elanı irəli çək!</h2>
                                 <p class="ref-desc" data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə 3 dəfə elanı irəli çəkmə bonusu qazanın.</p>
                                 
-                                <div class="referral-stats-grid">
+                                <div class="referral-stats">
                                     <div class="ref-stat-card">
-                                        <div class="ref-stat-icon" style="color: #6ee7b7;"><i class="fas fa-rocket"></i></div>
-                                        <span class="ref-stat-label" data-translate="mon-referral-bumps">İrəli çəkmə bonusu</span>
-                                        <span class="ref-stat-value"><span id="referralBumpsValue">0</span> <small>dəfə</small></span>
+                                        <span class="ref-stat-label"><i class="fas fa-rocket" style="color:#34d399;"></i> <span data-translate="mon-referral-bumps">İrəli çəkmə bonusu</span></span>
+                                        <div class="ref-stat-value"><span id="referralBumpsValue">0</span> <small>dəfə</small></div>
                                     </div>
                                     <div class="ref-stat-card">
-                                        <div class="ref-stat-icon" style="color: #fde047;"><i class="fas fa-crown"></i></div>
-                                        <span class="ref-stat-label" data-translate="mon-referral-vips">VIP bonusu</span>
-                                        <span class="ref-stat-value"><span id="referralVipsValue">0</span> <small>ədəd</small></span>
+                                        <span class="ref-stat-label"><i class="fas fa-crown" style="color:#fbbf24;"></i> <span data-translate="mon-referral-vips">VIP bonusu</span></span>
+                                        <div class="ref-stat-value"><span id="referralVipsValue">0</span> <small>ədəd</small></div>
                                     </div>
                                     <div class="ref-stat-card">
-                                        <div class="ref-stat-icon" style="color: #93c5fd;"><i class="fas fa-user-friends"></i></div>
-                                        <span class="ref-stat-label" data-translate="mon-referral-friends">Dəvətlər</span>
-                                        <span class="ref-stat-value" id="referralCount">0</span>
+                                        <span class="ref-stat-label"><i class="fas fa-users" style="color:#60a5fa;"></i> <span data-translate="mon-referral-friends">Dəvətlər</span></span>
+                                        <div class="ref-stat-value"><span id="referralCount">0</span> <small>dost</small></div>
                                     </div>
                                 </div>
 
-                                <!-- Campaign Milestone Box (High Contrast) -->
+                                <!-- Campaign Milestone Box -->
                                 <div class="referral-campaign-box">
-                                    <div class="campaign-header-row">
-                                        <div class="campaign-title">
+                                    <div class="campaign-head">
+                                        <div class="campaign-title-wrap">
                                             <i class="fas fa-crown"></i>
                                             <span data-translate="mon-referral-campaign-title">Xüsusi Kompaniya: 3 dost dəvət et, 2 dəfə 1 həftəlik VIP qazan!</span>
                                         </div>
-                                        <span class="campaign-badge" id="referralCampaignCounter">0 / 3</span>
+                                        <span class="campaign-pill"><span id="referralCampaignCounter">0 / 3</span></span>
                                     </div>
-                                    <p class="campaign-subtext" data-translate="mon-referral-campaign-sub">Hər 3 dost tamamlandıqda hesabınıza 2 ədəd 7 günlük VIP elan bonusu hədiyyə olunur.</p>
-                                    <div class="campaign-bar-track">
-                                        <div class="campaign-bar-fill" id="referralCampaignBar"></div>
+                                    <p class="campaign-sub" data-translate="mon-referral-campaign-sub">Hər 3 dost tamamlandıqda hesabınıza 2 ədəd 7 günlük VIP elan bonusu hədiyyə olunur.</p>
+                                    <div class="campaign-progress-track">
+                                        <div id="referralCampaignBar" class="campaign-progress-fill"></div>
                                     </div>
                                 </div>
 
                                 <div class="copy-link-box">
-                                    <input type="text" readonly id="referralLink" aria-label="Referal Linki">
-                                    <button class="btn-copy" onclick="copyReferralLink()"><i class="fas fa-copy"></i>
+                                    <input type="text" readonly id="referralLink">
+                                    <button class="btn-copy" id="btnCopyReferral" onclick="copyReferralLink()"><i class="fas fa-copy"></i>
                                         <span data-translate="mon-copy-link">Kopyala</span></button>
                                 </div>
                             </div>
@@ -1123,8 +1120,8 @@
     <script src="JS/axios.min.js"></script>
     <script src="JS/api.js"></script>
     <script src="JS/auth.js"></script>
-    <script src="JS/script.js?v=20261122_v1"></script>
-    <script src="JS/cabinet.js?v=20261122_v1"></script>
+    <script src="JS/script.js?v=20261123_v1"></script>
+    <script src="JS/cabinet.js?v=20261123_v1"></script>
     <script src="JS/favorites.js"></script>
     <script src="JS/components.js"></script>
 </body>
