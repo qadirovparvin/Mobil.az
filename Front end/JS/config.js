@@ -64,7 +64,7 @@ var COUNTRY_PHONE_CONFIGS = {
         code: '+994',
         digits: 9,
         placeholder: '(50) 000-00-00',
-        allowedPrefixes: ['10', '12', '50', '51', '55', '60', '70', '71', '77', '99'],
+        allowedPrefixes: ['10', '12', '50', '51', '55', '60', '70', '77', '99'],
         format: function(digits) {
             if (!digits) return '';
             var res = '(' + digits.slice(0, 2);
@@ -233,6 +233,61 @@ function setupPhoneInputMask(inputId, prefixId) {
     var prefixEl = typeof prefixId === 'string' ? document.getElementById(prefixId) : prefixId;
     if (!input) return;
 
+    function getPhoneFeedbackEl() {
+        var combo = input.closest('.phone-combo') || input.parentElement;
+        if (!combo) return null;
+        var parent = combo.parentElement || combo;
+        var err = parent.querySelector('.phone-input-feedback');
+        if (!err) {
+            err = document.createElement('div');
+            err.className = 'phone-input-feedback';
+            err.style.cssText = 'color:#ef4444;font-size:12px;margin-top:4px;display:none;font-weight:500;line-height:1.4;';
+            if (combo.nextSibling) {
+                combo.parentNode.insertBefore(err, combo.nextSibling);
+            } else {
+                combo.parentNode.appendChild(err);
+            }
+        }
+        return err;
+    }
+
+    function showPhoneError(msg) {
+        var err = getPhoneFeedbackEl();
+        if (err) {
+            err.textContent = msg;
+            err.style.display = 'block';
+        }
+        input.style.borderColor = '#ef4444';
+    }
+
+    function clearPhoneError() {
+        var err = getPhoneFeedbackEl();
+        if (err) {
+            err.textContent = '';
+            err.style.display = 'none';
+        }
+        input.style.borderColor = '';
+    }
+
+    function getErrMsg(type) {
+        var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'AZ';
+        lang = lang.trim().toUpperCase();
+        var isRu = (lang === 'RU' || lang === 'RUS');
+        var isEn = (lang === 'EN' || lang === 'ENG');
+
+        if (type === 'invalidPrefix') {
+            return isRu ? 'Префикс оператора не поддерживается (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                   isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                   'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)';
+        }
+        if (type === 'invalidLength') {
+            return isRu ? 'Азербайджанский номер должен состоять из 9 цифр. Пример: (50) 123-45-67' :
+                   isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
+                   'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67';
+        }
+        return isRu ? 'Введите номер телефона' : isEn ? 'Enter phone number' : 'Telefon nömrəsini daxil edin';
+    }
+
     function applyFormat() {
         var prefix = prefixEl ? prefixEl.value : '+994';
         var cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
@@ -240,6 +295,33 @@ function setupPhoneInputMask(inputId, prefixId) {
 
         var rawVal = input.value;
         var cleaned = cfg.clean(rawVal);
+
+        if (prefix === '+994') {
+            var allowedPrefixes = cfg.allowedPrefixes || ['10', '12', '50', '51', '55', '60', '70', '77', '99'];
+            var allowedFirstDigits = ['1', '5', '6', '7', '9'];
+
+            if (cleaned.length >= 1) {
+                if (!allowedFirstDigits.includes(cleaned[0])) {
+                    cleaned = '';
+                    showPhoneError(getErrMsg('invalidPrefix'));
+                } else if (cleaned.length >= 2) {
+                    var op = cleaned.slice(0, 2);
+                    if (!allowedPrefixes.includes(op)) {
+                        cleaned = cleaned.slice(0, 1);
+                        showPhoneError(getErrMsg('invalidPrefix'));
+                    } else {
+                        clearPhoneError();
+                    }
+                } else {
+                    clearPhoneError();
+                }
+            } else {
+                clearPhoneError();
+            }
+        } else {
+            clearPhoneError();
+        }
+
         var formatted = cfg.format(cleaned);
         input.value = formatted;
 
@@ -254,8 +336,18 @@ function setupPhoneInputMask(inputId, prefixId) {
 
     input.addEventListener('input', applyFormat);
     input.addEventListener('paste', function() { setTimeout(applyFormat, 0); });
+    input.addEventListener('blur', function() {
+        var prefix = prefixEl ? prefixEl.value : '+994';
+        var cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
+        var cleaned = cfg.clean(input.value);
+        if (prefix === '+994' && cleaned.length > 0 && cleaned.length < 9) {
+            showPhoneError(getErrMsg('invalidLength'));
+        }
+    });
+
     if (prefixEl) {
         prefixEl.addEventListener('change', function() {
+            clearPhoneError();
             applyFormat();
             input.focus();
         });
@@ -267,35 +359,60 @@ function setupPhoneInputMask(inputId, prefixId) {
 function validatePhoneNumber(inputId, prefixId) {
     var input = typeof inputId === 'string' ? document.getElementById(inputId) : inputId;
     var prefixEl = typeof prefixId === 'string' ? document.getElementById(prefixId) : prefixId;
-    if (!input) return { valid: false, message: 'Telefon sahəsi tapılmadı' };
+    var lang = (typeof localStorage !== 'undefined' && localStorage.getItem('lang')) || 'AZ';
+    lang = lang.trim().toUpperCase();
+    var isRu = (lang === 'RU' || lang === 'RUS');
+    var isEn = (lang === 'EN' || lang === 'ENG');
+
+    if (!input) return { valid: false, message: isRu ? 'Поле телефона не найдено' : isEn ? 'Phone field not found' : 'Telefon sahəsi tapılmadı' };
     var prefix = prefixEl ? prefixEl.value : '+994';
     var cfg = COUNTRY_PHONE_CONFIGS[prefix] || COUNTRY_PHONE_CONFIGS['+994'];
     var digits = cfg.clean(input.value);
 
     if (!digits) {
-        return { valid: false, message: 'Telefon nömrəsini daxil edin' };
+        return { valid: false, message: isRu ? 'Введите номер телефона' : isEn ? 'Enter phone number' : 'Telefon nömrəsini daxil edin' };
     }
 
     if (prefix === '+994') {
         if (digits.length !== 9) {
-            return { valid: false, message: 'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67' };
+            return {
+                valid: false,
+                message: isRu ? 'Азербайджанский номер должен состоять из 9 цифр. Пример: (50) 123-45-67' :
+                         isEn ? 'Azerbaijan phone number must be 9 digits. Example: (50) 123-45-67' :
+                         'Azərbaycan nömrəsi 9 rəqəmdən ibarət olmalıdır. Nümunə: (50) 123-45-67'
+            };
         }
         var op = digits.slice(0, 2);
         if (!cfg.allowedPrefixes.includes(op)) {
-            return { valid: false, message: 'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 71, 77, 99)' };
+            return {
+                valid: false,
+                message: isRu ? 'Префикс оператора не поддерживается (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                         isEn ? 'Mobile operator prefix is not supported (10, 12, 50, 51, 55, 60, 70, 77, 99)' :
+                         'Mobil operator prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)'
+            };
         }
         return { valid: true, fullPhone: '+994' + digits, digits: digits, prefix: prefix };
     }
 
     if (prefix === 'other') {
         if (digits.length < 7 || digits.length > 15) {
-            return { valid: false, message: 'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır' };
+            return {
+                valid: false,
+                message: isRu ? 'Международный номер должен содержать от 7 до 15 цифр' :
+                         isEn ? 'International phone number must be between 7 and 15 digits' :
+                         'Beynəlxalq telefon nömrəsi 7 ilə 15 rəqəm arasında olmalıdır'
+            };
         }
         return { valid: true, fullPhone: '+' + digits, digits: digits, prefix: prefix };
     }
 
     if (digits.length !== cfg.digits) {
-        return { valid: false, message: cfg.name + ' nömrəsi tam ' + cfg.digits + ' rəqəmdən ibarət olmalıdır' };
+        return {
+            valid: false,
+            message: isRu ? (cfg.name + ' номер должен состоять из ' + cfg.digits + ' цифр') :
+                     isEn ? (cfg.name + ' number must be exactly ' + cfg.digits + ' digits') :
+                     (cfg.name + ' nömrəsi tam ' + cfg.digits + ' rəqəmdən ibarət olmalıdır')
+        };
     }
 
     return { valid: true, fullPhone: prefix + digits, digits: digits, prefix: prefix };
