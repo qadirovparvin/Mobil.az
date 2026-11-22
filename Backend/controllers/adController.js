@@ -26,6 +26,7 @@ const {
 } = require('../utils/securityValidation');
 const { getCache, setCache, invalidateCache } = require('../utils/redisClient');
 const { activeListingFilter, activeVipFilter, hasActiveVip } = require('../utils/listingVisibility');
+const { normalizePhone } = require('../utils/phoneUtils');
 
 // ─── Promotion pricing (AZN) ────────────────────────────────
 const BOOST_PRICES = { Urgent: 3, BumpUp: 3, VIP: 5, Premium: 10, PRO: 10 };
@@ -493,6 +494,16 @@ const createAd = async (req, res, next) => {
             adNumber = candidate;
         }
 
+        let normalizedContactPhone = '';
+        const phoneToValidate = contactPhone || (req.user && req.user.phone) || '';
+        if (phoneToValidate) {
+            try {
+                normalizedContactPhone = normalizePhone(phoneToValidate);
+            } catch (pErr) {
+                return res.status(400).json({ message: pErr.message || 'Düzgün əlaqə nömrəsi daxil edin.' });
+            }
+        }
+
         const ad = await Ad.create({
             adNumber,
             author: req.user._id,
@@ -507,7 +518,7 @@ const createAd = async (req, res, next) => {
             images:      cleanImages || [],
             city: cleanCity,
             region: sanitizePlainText(region || '', { maxLength: 80 }),
-            contactPhone: sanitizePlainText(contactPhone || req.user.phone || '', { maxLength: 40 }),
+            contactPhone: normalizedContactPhone || sanitizePlainText(contactPhone || req.user.phone || '', { maxLength: 40 }),
             sellerType:  listingSellerType,
             store:       listingStore,
             specs:       cleanSpecs,
@@ -588,7 +599,15 @@ const updateAd = async (req, res, next) => {
                     const maxLength = field === 'description' ? 5000 : 120;
                     const sanitized = sanitizePlainText(req.body[field], { maxLength, allowEmpty: field !== 'brand' && field !== 'modelName' });
                     if (sanitized === null) throw httpError(400, { message: `${field} düzgün deyil` });
-                    ad[field] = sanitized;
+                    if (field === 'contactPhone' && sanitized) {
+                        try {
+                            ad.contactPhone = normalizePhone(sanitized);
+                        } catch (pErr) {
+                            throw httpError(400, { message: pErr.message || 'Düzgün əlaqə nömrəsi daxil edin.' });
+                        }
+                    } else {
+                        ad[field] = sanitized;
+                    }
                 } else if (field === 'category') {
                     ad.category = readEnum(req.body.category, ALLOWED_CATEGORIES, { fieldName: 'category', required: true, maxLength: 80 });
                 } else if (field === 'images') {

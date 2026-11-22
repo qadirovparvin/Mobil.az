@@ -5,7 +5,7 @@
 function isValidAzPhone(phone) {
   if (!phone) return false;
   const cleaned = String(phone).replace(/[\s\-\(\)\.]/g, '');
-  return /^(\+994|0)?(50|51|55|70|71|77|99|10|60)\d{7}$/.test(cleaned);
+  return /^(\+994|0)?(10|12|50|51|55|60|70|77|99)\d{7}$/.test(cleaned);
 }
 
 const CATALOG = {
@@ -1639,12 +1639,22 @@ if (adFormEl) {
       const phoneCheck = validatePhoneNumber('phone', 'adPhonePrefix');
       if (!phoneCheck.valid) {
         alert(phoneCheck.message || 'Düzgün əlaqə nömrəsi daxil edin.');
+        const phoneEl = document.getElementById('phone');
+        if (phoneEl) {
+          phoneEl.focus();
+          phoneEl.style.borderColor = '#ef4444';
+        }
         return;
       }
       finalPhone = phoneCheck.fullPhone;
     } else {
       if (!isValidAzPhone(phone)) {
-        alert('Düzgün əlaqə nömrəsi daxil edin (məs: +994 50 123 45 67).');
+        alert('Düzgün əlaqə nömrəsi daxil edin (məs: (50) 123-45-67).');
+        const phoneEl = document.getElementById('phone');
+        if (phoneEl) {
+          phoneEl.focus();
+          phoneEl.style.borderColor = '#ef4444';
+        }
         return;
       }
       finalPhone = phone;

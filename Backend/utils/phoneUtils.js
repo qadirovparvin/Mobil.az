@@ -8,7 +8,7 @@
  * @returns {string}
  */
 const AZ_MOBILE_PREFIXES = new Set([
-    '10', '50', '51', '55', '60', '70', '77', '99'
+    '10', '12', '50', '51', '55', '60', '70', '77', '99'
 ]);
 
 const normalizePhone = (phone) => {
@@ -36,7 +36,7 @@ const normalizePhone = (phone) => {
 
         const prefix = cleaned.slice(4, 6);
         if (!AZ_MOBILE_PREFIXES.has(prefix)) {
-            const error = new Error('Telefon prefiksi dəstəklənmir (50, 51, 55, 70, 77, 99, 10, 60)');
+            const error = new Error('Telefon prefiksi dəstəklənmir (10, 12, 50, 51, 55, 60, 70, 77, 99)');
             error.status = 400;
             throw error;
         }
