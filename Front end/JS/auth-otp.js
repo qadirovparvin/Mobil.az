@@ -51,48 +51,6 @@ if (typeof window !== 'undefined') {
     }
 }
 
-// ── Referral code capture & display ─────────────────────────
-function getCapturedReferralCode() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        let ref = params.get('ref') || params.get('referral') || localStorage.getItem('referralCode') || sessionStorage.getItem('referralCode');
-        if (!ref && typeof document !== 'undefined') {
-            const match = document.cookie.match(/(?:^|;\s*)referral_code=([^;]+)/);
-            if (match) ref = decodeURIComponent(match[1]);
-        }
-        if (ref) {
-            return ref.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
-        }
-    } catch (_) {}
-    return undefined;
-}
-
-function initReferralCapture() {
-    if (typeof window === 'undefined') return;
-    try {
-        const ref = getCapturedReferralCode();
-        if (ref) {
-            localStorage.setItem('referralCode', ref);
-            sessionStorage.setItem('referralCode', ref);
-            const banner = document.getElementById('referralBanner');
-            const codeDisplay = document.getElementById('refCodeDisplay');
-            if (banner) {
-                banner.style.display = 'flex';
-                if (codeDisplay) codeDisplay.textContent = ref;
-            }
-        }
-    } catch (e) {
-        console.warn('Referral capture warning:', e);
-    }
-}
-if (typeof document !== 'undefined') {
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initReferralCapture);
-    } else {
-        initReferralCapture();
-    }
-}
-
 let SMS_DEV_MODE = true; // TODO: false when SMS paid
 if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'production' || process.env?.SMS_DEV_MODE === 'false')) {
     SMS_DEV_MODE = false;
@@ -1314,6 +1272,21 @@ async function verifySignupEmail() {
 
 /* ── Init on DOM ready ──────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+    // Referral link capture and UI notification
+    try {
+        const refParam = new URLSearchParams(window.location.search).get('ref') || new URLSearchParams(window.location.search).get('referral');
+        if (refParam) {
+            localStorage.setItem('mobilaz_referral_code', refParam.trim().toUpperCase());
+        }
+        const activeRef = localStorage.getItem('mobilaz_referral_code');
+        if (activeRef) {
+            const banner = document.getElementById('referralBanner');
+            const codeSpan = document.getElementById('referralBannerCode');
+            if (banner) banner.style.display = 'flex';
+            if (codeSpan) codeSpan.textContent = activeRef;
+        }
+    } catch (_) {}
+
     // Wire all OTP input groups that exist on current page
     // Setup professional phone masking
     setupPhoneInputMask('loginPhone', 'loginPhonePrefix');
@@ -1481,6 +1454,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function getCapturedReferralCode() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const urlRef = params.get('ref') || params.get('referral');
+            if (urlRef) return urlRef.trim().toUpperCase();
+            const stored = localStorage.getItem('mobilaz_referral_code');
+            if (stored) return stored.trim().toUpperCase();
+        } catch (_) {}
+        return undefined;
+    }
+
     // Phone signup finalize
     const phoneSignupForm = document.getElementById('phoneSignupForm');
     if (phoneSignupForm) {
@@ -1504,14 +1488,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 setLoading(btn, false);
                 return;
             }
+            const refCode = getCapturedReferralCode();
             const body   = {
                 name:     document.getElementById('signupFirstName')?.value.trim(),
                 lastName: document.getElementById('signupLastName')?.value.trim(),
                 phone:    phoneCheck.fullPhone,
-                    email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
-                    password: pwd,
-                    referralCode: getCapturedReferralCode() || undefined
-                };
+                email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
+                password: pwd,
+                ...(refCode ? { referralCode: refCode } : {})
+            };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
@@ -1519,11 +1504,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
-                try {
-                    localStorage.removeItem('referralCode');
-                    sessionStorage.removeItem('referralCode');
-                    document.cookie = 'referral_code=; Max-Age=0; path=/';
-                } catch (_) {}
+                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) {}
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
@@ -1551,18 +1532,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('finalEmailSignupBtn');
             setLoading(btn, true);
             try {
+                const refCode = getCapturedReferralCode();
                 const body = {
                     name:     document.getElementById('signupFirstNameE')?.value.trim(),
                     lastName: document.getElementById('signupLastNameE')?.value.trim(),
                     email:    document.getElementById('signupEmailVerify')?.value.trim(),
-                phone:    (() => {
-                    const el = document.getElementById('signupPhoneOptional');
-                    if (!el || !el.value.trim()) return undefined;
-                    const chk = validatePhoneNumber('signupPhoneOptional', 'signupPhoneOptionalPrefix');
-                    return chk.valid ? chk.fullPhone : undefined;
-                })(),
-                password: pwd,
-                referralCode: getCapturedReferralCode() || undefined
+                    phone:    (() => {
+                        const el = document.getElementById('signupPhoneOptional');
+                        if (!el || !el.value.trim()) return undefined;
+                        const chk = validatePhoneNumber('signupPhoneOptional', 'signupPhoneOptionalPrefix');
+                        return chk.valid ? chk.fullPhone : undefined;
+                    })(),
+                    password: pwd,
+                    ...(refCode ? { referralCode: refCode } : {})
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
@@ -1571,11 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
-                try {
-                    localStorage.removeItem('referralCode');
-                    sessionStorage.removeItem('referralCode');
-                    document.cookie = 'referral_code=; Max-Age=0; path=/';
-                } catch (_) {}
+                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) {}
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);

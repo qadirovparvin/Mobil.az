@@ -419,17 +419,6 @@ app.use('/api/reviews',       require('./routes/reviewRoutes'));
 app.use('/api/questions',     require('./routes/questionRoutes'));
 app.use('/api/referral',      require('./routes/referralRoutes'));
 
-// ── Referral Link Handler ───────────────────────────────────
-app.get('/ref/:code', (req, res) => {
-    const rawCode = req.params.code ? String(req.params.code).trim().toUpperCase() : '';
-    const safeCode = rawCode.replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
-    if (safeCode) {
-        res.cookie('referral_code', safeCode, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: false });
-        return res.redirect(302, `/signup.html?ref=${encodeURIComponent(safeCode)}`);
-    }
-    return res.redirect(302, '/signup.html');
-});
-
 app.get('/api/categories', (req, res) => {
     res.json({
         data: [
@@ -472,6 +461,13 @@ app.get('/', (req, res) => {
             upload:        '/api/upload'
         }
     });
+});
+
+// ── Referral Link Handler ─────────────────────────────────
+app.get('/ref/:code', (req, res) => {
+    const rawCode = String(req.params.code || '').trim();
+    const cleanCode = encodeURIComponent(rawCode.slice(0, 32));
+    res.redirect(302, `/signup.html?ref=${cleanCode}`);
 });
 
 // ── Static Files Serving ─────────────────────────────────

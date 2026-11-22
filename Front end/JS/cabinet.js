@@ -1,5 +1,7 @@
 const resolveCabinetApi = () => window.API_URL || window.API_BASE || (typeof window !== 'undefined' && !['localhost', '127.0.0.1'].includes(window.location.hostname) && window.location.origin ? `${window.location.origin}/api` : 'http://localhost:5000/api');
 let API_BASE = resolveCabinetApi();
+let userReferralBumps = 0;
+let userReferralVips = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof setupPhoneInputMask === 'function') {
@@ -1416,23 +1418,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 maximumFractionDigits: 2
             });
         }
+        userReferralBumps = Number(user.referralBumps || 0);
+        userReferralVips  = Number(user.referralVips || 0);
+
+        const referralBumpsValue = document.getElementById('referralBumpsValue');
+        if (referralBumpsValue) {
+            referralBumpsValue.textContent = userReferralBumps;
+        }
+        const referralVipsValue = document.getElementById('referralVipsValue');
+        if (referralVipsValue) {
+            referralVipsValue.textContent = userReferralVips;
+        }
         if (referralBalanceValue) {
             referralBalanceValue.textContent = Number(user.referralCredits || 0).toLocaleString(getLocale(), {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
-        const bumpBonusCountEl = document.getElementById('bumpBonusCount');
-        if (bumpBonusCountEl) {
-            bumpBonusCountEl.textContent = Number(user.bumpBonus || 0);
-        }
-        window.userBumpBonus = Number(user.bumpBonus || 0);
         userReferralBalance = Number(user.referralCredits || 0);
         if (referralLink) {
-            const hostOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mobilim.az';
+            const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mobilim.az';
             referralLink.value = user.referralCode
-                ? `${hostOrigin}/ref/${user.referralCode}`
-                : `${hostOrigin}/ref/...`;
+                ? `${origin}/ref/${user.referralCode}`
+                : `${origin}/ref/...`;
         }
         if (facebookProfileName) facebookProfileName.textContent = displayName;
 
@@ -1481,12 +1489,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 const referralCountEl = document.getElementById('referralCount');
                 if (referralCountEl) {
-                    referralCountEl.textContent = data.totalReferrals ?? 0;
+                    referralCountEl.textContent = data.totalReferrals !== undefined ? data.totalReferrals : 0;
                 }
-                const bumpBonusCountEl = document.getElementById('bumpBonusCount');
-                if (bumpBonusCountEl && data.bumpBonus !== undefined) {
-                    bumpBonusCountEl.textContent = data.bumpBonus;
-                    window.userBumpBonus = Number(data.bumpBonus);
+                const referralBumpsEl = document.getElementById('referralBumpsValue');
+                if (referralBumpsEl) {
+                    referralBumpsEl.textContent = data.referralBumps !== undefined ? data.referralBumps : 0;
+                }
+                const referralVipsEl = document.getElementById('referralVipsValue');
+                if (referralVipsEl) {
+                    referralVipsEl.textContent = data.referralVips !== undefined ? data.referralVips : 0;
+                }
+
+                userReferralBumps = Number(data.referralBumps || 0);
+                userReferralVips  = Number(data.referralVips || 0);
+
+                if (data.referralCode && referralLink) {
+                    const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mobilim.az';
+                    referralLink.value = `${origin}/ref/${data.referralCode}`;
+                }
+
+                const campaignCounter = document.getElementById('referralCampaignCounter');
+                if (campaignCounter) {
+                    campaignCounter.textContent = `${data.campaign?.current || 0} / 3`;
+                }
+                const campaignBar = document.getElementById('referralCampaignBar');
+                if (campaignBar) {
+                    const pct = Math.min(100, Math.round(((data.campaign?.current || 0) / 3) * 100));
+                    campaignBar.style.width = `${pct}%`;
                 }
             }
         } catch (error) {
@@ -1697,9 +1726,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </a>
                 <div class="my-ad-controls">
-                    <button class="btn-bump-ad" data-id="${escapeHtml(ad._id)}" title="Elanı irəli çək (siyahının əvvəlinə gətir)">
-                        <i class="fas fa-rocket"></i> <span data-translate="mon-bump">İrəli çək</span>${(window.userBumpBonus || 0) > 0 ? ` <span class="bump-bonus-badge">${window.userBumpBonus} pulsuz</span>` : ''}
-                    </button>
+                    ${(userReferralBumps > 0 && (ad.status === 'active' || ad.status === 'approved')) ? `
+                        <button type="button" class="btn-action btn-quick-bump" data-id="${escapeHtml(ad._id)}" title="Elanı 1 'İrəli çək' bonusu ilə ən ön sıraya çək" style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981; border-radius: 8px; padding: 7px 11px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-rocket"></i> <span>İrəli çək (${userReferralBumps})</span>
+                        </button>
+                    ` : ''}
                     <button class="btn-boost" data-id="${escapeHtml(ad._id)}" title="VIP / PRO statusu üçün müraciət et">
                         <i class="fas fa-crown"></i> <span>VIP / PRO Sorğusu</span>
                     </button>
@@ -1808,12 +1839,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = e.target.closest('.delete-action');
             const editBtn = e.target.closest('.edit-action');
             const boostBtn = e.target.closest('.btn-boost');
-            const bumpBtn = e.target.closest('.btn-bump-ad');
+            const quickBumpBtn = e.target.closest('.btn-quick-bump');
 
-            if (bumpBtn) {
-                const adId = bumpBtn.getAttribute('data-id') || bumpBtn.closest('.my-ad-item')?.getAttribute('data-id');
-                if (adId && typeof window.handleBumpAd === 'function') {
-                    window.handleBumpAd(adId);
+            if (quickBumpBtn) {
+                const adId = quickBumpBtn.getAttribute('data-id') || quickBumpBtn.closest('.my-ad-item')?.getAttribute('data-id');
+                if (adId && typeof window.quickBumpAd === 'function') {
+                    window.quickBumpAd(adId);
                 }
                 return;
             }
@@ -2974,61 +3005,9 @@ let currentPromoAdId = null;
 let selectedPkg = 'Urgent';
 
 const prices = {
-    BumpUp: 3.0,
     Urgent: 3.0,
     VIP: 5.0,
     Premium: 10.0
-};
-
-window.handleBumpAd = async function (adId) {
-    const t = window.toast || { show: (m, type) => alert(m) };
-    const currentBumps = Number(window.userBumpBonus || 0);
-
-    if (currentBumps > 0) {
-        if (!confirm(`Bu elanı siyahının ən başına gətirmək (irəli çəkmək) istəyirsiniz?\n1 pulsuz bonusunuz istifadə ediləcək. (Qalan pulsuz bonus: ${currentBumps})`)) {
-            return;
-        }
-        try {
-            const token = getToken();
-            const base = window.API_URL || window.API_BASE || resolveCabinetApi();
-            const idempotencyKey = `bump-${Date.now()}-${adId}`;
-
-            let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
-            const res = await fetch(`${base}/ads/${encodeURIComponent(adId)}/boost`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
-                },
-                body: JSON.stringify({ promotionType: 'BumpUp', idempotencyKey })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Xəta baş verdi');
-
-            t.show(data.message || 'Elanınız uğurla irəli çəkildi! 🚀', 'success');
-
-            if (data.bumpBonus !== undefined) {
-                window.userBumpBonus = Number(data.bumpBonus);
-                const bumpBonusCountEl = document.getElementById('bumpBonusCount');
-                if (bumpBonusCountEl) bumpBonusCountEl.textContent = data.bumpBonus;
-                const storedUser = getStoredUser();
-                if (storedUser) {
-                    storedUser.bumpBonus = data.bumpBonus;
-                    localStorage.setItem('user', JSON.stringify(storedUser));
-                }
-            }
-            if (typeof loadMyAds === 'function') {
-                await loadMyAds();
-            }
-        } catch (err) {
-            t.show(err.message, 'error');
-        }
-    } else {
-        window.openPromotionModal(adId);
-        window.selectPackage('BumpUp');
-    }
 };
 
 window.openPromotionModal = function (adId) {
@@ -3037,6 +3016,142 @@ window.openPromotionModal = function (adId) {
     if (modal) {
         modal.classList.add('active');
         selectPackage('Urgent');
+
+        const bonusSec = document.getElementById('promoBonusSection');
+        const bumpRow = document.getElementById('promoBonusBumpRow');
+        const vipRow = document.getElementById('promoBonusVipRow');
+        const bumpCountEl = document.getElementById('modalBonusBumpCount');
+        const vipCountEl = document.getElementById('modalBonusVipCount');
+
+        const hasBumps = Number(userReferralBumps || 0) > 0;
+        const hasVips = Number(userReferralVips || 0) > 0;
+
+        if (bonusSec) {
+            if (hasBumps || hasVips) {
+                bonusSec.style.display = 'block';
+                if (bumpRow) bumpRow.style.display = hasBumps ? 'flex' : 'none';
+                if (bumpCountEl) bumpCountEl.textContent = userReferralBumps;
+                if (vipRow) vipRow.style.display = hasVips ? 'flex' : 'none';
+                if (vipCountEl) vipCountEl.textContent = userReferralVips;
+            } else {
+                bonusSec.style.display = 'none';
+            }
+        }
+    }
+};
+
+window.quickBumpAd = async function (adId) {
+    if (!adId) return;
+    if (userReferralBumps < 1) {
+        const t = window.toast || { show: (m) => alert(m) };
+        t.show('Balansınızda "İrəli çək" bonusu yoxdur', 'error');
+        return;
+    }
+
+    if (!confirm('Bu elanı 1 ədəd pulsuz "İrəli çək" bonusu ilə ən ön sıraya çəkmək istəyirsiniz?')) {
+        return;
+    }
+
+    const token = typeof getToken === 'function' ? getToken() : (localStorage.getItem('token') || sessionStorage.getItem('token'));
+    if (!token) return;
+
+    try {
+        const base = window.API_URL || window.API_BASE || resolveCabinetApi();
+        let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+        if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+            try { csrfToken = await window.fetchCsrfToken(); } catch (_) {}
+        }
+
+        const res = await fetch(`${base}/ads/${encodeURIComponent(adId)}/use-bonus`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
+            body: JSON.stringify({ bonusType: 'bump' })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Bonus tətbiq edilə bilmədi');
+
+        if (data.referralBumps !== undefined) userReferralBumps = data.referralBumps;
+        else userReferralBumps = Math.max(0, userReferralBumps - 1);
+
+        const bumpsEl = document.getElementById('referralBumpsValue');
+        if (bumpsEl) bumpsEl.textContent = userReferralBumps;
+
+        const t = window.toast || { show: (m) => alert(m) };
+        t.show(data.message || 'Elanınız uğurla irəli çəkildi! 🚀', 'success');
+
+        if (typeof loadMyAds === 'function') await loadMyAds();
+        if (typeof fetchReferralStats === 'function') await fetchReferralStats();
+    } catch (err) {
+        const t = window.toast || { show: (m) => alert(m) };
+        t.show(err.message || 'Xəta baş verdi', 'error');
+    }
+};
+
+window.useReferralBonusOnModal = async function (bonusType) {
+    if (!currentPromoAdId) return;
+
+    const token = typeof getToken === 'function' ? getToken() : (localStorage.getItem('token') || sessionStorage.getItem('token'));
+    if (!token) return;
+
+    const btnId = bonusType === 'vip' ? 'btnModalUseVipBonus' : 'btnModalUseBumpBonus';
+    const btn = document.getElementById(btnId);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gözləyin...';
+    }
+
+    try {
+        const base = window.API_URL || window.API_BASE || resolveCabinetApi();
+        let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+        if (!csrfToken && typeof window.fetchCsrfToken === 'function') {
+            try { csrfToken = await window.fetchCsrfToken(); } catch (_) {}
+        }
+
+        const res = await fetch(`${base}/ads/${encodeURIComponent(currentPromoAdId)}/use-bonus`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+            },
+            body: JSON.stringify({ bonusType })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Bonus tətbiq edilə bilmədi');
+
+        if (data.referralBumps !== undefined) userReferralBumps = data.referralBumps;
+        if (data.referralVips !== undefined) userReferralVips = data.referralVips;
+
+        const bumpsEl = document.getElementById('referralBumpsValue');
+        if (bumpsEl) bumpsEl.textContent = userReferralBumps;
+        const vipsEl = document.getElementById('referralVipsValue');
+        if (vipsEl) vipsEl.textContent = userReferralVips;
+
+        const t = window.toast || { show: (m) => alert(m) };
+        t.show(data.message || 'Bonus uğurla tətbiq edildi!', 'success');
+
+        window.closePromotionModal();
+
+        if (typeof loadMyAds === 'function') await loadMyAds();
+        if (typeof fetchReferralStats === 'function') await fetchReferralStats();
+    } catch (err) {
+        const t = window.toast || { show: (m) => alert(m) };
+        t.show(err.message || 'Xəta baş verdi', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = bonusType === 'vip'
+                ? '<i class="fas fa-crown"></i> 1 Həftəlik VIP Et'
+                : '<i class="fas fa-rocket"></i> İrəli Çək';
+        }
     }
 };
 
@@ -3126,31 +3241,9 @@ window.submitPromotionRequestToAdmin = async function() {
 };
 
 window.updateTotal = function () {
+    let price = prices[selectedPkg] || 0;
     const finalPriceElem = document.getElementById('finalPrice');
-    const payBtn = document.getElementById('btnPayPromo');
-    const bumps = Number(window.userBumpBonus || 0);
-
-    const pkgPriceBumpUp = document.getElementById('pkgPriceBumpUp');
-    if (pkgPriceBumpUp) {
-        pkgPriceBumpUp.innerHTML = bumps > 0
-            ? `<span style="color:#10b981;font-weight:700;">PULSUZ</span> <small>(${bumps} bonus)</small>`
-            : `3.00 <small>AZN</small>`;
-    }
-
-    if (selectedPkg === 'BumpUp' && bumps > 0) {
-        if (finalPriceElem) {
-            finalPriceElem.innerHTML = `<span style="color:#10b981;font-weight:700;">PULSUZ (1 bonus çıxılacaq)</span>`;
-        }
-        if (payBtn) {
-            payBtn.innerHTML = `<i class="fas fa-rocket"></i> <span>Pulsuz İrəli Çək (Qalan: ${bumps})</span>`;
-        }
-    } else {
-        let price = prices[selectedPkg] || 0;
-        if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
-        if (payBtn) {
-            payBtn.innerHTML = `<i class="fas fa-check-circle"></i> <span data-translate="mon-pay-btn">Ödəniş et</span>`;
-        }
-    }
+    if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
 };
 
 window.confirmPromotion = async function () {
@@ -3235,19 +3328,13 @@ window.confirmPromotion = async function () {
         t.show(data.message || `${selectedPkg} uğurla aktivləşdirildi!`, 'success');
         window.closePromotionModal();
 
-        // Update stored user wallet balance & bump bonus
-        if (data.bumpBonus !== undefined) {
-            window.userBumpBonus = Number(data.bumpBonus);
-            const bumpBonusCountEl = document.getElementById('bumpBonusCount');
-            if (bumpBonusCountEl) bumpBonusCountEl.textContent = data.bumpBonus;
-        }
-        if (data.walletBalance !== undefined || data.bumpBonus !== undefined) {
+        // Update stored user wallet balance
+        if (data.walletBalance !== undefined) {
             const rawUser = localStorage.getItem('user') || localStorage.getItem('mobilaz_current_user');
             if (rawUser) {
                 try {
                     const userObj = JSON.parse(rawUser);
-                    if (data.walletBalance !== undefined) userObj.walletBalance = data.walletBalance;
-                    if (data.bumpBonus !== undefined) userObj.bumpBonus = data.bumpBonus;
+                    userObj.walletBalance = data.walletBalance;
                     localStorage.setItem('user', JSON.stringify(userObj));
                     localStorage.setItem('mobilaz_current_user', JSON.stringify(userObj));
                 } catch (e) {

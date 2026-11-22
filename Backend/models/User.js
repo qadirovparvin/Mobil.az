@@ -45,8 +45,10 @@ const userSchema = new mongoose.Schema({
     referralCode:    { type: String, unique: true, sparse: true },
     referredBy:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     referralCredits: { type: Number, default: 0 },
-    bumpBonus:       { type: Number, default: 0, min: 0 },
-    referralAwarded: { type: Boolean, default: false },
+    referralBumps:   { type: Number, default: 0, min: 0 }, // Free "İrəli çək" (BumpUp) boosts earned from referrals
+    referralVips:    { type: Number, default: 0, min: 0 }, // Free 1-week VIP boosts earned from 3-friend milestone campaign
+    referralRewardGranted: { type: Boolean, default: false }, // Prevent duplicate reward granting
+    referralVipCampaignClaimedCount: { type: Number, default: 0, min: 0 }, // Total 3-friend VIP milestones claimed
 
     // ── Security ──────────────────────────────────────────
     tokenVersion:     { type: Number, default: 0 },

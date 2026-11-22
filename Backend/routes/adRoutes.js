@@ -7,7 +7,7 @@ const { validateObjectIdParam, validateAdIdOrNumberParam } = require('../utils/s
 const { upload, processImage, MAX_UPLOAD_FILES } = require('../middlewares/uploadMiddleware');
 const {
     getAds, getAdById, createAd, updateAd,
-    deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds, requestAdPromotion
+    deleteAd, getMyAds, boostAd, toggleFavorite, getFavoriteAds, requestAdPromotion, useAdBonus
 } = require('../controllers/adController');
 
 // Public (optional authentication; rejects invalid/refresh tokens if Bearer auth header is passed)
@@ -32,6 +32,7 @@ router.post('/',          protect, csrfProtection, upload.array('images', MAX_UP
 router.put('/:id',        protect, csrfProtection, validateObjectIdParam('id'), upload.array('images', MAX_UPLOAD_FILES), processImage, updateAd);
 router.delete('/:id',     protect, csrfProtection, validateObjectIdParam('id'), deleteAd);
 router.post('/:id/boost', protect, csrfProtection, validateObjectIdParam('id'), boostAd);
+router.post('/:id/use-bonus', protect, csrfProtection, validateObjectIdParam('id'), useAdBonus);
 router.post('/:id/request-promotion', protect, csrfProtection, validateObjectIdParam('id'), requestAdPromotion);
 router.post('/:id/favorite', protect, csrfProtection, validateObjectIdParam('id'), toggleFavorite);
 

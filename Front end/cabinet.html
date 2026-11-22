@@ -127,21 +127,36 @@
                                 <div class="referral-icon">
                                     <i class="fas fa-gift"></i>
                                 </div>
-                                <h2 data-translate="mon-referral-title">Dostunu gətir, 5 AZN və 3x İrəli Çək qazan!</h2>
-                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN və 3 dəfə elanı irəli çəkmə hədiyyə olunacaq.</p>
+                                <h2 data-translate="mon-referral-title">Dostunu gətir, elanı irəli çək!</h2>
+                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə 3 dəfə elanı irəli çəkmə bonusu qazanın.</p>
                                 
-                                <div class="referral-stats">
+                                <div class="referral-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0;">
                                     <div class="ref-stat">
-                                        <span class="ref-stat-label" data-translate="mon-referral-credit">Referal balansı</span>
-                                        <span class="ref-stat-value"><span id="referralBalanceValue">0.00</span> <small>AZN</small></span>
+                                        <span class="ref-stat-label" data-translate="mon-referral-bumps">İrəli çəkmə bonusu</span>
+                                        <span class="ref-stat-value"><span id="referralBumpsValue">0</span> <small>dəfə</small></span>
                                     </div>
                                     <div class="ref-stat">
-                                        <span class="ref-stat-label" data-translate="mon-referrals-count">Dəvətlər</span>
+                                        <span class="ref-stat-label" data-translate="mon-referral-vips">VIP bonusu</span>
+                                        <span class="ref-stat-value"><span id="referralVipsValue">0</span> <small>ədəd</small></span>
+                                    </div>
+                                    <div class="ref-stat">
+                                        <span class="ref-stat-label" data-translate="mon-referral-friends">Dəvətlər</span>
                                         <span class="ref-stat-value" id="referralCount">0</span>
                                     </div>
-                                    <div class="ref-stat">
-                                        <span class="ref-stat-label" data-translate="mon-bump-bonus">İrəli çəkmə</span>
-                                        <span class="ref-stat-value"><span id="bumpBonusCount">0</span> <small data-translate="mon-times">dəfə</small></span>
+                                </div>
+
+                                <!-- Campaign Milestone Box -->
+                                <div class="referral-campaign-box" style="background: rgba(245, 158, 11, 0.09); border: 1px solid rgba(245, 158, 11, 0.28); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; text-align: left;">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px;">
+                                        <div style="display: flex; align-items: center; gap: 6px; font-weight: 700; color: #f59e0b; font-size: 13px;">
+                                            <i class="fas fa-crown"></i>
+                                            <span data-translate="mon-referral-campaign-title">Xüsusi Kompaniya: 3 dost dəvət et, 2 dəfə 1 həftəlik VIP qazan!</span>
+                                        </div>
+                                        <span id="referralCampaignCounter" style="font-size: 12px; font-weight: 700; color: #f59e0b; white-space: nowrap;">0 / 3</span>
+                                    </div>
+                                    <p data-translate="mon-referral-campaign-sub" style="font-size: 11.5px; color: var(--text-secondary, #94a3b8); margin: 0 0 8px 0; line-height: 1.4;">Hər 3 dost tamamlandıqda hesabınıza 2 ədəd 7 günlük VIP elan bonusu hədiyyə olunur.</p>
+                                    <div style="background: rgba(255,255,255,0.08); border-radius: 999px; height: 7px; overflow: hidden;">
+                                        <div id="referralCampaignBar" style="background: linear-gradient(90deg, #f59e0b, #fbbf24); height: 100%; width: 0%; transition: width 0.4s ease; border-radius: 999px;"></div>
                                     </div>
                                 </div>
 
@@ -162,7 +177,7 @@
                                     <div class="timeline-dot"></div>
                                     <div class="timeline-content">
                                         <h4 data-translate="cab-ref-bonus">Referal Bonusu</h4>
-                                        <p data-translate="cab-ref-bonus-desc">Dostunuz "Həsən Ə." qeydiyyatdan keçdiyi üçün 5 AZN qazandınız.</p>
+                                        <p data-translate="cab-ref-bonus-desc">Dostunuz qeydiyyatdan keçdiyi üçün 3 ədəd "İrəli çək" bonusu qazandınız.</p>
                                         <span class="timeline-time">2 saat əvvəl</span>
                                     </div>
                                 </div>
@@ -564,20 +579,34 @@
                 <button class="btn-close-modal" onclick="closePromotionModal()"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="promo-packages">
-                <!-- BumpUp / İrəli Çək -->
-                <div class="promo-pkg-card" onclick="selectPackage('BumpUp')">
-                    <input type="radio" name="promoPack" id="pkg-bumpup" value="BumpUp">
-                    <label for="pkg-bumpup" class="pkg-label">
-                        <div class="pkg-icon bump" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"><i class="fas fa-rocket"></i></div>
-                        <div class="pkg-info">
-                            <h4 data-translate="mon-bump">İrəli çək</h4>
-                            <p data-translate="mon-bump-desc">Elanı axtarış və ana səhifədə ən başa gətirin</p>
-                        </div>
-                        <div class="pkg-price" id="pkgPriceBumpUp">3.00 <small>AZN</small></div>
-                    </label>
+            <!-- Referral Bonus Usage Banner in Modal -->
+            <div id="promoBonusSection" style="display:none; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">
+                <div style="font-size: 12px; font-weight: 700; color: #10b981; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <i class="fas fa-gift"></i> Qazanılmış Referral Bonusları
                 </div>
+                <!-- Bump Bonus Option -->
+                <div id="promoBonusBumpRow" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                    <div>
+                        <div style="font-weight: 600; font-size: 13px; color: inherit;"><i class="fas fa-rocket" style="color:#10b981; margin-right:4px;"></i> Pulsuz «İrəli çək» Bonusu</div>
+                        <div style="font-size: 11.5px; color: var(--text-secondary, #94a3b8);">Balansınızda: <strong id="modalBonusBumpCount" style="color:#10b981;">0</strong> ədəd var</div>
+                    </div>
+                    <button type="button" class="btn-primary" id="btnModalUseBumpBonus" onclick="useReferralBonusOnModal('bump')" style="background: #10b981; border: none; padding: 7px 12px; font-size: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; color: #fff;">
+                        <i class="fas fa-rocket"></i> İrəli Çək
+                    </button>
+                </div>
+                <!-- VIP Bonus Option -->
+                <div id="promoBonusVipRow" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 8px;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 13px; color: inherit;"><i class="fas fa-crown" style="color:#f59e0b; margin-right:4px;"></i> Pulsuz 1 Həftəlik VIP Bonusu</div>
+                        <div style="font-size: 11.5px; color: var(--text-secondary, #94a3b8);">Balansınızda: <strong id="modalBonusVipCount" style="color:#f59e0b;">0</strong> ədəd var</div>
+                    </div>
+                    <button type="button" class="btn-primary" id="btnModalUseVipBonus" onclick="useReferralBonusOnModal('vip')" style="background: #f59e0b; border: none; padding: 7px 12px; font-size: 12px; border-radius: 8px; cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; color: #000;">
+                        <i class="fas fa-crown"></i> 1 Həftəlik VIP Et
+                    </button>
+                </div>
+            </div>
 
+            <div class="promo-packages">
                 <!-- Urgent / Təcili -->
                 <div class="promo-pkg-card" onclick="selectPackage('Urgent')">
                     <input type="radio" name="promoPack" id="pkg-urgent" value="Urgent">
@@ -877,8 +906,8 @@
     <script src="JS/axios.min.js"></script>
     <script src="JS/api.js"></script>
     <script src="JS/auth.js"></script>
-    <script src="JS/script.js"></script>
-    <script src="JS/cabinet.js?v=20261122_ref1"></script>
+    <script src="JS/script.js?v=20261122_v1"></script>
+    <script src="JS/cabinet.js?v=20261122_v1"></script>
     <script src="JS/favorites.js"></script>
   <script src="JS/components.js"></script>
 </body>
