@@ -2046,6 +2046,7 @@ input:checked+.slider:before {
 }
 
 @media (max-width: 768px) {
+
     html,
     body {
         max-width: 100vw;
@@ -2153,10 +2154,13 @@ input:checked+.slider:before {
 /* Referral Card */
 .referral-card {
     padding: 30px;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 45%, #047857 100%);
+    color: #ffffff;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(6, 78, 59, 0.35);
+    border-radius: 20px;
 }
 
 .referral-card::after {
@@ -2165,101 +2169,248 @@ input:checked+.slider:before {
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
     position: absolute;
-    right: -20px;
-    bottom: -20px;
-    font-size: 120px;
-    opacity: 0.1;
+    right: -25px;
+    bottom: -25px;
+    font-size: 140px;
+    opacity: 0.08;
+    color: #ffffff;
     transform: rotate(-15deg);
+    pointer-events: none;
 }
 
 .referral-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
-    margin-bottom: 20px;
+    font-size: 26px;
+    color: #fde047;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .referral-card h2 {
-    font-size: 22px;
-    margin-bottom: 10px;
+    font-size: 24px;
+    margin-bottom: 8px;
     font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.3px;
 }
 
-.referral-card p {
+.referral-card p.ref-desc {
     font-size: 14px;
-    opacity: 0.9;
-    line-height: 1.5;
-    margin-bottom: 25px;
-    max-width: 80%;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.55;
+    margin-bottom: 22px;
+    max-width: 90%;
 }
 
-.referral-stats {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 25px;
+/* 3-Stat Glass Cards */
+.referral-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.ref-stat {
+.ref-stat-card {
+    background: rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    padding: 14px 12px;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.ref-stat-label {
-    font-size: 12px;
+.ref-stat-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.ref-stat-card .ref-stat-icon {
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
+.ref-stat-card .ref-stat-label {
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.8;
-    margin-bottom: 5px;
+    letter-spacing: 0.6px;
+    color: rgba(255, 255, 255, 0.82);
+    margin-bottom: 4px;
 }
 
-.ref-stat-value {
-    font-size: 24px;
+.ref-stat-card .ref-stat-value {
+    font-size: 22px;
     font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
 }
 
-.ref-stat-value small {
+.ref-stat-card .ref-stat-value small {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    margin-left: 3px;
+}
+
+/* Milestone Campaign Box - High Contrast & Luxurious */
+.referral-campaign-box {
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(250, 204, 21, 0.45);
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    text-align: left;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.campaign-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.campaign-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    color: #ffffff;
     font-size: 14px;
+}
+
+.campaign-title i {
+    color: #facc15;
+    font-size: 16px;
+    filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.5));
+}
+
+.campaign-badge {
+    background: linear-gradient(135deg, #facc15, #eab308);
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.campaign-subtext {
+    font-size: 12.5px;
+    color: rgba(255, 255, 255, 0.95);
+    margin: 0 0 10px 0;
+    line-height: 1.5;
     font-weight: 500;
 }
 
+.campaign-bar-track {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    height: 9px;
+    overflow: hidden;
+    padding: 1px;
+}
+
+.campaign-bar-fill {
+    background: linear-gradient(90deg, #facc15 0%, #fbbf24 100%);
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.6);
+}
+
+/* Copy Link Container */
 .copy-link-box {
     display: flex;
+    align-items: center;
     gap: 10px;
-    background: rgba(0, 0, 0, 0.1);
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(8px);
+    padding: 6px 6px 6px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .copy-link-box input {
     background: transparent;
     border: none;
-    color: white;
+    color: #ffffff;
     flex: 1;
     outline: none;
-    font-size: 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: inherit;
+}
+
+.copy-link-box input::selection {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 .btn-copy {
-    background: white;
-    color: #059669;
+    background: #ffffff;
+    color: #065f46;
     border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 800;
     cursor: pointer;
     font-size: 13px;
-    transition: 0.3s;
+    transition: 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .btn-copy:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background: #f8fafc;
+    color: #047857;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 640px) {
+    .referral-card {
+        padding: 22px 16px;
+    }
+    .referral-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    .ref-stat-card {
+        padding: 10px 6px;
+    }
+    .ref-stat-card .ref-stat-value {
+        font-size: 18px;
+    }
+    .ref-stat-card .ref-stat-label {
+        font-size: 10px;
+    }
+    .campaign-title {
+        font-size: 13px;
+    }
+    .campaign-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
 }
 
 /* Promotion Modal */
@@ -2702,4 +2853,3 @@ input:checked+.slider:before {
 [data-theme="dark"] .billing-rules-list li strong {
     color: #ffffff !important;
 }
-

@@ -44,7 +44,7 @@ if (process.env.SENTRY_DSN) {
                         if (data.password) data.password = '[REDACTED]';
                         if (data.code) data.code = '[REDACTED]';
                         event.request.data = isString ? JSON.stringify(data) : data;
-                    } catch (e) {}
+                    } catch (e) { }
                 }
             }
             return event;
@@ -53,21 +53,21 @@ if (process.env.SENTRY_DSN) {
 }
 
 const { getTranslation } = require('./utils/translations');
-const express       = require('express');
+const express = require('express');
 const mongoose = require('mongoose');
 const logger = require('./utils/logger');
-const http          = require('http');
-const { Server }    = require('socket.io');
-const cors          = require('cors');
-const helmet        = require('helmet');
-const path          = require('path');
-const bcrypt        = require('bcryptjs');
-const rateLimit     = require('express-rate-limit');
+const http = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
+const helmet = require('helmet');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
-const connectDB     = require('./config/db');
+const connectDB = require('./config/db');
 const xssMiddleware = require('./middlewares/xssMiddleware');
-const User          = require('./models/User');
-const Message       = require('./models/Message');
+const User = require('./models/User');
+const Message = require('./models/Message');
 const { isAccountAllowed, getAccountDeniedMessage } = require('./utils/accountSecurity');
 const { validateChatMessagePayload } = require('./utils/chatSecurity');
 const { validateChatParticipants } = require('./utils/chatGuards');
@@ -127,7 +127,7 @@ try {
 }
 
 // ── Connect to Database & Auto-Seed Admin ────────────────
-const ADMIN_EMAIL    = process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com';
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'mobilim.az@gmail.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Gadirov!090803';
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
@@ -149,7 +149,7 @@ async function seedAdmin() {
 
         for (const adm of adminsToEnsure) {
             const cleanEmail = adm.email.trim().toLowerCase();
-            const salt   = await bcrypt.genSalt(10);
+            const salt = await bcrypt.genSalt(10);
             const hashed = await bcrypt.hash(adm.password, salt);
 
             const existing = await User.findOne({ email: cleanEmail });
@@ -167,13 +167,13 @@ async function seedAdmin() {
                 logger.info('✅ Admin account updated & verified: ' + cleanEmail);
             } else {
                 await User.create({
-                    name:     adm.name,
+                    name: adm.name,
                     lastName: adm.lastName,
-                    email:    cleanEmail,
-                    phone:    adm.phone,
+                    email: cleanEmail,
+                    phone: adm.phone,
                     password: hashed,
-                    role:     'admin',
-                    status:   'active',
+                    role: 'admin',
+                    status: 'active',
                     isVerified: true,
                     twoFactorEnabled: false
                 });
@@ -401,23 +401,23 @@ app.use('/Photo', express.static(path.join(__dirname, '../Front end/Photo')));
 app.use('/photo', express.static(path.join(__dirname, '../Front end/Photo')));
 
 // ── API Routes ────────────────────────────────────────────
-app.use('/api/auth',          authLimiter, require('./routes/authRoutes'));
-app.use('/api/user',          require('./routes/userRoutes'));
+app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
+app.use('/api/user', require('./routes/userRoutes'));
 const adRoutes = require('./routes/adRoutes');
-app.use('/api/ads',           adRoutes);
-app.use('/api/listings',      adRoutes);
-app.use('/api/items',         adRoutes);
-app.use('/api/elanlar',       adRoutes);
-app.use('/api/stores',        require('./routes/storeRoutes'));
-app.use('/api/wallet',        require('./routes/walletRoutes'));
-app.use('/api/messages',      require('./routes/messageRoutes'));
+app.use('/api/ads', adRoutes);
+app.use('/api/listings', adRoutes);
+app.use('/api/items', adRoutes);
+app.use('/api/elanlar', adRoutes);
+app.use('/api/stores', require('./routes/storeRoutes'));
+app.use('/api/wallet', require('./routes/walletRoutes'));
+app.use('/api/messages', require('./routes/messageRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
-app.use('/api/reports',       require('./routes/reportRoutes'));
-app.use('/api/upload',        uploadLimiter, require('./routes/uploadRoutes'));
-app.use('/api/admin',         require('./routes/adminRoutes'));
-app.use('/api/reviews',       require('./routes/reviewRoutes'));
-app.use('/api/questions',     require('./routes/questionRoutes'));
-app.use('/api/referral',      require('./routes/referralRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/upload', uploadLimiter, require('./routes/uploadRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/questions', require('./routes/questionRoutes'));
+app.use('/api/referral', require('./routes/referralRoutes'));
 
 app.get('/api/categories', (req, res) => {
     res.json({
@@ -449,16 +449,16 @@ app.get('/api/health-detailed', (req, res) => {
 app.get('/', (req, res) => {
     res.json({
         message: 'Mobilim.az API v1.0',
-        status:  'running',
+        status: 'running',
         endpoints: {
-            auth:          '/api/auth',
-            user:          '/api/user',
-            ads:           '/api/ads',
-            stores:        '/api/stores',
-            wallet:        '/api/wallet',
-            messages:      '/api/messages',
+            auth: '/api/auth',
+            user: '/api/user',
+            ads: '/api/ads',
+            stores: '/api/stores',
+            wallet: '/api/wallet',
+            messages: '/api/messages',
             notifications: '/api/notifications',
-            upload:        '/api/upload'
+            upload: '/api/upload'
         }
     });
 });
@@ -635,7 +635,7 @@ io.on('connection', (socket) => {
                 socket.emit('message_error', { message: chatCheck.message });
                 return;
             }
-            
+
             // 1. Save to Database first
             const newMessage = await Message.create({
                 sender: socket.user.id,
@@ -649,10 +649,10 @@ io.on('connection', (socket) => {
 
             // 2. Broadcast to recipient's room
             io.to(recipient).emit('receive_message', populatedMsg);
-            
+
             // 3. Emit back to sender as well (so it syncs across their own tabs)
             io.to(socket.user.id).emit('receive_message', populatedMsg);
-            
+
         } catch (error) {
             logger.error("Socket error saving message:", error);
         }
@@ -669,7 +669,7 @@ io.on('connection', (socket) => {
                 { _id: { $in: messageIds }, recipient: socket.user.id, isDelivered: false },
                 { $set: { isDelivered: true, deliveredAt: now } }
             );
-            
+
             // Fetch one to find sender, or loop
             const sample = await Message.findById(messageIds[0]);
             if (sample && sample.sender) {
@@ -691,7 +691,7 @@ io.on('connection', (socket) => {
                 { _id: { $in: messageIds }, recipient: socket.user.id, isRead: false },
                 { $set: { isRead: true, readAt: now, isDelivered: true, deliveredAt: now } } // also mark delivered if not already
             );
-            
+
             const sample = await Message.findById(messageIds[0]);
             if (sample && sample.sender) {
                 io.to(sample.sender.toString()).emit('messages_read', { messageIds, readAt: now });
@@ -714,7 +714,7 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         socketMessageRateLimits.delete(socket.id);
         logger.info(`Socket disconnected: ${socket.id}`);
-        
+
         const count = (userSocketCounts.get(userId) || 1) - 1;
         if (count <= 0) {
             userSocketCounts.delete(userId);
@@ -754,7 +754,7 @@ const gracefulShutdown = () => {
         try {
             await mongoose.connection.close();
             logger.info('MongoDB connection closed.');
-            
+
             const { redis } = require('./utils/redisClient');
             if (redis) {
                 await redis.quit();

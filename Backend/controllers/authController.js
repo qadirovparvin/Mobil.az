@@ -1,11 +1,11 @@
 const logger = require('../utils/logger');
-const bcrypt    = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const axios = require('axios');
 const nodemailer = require('nodemailer');
-const User      = require('../models/User');
-const Otp       = require('../models/Otp');
-const Store     = require('../models/Store');
+const User = require('../models/User');
+const Otp = require('../models/Otp');
+const Store = require('../models/Store');
 const Notification = require('../models/Notification');
 const {
     buildAuthResponse,
@@ -246,11 +246,11 @@ const verifyUserSecondFactor = async (user, { otpCode, recoveryCode }) => {
 // ─── Helper: create welcome notification ────────────────────
 const createWelcomeNotification = async (userId) => {
     await Notification.create({
-        user:  userId,
-        type:  'system',
+        user: userId,
+        type: 'system',
         title: 'Mobilim.az-a xoş gəldiniz! 🎉',
-        body:  'Hesabınız uğurla yaradıldı. İlk elanınızı əlavə edin!',
-        link:  '/elan-yerlesdir.html'
+        body: 'Hesabınız uğurla yaradıldı. İlk elanınızı əlavə edin!',
+        link: '/elan-yerlesdir.html'
     });
 };
 
@@ -369,7 +369,7 @@ const register = async (req, res, next) => {
             lastName: lastName || '',
             email: normalizedEmail || undefined,
             password: hashedPassword,
-            phone:    normalizedPhone || undefined,
+            phone: normalizedPhone || undefined,
             referredBy: referrer ? referrer._id : null,
             unverifiedExpiresAt: new Date(Date.now() + EMAIL_VERIFY_TOKEN_TTL_MS),
             emailVerificationToken: hashToken(verifyToken),
@@ -896,15 +896,15 @@ const verifyOtp = async (req, res, next) => {
         const userToVerify = await User.findOne({
             $or: [{ email: cleanIdentifier }, { phone: cleanIdentifier }]
         });
-        
+
         if (userToVerify && !userToVerify.isVerified) {
             userToVerify.isVerified = true;
             userToVerify.unverifiedExpiresAt = null;
-            
+
             if (userToVerify.referredBy) {
                 await grantReferralReward(userToVerify._id).catch(err => logger.error('Referral grant error on verify-otp:', err));
             }
-            
+
             await userToVerify.save();
         }
 
@@ -1016,7 +1016,7 @@ const forgotPassword = async (req, res, next) => {
 
         // Generate secure reset token. Store only its SHA-256 hash in the database.
         const resetToken = crypto.randomBytes(32).toString('hex');
-        user.resetToken       = hashToken(resetToken);
+        user.resetToken = hashToken(resetToken);
         user.resetTokenExpiry = new Date(Date.now() + RESET_TOKEN_TTL_MS);
         user.resetRequestedAt = new Date();
         await user.save();
@@ -1088,16 +1088,16 @@ const resetPassword = async (req, res, next) => {
         }
 
         const salt = await bcrypt.genSalt(12);
-        user.password         = await bcrypt.hash(newPassword, salt);
-        user.resetToken       = null;
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetToken = null;
         user.resetTokenExpiry = null;
         user.resetRequestedAt = null;
-        user.loginAttempts    = 0;
-        user.lockUntil        = null;
-        user.lastFailedLogin  = null;
-        user.refreshTokens    = [];
-        user.tokenVersion     = (user.tokenVersion || 0) + 1;
-        user.sessionVersion   = (user.sessionVersion || 0) + 1;
+        user.loginAttempts = 0;
+        user.lockUntil = null;
+        user.lastFailedLogin = null;
+        user.refreshTokens = [];
+        user.tokenVersion = (user.tokenVersion || 0) + 1;
+        user.sessionVersion = (user.sessionVersion || 0) + 1;
         await user.save();
 
         res.json({ message: 'Şifrə uğurla dəyişdirildi' });
@@ -1254,11 +1254,11 @@ const getMockOtp = async (req, res, next) => {
         if (process.env.NODE_ENV === 'production') {
             return res.status(403).json({ message: 'Bu endpoint yalnız development mühiti üçündür' });
         }
-        
+
         const { identifier } = req.params;
         const cleanId = String(identifier || '').trim().toLowerCase();
         const otp = await Otp.findOne({ identifier: cleanId }).sort({ createdAt: -1 });
-        
+
         if (!otp) {
             return res.status(404).json({ message: 'Bu identifikator üçün aktiv OTP tapılmadı' });
         }
