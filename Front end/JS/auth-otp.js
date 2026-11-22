@@ -51,6 +51,48 @@ if (typeof window !== 'undefined') {
     }
 }
 
+// ── Referral code capture & display ─────────────────────────
+function getCapturedReferralCode() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        let ref = params.get('ref') || params.get('referral') || localStorage.getItem('referralCode') || sessionStorage.getItem('referralCode');
+        if (!ref && typeof document !== 'undefined') {
+            const match = document.cookie.match(/(?:^|;\s*)referral_code=([^;]+)/);
+            if (match) ref = decodeURIComponent(match[1]);
+        }
+        if (ref) {
+            return ref.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+        }
+    } catch (_) {}
+    return undefined;
+}
+
+function initReferralCapture() {
+    if (typeof window === 'undefined') return;
+    try {
+        const ref = getCapturedReferralCode();
+        if (ref) {
+            localStorage.setItem('referralCode', ref);
+            sessionStorage.setItem('referralCode', ref);
+            const banner = document.getElementById('referralBanner');
+            const codeDisplay = document.getElementById('refCodeDisplay');
+            if (banner) {
+                banner.style.display = 'flex';
+                if (codeDisplay) codeDisplay.textContent = ref;
+            }
+        }
+    } catch (e) {
+        console.warn('Referral capture warning:', e);
+    }
+}
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initReferralCapture);
+    } else {
+        initReferralCapture();
+    }
+}
+
 let SMS_DEV_MODE = true; // TODO: false when SMS paid
 if (typeof process !== 'undefined' && (process.env?.NODE_ENV === 'production' || process.env?.SMS_DEV_MODE === 'false')) {
     SMS_DEV_MODE = false;
@@ -1467,7 +1509,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastName: document.getElementById('signupLastName')?.value.trim(),
                 phone:    phoneCheck.fullPhone,
                     email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
-                    password: pwd
+                    password: pwd,
+                    referralCode: getCapturedReferralCode() || undefined
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
@@ -1476,6 +1519,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
+                try {
+                    localStorage.removeItem('referralCode');
+                    sessionStorage.removeItem('referralCode');
+                    document.cookie = 'referral_code=; Max-Age=0; path=/';
+                } catch (_) {}
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
@@ -1513,7 +1561,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const chk = validatePhoneNumber('signupPhoneOptional', 'signupPhoneOptionalPrefix');
                     return chk.valid ? chk.fullPhone : undefined;
                 })(),
-                password: pwd
+                password: pwd,
+                referralCode: getCapturedReferralCode() || undefined
                 };
                 const res  = await fetch(`${window.API_URL}/auth/register`, { method:'POST', credentials: 'include', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
                 const data = await res.json();
@@ -1522,6 +1571,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
+                try {
+                    localStorage.removeItem('referralCode');
+                    sessionStorage.removeItem('referralCode');
+                    document.cookie = 'referral_code=; Max-Age=0; path=/';
+                } catch (_) {}
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);

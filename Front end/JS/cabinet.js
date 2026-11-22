@@ -1422,11 +1422,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 maximumFractionDigits: 2
             });
         }
+        const bumpBonusCountEl = document.getElementById('bumpBonusCount');
+        if (bumpBonusCountEl) {
+            bumpBonusCountEl.textContent = Number(user.bumpBonus || 0);
+        }
+        window.userBumpBonus = Number(user.bumpBonus || 0);
         userReferralBalance = Number(user.referralCredits || 0);
         if (referralLink) {
+            const hostOrigin = (window.location && window.location.origin) ? window.location.origin : 'https://mobilim.az';
             referralLink.value = user.referralCode
-                ? `https://mobilim.az/ref/${user.referralCode}`
-                : 'https://mobilim.az/ref/...';
+                ? `${hostOrigin}/ref/${user.referralCode}`
+                : `${hostOrigin}/ref/...`;
         }
         if (facebookProfileName) facebookProfileName.textContent = displayName;
 
@@ -1475,7 +1481,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
                 const referralCountEl = document.getElementById('referralCount');
                 if (referralCountEl) {
-                    referralCountEl.textContent = data.totalReferrals;
+                    referralCountEl.textContent = data.totalReferrals ?? 0;
+                }
+                const bumpBonusCountEl = document.getElementById('bumpBonusCount');
+                if (bumpBonusCountEl && data.bumpBonus !== undefined) {
+                    bumpBonusCountEl.textContent = data.bumpBonus;
+                    window.userBumpBonus = Number(data.bumpBonus);
                 }
             }
         } catch (error) {
@@ -1686,6 +1697,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </a>
                 <div class="my-ad-controls">
+                    <button class="btn-bump-ad" data-id="${escapeHtml(ad._id)}" title="Elanı irəli çək (siyahının əvvəlinə gətir)">
+                        <i class="fas fa-rocket"></i> <span data-translate="mon-bump">İrəli çək</span>${(window.userBumpBonus || 0) > 0 ? ` <span class="bump-bonus-badge">${window.userBumpBonus} pulsuz</span>` : ''}
+                    </button>
                     <button class="btn-boost" data-id="${escapeHtml(ad._id)}" title="VIP / PRO statusu üçün müraciət et">
                         <i class="fas fa-crown"></i> <span>VIP / PRO Sorğusu</span>
                     </button>
@@ -1794,6 +1808,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = e.target.closest('.delete-action');
             const editBtn = e.target.closest('.edit-action');
             const boostBtn = e.target.closest('.btn-boost');
+            const bumpBtn = e.target.closest('.btn-bump-ad');
+
+            if (bumpBtn) {
+                const adId = bumpBtn.getAttribute('data-id') || bumpBtn.closest('.my-ad-item')?.getAttribute('data-id');
+                if (adId && typeof window.handleBumpAd === 'function') {
+                    window.handleBumpAd(adId);
+                }
+                return;
+            }
 
             if (boostBtn) {
                 const adId = boostBtn.getAttribute('data-id') || boostBtn.closest('.my-ad-item')?.getAttribute('data-id');
@@ -2951,9 +2974,61 @@ let currentPromoAdId = null;
 let selectedPkg = 'Urgent';
 
 const prices = {
+    BumpUp: 3.0,
     Urgent: 3.0,
     VIP: 5.0,
     Premium: 10.0
+};
+
+window.handleBumpAd = async function (adId) {
+    const t = window.toast || { show: (m, type) => alert(m) };
+    const currentBumps = Number(window.userBumpBonus || 0);
+
+    if (currentBumps > 0) {
+        if (!confirm(`Bu elanı siyahının ən başına gətirmək (irəli çəkmək) istəyirsiniz?\n1 pulsuz bonusunuz istifadə ediləcək. (Qalan pulsuz bonus: ${currentBumps})`)) {
+            return;
+        }
+        try {
+            const token = getToken();
+            const base = window.API_URL || window.API_BASE || resolveCabinetApi();
+            const idempotencyKey = `bump-${Date.now()}-${adId}`;
+
+            let csrfToken = window.CSRF_TOKEN || localStorage.getItem('csrfToken') || sessionStorage.getItem('csrfToken') || '';
+            const res = await fetch(`${base}/ads/${encodeURIComponent(adId)}/boost`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...(csrfToken ? { 'X-CSRF-Token': csrfToken } : {})
+                },
+                body: JSON.stringify({ promotionType: 'BumpUp', idempotencyKey })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Xəta baş verdi');
+
+            t.show(data.message || 'Elanınız uğurla irəli çəkildi! 🚀', 'success');
+
+            if (data.bumpBonus !== undefined) {
+                window.userBumpBonus = Number(data.bumpBonus);
+                const bumpBonusCountEl = document.getElementById('bumpBonusCount');
+                if (bumpBonusCountEl) bumpBonusCountEl.textContent = data.bumpBonus;
+                const storedUser = getStoredUser();
+                if (storedUser) {
+                    storedUser.bumpBonus = data.bumpBonus;
+                    localStorage.setItem('user', JSON.stringify(storedUser));
+                }
+            }
+            if (typeof loadMyAds === 'function') {
+                await loadMyAds();
+            }
+        } catch (err) {
+            t.show(err.message, 'error');
+        }
+    } else {
+        window.openPromotionModal(adId);
+        window.selectPackage('BumpUp');
+    }
 };
 
 window.openPromotionModal = function (adId) {
@@ -3051,9 +3126,31 @@ window.submitPromotionRequestToAdmin = async function() {
 };
 
 window.updateTotal = function () {
-    let price = prices[selectedPkg] || 0;
     const finalPriceElem = document.getElementById('finalPrice');
-    if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
+    const payBtn = document.getElementById('btnPayPromo');
+    const bumps = Number(window.userBumpBonus || 0);
+
+    const pkgPriceBumpUp = document.getElementById('pkgPriceBumpUp');
+    if (pkgPriceBumpUp) {
+        pkgPriceBumpUp.innerHTML = bumps > 0
+            ? `<span style="color:#10b981;font-weight:700;">PULSUZ</span> <small>(${bumps} bonus)</small>`
+            : `3.00 <small>AZN</small>`;
+    }
+
+    if (selectedPkg === 'BumpUp' && bumps > 0) {
+        if (finalPriceElem) {
+            finalPriceElem.innerHTML = `<span style="color:#10b981;font-weight:700;">PULSUZ (1 bonus çıxılacaq)</span>`;
+        }
+        if (payBtn) {
+            payBtn.innerHTML = `<i class="fas fa-rocket"></i> <span>Pulsuz İrəli Çək (Qalan: ${bumps})</span>`;
+        }
+    } else {
+        let price = prices[selectedPkg] || 0;
+        if (finalPriceElem) finalPriceElem.innerText = price.toFixed(2) + ' AZN';
+        if (payBtn) {
+            payBtn.innerHTML = `<i class="fas fa-check-circle"></i> <span data-translate="mon-pay-btn">Ödəniş et</span>`;
+        }
+    }
 };
 
 window.confirmPromotion = async function () {
@@ -3138,13 +3235,19 @@ window.confirmPromotion = async function () {
         t.show(data.message || `${selectedPkg} uğurla aktivləşdirildi!`, 'success');
         window.closePromotionModal();
 
-        // Update stored user wallet balance
-        if (data.walletBalance !== undefined) {
+        // Update stored user wallet balance & bump bonus
+        if (data.bumpBonus !== undefined) {
+            window.userBumpBonus = Number(data.bumpBonus);
+            const bumpBonusCountEl = document.getElementById('bumpBonusCount');
+            if (bumpBonusCountEl) bumpBonusCountEl.textContent = data.bumpBonus;
+        }
+        if (data.walletBalance !== undefined || data.bumpBonus !== undefined) {
             const rawUser = localStorage.getItem('user') || localStorage.getItem('mobilaz_current_user');
             if (rawUser) {
                 try {
                     const userObj = JSON.parse(rawUser);
-                    userObj.walletBalance = data.walletBalance;
+                    if (data.walletBalance !== undefined) userObj.walletBalance = data.walletBalance;
+                    if (data.bumpBonus !== undefined) userObj.bumpBonus = data.bumpBonus;
                     localStorage.setItem('user', JSON.stringify(userObj));
                     localStorage.setItem('mobilaz_current_user', JSON.stringify(userObj));
                 } catch (e) {

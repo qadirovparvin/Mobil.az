@@ -127,8 +127,8 @@
                                 <div class="referral-icon">
                                     <i class="fas fa-gift"></i>
                                 </div>
-                                <h2 data-translate="mon-referral-title">Dostunu gətir, 5 AZN qazan!</h2>
-                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN hədiyyə olunacaq.</p>
+                                <h2 data-translate="mon-referral-title">Dostunu gətir, 5 AZN və 3x İrəli Çək qazan!</h2>
+                                <p data-translate="mon-referral-desc">Hər dəvət etdiyiniz dostunuz qeydiyyatdan keçdikdə balansınıza 5 AZN və 3 dəfə elanı irəli çəkmə hədiyyə olunacaq.</p>
                                 
                                 <div class="referral-stats">
                                     <div class="ref-stat">
@@ -136,8 +136,12 @@
                                         <span class="ref-stat-value"><span id="referralBalanceValue">0.00</span> <small>AZN</small></span>
                                     </div>
                                     <div class="ref-stat">
-                                        <span class="ref-stat-label">Dəvətlər</span>
+                                        <span class="ref-stat-label" data-translate="mon-referrals-count">Dəvətlər</span>
                                         <span class="ref-stat-value" id="referralCount">0</span>
+                                    </div>
+                                    <div class="ref-stat">
+                                        <span class="ref-stat-label" data-translate="mon-bump-bonus">İrəli çəkmə</span>
+                                        <span class="ref-stat-value"><span id="bumpBonusCount">0</span> <small data-translate="mon-times">dəfə</small></span>
                                     </div>
                                 </div>
 
@@ -561,6 +565,19 @@
             </div>
             
             <div class="promo-packages">
+                <!-- BumpUp / İrəli Çək -->
+                <div class="promo-pkg-card" onclick="selectPackage('BumpUp')">
+                    <input type="radio" name="promoPack" id="pkg-bumpup" value="BumpUp">
+                    <label for="pkg-bumpup" class="pkg-label">
+                        <div class="pkg-icon bump" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"><i class="fas fa-rocket"></i></div>
+                        <div class="pkg-info">
+                            <h4 data-translate="mon-bump">İrəli çək</h4>
+                            <p data-translate="mon-bump-desc">Elanı axtarış və ana səhifədə ən başa gətirin</p>
+                        </div>
+                        <div class="pkg-price" id="pkgPriceBumpUp">3.00 <small>AZN</small></div>
+                    </label>
+                </div>
+
                 <!-- Urgent / Təcili -->
                 <div class="promo-pkg-card" onclick="selectPackage('Urgent')">
                     <input type="radio" name="promoPack" id="pkg-urgent" value="Urgent">
@@ -861,7 +878,7 @@
     <script src="JS/api.js"></script>
     <script src="JS/auth.js"></script>
     <script src="JS/script.js"></script>
-    <script src="JS/cabinet.js?v=20261118_v3"></script>
+    <script src="JS/cabinet.js?v=20261122_ref1"></script>
     <script src="JS/favorites.js"></script>
   <script src="JS/components.js"></script>
 </body>

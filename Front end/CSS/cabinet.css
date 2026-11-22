@@ -670,6 +670,38 @@
     align-items: flex-end;
 }
 
+.btn-bump-ad {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.btn-bump-ad:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+}
+
+.bump-bonus-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
 .btn-boost {
     background: linear-gradient(135deg, #f59e0b, #d97706);
     color: white;
