@@ -9,7 +9,7 @@
   <meta name="description" content="Mobilim.az — Elan detalları">
   <link rel="stylesheet" href="CSS/general.css?v=20261117_v6">
   <link rel="stylesheet" href="CSS/style.css?v=20261117_v6">
-  <link rel="stylesheet" href="CSS/elan-detail.css?v=20261117_v9">
+  <link rel="stylesheet" href="CSS/elan-detail.css?v=20261123_v1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
@@ -1250,23 +1250,8 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // ── Image Gallery (only if thumbs exist — ad-details.js will handle the real gallery) ──
+    // ── Image Gallery & Action Buttons ──
     window.addEventListener('DOMContentLoaded', () => {
-      // Favorite Button
-      const favBtn = document.getElementById('galleryFavBtn');
-      if (favBtn) {
-        let isFaved = false;
-        favBtn.addEventListener('click', () => {
-          isFaved = !isFaved;
-          const icon = favBtn.querySelector('i');
-          if (icon) icon.className = isFaved ? 'fas fa-heart' : 'far fa-heart';
-          favBtn.classList.toggle('active', isFaved);
-          favBtn.style.transform = 'scale(1.3)';
-          setTimeout(() => favBtn.style.transform = '', 200);
-          showToast(isFaved ? 'Seçilmişlərə əlavə edildi!' : 'Seçilmişlərdən çıxarıldı!');
-        });
-      }
-
       // ── Share Button ───────────────────────────────
       const shareBtn = document.getElementById('shareBtn');
       if (shareBtn) {
@@ -1335,9 +1320,9 @@
   <script src="JS/axios.min.js"></script>
   <script src="JS/api.js?v=20261117_v11"></script>
   <script src="JS/auth.js?v=20261117_v11"></script>
-  <script src="JS/script.js?v=20261117_v11"></script>
+  <script src="JS/script.js?v=20261123_v1"></script>
   <script src="JS/components.js?v=20261117_v11"></script>
-  <script src="JS/favorites.js?v=20261117_v11"></script>
+  <script src="JS/favorites.js?v=20261123_v1"></script>
   <script src="JS/listing-details.js?v=20261117_v11"></script>
 </body>
 

@@ -131,11 +131,13 @@
 
 .gallery-fav-btn i {
   font-size: 18px;
-  color: #e03c4b;
+  color: #64748b;
   transition: all 0.2s;
 }
 
+.gallery-fav-btn:hover i,
 .gallery-fav-btn.active i {
+  color: #e03c4b;
   font-weight: 900;
 }
 

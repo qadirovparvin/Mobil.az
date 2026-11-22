@@ -117,8 +117,15 @@ document.addEventListener("DOMContentLoaded", () => {
             newBtn.addEventListener('click', async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
                 
                 if (!getToken()) {
+                    newBtn.classList.remove('favorited');
+                    const updatedIcon = newBtn.querySelector('i');
+                    if (updatedIcon) {
+                        updatedIcon.className = 'far fa-heart';
+                        updatedIcon.style.color = '';
+                    }
                     if(window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
                     else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
                     return;
@@ -180,8 +187,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         newDetailFavBtn.addEventListener('click', async (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
             
             if (!getToken()) {
+                newDetailFavBtn.classList.remove('active');
+                const newIcon = newDetailFavBtn.querySelector('i');
+                if (newIcon) {
+                    newIcon.className = 'far fa-heart';
+                    newIcon.style.color = '';
+                }
                 if(window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
                 else alert('Seçilmişlərə əlavə etmək üçün daxil olun');
                 return;
@@ -449,6 +464,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Expose init function globally so dynamically loaded ads can re-bind
     window.initializeFavoriteButtons = initFavoriteButtons;
+    window.syncFavoritesUI = initFavoriteButtons;
+    window.initFavorites = initFavoriteButtons;
+    window.initDetailPageFavorite = initDetailPageFavorite;
 
     // Initial load: fetch favorites, then init buttons and render page
     fetchUserFavorites().then(favs => {
