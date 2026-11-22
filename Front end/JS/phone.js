@@ -246,7 +246,9 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const newHtml = nextAds.map(createCardMarkup).join('');
                 container.insertAdjacentHTML('beforeend', newHtml);
 
-                if (typeof window.syncFavoritesUI === 'function') {
+                if (typeof window.initializeFavoriteButtons === 'function') {
+                    window.initializeFavoriteButtons();
+                } else if (typeof window.syncFavoritesUI === 'function') {
                     window.syncFavoritesUI();
                 } else if (typeof window.initFavorites === 'function') {
                     window.initFavorites();
@@ -345,7 +347,9 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
 
         // Sync favorite buttons
-        if (typeof window.syncFavoritesUI === 'function') {
+        if (typeof window.initializeFavoriteButtons === 'function') {
+            window.initializeFavoriteButtons();
+        } else if (typeof window.syncFavoritesUI === 'function') {
             window.syncFavoritesUI();
         } else if (typeof window.initFavorites === 'function') {
             window.initFavorites();
@@ -359,7 +363,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.addEventListener('mobilaz:languagechange', () => {
         if (Array.isArray(ads) && ads.length > 0 && container) {
             container.innerHTML = ads.map(createCardMarkup).join('');
-            if (typeof window.syncFavoritesUI === 'function') {
+            if (typeof window.initializeFavoriteButtons === 'function') {
+                window.initializeFavoriteButtons();
+            } else if (typeof window.syncFavoritesUI === 'function') {
                 window.syncFavoritesUI();
             }
         }

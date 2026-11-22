@@ -2890,8 +2890,23 @@ document.addEventListener("DOMContentLoaded", function () {
         const favBtn = e.target.closest(".favorite-btn");
         if (!favBtn) return;
 
+        // If favorites.js is managing favorites, let favorites.js handle it exclusively
+        if (typeof window.initializeFavoriteButtons === 'function') return;
+
         e.preventDefault();
         e.stopPropagation();
+
+        const token = typeof window.getAuthToken === 'function' ? window.getAuthToken() : (sessionStorage.getItem('token') || localStorage.getItem('token'));
+        if (!token) {
+            favBtn.classList.remove("favorited");
+            const icon = favBtn.querySelector("i");
+            if (icon) {
+                icon.classList.remove("fas");
+                icon.classList.add("far");
+            }
+            if (window.toast) window.toast.show('Seçilmişlərə əlavə etmək üçün daxil olun', 'error');
+            return;
+        }
 
         const icon = favBtn.querySelector("i");
         if (!icon) return;
