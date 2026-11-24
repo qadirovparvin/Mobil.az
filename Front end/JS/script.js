@@ -2685,6 +2685,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    const filterCollapse = document.getElementById("filterCollapseBtn") || document.querySelector(".btn-collapse");
+    if (filterCollapse && filterBody) {
+        filterCollapse.addEventListener("click", function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            filterBody.classList.remove("active");
+            filterBody.classList.remove("open");
+        });
+    }
+
     // ─── NEW AD BUTTON ────────────────────────────────────────────────────────
     const newAdBtn = document.getElementById("newAdBtn");
     if (newAdBtn) {
