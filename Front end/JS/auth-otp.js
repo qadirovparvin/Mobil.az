@@ -1,27 +1,5 @@
 "use strict";
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('click', (e) => {
-        const btn = e.target.closest('[id^="toggle"]');
-        if (!btn) return;
-        e.preventDefault();
-        const targetId = btn.dataset.target || btn.id.replace('toggle', '').toLowerCase();
-        const input = document.getElementById(targetId) || document.getElementById('loginPassword') || document.querySelector('input[type="password"], input[type="text"]');
-        if (input) {
-            input.type = input.type === 'password' ? 'text' : 'password';
-            if (btn.classList.contains('fa-eye')) {
-                btn.classList.remove('fa-eye');
-                btn.classList.add('fa-eye-slash');
-            } else if (btn.classList.contains('fa-eye-slash')) {
-                btn.classList.remove('fa-eye-slash');
-                btn.classList.add('fa-eye');
-            }
-        }
-    });
-});
-
-
-
 /* ============================================================
    auth-otp.js  –  Shared helpers for login & signup OTP flows
    ============================================================ */
@@ -348,20 +326,22 @@ function setLoading(btn, on) {
 }
 
 /* ── Password visibility toggle ────────────────────────────── */
-window.togglePwd = function togglePwd(inputId, iconId) {
-    const inp = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if (!inp) return;
-    const now = Date.now();
-    if (inp._lastToggle && (now - inp._lastToggle < 250)) return;
-    inp._lastToggle = now;
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        if (icon) { icon.classList.replace('fa-eye', 'fa-eye-slash'); }
-    } else {
-        inp.type = 'password';
-        if (icon) { icon.classList.replace('fa-eye-slash', 'fa-eye'); }
-    }
+if (typeof window.togglePwd !== 'function') {
+    window.togglePwd = function togglePwd(inputId, iconId) {
+        const inp = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (!inp) return;
+        const now = Date.now();
+        if (inp._lastToggle && (now - inp._lastToggle < 250)) return;
+        inp._lastToggle = now;
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            if (icon) { icon.classList.replace('fa-eye', 'fa-eye-slash'); }
+        } else {
+            inp.type = 'password';
+            if (icon) { icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
+    };
 }
 
 /* ── Password strength ──────────────────────────────────────── */
@@ -1285,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (banner) banner.style.display = 'flex';
             if (codeSpan) codeSpan.textContent = activeRef;
         }
-    } catch (_) {}
+    } catch (_) { }
 
     // Wire all OTP input groups that exist on current page
     // Setup professional phone masking
@@ -1461,7 +1441,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (urlRef) return urlRef.trim().toUpperCase();
             const stored = localStorage.getItem('mobilaz_referral_code');
             if (stored) return stored.trim().toUpperCase();
-        } catch (_) {}
+        } catch (_) { }
         return undefined;
     }
 
@@ -1483,20 +1463,20 @@ document.addEventListener('DOMContentLoaded', () => {
             setLoading(btn, true);
             try {
                 const phoneCheck = validatePhoneNumber('signupPhone', 'signupPhonePrefix');
-            if (!phoneCheck.valid) {
-                showToast(phoneCheck.message, 'error');
-                setLoading(btn, false);
-                return;
-            }
-            const refCode = getCapturedReferralCode();
-            const body   = {
-                name:     document.getElementById('signupFirstName')?.value.trim(),
-                lastName: document.getElementById('signupLastName')?.value.trim(),
-                phone:    phoneCheck.fullPhone,
-                email:    document.getElementById('signupEmailOptional')?.value.trim() || undefined,
-                password: pwd,
-                ...(refCode ? { referralCode: refCode } : {})
-            };
+                if (!phoneCheck.valid) {
+                    showToast(phoneCheck.message, 'error');
+                    setLoading(btn, false);
+                    return;
+                }
+                const refCode = getCapturedReferralCode();
+                const body = {
+                    name: document.getElementById('signupFirstName')?.value.trim(),
+                    lastName: document.getElementById('signupLastName')?.value.trim(),
+                    phone: phoneCheck.fullPhone,
+                    email: document.getElementById('signupEmailOptional')?.value.trim() || undefined,
+                    password: pwd,
+                    ...(refCode ? { referralCode: refCode } : {})
+                };
                 const res = await fetch(`${window.API_URL}/auth/register`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
                 const data = await res.json();
                 if (!res.ok) {
@@ -1504,7 +1484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
-                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) {}
+                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) { }
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);
@@ -1536,8 +1516,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const body = {
                     name: document.getElementById('signupFirstNameE')?.value.trim(),
                     lastName: document.getElementById('signupLastNameE')?.value.trim(),
-                    email:    document.getElementById('signupEmailVerify')?.value.trim(),
-                    phone:    (() => {
+                    email: document.getElementById('signupEmailVerify')?.value.trim(),
+                    phone: (() => {
                         const el = document.getElementById('signupPhoneOptional');
                         if (!el || !el.value.trim()) return undefined;
                         const chk = validatePhoneNumber('signupPhoneOptional', 'signupPhoneOptionalPrefix');
@@ -1553,7 +1533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(errorText, 'error');
                     return;
                 }
-                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) {}
+                try { localStorage.removeItem('mobilaz_referral_code'); } catch (_) { }
                 persistSession(data);
                 showToast('Qeydiyyat tamamlandı!', 'success');
                 setTimeout(() => window.location.href = 'cabinet.html', 1200);

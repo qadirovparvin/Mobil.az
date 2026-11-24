@@ -463,17 +463,34 @@
 
 .input-group .toggle-password {
     position: absolute;
-    right: 14px;
-    bottom: 14px;
-    color: #999;
+    right: 6px;
+    bottom: 5px;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
     cursor: pointer;
-    font-size: 0.95rem;
-    transition: color 0.2s;
-    z-index: 2;
+    font-size: 1.05rem;
+    transition: color 0.2s, transform 0.15s ease;
+    z-index: 10;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 .input-group .toggle-password:hover {
     color: #7c3aed;
+}
+
+.input-group .toggle-password:active {
+    transform: scale(0.9);
+}
+
+.input-group input[type="password"],
+.input-group input[type="text"] {
+    padding-right: 46px;
 }
 
 /* Phone prefix select combo */
