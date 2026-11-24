@@ -175,10 +175,47 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!container) return;
         container.style.display = 'grid';
         const lang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
+
+        if (translateKey === 'vip-empty') {
+            const vipTitles = {
+                AZ: 'Hazırda VIP elan yoxdur.',
+                RUS: 'В настоящее время нет VIP-объявлений',
+                RU: 'В настоящее время нет VIP-объявлений',
+                ENG: 'No VIP ads currently.'
+            };
+            const vipDescs = {
+                AZ: 'Elanınızı VIP edərək ən öndə nümayiş etdirin və alıcıların diqqətini dərhal cəlb edin!',
+                RUS: 'Сделайте объявление VIP, чтобы показать его первым и мгновенно привлечь покупателей!',
+                RU: 'Сделайте объявление VIP, чтобы показать его первым и мгновенно привлечь покупателей!',
+                ENG: 'Promote your ad to VIP to display it at the top and instantly attract buyers!'
+            };
+            const vipBtnLabels = {
+                AZ: 'Elanını VIP et',
+                RUS: 'Сделать VIP',
+                RU: 'Сделать VIP',
+                ENG: 'Make ad VIP'
+            };
+            const title = vipTitles[lang] || (lang.includes('RU') ? vipTitles.RUS : (lang.includes('EN') ? vipTitles.ENG : vipTitles.AZ));
+            const desc = vipDescs[lang] || (lang.includes('RU') ? vipDescs.RUS : (lang.includes('EN') ? vipDescs.ENG : vipDescs.AZ));
+            const btnLabel = vipBtnLabels[lang] || (lang.includes('RU') ? vipBtnLabels.RUS : (lang.includes('EN') ? vipBtnLabels.ENG : vipBtnLabels.AZ));
+
+            container.innerHTML = `
+                <div class="empty-vip-banner">
+                    <div class="empty-vip-icon-wrap"><i class="fas fa-crown"></i></div>
+                    <h4 class="empty-vip-title" data-translate="vip-empty">${escapeHtml(title)}</h4>
+                    <p class="empty-vip-desc" data-translate="vip-empty-desc">${escapeHtml(desc)}</p>
+                    <a href="elan-yerlesdir.html?vip=1" class="btn-vip-promote">
+                        <i class="fas fa-bolt"></i>
+                        <span data-translate="make-ad-vip">${escapeHtml(btnLabel)}</span>
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
         let text = message;
         if (translateKey) {
             const emptyI18n = {
-                'vip-empty': { AZ: 'Hazırda VIP elan yoxdur.', RUS: 'В настоящее время нет VIP-объявлений', RU: 'В настоящее время нет VIP-объявлений', ENG: 'No VIP ads currently.' },
                 'ads-empty': { AZ: 'Hazırda aktiv elan yoxdur.', RUS: 'Объявлений пока нет', RU: 'Объявлений пока нет', ENG: 'No active ads currently.' },
                 'no-results': { AZ: 'Nəticə tapılmadı.', RUS: 'Результатов не найдено', RU: 'Результатов не найдено', ENG: 'No results found.' }
             };
@@ -187,8 +224,10 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         const keyAttr = translateKey ? ` data-translate="${translateKey}"` : '';
+        const iconClass = translateKey === 'no-results' ? 'fa-search' : 'fa-box-open';
         container.innerHTML = `
-            <div class="empty-ads-box" style="grid-column: 1/-1; padding:28px 20px; text-align:center; color:#64748b; background:rgba(248,250,252,0.9); border:1px solid #e2e8f0; border-radius:18px; font-weight:500; font-size:15px; margin:10px 0;">
+            <div class="empty-ads-box">
+                <i class="fas ${iconClass} empty-ads-icon"></i>
                 <span${keyAttr}>${escapeHtml(text)}</span>
             </div>
         `;
@@ -291,11 +330,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 const showAllVipBtn = document.getElementById('show-all-vip') || document.querySelector('.show-all-btn') || document.querySelector('.all-view');
                 if (showAllVipBtn) {
-                    const currentLang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
                     if (!vipAds.length) {
-                        showAllVipBtn.textContent = (currentLang.includes('RU') ? 'Сделать VIP' : (currentLang.includes('EN') ? 'Make ad VIP' : 'Elanını VIP et'));
-                        showAllVipBtn.onclick = () => { window.location.href = 'elan-yerlesdir.html?vip=1'; };
+                        showAllVipBtn.style.display = 'none';
                     } else {
+                        showAllVipBtn.style.display = 'inline-flex';
+                        const currentLang = (localStorage.getItem('lang') || 'AZ').toUpperCase();
                         showAllVipBtn.textContent = (currentLang.includes('RU') ? 'Показать все' : (currentLang.includes('EN') ? 'Show all' : 'Hamısını göstər'));
                         showAllVipBtn.onclick = () => {
                             if (typeof window.searchAdsFromAPI === 'function') {
