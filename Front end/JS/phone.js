@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                         <div class="elan-price product-price">${formatPrice(ad.price)}</div>
                         <div class="elan-title product-title">${title}</div>
                         <div class="elan-location product-location">
-                            <span class="elan-city-wrap">
+                            <span class="elan-city-box">
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span class="elan-city-label">${city}</span>
                             </span>
