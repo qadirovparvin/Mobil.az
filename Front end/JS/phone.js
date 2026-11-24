@@ -171,8 +171,10 @@ document.addEventListener("DOMContentLoaded", async function () {
                         <div class="elan-price product-price">${formatPrice(ad.price)}</div>
                         <div class="elan-title product-title">${title}</div>
                         <div class="elan-location product-location">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span class="elan-city-label">${city}</span>
+                            <span class="elan-city-wrap">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span class="elan-city-label">${city}</span>
+                            </span>
                             <span class="elan-date product-date">${escapeHtml(formatDateLabel(ad.createdAt))}</span>
                         </div>
                     </div>

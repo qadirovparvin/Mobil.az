@@ -102,6 +102,9 @@ document.addEventListener("DOMContentLoaded", async function () {
             const locDiv = document.createElement('div');
             locDiv.className = 'elan-location product-location';
 
+            const cityWrap = document.createElement('span');
+            cityWrap.className = 'elan-city-wrap';
+
             const marker = document.createElement('i');
             marker.className = 'fas fa-map-marker-alt';
 
@@ -109,12 +112,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             citySpan.className = 'elan-city-label';
             citySpan.textContent = ad.city || '';
 
+            cityWrap.appendChild(marker);
+            cityWrap.appendChild(citySpan);
+
             const dateSpan = document.createElement('span');
             dateSpan.className = 'elan-date product-date';
             dateSpan.textContent = new Date(ad.createdAt).toLocaleString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-            locDiv.appendChild(marker);
-            locDiv.appendChild(citySpan);
+            locDiv.appendChild(cityWrap);
             locDiv.appendChild(dateSpan);
 
             adInfo.appendChild(priceDiv);

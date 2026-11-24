@@ -314,6 +314,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const locDiv = document.createElement('div');
                     locDiv.className = 'elan-location product-location';
 
+                    const cityWrap = document.createElement('span');
+                    cityWrap.className = 'elan-city-wrap';
+
                     const marker = document.createElement('i');
                     marker.className = 'fas fa-map-marker-alt';
 
@@ -321,12 +324,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     citySpan.className = 'elan-city-label';
                     citySpan.textContent = city;
 
+                    cityWrap.appendChild(marker);
+                    cityWrap.appendChild(citySpan);
+
                     const dateSpan = document.createElement('span');
                     dateSpan.className = 'elan-date product-date';
                     dateSpan.textContent = date;
 
-                    locDiv.appendChild(marker);
-                    locDiv.appendChild(citySpan);
+                    locDiv.appendChild(cityWrap);
                     locDiv.appendChild(dateSpan);
 
                     adInfo.appendChild(priceDiv);
