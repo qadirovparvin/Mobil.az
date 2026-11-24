@@ -1876,11 +1876,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const writeBlock = section.querySelector('.write-review-main');
 
             if (!reviews.length) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.className = 'no-reviews-empty empty-state';
-                emptyDiv.style.cssText = 'padding: 16px; text-align: center; color: #6b7280; font-size: 14px;';
-                emptyDiv.innerHTML = `<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">${t.noReviewsTitle}</span>`;
-                section.insertBefore(emptyDiv, writeBlock || null);
+                if (!summaryEl) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'no-reviews-empty empty-state';
+                    emptyDiv.style.cssText = 'padding: 16px; text-align: center; color: #6b7280; font-size: 14px;';
+                    emptyDiv.innerHTML = `<span class="no-reviews-title" style="font-size: 14px; color: #9ca3af; font-weight: 400;">${t.noReviewsTitle}</span>`;
+                    section.insertBefore(emptyDiv, writeBlock || null);
+                }
             } else {
                 reviews.slice(0, 10).forEach(r => {
                     const div = document.createElement('div');

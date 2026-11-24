@@ -1259,7 +1259,7 @@ const useAdBonus = async (req, res, next) => {
                 link: `/elan-detail.html?id=${ad._id}`
             });
 
-            await invalidateCache('ads:VIP:cache:*').catch(() => {});
+            await invalidateCache('ads:VIP:cache:*').catch(() => { });
 
             return res.json({
                 success: true,
@@ -1307,7 +1307,7 @@ const useAdBonus = async (req, res, next) => {
                 link: `/elan-detail.html?id=${ad._id}`
             });
 
-            await invalidateCache('ads:VIP:cache:*').catch(() => {});
+            await invalidateCache('ads:VIP:cache:*').catch(() => { });
 
             return res.json({
                 success: true,
