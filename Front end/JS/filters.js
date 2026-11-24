@@ -19,6 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Single select logic - toggle if active, otherwise switch
                     if (pill.classList.contains('active')) {
                         pill.classList.remove('active');
+                        // If group has an 'any' or 'both' default pill, re-activate it
+                        const defaultPill = group.querySelector('.filter-pill[data-value="any"], .filter-pill[data-value="both"]');
+                        if (defaultPill && defaultPill !== pill) {
+                            defaultPill.classList.add('active');
+                        }
                     } else {
                         pills.forEach(p => p.classList.remove('active'));
                         pill.classList.add('active');
@@ -33,8 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof window.filterAds === 'function') {
                         window.filterAds(activeVal || 'all');
                     }
-                    debouncedApply();
                 }
+
+                updateActiveBadge();
+                debouncedApply();
             });
         });
     });
@@ -290,6 +297,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!filterVal || filterVal === 'any' || filterVal === 'both') return true;
                 return filterVal.toLowerCase() === (attrVal || '').toLowerCase();
             };
+
+            const memoryCheck = (filterVal, attrVal) => {
+                if (!filterVal || filterVal === 'any' || filterVal === 'both') return true;
+                const attr = (attrVal || '').toLowerCase();
+                const num = parseInt(attr.replace(/[^0-9]/g, ''), 10);
+                if (filterVal === 'below-64') {
+                    return !isNaN(num) && num < 64;
+                }
+                if (filterVal === '512+') {
+                    return (!isNaN(num) && num >= 512) || attr.includes('1 tb') || attr.includes('1tb');
+                }
+                const filterNum = parseInt(filterVal.replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(filterNum) && !isNaN(num)) {
+                    return num === filterNum;
+                }
+                return attr.includes(filterVal.toLowerCase());
+            };
+
+            const ramCheck = (filterVal, attrVal) => {
+                if (!filterVal || filterVal === 'any' || filterVal === 'both') return true;
+                const attr = (attrVal || '').toLowerCase();
+                const num = parseInt(attr.replace(/[^0-9]/g, ''), 10);
+                const filterNum = parseInt(filterVal.replace(/[^0-9]/g, ''), 10);
+                if (!isNaN(filterNum) && !isNaN(num)) {
+                    return num === filterNum;
+                }
+                return attr.includes(filterVal.toLowerCase());
+            };
             
             // Basic checks
             if (matches && !exactCheck(filters.brand, card.getAttribute('data-brand'))) matches = false;
@@ -302,8 +337,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (matches && !exactCheck(filters.city, card.getAttribute('data-city'))) matches = false;
-            if (matches && !exactCheck(filters.memory, card.getAttribute('data-memory'))) matches = false;
-            if (matches && !exactCheck(filters.ram, card.getAttribute('data-ram'))) matches = false;
+            if (matches && !memoryCheck(filters.memory, card.getAttribute('data-memory'))) matches = false;
+            if (matches && !ramCheck(filters.ram, card.getAttribute('data-ram'))) matches = false;
             if (matches && !exactCheck(filters.screen, card.getAttribute('data-screen'))) matches = false;
             if (matches && !exactCheck(filters.battery, card.getAttribute('data-battery'))) matches = false;
             if (matches && !exactCheck(filters.fingerprint, card.getAttribute('data-fingerprint'))) matches = false;
