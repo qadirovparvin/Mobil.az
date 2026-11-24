@@ -1432,7 +1432,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         revealSellerPhone();
                     } else {
                         const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
-                        if (telNumber) window.location.href = `tel:${telNumber}`;
+                        if (typeof window.openExternalConfirmModal === 'function') {
+                            window.openExternalConfirmModal(`tel:${telNumber}`, { formattedNumber: rawPhone });
+                        } else if (telNumber) {
+                            window.location.href = `tel:${telNumber}`;
+                        }
                     }
                 };
             } else {
@@ -1527,7 +1531,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             revealSellerPhone();
                         } else {
                             const telNumber = cleanPhone || rawPhone.replace(/\s+/g, '');
-                            if (telNumber) window.location.href = `tel:${telNumber}`;
+                            if (typeof window.openExternalConfirmModal === 'function') {
+                                window.openExternalConfirmModal(`tel:${telNumber}`, { formattedNumber: rawPhone });
+                            } else if (telNumber) {
+                                window.location.href = `tel:${telNumber}`;
+                            }
                         }
                     };
                     callBtn.classList.remove('hidden');
