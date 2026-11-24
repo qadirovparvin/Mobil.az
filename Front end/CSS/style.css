@@ -2369,6 +2369,21 @@ main {
   }
 }
 
+/* Global Password Visibility Toggle Button */
+.toggle-password {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color 0.2s, transform 0.15s ease;
+}
+.toggle-password:hover {
+  color: var(--accent-color, #7c3aed);
+}
+.toggle-password:active {
+  transform: scale(0.9);
+}
+
 @keyframes filterSlideDown {
   from {
     opacity: 0;

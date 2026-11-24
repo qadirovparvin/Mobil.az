@@ -451,8 +451,13 @@ if (typeof window !== 'undefined') {
 
 // Global password visibility toggler (safe against strict CSP and works immediately)
 window.togglePwd = function (inputId, iconId) {
-    let inp = inputId ? document.getElementById(inputId) : null;
-    let icon = iconId ? document.getElementById(iconId) : null;
+    let inp = typeof inputId === 'string' ? document.getElementById(inputId) : (inputId instanceof HTMLElement ? inputId : null);
+    let icon = typeof iconId === 'string' ? document.getElementById(iconId) : (iconId instanceof HTMLElement ? iconId : null);
+
+    if (icon && !inp) {
+        const targetId = icon.dataset ? icon.dataset.target : null;
+        if (targetId) inp = document.getElementById(targetId);
+    }
     if (!inp && icon) {
         const group = icon.closest('.input-group') || icon.parentElement;
         if (group) inp = group.querySelector('input[type="password"], input[type="text"]');
@@ -460,34 +465,51 @@ window.togglePwd = function (inputId, iconId) {
     if (!inp) return;
 
     const now = Date.now();
-    if (inp._lastToggle && (now - inp._lastToggle < 250)) {
+    if (inp._lastToggle && (now - inp._lastToggle < 200)) {
         return;
     }
     inp._lastToggle = now;
 
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        if (icon) {
+    const isPassword = (inp.type === 'password');
+    inp.type = isPassword ? 'text' : 'password';
+
+    if (icon) {
+        if (isPassword) {
             icon.classList.remove('fa-eye');
             icon.classList.add('fa-eye-slash');
-        }
-    } else {
-        inp.type = 'password';
-        if (icon) {
+            icon.setAttribute('aria-label', 'Şifrəni gizlət');
+            icon.setAttribute('title', 'Şifrəni gizlət');
+        } else {
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');
+            icon.setAttribute('aria-label', 'Şifrəni göstər');
+            icon.setAttribute('title', 'Şifrəni göstər');
         }
     }
 };
 
 if (typeof document !== 'undefined') {
     document.addEventListener('click', function (e) {
-        const icon = e.target && e.target.closest ? e.target.closest('.toggle-password, #toggleLoginPwd, #toggleSignupPwd, #toggleSignupConfirm, #toggleResetPwd, #toggleConfirmResetPwd') : null;
+        const icon = e.target && e.target.closest ? e.target.closest('.toggle-password, [id^="toggle"], .eye-toggle') : null;
         if (!icon) return;
+
+        // Verify this is an eye/password toggle element
+        const isEye = icon.classList.contains('toggle-password') ||
+                      icon.classList.contains('fa-eye') ||
+                      icon.classList.contains('fa-eye-slash') ||
+                      icon.classList.contains('eye-toggle') ||
+                      (icon.id && (icon.id.toLowerCase().includes('pwd') || icon.id.toLowerCase().includes('confirm'))) ||
+                      (icon.dataset && icon.dataset.target);
+        if (!isEye) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const targetId = icon.dataset ? icon.dataset.target : null;
         const group = icon.closest('.input-group') || icon.parentElement;
-        const inp = group ? group.querySelector('input[type="password"], input[type="text"]') : null;
-        window.togglePwd(inp ? inp.id : null, icon.id);
-    });
+        const inp = (targetId ? document.getElementById(targetId) : null) || (group ? group.querySelector('input[type="password"], input[type="text"]') : null);
+        window.togglePwd(inp, icon);
+    }, true);
 }
 
 
