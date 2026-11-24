@@ -512,6 +512,51 @@ if (typeof document !== 'undefined') {
     }, true);
 }
 
+// Global robust chat/user avatar generator (prevents broken image icons and provides sleek gradient initial fallbacks)
+window.getChatAvatarHtml = function (user, size = 44) {
+    const escape = (str) => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const name = (user?.name || user?.email || user?.fullName || 'İstifadəçi').trim();
+    const firstLetter = escape((name.charAt(0) || 'U').toUpperCase());
+
+    const gradients = [
+        'linear-gradient(135deg, #6366f1, #8b5cf6)',
+        'linear-gradient(135deg, #3b82f6, #06b6d4)',
+        'linear-gradient(135deg, #ec4899, #8b5cf6)',
+        'linear-gradient(135deg, #f59e0b, #ef4444)',
+        'linear-gradient(135deg, #10b981, #14b8a6)',
+        'linear-gradient(135deg, #8b5cf6, #d946ef)'
+    ];
+    let sum = 0;
+    for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+    const bgGradient = gradients[sum % gradients.length];
+
+    let rawAvatar = (user?.avatar || user?.photo || user?.profileImage || '').trim();
+    if (rawAvatar === 'Photo/avatar.png' || rawAvatar === '/Photo/avatar.png' || rawAvatar === 'null' || rawAvatar === 'undefined') {
+        rawAvatar = '';
+    }
+    let avatarUrl = rawAvatar;
+    if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('data:') && !avatarUrl.startsWith('/')) {
+        avatarUrl = `/${avatarUrl}`;
+    }
+
+    const fontSize = Math.max(12, Math.round(size * 0.42));
+
+    if (avatarUrl) {
+        return `
+            <div class="chat-avatar-wrap" style="width:${size}px; height:${size}px; min-width:${size}px; border-radius:50%; position:relative; overflow:hidden; background:${bgGradient}; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:700; font-size:${fontSize}px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); border:1.5px solid rgba(255,255,255,0.12);">
+                <span>${firstLetter}</span>
+                <img src="${escape(avatarUrl)}" alt="${escape(name)}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:50%;" onerror="this.remove();">
+            </div>
+        `;
+    }
+
+    return `
+        <div class="chat-avatar-wrap" style="width:${size}px; height:${size}px; min-width:${size}px; border-radius:50%; background:${bgGradient}; display:flex; align-items:center; justify-content:center; color:#ffffff; font-weight:700; font-size:${fontSize}px; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,0.2); border:1.5px solid rgba(255,255,255,0.12);">
+            <span>${firstLetter}</span>
+        </div>
+    `;
+};
+
 
 window.getToken = function () {
     const tryGet = (store, key) => {

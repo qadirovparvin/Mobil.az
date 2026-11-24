@@ -2353,11 +2353,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
         const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : (conv.adTitle || 'Elan');
 
-        // Update header info
+        // Update header info & avatar
         const headerName = document.querySelector('.chat-header-info h3');
         const headerAd = document.querySelector('.chat-header-info p');
+        const headerAvatar = document.getElementById('chatHeaderAvatar');
         if (headerName) headerName.textContent = otherName;
         if (headerAd) headerAd.innerHTML = `<i class="fas fa-tag"></i> <span>${escapeHtml(adTitle)}</span>`;
+        if (headerAvatar) {
+            headerAvatar.style.display = 'block';
+            headerAvatar.innerHTML = window.getChatAvatarHtml ? window.getChatAvatarHtml(otherUser, 42) : '';
+        }
 
         // Highlight active item in list
         document.querySelectorAll('.chat-list-item').forEach(el => {
@@ -2564,35 +2569,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
 
                 const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
-                const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : 'Elan';
+                const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : (conv.adTitle || 'Elan');
 
                 const item = document.createElement('div');
                 item.className = 'chat-list-item cab-glass';
                 item.setAttribute('data-ad-id', conv._id?.ad || '');
                 item.setAttribute('data-other-id', other || '');
-                item.style.padding = '15px';
-                item.style.borderBottom = '1px solid var(--border-color)';
-                item.style.cursor = 'pointer';
-                item.style.transition = 'background 0.2s';
 
                 const isSelected = currentConversation && (currentConversation._id?.ad === conv._id?.ad) && (currentConversation._id?.other === other);
                 if (isSelected) {
                     item.classList.add('active');
-                    item.style.borderLeft = '3px solid var(--airy-primary)';
                 }
 
-                item.onmouseover = () => { if (!item.classList.contains('active')) item.style.background = 'var(--bg-secondary)'; };
-                item.onmouseout = () => { if (!item.classList.contains('active')) item.style.background = 'transparent'; };
+                const avatarHtml = window.getChatAvatarHtml ? window.getChatAvatarHtml(otherUser, 46) : '';
+
+                let timeLabel = '';
+                if (conv.lastMessage?.createdAt) {
+                    const d = new Date(conv.lastMessage.createdAt);
+                    if (!isNaN(d.getTime())) {
+                        const now = new Date();
+                        const isToday = d.toDateString() === now.toDateString();
+                        timeLabel = isToday ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                    }
+                }
 
                 item.innerHTML = `
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <img src="${otherUser?.avatar || 'Photo/avatar.png'}" alt="${escapeHtml(otherName)} profil şəkli" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                        ${avatarHtml}
                         <div style="flex: 1; min-width: 0;">
-                            <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(otherName)}</div>
-                            <div style="font-size: 12px; color: var(--airy-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${escapeHtml(adTitle)}</div>
+                            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(otherName)}</div>
+                                ${timeLabel ? `<span style="font-size: 11px; color: var(--text-muted); margin-left: 6px; flex-shrink: 0;">${escapeHtml(timeLabel)}</span>` : ''}
+                            </div>
+                            <div style="font-size: 12px; color: var(--airy-primary, #a78bfa); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; display: flex; align-items: center; gap: 4px;">
+                                <i class="fas fa-tag" style="font-size: 10px;"></i>
+                                <span>${escapeHtml(adTitle)}</span>
+                            </div>
                             <div style="font-size: 13px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(conv.lastMessage?.text || '')}</div>
                         </div>
-                        ${conv.unread > 0 ? `<div class="unread-badge" style="background: var(--airy-primary); color: white; font-size: 11px; font-weight: bold; padding: 2px 8px; border-radius: 12px;">${conv.unread}</div>` : ''}
+                        ${conv.unread > 0 ? `<div class="unread-badge" style="background: var(--airy-primary, #6e56cf); color: white; font-size: 11px; font-weight: bold; padding: 2px 7px; border-radius: 12px; flex-shrink: 0;">${conv.unread}</div>` : ''}
                     </div>
                 `;
 

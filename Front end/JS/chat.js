@@ -180,9 +180,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     item.onmouseout = () => item.style.background = 'transparent';
                 }
                 
+                const avatarHtml = window.getChatAvatarHtml ? window.getChatAvatarHtml(otherUser, 45) : '';
+
                 item.innerHTML = `
                     <div style="display: flex; gap: 12px; align-items: center;">
-                        <img src="${otherUser?.avatar || 'Photo/avatar.png'}" alt="${escapeHtml(otherName)} profil şəkli" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                        ${avatarHtml}
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(otherName)}</div>
                             <div style="font-size: 12px; color: var(--airy-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px;">${escapeHtml(adTitle)}</div>
