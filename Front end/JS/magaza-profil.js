@@ -222,7 +222,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                         callBtn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
                         callRevealed = true;
                     } else {
-                        window.location.href = `tel:${store.contactNumber}`;
+                        if (typeof window.openExternalConfirmModal === 'function') {
+                            window.openExternalConfirmModal(`tel:${store.contactNumber}`, { formattedNumber: store.contactNumber });
+                        } else {
+                            window.location.href = `tel:${store.contactNumber}`;
+                        }
                     }
                 });
             } else {

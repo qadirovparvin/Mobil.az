@@ -564,7 +564,11 @@ function handleContact() {
     const safeTelHref = getSafeTelHref(store.contactNumber);
 
     if (safeTelHref) {
-        window.location.href = safeTelHref;
+        if (typeof window.openExternalConfirmModal === "function") {
+            window.openExternalConfirmModal(safeTelHref, { formattedNumber: store.contactNumber });
+        } else {
+            window.location.href = safeTelHref;
+        }
     }
 }
 
