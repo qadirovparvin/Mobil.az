@@ -156,8 +156,15 @@ const getAds = async (req, res, next) => {
         const storageVal = storage || memory;
         if (storageVal && storageVal !== 'any' && storageVal !== 'both') {
             const cleanStorage = readString(storageVal, { fieldName: 'storage', maxLength: 80 });
-            const escapedStorage = cleanStorage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const storageRegex = { $regex: escapedStorage, $options: 'i' };
+            let storageRegex;
+            if (cleanStorage === 'below-64') {
+                storageRegex = { $regex: '(^|\\D)(4|8|16|32)\\s*(gb|g|$)', $options: 'i' };
+            } else if (cleanStorage === '512+') {
+                storageRegex = { $regex: '(^|\\D)(512|1024)\\s*(gb|g|$)|1\\s*tb', $options: 'i' };
+            } else {
+                const escapedStorage = cleanStorage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                storageRegex = { $regex: `(^|\\D)${escapedStorage}(\\s*gb|\\s*g|\\D|$)`, $options: 'i' };
+            }
             filter.$and = filter.$and || [];
             filter.$and.push({
                 $or: [
@@ -169,7 +176,7 @@ const getAds = async (req, res, next) => {
         if (ram && ram !== 'any' && ram !== 'both') {
             const cleanRam = readString(ram, { fieldName: 'ram', maxLength: 80 });
             const escapedRam = cleanRam.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const ramRegex = { $regex: escapedRam, $options: 'i' };
+            const ramRegex = { $regex: `(^|\\D)${escapedRam}(\\s*gb|\\s*g|\\D|$)`, $options: 'i' };
             filter.$and = filter.$and || [];
             filter.$and.push({
                 $or: [

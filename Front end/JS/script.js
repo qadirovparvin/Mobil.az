@@ -2675,23 +2675,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // ─── FILTER BUTTON GROUPS ─────────────────────────────────────────────────
-    const buttonGroups = document.querySelectorAll(".memory-buttons, .fingerprint-buttons, .nfc-buttons, .waterproof-buttons, .expandable-buttons, .delivery-buttons, .condition-buttons, .color-buttons");
-    if (buttonGroups && buttonGroups.length > 0) {
-        buttonGroups.forEach((group) => {
-            if (!group) return;
-            const buttons = group.querySelectorAll("button");
-            if (buttons && buttons.length > 0) {
-                buttons.forEach((button) => {
-                    if (!button) return;
-                    button.addEventListener("click", function () {
-                        buttons.forEach((btn) => btn?.classList.remove("active"));
-                        this.classList.add("active");
-                    });
-                });
-            }
-        });
-    }
+
     // ─── SORTING ──────────────────────────────────────────────────────────────
     const sortingSelect = document.getElementById("sortingOptions");
     if (sortingSelect) {
