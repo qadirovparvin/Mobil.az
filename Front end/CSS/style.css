@@ -1452,16 +1452,40 @@ main {
 .ad-location {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   font-size: 13px;
   color: var(--text-secondary);
+  gap: 6px;
+}
+
+.elan-location i,
+.product-location i,
+.ad-location i {
+  font-size: 12px;
+  color: inherit;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+
+.elan-city-wrap,
+.elan-location-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.elan-city-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .elan-date,
 .product-date,
 .ad-date {
+  margin-left: auto;
   font-size: 12px;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .site-footer {
