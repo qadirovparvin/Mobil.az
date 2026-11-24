@@ -2655,6 +2655,24 @@ document.addEventListener("DOMContentLoaded", function () {
             filterBody.classList.toggle("active");
             filterBody.classList.toggle("open");
         });
+
+        // Close on outside click
+        document.addEventListener("click", function (e) {
+            if (filterBody.classList.contains("active") || filterBody.classList.contains("open")) {
+                if (!filterBody.contains(e.target) && !filterToggle.contains(e.target)) {
+                    filterBody.classList.remove("active");
+                    filterBody.classList.remove("open");
+                }
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && (filterBody.classList.contains("active") || filterBody.classList.contains("open"))) {
+                filterBody.classList.remove("active");
+                filterBody.classList.remove("open");
+            }
+        });
     }
 
     const mobileClose = document.getElementById("mobileFilterClose") || document.querySelector(".mobile-filter-close");
