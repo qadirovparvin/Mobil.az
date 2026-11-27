@@ -775,7 +775,7 @@ function mockSendOtp(identifier, code, type) {
 // @access  Public
 const sendOtp = async (req, res, next) => {
     try {
-        const { identifier, type } = req.body;
+        const { identifier, type, purpose } = req.body;
 
         if (!identifier || !type) {
             return res.status(400).json({ message: 'Identifier və tip mütləqdir' });
@@ -793,6 +793,24 @@ const sendOtp = async (req, res, next) => {
         const cleanIdentifier = type === 'email'
             ? normalizeEmailStrict(identifier)
             : normalizePhone(readString(identifier, { fieldName: 'identifier', maxLength: 40 }));
+
+        if (purpose === 'login') {
+            const user = await User.findOne({
+                $or: [{ email: cleanIdentifier }, { phone: cleanIdentifier }]
+            });
+            if (!user) {
+                return res.status(404).json({ message: 'Bu email ilə qeydiyyatdan keçmiş hesab tapılmadı' });
+            }
+            if (user.status === 'deleted') {
+                return res.status(403).json({ message: 'Bu hesab silinib' });
+            }
+            if (user.status === 'frozen') {
+                return res.status(403).json({ message: 'Bu hesab dondurulub' });
+            }
+            if (!isAccountAllowed(user)) {
+                return res.status(403).json({ message: getAccountDeniedMessage(user) });
+            }
+        }
 
         const attempts = await getOtpAttempts(cleanIdentifier);
         if (attempts.lockedUntil && attempts.lockedUntil > new Date()) {
@@ -831,8 +849,10 @@ const sendOtp = async (req, res, next) => {
             }
         }
 
+        const isDev = process.env.NODE_ENV !== 'production';
         res.json({
-            message: type === 'sms' ? 'SMS kodu göndərildi' : 'Email kodu göndərildi'
+            message: type === 'sms' ? 'SMS kodu göndərildi' : 'Email kodu göndərildi',
+            ...(isDev ? { devCode: code } : {})
         });
     } catch (error) {
         next(error);
@@ -844,7 +864,7 @@ const sendOtp = async (req, res, next) => {
 // @access  Public
 const verifyOtp = async (req, res, next) => {
     try {
-        const { identifier, code, type } = req.body;
+        const { identifier, code, type, purpose, rememberMe } = req.body;
 
         if (!identifier || !code || !type) {
             return res.status(400).json({ message: 'Identifier, kod və tip mütləqdir' });
@@ -882,20 +902,13 @@ const verifyOtp = async (req, res, next) => {
             return res.status(400).json({ message: 'Yanlış kod', verified: false });
         }
 
-        await Otp.deleteOne({ _id: foundOtp._id });
-
-        // OTP is valid — delete it so it can't be reused and clear attempts
         await clearOtpAttempts(cleanIdentifier);
-        if (foundOtp) {
-            await Otp.deleteOne({ _id: foundOtp._id });
-        } else {
-            await Otp.deleteMany({ identifier: cleanIdentifier, type });
-        }
+        await Otp.deleteMany({ identifier: cleanIdentifier, type });
 
         // Auto-verify account if identifier matches a user
         const userToVerify = await User.findOne({
             $or: [{ email: cleanIdentifier }, { phone: cleanIdentifier }]
-        });
+        }).select('+password +refreshTokens +twoFactorSecret +twoFactorRecoveryCodes +twoFactorLastUsedStep +twoFactorFailures +twoFactorLockedUntil');
 
         if (userToVerify && !userToVerify.isVerified) {
             userToVerify.isVerified = true;
@@ -906,6 +919,31 @@ const verifyOtp = async (req, res, next) => {
             }
 
             await userToVerify.save();
+        }
+
+        if (purpose === 'login') {
+            if (!userToVerify) {
+                return res.status(404).json({ message: 'İstifadəçi tapılmadı', verified: false });
+            }
+            if (userToVerify.status === 'deleted') {
+                return res.status(403).json({ message: 'Bu hesab silinib' });
+            }
+            if (userToVerify.status === 'frozen') {
+                return res.status(403).json({ message: 'Bu hesab dondurulub' });
+            }
+            if (!isAccountAllowed(userToVerify)) {
+                return res.status(403).json({ message: getAccountDeniedMessage(userToVerify) });
+            }
+
+            userToVerify.loginAttempts = 0;
+            userToVerify.lockUntil = null;
+            userToVerify.lastFailedLogin = null;
+            await userToVerify.save();
+
+            const isRemember = (rememberMe === true || rememberMe === 'true' || rememberMe === 1 || rememberMe === '1');
+            await issueRefreshToken(userToVerify, req, res, isRemember);
+            const accessToken = generateAccessToken(userToVerify, isRemember);
+            return res.json(buildAuthResponse(userToVerify, accessToken, isRemember));
         }
 
         res.json({ message: 'Kod təsdiqləndi', verified: true });

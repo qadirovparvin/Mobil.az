@@ -440,7 +440,7 @@ function startCountdown(timerSpanId, resendBtnId, seconds = 60) {
 
 /* ── Login method switcher ──────────────────────────────────── */
 function switchLoginMethod(method) {
-    if (method === 'sms' || method === 'emailOtp' || method === 'email') {
+    if (method === 'sms') {
         showToast(SMS_DEV_WARNING, 'warning');
         // Keep password tab active, do NOT switch
         switchLoginMethod('password');
@@ -457,7 +457,7 @@ function switchLoginMethod(method) {
         document.getElementById('smsLoginForm').style.display = 'block';
         document.getElementById('methodSMS').classList.add('active');
         wireOtpInputs('smsOtpInputs');
-    } else if (method === 'email') {
+    } else if (method === 'email' || method === 'emailOtp') {
         document.getElementById('emailLoginForm').style.display = 'block';
         document.getElementById('methodEmail').classList.add('active');
         wireOtpInputs('emailOtpInputs');
@@ -1041,24 +1041,58 @@ async function sendLoginEmail() {
     setLoading(btn, true);
 
     try {
-        await new Promise(r => setTimeout(r, 1200));
+        const res = await fetch(`${window.API_URL}/auth/send-otp`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: email, type: 'email', purpose: 'login' })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.message || 'Xəta baş verdi. Yenidən cəhd edin.', 'error');
+            return;
+        }
         document.getElementById('emailAddressDisplay').textContent = email;
         document.getElementById('emailStep1').style.display = 'none';
         document.getElementById('emailStep2').classList.add('visible');
         wireOtpInputs('emailOtpInputs');
         startCountdown('emailTimer', 'emailResendBtn');
-        showToast('Email kodu göndərildi!', 'success');
+        showToast(data.message || 'Email kodu göndərildi!', 'success');
     } catch (e) {
-        showToast('Xəta baş verdi. Yenidən cəhd edin.', 'error');
+        console.error('sendLoginEmail error:', e);
+        showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
     } finally {
         setLoading(btn, false);
     }
 }
 
-function resendLoginEmail() {
+async function resendLoginEmail() {
     clearOtp('emailOtpInputs');
-    startCountdown('emailTimer', 'emailResendBtn');
-    showToast('Email kodu yenidən göndərildi', 'info');
+    const email = document.getElementById('loginEmailCode')?.value.trim();
+    if (!email || !email.includes('@')) {
+        showToast('Düzgün email daxil edin', 'error');
+        backToEmailStep1();
+        return;
+    }
+    const resendBtn = document.getElementById('emailResendBtn');
+    if (resendBtn) resendBtn.disabled = true;
+    try {
+        const res = await fetch(`${window.API_URL}/auth/send-otp`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: email, type: 'email', purpose: 'login' })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            showToast(data.message || 'Xəta baş verdi', 'error');
+            return;
+        }
+        startCountdown('emailTimer', 'emailResendBtn');
+        showToast(data.message || 'Email kodu yenidən göndərildi', 'info');
+    } catch (e) {
+        showToast('Serverlə əlaqə yaradılmadı', 'error');
+    }
 }
 
 function backToEmailStep1() {
@@ -1430,7 +1464,49 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const otp = getOtpValue('emailOtpInputs');
             if (otp.length < 6) { showToast('6 rəqəmli kodu daxil edin', 'error'); return; }
-            showToast('Email kodu ilə giriş hələ backend-ə qoşulmayıb. Şifrə ilə giriş edin.', 'info');
+            const email = document.getElementById('loginEmailCode')?.value.trim();
+            if (!email || !email.includes('@')) {
+                showToast('Düzgün email daxil edin', 'error');
+                backToEmailStep1();
+                return;
+            }
+            const btn = document.getElementById('verifyEmailLoginBtn');
+            setLoading(btn, true);
+            try {
+                const isRemember = document.getElementById('rememberMe')?.checked ?? true;
+                const res = await fetch(`${window.API_URL}/auth/verify-otp`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier: email, code: otp, type: 'email', purpose: 'login', rememberMe: isRemember })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    showToast(data.message || 'Yanlış kod və ya xəta baş verdi', 'error');
+                    clearOtp('emailOtpInputs');
+                    return;
+                }
+                function getSafeRedirectTarget(fallback = 'cabinet.html') {
+                    try {
+                        const redirect = new URLSearchParams(window.location.search).get('redirect');
+                        if (redirect
+                            && /^[a-zA-Z0-9_\-\/]+\.html(\?[a-zA-Z0-9_\-=&%~.+]*)*$/.test(redirect)
+                            && !/^(\/\/|https?:)/i.test(redirect)
+                            && !/^(javascript|data|vbscript):/i.test(redirect)
+                            && !/\\/.test(redirect)) {
+                            return redirect;
+                        }
+                    } catch (e) { }
+                    return fallback;
+                }
+                const redirectTarget = data.role === 'admin' || data.user?.role === 'admin' ? 'admin.html' : getSafeRedirectTarget('cabinet.html');
+                onLoginSuccess(data.accessToken || data.token, data.user || data, isRemember, redirectTarget);
+            } catch (err) {
+                console.error('Email login verify error:', err);
+                showToast('Serverlə əlaqə yaradılmadı. Yenidən cəhd edin.', 'error');
+            } finally {
+                setLoading(btn, false);
+            }
         });
     }
 
