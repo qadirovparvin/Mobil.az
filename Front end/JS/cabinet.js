@@ -2336,8 +2336,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         bubble.innerHTML = `
-            <div>${escapeHtml(msg.text || '')}</div>
-            ${timeStr ? `<span class="bubble-time">${escapeHtml(timeStr)}</span>` : ''}
+            <div class="bubble-content">${escapeHtml(msg.text || '')}</div>
+            <div class="bubble-meta">
+                ${timeStr ? `<span class="bubble-time">${escapeHtml(timeStr)}</span>` : ''}
+                ${isMine ? '<i class="fas fa-check-double bubble-check"></i>' : ''}
+            </div>
         `;
 
         messagesArea.appendChild(bubble);
@@ -2351,17 +2354,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const other = conv._id?.other;
         const otherUser = (conv.lastMessage?.sender?._id === other) ? conv.lastMessage?.sender : conv.lastMessage?.recipient;
         const otherName = otherUser ? (otherUser.name || otherUser.email || 'İstifadəçi') : 'İstifadəçi';
-        const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}` : (conv.adTitle || 'Elan');
+        const adTitle = ad.brand ? `${ad.brand} ${ad.modelName || ''}`.trim() : (conv.adTitle || 'Elan');
+        const adPrice = ad.price ? `${Number(ad.price).toLocaleString('az-AZ')} AZN` : '';
+        const adImages = Array.isArray(ad.images) ? ad.images : (ad.image ? [ad.image] : []);
+        const rawAdImg = adImages.length > 0 ? adImages[0] : '';
+        const adImgUrl = rawAdImg ? (rawAdImg.startsWith('http') || rawAdImg.startsWith('/') ? rawAdImg : `/${rawAdImg}`) : 'Photo/default-ad.svg';
+        const adId = conv._id?.ad || ad._id;
 
-        // Update header info & avatar
+        // Update header user info & avatar
         const headerName = document.querySelector('.chat-header-info h3');
         const headerAd = document.querySelector('.chat-header-info p');
         const headerAvatar = document.getElementById('chatHeaderAvatar');
+        const statusDot = document.getElementById('chatUserStatusDot');
         if (headerName) headerName.textContent = otherName;
         if (headerAd) headerAd.innerHTML = `<i class="fas fa-tag"></i> <span>${escapeHtml(adTitle)}</span>`;
         if (headerAvatar) {
             headerAvatar.style.display = 'block';
             headerAvatar.innerHTML = window.getChatAvatarHtml ? window.getChatAvatarHtml(otherUser, 42) : '';
+        }
+        if (statusDot) {
+            statusDot.style.display = 'inline-block';
+        }
+
+        // Update header ad preview widget
+        const adWidget = document.getElementById('chatHeaderAdWidget');
+        const adImgEl = document.getElementById('chatHeaderAdImg');
+        const adTitleEl = document.getElementById('chatHeaderAdTitle');
+        const adPriceEl = document.getElementById('chatHeaderAdPrice');
+        const adLinkEl = document.getElementById('chatHeaderAdLink');
+
+        if (adWidget) {
+            if (adTitle && adTitle !== 'Elan') {
+                adWidget.style.display = 'flex';
+                if (adImgEl) adImgEl.src = adImgUrl;
+                if (adTitleEl) adTitleEl.textContent = adTitle;
+                if (adPriceEl) adPriceEl.textContent = adPrice;
+                if (adLinkEl) {
+                    if (adId) {
+                        adLinkEl.href = `elan-detail.html?id=${adId}`;
+                        adLinkEl.style.display = 'inline-flex';
+                    } else {
+                        adLinkEl.style.display = 'none';
+                    }
+                }
+            } else {
+                adWidget.style.display = 'none';
+            }
+        }
+
+        // Show quick replies
+        const quickReplies = document.getElementById('chatQuickReplies');
+        if (quickReplies) {
+            quickReplies.style.display = 'flex';
         }
 
         // Highlight active item in list
@@ -2497,6 +2541,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     sendCabinetMessage();
+                }
+            });
+        }
+
+        // Quick reply suggestion chips
+        const quickRepliesWrap = document.getElementById('chatQuickReplies');
+        if (quickRepliesWrap) {
+            quickRepliesWrap.addEventListener('click', (e) => {
+                const chip = e.target.closest('.quick-chip');
+                if (!chip) return;
+                const msg = chip.getAttribute('data-msg');
+                if (chatInput && msg) {
+                    chatInput.value = msg;
+                    chatInput.focus();
                 }
             });
         }
