@@ -124,6 +124,35 @@
     color: var(--cab-primary-light);
 }
 
+.user-role-badge.badge-admin {
+    background: rgba(108, 92, 231, 0.18) !important;
+    color: #8b5cf6 !important;
+    border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+}
+
+[data-theme="dark"] body .user-role-badge.badge-admin {
+    background: rgba(108, 92, 231, 0.28) !important;
+    color: #a78bfa !important;
+    border: 1px solid rgba(139, 92, 246, 0.45) !important;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.2) !important;
+}
+
+.user-role-badge.badge-vip {
+    background: rgba(245, 158, 11, 0.18) !important;
+    color: #f59e0b !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    font-weight: 700 !important;
+}
+
+.user-role-badge.badge-pro {
+    background: rgba(59, 130, 246, 0.18) !important;
+    color: #3b82f6 !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    font-weight: 700 !important;
+}
+
 .cabinet-menu {
     list-style: none;
     padding: 0 15px;
