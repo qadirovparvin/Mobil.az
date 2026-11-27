@@ -80,7 +80,6 @@ const getConversations = async (req, res, next) => {
             {
                 $match: {
                     $or: [{ sender: userId }, { recipient: userId }],
-                    adDeletedAt: null,
                     $and: [
                         {
                             $or: [
@@ -152,7 +151,7 @@ const getMessages = async (req, res, next) => {
             senderId: userId,
             recipientId: cleanOtherUserId,
             adId
-        });
+        }, { allowDeletedAd: true });
         if (!chatCheck.valid) {
             return res.status(chatCheck.status).json({ message: chatCheck.message });
         }
@@ -160,7 +159,6 @@ const getMessages = async (req, res, next) => {
 
         const messages = await Message.find({
             ad: adId,
-            adDeletedAt: null,
             $and: [
                 {
                     $or: [
@@ -186,7 +184,6 @@ const getMessages = async (req, res, next) => {
         // Mark incoming messages as read
         const unreadFilter = {
             ad: adId,
-            adDeletedAt: null,
             isRead: false,
             sender: cleanOtherUserId,
             recipient: userId,
@@ -225,7 +222,7 @@ const getMessages = async (req, res, next) => {
 // @access  Private
 const getUnreadCount = async (req, res, next) => {
     try {
-        const count = await Message.countDocuments({ recipient: req.user._id, adDeletedAt: null, isRead: false, deletedByRecipient: false });
+        const count = await Message.countDocuments({ recipient: req.user._id, isRead: false, deletedByRecipient: false });
         res.json({ unread: count });
     } catch (error) {
         next(error);

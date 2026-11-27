@@ -5,18 +5,22 @@ const { DELETED_AD_STATUS } = require('./adLifecycle');
 
 const CHAT_USER_FIELDS = 'name lastName avatar status disabled isBlocked isBanned';
 
-const validateChatParticipants = async ({ senderId, recipientId, adId }) => {
+const validateChatParticipants = async ({ senderId, recipientId, adId }, { allowDeletedAd = false } = {}) => {
+    const adQuery = allowDeletedAd
+        ? { _id: adId }
+        : { _id: adId, status: { $ne: DELETED_AD_STATUS } };
+
     const [ad, sender, recipient] = await Promise.all([
-        Ad.findOne({ _id: adId, status: { $ne: DELETED_AD_STATUS } }).select('_id author status'),
+        Ad.findOne(adQuery).select('_id author status'),
         User.findById(senderId).select(CHAT_USER_FIELDS),
         User.findById(recipientId).select(CHAT_USER_FIELDS)
     ]);
 
-    if (!ad) {
+    if (!ad && !allowDeletedAd) {
         return { valid: false, status: 404, message: 'Elan tapılmadı' };
     }
     
-    if (ad.author.toString() !== senderId.toString() && ad.author.toString() !== recipientId.toString()) {
+    if (ad && ad.author.toString() !== senderId.toString() && ad.author.toString() !== recipientId.toString() && !allowDeletedAd) {
         return { valid: false, status: 403, message: 'Yalnız elan sahibi ilə mesajlaşmaq mümkündür' };
     }
 
@@ -32,15 +36,14 @@ const validateChatParticipants = async ({ senderId, recipientId, adId }) => {
 
 const isVisibleConversation = (conversation) => {
     const lastMessage = conversation?.lastMessage;
-    const ad = lastMessage?.ad;
-    const sender = lastMessage?.sender;
-    const recipient = lastMessage?.recipient;
+    if (!lastMessage) return false;
+    const sender = lastMessage.sender;
+    const recipient = lastMessage.recipient;
 
+    // Participants must be valid accounts (not banned/deleted)
     return Boolean(
-        ad &&
-        ad.status !== DELETED_AD_STATUS &&
-        isAccountAllowed(sender) &&
-        isAccountAllowed(recipient)
+        (!sender || isAccountAllowed(sender)) &&
+        (!recipient || isAccountAllowed(recipient))
     );
 };
 

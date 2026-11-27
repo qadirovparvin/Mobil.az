@@ -149,8 +149,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = window.toast;
 
     function getToken() {
-        const token = window.getAuthToken ? window.getAuthToken() : (sessionStorage.getItem('token') || '');
-        return token || localStorage.getItem('token') || '';
+        if (typeof window.getAuthToken === 'function' && window.getAuthToken !== getToken) {
+            const t = window.getAuthToken();
+            if (t) return t;
+        }
+        if (typeof window.getToken === 'function' && window.getToken !== getToken) {
+            const t = window.getToken();
+            if (t) return t;
+        }
+        const candidates = [
+            sessionStorage.getItem('token'),
+            localStorage.getItem('token'),
+            sessionStorage.getItem('adminToken'),
+            localStorage.getItem('adminToken'),
+            sessionStorage.getItem('accessToken'),
+            localStorage.getItem('accessToken')
+        ];
+        for (const c of candidates) {
+            if (c && c !== 'null' && c !== 'undefined') return c.trim().replace(/^["']+|["']+$/g, '');
+        }
+        return '';
     }
 
     function getCurrentLang() {
@@ -176,6 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.cabinetT = t;
+
+    // Immediate early render from storage to avoid any layout flash
+    try {
+        const earlyUser = getStoredUser();
+        if (earlyUser) renderCurrentUser(earlyUser);
+    } catch (e) { }
 
     const BILLING_COPY = {
         AZ: {
@@ -1296,10 +1320,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.openBillingPanel = openBillingPanel;
 
     function getStoredUser() {
+        if (typeof window.getUser === 'function') {
+            const u = window.getUser();
+            if (u && (u.email || u.name || u.phone || u._id || u.id)) return u;
+        }
         const raw =
             localStorage.getItem('user') ||
+            sessionStorage.getItem('user') ||
             localStorage.getItem('mobilaz_current_user') ||
-            localStorage.getItem('adminUser');
+            sessionStorage.getItem('mobilaz_current_user') ||
+            localStorage.getItem('adminUser') ||
+            sessionStorage.getItem('adminUser') ||
+            localStorage.getItem('mobilaz_user') ||
+            sessionStorage.getItem('mobilaz_user');
 
         if (!raw) return null;
 
@@ -1316,16 +1349,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function persistUser(user) {
         if (!user) return;
+        const userStr = JSON.stringify(user);
+        try { localStorage.setItem('user', userStr); } catch (e) { }
+        try { localStorage.setItem('mobilaz_current_user', userStr); } catch (e) { }
+        try { sessionStorage.setItem('user', userStr); } catch (e) { }
+        try { sessionStorage.setItem('mobilaz_current_user', userStr); } catch (e) { }
 
-        localStorage.setItem('user', JSON.stringify(user));
-        localStorage.setItem('mobilaz_current_user', JSON.stringify(user));
-
-        if (user.role === 'admin') {
-            const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token');
+        if (user.role === 'admin' || user.isAdmin) {
+            const token = sessionStorage.getItem('adminToken') || sessionStorage.getItem('token') || localStorage.getItem('token');
             if (token) {
-                sessionStorage.setItem('adminToken', token);
+                try { sessionStorage.setItem('adminToken', token); } catch (e) { }
+                try { localStorage.setItem('adminToken', token); } catch (e) { }
             }
-            localStorage.setItem('adminUser', JSON.stringify(user));
+            try { localStorage.setItem('adminUser', userStr); } catch (e) { }
+            try { sessionStorage.setItem('adminUser', userStr); } catch (e) { }
         }
     }
 
@@ -1378,10 +1415,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCurrentUser(user) {
-        if (!user) return;
+        const storedUser = (typeof getStoredUser === 'function' ? getStoredUser() : null) ||
+                           (typeof window.getUser === 'function' ? window.getUser() : null) || {};
+        const mergedUser = { ...storedUser, ...(user || {}) };
 
-        const displayName = getDisplayName(user);
-        const firstName = user.name || t('userFallback', 'istifadəçi');
+        // Inherit phone or admin role from admin storage if available
+        try {
+            const rawAdmin = sessionStorage.getItem('adminUser') || localStorage.getItem('adminUser');
+            if (rawAdmin) {
+                const adminData = JSON.parse(rawAdmin);
+                if (adminData) {
+                    if (!mergedUser.phone && adminData.phone) mergedUser.phone = adminData.phone;
+                    if (adminData.role === 'admin') mergedUser.role = 'admin';
+                }
+            }
+        } catch (e) { }
+
+        // Also if storedUser had phone but user payload didn't, keep stored phone
+        if (!mergedUser.phone && storedUser.phone) {
+            mergedUser.phone = storedUser.phone;
+        }
+
+        if (!mergedUser || (!mergedUser.name && !mergedUser.email && !mergedUser.phone && !mergedUser._id && !mergedUser.id)) return;
+
+        const displayName = getDisplayName(mergedUser);
+        const firstName = mergedUser.name || t('userFallback', 'istifadəçi');
 
         const sidebarUserName = document.getElementById('sidebarUserName');
         const sidebarUserEmail = document.getElementById('sidebarUserEmail');
@@ -1395,31 +1453,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (sidebarUserName) sidebarUserName.textContent = displayName;
         if (sidebarUserEmail) {
-            const emailVal = user.email || '—';
-            const emailSpan = sidebarUserEmail.querySelector('.val');
-            if (emailSpan) emailSpan.textContent = emailVal;
-            else sidebarUserEmail.textContent = emailVal;
-            sidebarUserEmail.style.display = user.email ? 'flex' : (user.phone ? 'none' : 'flex');
+            const emailVal = (mergedUser.email || '').trim();
+            let emailSpan = sidebarUserEmail.querySelector('.val');
+            if (!emailSpan) {
+                sidebarUserEmail.innerHTML = `<i class="fas fa-envelope" style="opacity:0.6;font-size:11px;"></i> <span class="val">${escapeHtml(emailVal || '—')}</span>`;
+            } else {
+                emailSpan.textContent = emailVal || '—';
+            }
+            sidebarUserEmail.style.display = emailVal ? 'flex' : 'none';
         }
         if (sidebarUserPhone) {
-            const phoneVal = user.phone || '—';
-            const phoneSpan = sidebarUserPhone.querySelector('.val');
-            if (phoneSpan) phoneSpan.textContent = phoneVal;
-            else sidebarUserPhone.textContent = phoneVal;
-            sidebarUserPhone.style.display = user.phone ? 'flex' : 'none';
+            const rawPhone = (mergedUser.phone || mergedUser.phoneNumber || '').toString().trim();
+            const phoneVal = (rawPhone && rawPhone !== '—' && rawPhone !== '-') ? rawPhone : '';
+            let phoneSpan = sidebarUserPhone.querySelector('.val');
+            if (!phoneSpan) {
+                sidebarUserPhone.innerHTML = `<i class="fas fa-phone" style="opacity:0.6;font-size:11px;"></i> <span class="val">${escapeHtml(phoneVal)}</span>`;
+            } else {
+                phoneSpan.textContent = phoneVal;
+            }
+            sidebarUserPhone.style.display = phoneVal ? 'flex' : 'none';
         }
-        if (sidebarUserRole) sidebarUserRole.textContent = getRoleLabel(user);
+        if (sidebarUserRole) {
+            const isAdmin = Boolean(
+                mergedUser.role === 'admin' ||
+                mergedUser.isAdmin ||
+                sessionStorage.getItem('adminToken') ||
+                localStorage.getItem('adminToken') ||
+                sessionStorage.getItem('adminUser')
+            );
+            if (isAdmin) {
+                sidebarUserRole.setAttribute('data-translate', 'cab-admin-acc');
+                sidebarUserRole.textContent = t('roleAdmin', 'Admin Hesab');
+                sidebarUserRole.className = 'user-role-badge badge-admin';
+            } else if (mergedUser.activePackage === 'VIP' || mergedUser.role === 'vip') {
+                sidebarUserRole.setAttribute('data-translate', 'cab-vip-acc');
+                sidebarUserRole.textContent = t('roleVip', 'VIP Hesab');
+                sidebarUserRole.className = 'user-role-badge badge-vip';
+            } else if (mergedUser.activePackage === 'PRO' || mergedUser.role === 'pro') {
+                sidebarUserRole.setAttribute('data-translate', 'cab-pro-acc');
+                sidebarUserRole.textContent = t('rolePro', 'PRO Hesab');
+                sidebarUserRole.className = 'user-role-badge badge-pro';
+            } else {
+                sidebarUserRole.setAttribute('data-translate', 'cab-standard-acc');
+                sidebarUserRole.textContent = t('roleStandard', 'Standart Hesab');
+                sidebarUserRole.className = 'user-role-badge';
+            }
+        }
         if (welcomeText) {
             welcomeText.textContent = t('dashboardWelcome', 'Xoş gəldiniz, {{name}}. Bugünkü statistikanızla tanış olun.').replace('{{name}}', firstName);
         }
         if (walletAmountValue) {
-            walletAmountValue.textContent = Number(user.walletBalance || 0).toLocaleString(getLocale(), {
+            walletAmountValue.textContent = Number(mergedUser.walletBalance || 0).toLocaleString(getLocale(), {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
-        userReferralBumps = Number(user.referralBumps || 0);
-        userReferralVips  = Number(user.referralVips || 0);
+        userReferralBumps = Number(mergedUser.referralBumps || 0);
+        userReferralVips  = Number(mergedUser.referralVips || 0);
 
         const referralBumpsValue = document.getElementById('referralBumpsValue');
         if (referralBumpsValue) {
@@ -1430,16 +1520,16 @@ document.addEventListener('DOMContentLoaded', () => {
             referralVipsValue.textContent = userReferralVips;
         }
         if (referralBalanceValue) {
-            referralBalanceValue.textContent = Number(user.referralCredits || 0).toLocaleString(getLocale(), {
+            referralBalanceValue.textContent = Number(mergedUser.referralCredits || 0).toLocaleString(getLocale(), {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             });
         }
-        userReferralBalance = Number(user.referralCredits || 0);
+        userReferralBalance = Number(mergedUser.referralCredits || 0);
         if (referralLink) {
             const origin = (window.location && window.location.origin) ? window.location.origin : 'https://mobilim.az';
-            referralLink.value = user.referralCode
-                ? `${origin}/ref/${user.referralCode}`
+            referralLink.value = mergedUser.referralCode
+                ? `${origin}/ref/${mergedUser.referralCode}`
                 : `${origin}/ref/...`;
         }
         if (facebookProfileName) facebookProfileName.textContent = displayName;
@@ -1453,26 +1543,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const privacyAllowMessages = document.getElementById('privacyAllowMessages');
         const privacyShowOnline = document.getElementById('privacyShowOnline');
 
-        if (profileFirstName) profileFirstName.value = user.name || '';
-        if (profileLastName) profileLastName.value = user.lastName || '';
-        if (profileEmail) profileEmail.value = user.email || '';
+        if (profileFirstName) profileFirstName.value = mergedUser.name || '';
+        if (profileLastName) profileLastName.value = mergedUser.lastName || '';
+        if (profileEmail) profileEmail.value = mergedUser.email || '';
         if (profilePhone) {
+            const phoneForInput = mergedUser.phone || '';
             if (typeof setPhoneValue === 'function') {
-                setPhoneValue('profilePhone', null, user.phone || '');
+                setPhoneValue('profilePhone', null, phoneForInput);
             } else {
-                profilePhone.value = user.phone || '';
+                profilePhone.value = phoneForInput;
             }
         }
-        if (twoFactorCheckbox) twoFactorCheckbox.checked = Boolean(user.twoFactorEnabled);
-        if (privacyShowPhone) privacyShowPhone.checked = user.privacySettings?.showPhone ?? true;
-        if (privacyAllowMessages) privacyAllowMessages.checked = user.privacySettings?.allowMessages ?? true;
-        if (privacyShowOnline) privacyShowOnline.checked = user.privacySettings?.showOnlineStatus ?? true;
+        if (twoFactorCheckbox) twoFactorCheckbox.checked = Boolean(mergedUser.twoFactorEnabled);
+        if (privacyShowPhone) privacyShowPhone.checked = mergedUser.privacySettings?.showPhone ?? true;
+        if (privacyAllowMessages) privacyAllowMessages.checked = mergedUser.privacySettings?.allowMessages ?? true;
+        if (privacyShowOnline) privacyShowOnline.checked = mergedUser.privacySettings?.showOnlineStatus ?? true;
 
-        ensureAdminShortcut(user.role === 'admin');
-        renderBillingPanel(user);
+        const isAdminCheck = Boolean(
+            mergedUser.role === 'admin' ||
+            mergedUser.isAdmin ||
+            sessionStorage.getItem('adminToken') ||
+            localStorage.getItem('adminToken') ||
+            sessionStorage.getItem('adminUser')
+        );
+        ensureAdminShortcut(isAdminCheck);
+        renderBillingPanel(mergedUser);
 
         if (window.updateNavbar) {
-            window.updateNavbar(user);
+            window.updateNavbar(mergedUser);
         }
     }
 
@@ -1569,7 +1667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE}/user/profile`, {
+            let response = await fetch(`${API_BASE}/auth/me`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -1581,12 +1679,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!response.ok) {
+                response = await fetch(`${API_BASE}/user/profile`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+            }
+
+            if (!response.ok) {
                 return;
             }
 
-            const user = await response.json();
-            persistUser(user);
-            renderCurrentUser(user);
+            const freshUser = await response.json();
+            const existing = getStoredUser() || {};
+            const merged = { ...existing, ...freshUser };
+            if (!merged.phone && existing.phone) merged.phone = existing.phone;
+            persistUser(merged);
+            renderCurrentUser(merged);
         } catch (error) {
             console.warn('Cabinet user hydrate failed:', error);
         }
@@ -2430,7 +2539,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = getToken();
         const storedUser = getStoredUser();
         const myId = storedUser ? (storedUser.id || storedUser._id) : '';
-        const adId = conv._id?.ad;
 
         if (!adId || !other) return;
 
