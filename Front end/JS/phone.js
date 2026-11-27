@@ -131,7 +131,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         const hasRealImage = Boolean(ad.images && ad.images.length && ad.images[0]);
         const imageUrl = getImageUrl(ad.images?.[0]);
         const city = escapeHtml(formatCity(ad.city || ""));
-        const title = escapeHtml([ad.brand, ad.modelName].filter(Boolean).join(" "));
+        const rawBrand = String(ad.brand || "").trim();
+        const rawModel = String(ad.modelName || "").trim();
+        const fullTitle = (ad.title && String(ad.title).trim())
+            ? String(ad.title).trim()
+            : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                ? rawModel
+                : [rawBrand, rawModel].filter(Boolean).join(" ") || "Elan");
+        const title = escapeHtml(fullTitle);
         const altText = hasRealImage ? title : "Elan şəkli yoxdur";
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
         const nowTime = new Date();
