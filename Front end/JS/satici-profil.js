@@ -62,7 +62,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         container.replaceChildren();
         ads.forEach(ad => {
             const imageUrl = ad.images?.[0] ? `${API_BASE.replace('/api', '')}/uploads/${encodeURIComponent(ad.images[0].split('/').pop())}` : "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800";
-            const title = `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Elan';
+            const rawBrand = String(ad.brand || "").trim();
+            const rawModel = String(ad.modelName || "").trim();
+            const title = (ad.title && String(ad.title).trim())
+                ? String(ad.title).trim()
+                : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                    ? rawModel
+                    : [rawBrand, rawModel].filter(Boolean).join(" ") || "Elan");
 
             const a = document.createElement('a');
             a.href = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;

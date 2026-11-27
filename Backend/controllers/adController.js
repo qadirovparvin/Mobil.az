@@ -511,8 +511,13 @@ const createAd = async (req, res, next) => {
             }
         }
 
+        const generatedTitle = (cleanModelName && cleanModelName.toLowerCase().startsWith(cleanBrand.toLowerCase()))
+            ? cleanModelName
+            : [cleanBrand, cleanModelName].filter(Boolean).join(' ');
+
         const ad = await Ad.create({
             adNumber,
+            title: sanitizePlainText(req.body.title || '', { maxLength: 150 }) || generatedTitle,
             author: req.user._id,
             category: cleanCategory,
             brand: cleanBrand,

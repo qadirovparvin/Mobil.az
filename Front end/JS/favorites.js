@@ -259,7 +259,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 data.ads.forEach(ad => {
                     const imageUrl = getImageUrl(ad.images?.[0]);
                     const city = ad.city || "";
-                    const title = [ad.brand, ad.modelName].filter(Boolean).join(" ");
+                    const rawBrand = String(ad.brand || "").trim();
+                    const rawModel = String(ad.modelName || "").trim();
+                    const title = (ad.title && String(ad.title).trim())
+                        ? String(ad.title).trim()
+                        : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                            ? rawModel
+                            : [rawBrand, rawModel].filter(Boolean).join(" ") || "Elan");
                     const price = `${Number(ad.price || 0).toLocaleString("az-AZ")} AZN`;
                     const date = new Date(ad.createdAt).toLocaleString("az-AZ", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
                     

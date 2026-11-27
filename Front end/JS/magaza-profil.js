@@ -154,7 +154,14 @@ document.addEventListener("DOMContentLoaded", async function () {
                 adsGridEl.innerHTML = ads.map(ad => {
                     const imageUrl = getImageUrl(ad.images?.[0]);
                     const adCity = escapeHtml(ad.city || store.city || "Bakı");
-                    const title = escapeHtml([ad.brand, ad.modelName].filter(Boolean).join(" "));
+                    const rawBrand = String(ad.brand || "").trim();
+                    const rawModel = String(ad.modelName || "").trim();
+                    const fullTitle = (ad.title && String(ad.title).trim())
+                        ? String(ad.title).trim()
+                        : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                            ? rawModel
+                            : [rawBrand, rawModel].filter(Boolean).join(" ") || "Elan");
+                    const title = escapeHtml(fullTitle);
                     const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;
                     const conditionText = ad.condition || "Yeni";
                     const badgeStyle = conditionText === "Yeni" ? "" : ' style="background:#e67e22;"';

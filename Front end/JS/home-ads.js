@@ -119,9 +119,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const city = escapeHtml(ad.city || "");
         const rawBrand = String(ad.brand || "").trim();
         const rawModel = String(ad.modelName || "").trim();
-        const fullTitle = rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
-            ? rawModel
-            : [rawBrand, rawModel].filter(Boolean).join(" ");
+        const fullTitle = (ad.title && String(ad.title).trim())
+            ? String(ad.title).trim()
+            : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                ? rawModel
+                : [rawBrand, rawModel].filter(Boolean).join(" ") || "Elan");
         const title = escapeHtml(fullTitle);
         const altText = hasRealImage ? title : "Elan şəkli yoxdur";
         const detailUrl = `elan-detail.html?id=${encodeURIComponent(ad._id)}`;

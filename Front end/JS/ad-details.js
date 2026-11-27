@@ -865,7 +865,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         // ── 1. Page title & breadcrumb ─────────────────────────────
-        const adTitle = ad.title || `${ad.brand || ''} ${ad.modelName || ''}`.trim() || 'Adsız Elan';
+        const rawBrand = String(ad.brand || "").trim();
+        const rawModel = String(ad.modelName || "").trim();
+        const adTitle = (ad.title && String(ad.title).trim())
+            ? String(ad.title).trim()
+            : (rawBrand && rawModel && rawModel.toLowerCase().startsWith(rawBrand.toLowerCase())
+                ? rawModel
+                : [rawBrand, rawModel].filter(Boolean).join(" ") || 'Adsız Elan');
         document.title = `${adTitle} — Mobilim.az`;
 
         const titleEl = document.querySelector('.elan-main-title, .item-main-title, .ad-main-title');
@@ -1693,7 +1699,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     this.onerror = null;
                     this.src = '/assets/images/default-ad.svg';
                 };
-                const itemTitle = `${item.brand || ''} ${item.modelName || ''}`.trim() || item.title || 'Elan';
+                const rawItemBrand = String(item.brand || "").trim();
+                const rawItemModel = String(item.modelName || "").trim();
+                const itemTitle = (item.title && String(item.title).trim())
+                    ? String(item.title).trim()
+                    : (rawItemBrand && rawItemModel && rawItemModel.toLowerCase().startsWith(rawItemBrand.toLowerCase())
+                        ? rawItemModel
+                        : [rawItemBrand, rawItemModel].filter(Boolean).join(" ") || 'Elan');
                 imgEl.alt = itemTitle;
                 imgEl.loading = 'lazy';
                 imgContainer.appendChild(imgEl);
