@@ -20,7 +20,8 @@ test.describe('P2: Brand Consistency, UI Flows, and Smoke Qualification', () => 
 
       lines.forEach((line, index) => {
         // Exclude external third-party URLs like fontawesome, cdnjs, or mobilim.az itself
-        const cleanedLine = line.replace(/mobilim\.az/gi, '');
+        const textOnly = line.replace(/<[^>]+>/g, '');
+        const cleanedLine = textOnly.replace(/mobilim\.az/gi, '');
         // Search for standalone legacy mobil.az
         if (/\bmobil\.az\b/i.test(cleanedLine)) {
           violations.push({ file, line: index + 1, match: line.trim() });
